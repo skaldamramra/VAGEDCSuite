@@ -47,6 +47,7 @@ namespace VAGSuite
             this.editXaxisSymbolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editYaxisSymbolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.smoothSelectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.smoothSelectionToolProportionalStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.xtraTabControl1 = new DevExpress.XtraTab.XtraTabControl();
             this.xtraTabPage1 = new DevExpress.XtraTab.XtraTabPage();
@@ -191,7 +192,8 @@ namespace VAGSuite
             this.pasteSelectedCellsToolStripMenuItem,
             this.editXaxisSymbolToolStripMenuItem,
             this.editYaxisSymbolToolStripMenuItem,
-            this.smoothSelectionToolStripMenuItem});
+            this.smoothSelectionToolStripMenuItem,
+            this.smoothSelectionToolProportionalStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(179, 114);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
@@ -246,6 +248,13 @@ namespace VAGSuite
             this.smoothSelectionToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.smoothSelectionToolStripMenuItem.Text = "Smooth selection";
             this.smoothSelectionToolStripMenuItem.Click += new System.EventHandler(this.smoothSelectionToolStripMenuItem_Click);
+            // 
+            // smoothSelectionProportionalToolStripMenuItem
+            // 
+            this.smoothSelectionToolProportionalStripMenuItem.Name = "smoothSelectionToolProportionalStripMenuItem";
+            this.smoothSelectionToolProportionalStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.smoothSelectionToolProportionalStripMenuItem.Text = "Proportional Smooth selection";
+            this.smoothSelectionToolProportionalStripMenuItem.Click += new System.EventHandler(this.smoothSelectionToolProportionalStripMenuItem_Click);
             // 
             // gridView1
             // 
@@ -762,6 +771,7 @@ namespace VAGSuite
         //private DevExpress.XtraEditors.SimpleButton btnSaveToRAM;
         //private DevExpress.XtraEditors.SimpleButton btnReadFromRAM;
         private System.Windows.Forms.ToolStripMenuItem smoothSelectionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem smoothSelectionToolProportionalStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportMapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem asPreferredSettingInT5DashboardToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;

@@ -14,6 +14,7 @@ namespace VAGSuite
         abstract public string ExtractInfo(byte[] allBytes);
         abstract public void NameKnownMaps(byte[] allBytes, SymbolCollection newSymbols, List<CodeBlock> newCodeBlocks);
         abstract public void FindSVBL(byte[] allBytes, string filename, SymbolCollection newSymbols, List<CodeBlock> newCodeBlocks);
+        //abstract public void FindVCDSDiagLimits(byte[] allBytes, string filename, SymbolCollection newSymbols, List<CodeBlock> newCodeBlocks);
 
     }
 }

@@ -7,6 +7,9 @@ using System.Globalization;
 using System.Threading;
 using Microsoft.Office.Tools.Excel;
 using Microsoft.Office.Interop.Excel;
+using CsvHelper;
+using System.IO;
+using System.Net.NetworkInformation;
 
 namespace VAGSuite
 {
@@ -178,6 +181,34 @@ namespace VAGSuite
             }
             tci = new CultureInfo("nl-NL");
             Thread.CurrentThread.CurrentCulture = tci;
+
+        }
+
+        public void ExportToCsv(string mapname, int address, int length, byte[] mapdata, int cols, int rows, bool isSixteenbit, int[] xaxisvalues, int[] yaxisvalues, bool isupsidedown, string xaxisdescr, string yaxisdescr, string zaxisdescr)
+        {
+
+            CultureInfo tci = new CultureInfo("en-US");
+                // turn mapdata upside down
+                if (isupsidedown)
+                {
+                    mapdata = TurnMapUpsideDown(mapdata, cols, rows, isSixteenbit);
+                }
+
+
+                int nRows = rows;
+                int nColumns = cols;
+                string upperLeftCell = "B3";
+                int endRowNumber = System.Int32.Parse(upperLeftCell.Substring(1)) + nRows - 1;
+                char endColumnLetter = System.Convert.ToChar(Convert.ToInt32(upperLeftCell[0]) + nColumns - 1);
+                string upperRightCell = System.String.Format("{0}{1}", endColumnLetter, System.Int32.Parse(upperLeftCell.Substring(1)));
+                string lowerRightCell = System.String.Format("{0}{1}", endColumnLetter, endRowNumber);
+
+                using (var writer = new StreamWriter(Tools.Instance.m_currentfile + "~" + mapname + ".csv"))
+            using (var csv = new CsvWriter(writer))
+            {
+                csv.WriteRecords(mapdata);
+            }
+
 
         }
 

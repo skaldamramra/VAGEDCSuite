@@ -5525,6 +5525,134 @@ namespace VAGSuite
 
         }
 
+        private void smoothSelectionToolProportionalStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (m_viewtype == ViewType.Hexadecimal)
+            {
+                MessageBox.Show("Smoothing cannot be done in Hex view!");
+                return;
+            }
+            DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
+            if (cellcollection.Length > 2)
+            {
+                // get boundaries for this selection
+                // we need 4 corners 
+                int max_column = 0;
+                int min_column = 0xFFFF;
+                int max_row = 0;
+                int min_row = 0xFFFF;
+                foreach (DevExpress.XtraGrid.Views.Base.GridCell cell in cellcollection)
+                {
+                    if (cell.Column.AbsoluteIndex > max_column) max_column = cell.Column.AbsoluteIndex;
+                    if (cell.Column.AbsoluteIndex < min_column) min_column = cell.Column.AbsoluteIndex;
+                    if (cell.RowHandle > max_row) max_row = cell.RowHandle;
+                    if (cell.RowHandle < min_row) min_row = cell.RowHandle;
+                }
+                if (max_column == min_column)
+                {
+                    // one column selected only
+                    int top_value = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[max_column]));
+                    int bottom_value = Convert.ToInt32(gridView1.GetRowCellValue(min_row, gridView1.Columns[max_column]));
+                    double diffvalue = (top_value - bottom_value);
+                    double[] yaxisvalues = new double[cellcollection.Length];
+                    for (int q = 0; q < cellcollection.Length; q++)
+                    {
+                        yaxisvalues[q] = Convert.ToDouble(y_axisvalues.GetValue(y_axisvalues.Length-min_row-q-1));
+                        //Console.WriteLine(q + "-th value of Y-axis is: " + yaxisvalues[q] + " max_row is (" + max_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(max_row)) + " min_row is (" + min_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(min_row)) + "Length : " + y_axisvalues.Length);
+                    }
+                    double yaxisdiff = yaxisvalues[0] - yaxisvalues[cellcollection.Length - 1];
+                    //Console.WriteLine("Y Axis diff is: " + yaxisdiff);
+
+                    for (int t = 1; t < cellcollection.Length - 1; t++)
+                    {
+                        double newvalue = bottom_value + (diffvalue * ((yaxisvalues[0] - yaxisvalues[t])/yaxisdiff));
+                        newvalue = Math.Round(newvalue, 0);
+                        gridView1.SetRowCellValue(min_row + t, gridView1.Columns[max_column], newvalue);
+                    }
+
+                }
+                else if (max_row == min_row)
+                {
+                    // one row selected only
+                    int top_value = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[max_column]));
+                    int bottom_value = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[min_column]));
+                    double diffvalue = (top_value - bottom_value);
+                    double[] xaxisvalues = new double[cellcollection.Length];
+                    for (int q = 0; q < cellcollection.Length; q++)
+                    {
+                        xaxisvalues[q] = Convert.ToDouble(x_axisvalues.GetValue(x_axisvalues.Length - min_column - q - 1));
+                        //Console.WriteLine(q + "-th value of Y-axis is: " + yaxisvalues[q] + " max_row is (" + max_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(max_row)) + " min_row is (" + min_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(min_row)) + "Length : " + y_axisvalues.Length);
+                    }
+                    double xaxisdiff = xaxisvalues[0] - xaxisvalues[cellcollection.Length - 1];
+                    //Console.WriteLine("Y Axis diff is: " + yaxisdiff);
+                    for (int t = 1; t < cellcollection.Length - 1; t++)
+                    {
+                        double newvalue = bottom_value + (diffvalue * ((xaxisvalues[0] - xaxisvalues[t]) / xaxisdiff));
+                        newvalue = Math.Round(newvalue, 0);
+                        gridView1.SetRowCellValue(min_row, gridView1.Columns[min_column + t], newvalue);
+                    }
+                }
+                else
+                {
+                    // block selected
+                    // interpolation on 4 points!!!
+                    int top_leftvalue = Convert.ToInt32(gridView1.GetRowCellValue(min_row, gridView1.Columns[min_column]));
+                    int top_rightvalue = Convert.ToInt32(gridView1.GetRowCellValue(min_row, gridView1.Columns[max_column]));
+                    int bottom_leftvalue = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[min_column]));
+                    int bottom_rightvalue = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[max_column]));
+                    double[] xaxisvalues = new double[max_column - min_column + 1];
+                    double[] yaxisvalues = new double[max_row - min_row + 1];
+
+                    for (int q = 0; q <= (max_column - min_column); q++)
+                    {
+                        xaxisvalues[q] = Convert.ToDouble(x_axisvalues.GetValue(x_axisvalues.Length - min_column - q - 1));
+                        //Console.WriteLine(q + "-th value of X-axis is: " + xaxisvalues[q] + " max_column is (" + max_column + ") " + Convert.ToInt32(y_axisvalues.GetValue(max_column)) + " min_column is (" + min_column + ") " + Convert.ToInt32(y_axisvalues.GetValue(min_column)) + "Length : " + y_axisvalues.Length);
+                    }
+                    for (int q = 0; q <= (max_row - min_row); q++)
+                    {
+                        yaxisvalues[q] = Convert.ToDouble(y_axisvalues.GetValue(y_axisvalues.Length - min_row - q - 1));
+                        //Console.WriteLine(q + "-th value of Y-axis is: " + yaxisvalues[q] + " max_row is (" + max_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(max_row)) + " min_row is (" + min_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(min_row)) + "Length : " + y_axisvalues.Length);
+                    }
+                    double xaxisdiff = xaxisvalues[0] - xaxisvalues[max_column - min_column];
+                    double yaxisdiff = yaxisvalues[0] - yaxisvalues[max_row - min_row];
+                    int xvaluediff = ((top_rightvalue - top_leftvalue) + (bottom_rightvalue - bottom_leftvalue)) / 2;
+                    int yvaluediff = ((top_leftvalue - bottom_leftvalue) + (top_rightvalue - bottom_rightvalue)) / 2;
+                    //Console.WriteLine("X/Y Axis diffs are: " + xaxisdiff + " / " + yaxisdiff);
+                    //Console.WriteLine("X/Y Value diffs are: " + xvaluediff + " / " + yvaluediff);
+
+                    for (int tely = 0; tely <= max_row - min_row; tely++)
+                    {
+                        for (int telx = 0; telx <= max_column - min_column; telx++)
+                        {
+                            // get values 
+                            double valx1 = 0;
+                            double valx2 = 0;
+                            double valy1 = 0;
+                            double valy2 = 0;
+                            Console.WriteLine("max_col/min_col/telx - max_row/min_row/tely: " + max_column + "/" + min_column + "/" + telx + " - " + max_row + "/" + min_row + "/" + tely);
+                            double xportion = (xaxisvalues[max_column - min_column - telx] - xaxisvalues[max_column - min_column]) / xaxisdiff;
+                            double yportion = (yaxisvalues[tely] - yaxisvalues[max_row - min_row]) / yaxisdiff;
+
+                            
+                            float newvalue = (float)(bottom_leftvalue + ((xvaluediff * xportion)+(yvaluediff * yportion)));
+
+                            gridView1.SetRowCellValue(min_row + tely, gridView1.Columns[min_column + telx], newvalue.ToString("F0"));
+
+                            m_map_content = GetDataFromGridView(m_isUpsideDown);
+
+
+
+                            //double diffvaluex = (top_rightvalue - top_leftvalue) / (max_column - min_column - 1);
+                            //double diffvaluey = (top_rightvalue - top_leftvalue) / (max_column - min_column - 1);
+                        }
+                    }
+
+                }
+                //                simpleButton3.Enabled = false;
+            }
+
+        }
+
         private void simpleButton9_Click(object sender, EventArgs e)
         {
             CastReadFromSRAM();

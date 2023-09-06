@@ -8,6 +8,7 @@ namespace VAGSuite
 {
     public class EDC15VFileParser : IEDCFileParser
     {
+        private double SOICorrection = 0.01 ;// 0.023437;
         public override string ExtractInfo(byte[] allBytes)
         {
             // assume info will be @ 0x53452 12 bytes
@@ -580,7 +581,7 @@ namespace VAGSuite
                         //sh.Varname = "Start of injection (SOI) " + injDurCount.ToString("D2") + " [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";// " + sh.Flash_start_address.ToString("X8") + " " + sh.X_axis_ID.ToString("X4") + " " + sh.Y_axis_ID.ToString("X4");
                         sh.Varname = "Start of injection (SOI) " + tempRange.ToString() + " °C [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";// " + sh.Flash_start_address.ToString("X8") + " " + sh.X_axis_ID.ToString("X4") + " " + sh.Y_axis_ID.ToString("X4");
 
-                        sh.Correction = 0.023437;
+                        sh.Correction = SOICorrection;;
                         //sh.Offset = 78;
 
                         sh.Y_axis_descr = "Engine speed (rpm)";
@@ -672,6 +673,11 @@ namespace VAGSuite
                                         {
                                             double tempRange = GetTemperatureSOIRange(sh.MapSelector, smokeCount - 1);
                                             sh.Varname = "Smoke limiter " + tempRange.ToString() + " °C [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";// " + sh.Flash_start_address.ToString("X8") + " " + sh.X_axis_ID.ToString("X4") + " " + sh.Y_axis_ID.ToString("X4");
+                                        }
+                                        else
+                                        {
+
+                                            sh.Varname = "Smoke limiter " + smokeCount.ToString() + " [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";// " + sh.Flash_start_address.ToString("X8") + " " + sh.X_axis_ID.ToString("X4") + " " + sh.Y_axis_ID.ToString("X4");
                                         }
                                     }
                                 }
@@ -985,7 +991,7 @@ namespace VAGSuite
                             sh.X_axis_descr = "IQ (mg/stroke)";
 
 
-                            sh.Correction = 0.023437;
+                            sh.Correction = SOICorrection;
                             //sh.Offset = 78;
                             sh.Z_axis_descr = "Start position (degrees BTDC)";
                         }
@@ -1003,7 +1009,7 @@ namespace VAGSuite
                             sh.X_axis_descr = "IQ (mg/stroke)";
 
 
-                            sh.Correction = 0.023437;
+                            sh.Correction = SOICorrection;
                             //sh.Offset = 78;
                             sh.Z_axis_descr = "Start position (degrees BTDC)";
                         }
@@ -1021,7 +1027,7 @@ namespace VAGSuite
                             sh.X_axis_descr = "IQ (mg/stroke)";
 
 
-                            sh.Correction = 0.023437;
+                            sh.Correction = SOICorrection;
                             //sh.Offset = 78;
                             sh.Z_axis_descr = "Start position (degrees BTDC)";
                         }
@@ -1465,7 +1471,7 @@ namespace VAGSuite
                             sh.Subcategory = "Fuel";
                             int injDurCount = GetMapNameCountForCodeBlock("Start of injection (N108 SOI)", sh.CodeBlock, newSymbols, false);
                             sh.Varname = "Start of injection (N108 SOI) " + injDurCount.ToString() + " [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";// " + sh.Flash_start_address.ToString("X8") + " " + sh.X_axis_ID.ToString("X4") + " " + sh.Y_axis_ID.ToString("X4");
-                            sh.Correction = 0.023437;
+                            sh.Correction = SOICorrection;
                             sh.Y_axis_descr = "Engine speed (rpm)";
                             sh.YaxisUnits = "rpm";
                             sh.X_axis_correction = 0.01; // TODODONE : Check for x or y
@@ -1688,7 +1694,7 @@ namespace VAGSuite
                         sh.Varname = "SOI limiter (temperature) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         //sh.Correction = -0.023437;
                         //sh.Offset = 78;
-                        sh.Correction = 0.023437;
+                        sh.Correction = SOICorrection;
 
                         sh.Y_axis_descr = "Engine speed (rpm)";
                         sh.X_axis_descr = "Temperature"; //IAT, ECT or Fuel temp?
@@ -1705,7 +1711,7 @@ namespace VAGSuite
                         sh.Varname = "SOI limiter (temperature) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         //sh.Correction = -0.023437;
                         //sh.Offset = 78;
-                        sh.Correction = 0.023437;
+                        sh.Correction = SOICorrection;
 
                         sh.Y_axis_descr = "Engine speed (rpm)";
                         sh.X_axis_descr = "Temperature"; //IAT, ECT or Fuel temp?

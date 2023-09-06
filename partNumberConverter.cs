@@ -13162,7 +13162,10 @@ namespace VAGSuite
                 case "0281001230":
                     carMake = "Seat";
                     carType = "Toledo";
-                    ecuType = "EDC15P++";
+                    //ecuType = "EDC15P++";
+                    //ecuType = "EDC15V-5.36";
+                    ecuType = "EDC15VM+V";
+
                     fuelType = "Diesel";
                     softwareID = "038906012CA";
                     engineType = "ALH";

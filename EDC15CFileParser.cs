@@ -154,7 +154,8 @@ namespace VAGSuite
             MatchAxis(newSymbols, newAxisHelpers);
 
             FindSVBL(allBytes, filename, newSymbols, newCodeBlocks);
-            
+            //FindVCDSDiagLimits(allBytes, filename, newSymbols, newCodeBlocks);
+
 
             SymbolTranslator strans = new SymbolTranslator();
             foreach (SymbolHelper sh in newSymbols)
