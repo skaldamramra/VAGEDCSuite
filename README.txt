@@ -16,6 +16,7 @@ To be able to make EDC15P Suite even better we welcome every feedback with open 
 Dilemma 
 http://trionic.mobixs.eu/
 
+Current changes attempted by Skalda (1.4.x branch)
 
 
 -----HowTo Compile------
