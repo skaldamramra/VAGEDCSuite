@@ -271,7 +271,7 @@ namespace VAGSuite
             FindSVRLSequence(allBytes, filename, newSymbols, newCodeBlocks);
             //FindPIDmaps(allBytes, filename, newSymbols, newCodeBlocks);
             FindBIPline(allBytes, filename, newSymbols, newCodeBlocks);
-            Findmrwmaps1(allBytes, filename, newSymbols, newCodeBlocks);
+            //Findmrwmaps1(allBytes, filename, newSymbols, newCodeBlocks);
             Findmrwmaps2(allBytes, filename, newSymbols, newCodeBlocks);
         }
 
@@ -946,11 +946,12 @@ namespace VAGSuite
             return BIPLineFound;
         }
 
+        //Deprecated
         private bool Findmrwmaps1(byte[] allBytes, string filename, SymbolCollection newSymbols, List<CodeBlock> newCodeBlocks)
         {
             bool found = true;
             bool mrwKTBKFfound = false;
-            bool mrwMERKFfound = false;
+            //bool mrwMERKFfound = false;
             int offset = 0;
             int offset2 = 0;
             while (found)
@@ -985,7 +986,7 @@ namespace VAGSuite
 
                     offset = mrwKTBKFAddress + 1;
                 }
-
+                /* Deprecated
                 int mrwMERKFAddress = Tools.Instance.findSequence(allBytes, offset2, new byte[6] { 0x2C, 0x01, 0x2C, 0x01, 0x2E, 0xEC }, new byte[6] { 1, 1, 1, 1, 1, 1 });
                 
                 if (mrwMERKFAddress > 0)
@@ -1037,7 +1038,7 @@ namespace VAGSuite
                     newSymbols.Add(shmrwMEHKF);
 
                     offset2 = mrwMERKFAddress + 1;
-                }
+                }*/
 
                 else found = false;
             }
@@ -1148,7 +1149,7 @@ namespace VAGSuite
 
                     offset3 = mrwDZAddress + 1;
                 }
-
+                /*
                 int mrwMERKFAddress = Tools.Instance.findSequence(allBytes, offset2, new byte[8] { 0x10, 0x27, 0x10, 0x27, 0x2C, 0xEC, 0x0A, 0x00 }, new byte[8] { 1, 1, 1, 1, 1, 1, 1, 1 });
 
                 if (mrwMERKFAddress > 0)
@@ -1200,7 +1201,7 @@ namespace VAGSuite
                     newSymbols.Add(shmrwMEHKF);
 
                     offset2 = mrwMERKFAddress + 1;
-                }
+                }*/
 
                 else found = false;
             }
@@ -2225,6 +2226,37 @@ namespace VAGSuite
                         sh.Z_axis_descr = "EGR PWM (%)";
                         sh.XaxisUnits = "mgst";
                         sh.YaxisUnits = "RPM";
+                    }
+                    else if ((sh.X_axis_ID / 256 == 0xEC) && (sh.Y_axis_ID / 256 == 0xF9))
+                    {
+                        int AG4count = GetMapNameCountForCodeBlock("mrw Map - ", sh.CodeBlock, newSymbols, false);
+                        AG4count--;
+                        sh.Category = "Detected maps";
+                        sh.Subcategory = "Misc";
+                        sh.XaxisUnits = "RPM";
+                        sh.YaxisUnits = "mg/st";;
+                        sh.X_axis_descr = "Engine speed (RPM)";
+                        sh.Y_axis_descr = "Injected Quantity (mg/stroke)";
+                        sh.Y_axis_correction = 0.01;
+                        sh.Correction = 0.01;
+                        if (AG4count % 3 == 0)
+                        {
+                            sh.Varname = "mrw Map - AG4 Transmission downshift map (mrwM_ER_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            sh.Userdescription = "mrwM_ER_KF";
+                            sh.Z_axis_descr = "IQ (mg/stroke)";
+                        }
+                        if (AG4count % 3 == 1)
+                        {
+                            sh.Varname = "mrw Map - AG4 Transmission upshift map (mrwM_EH_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            sh.Userdescription = "mrwM_EH_KF";
+                            sh.Z_axis_descr = "IQ (mg/stroke)";
+                        }
+                        if (AG4count % 3 == 2)
+                        {
+                            sh.Varname = "mrw Map -  Injected Fuel Volume Correction at 100°C (mrwKTB_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            sh.Userdescription = "mrwKTB_KF";
+                            sh.Z_axis_descr = "IQ correction (mg/st)";
+                        }
                     }
                     /*else
                     {
@@ -5521,13 +5553,13 @@ namespace VAGSuite
                     sh.Z_axis_descr = "Boost limit (mbar)";
                     sh.YaxisUnits = "mbar";
                 }
-                else
+                /*else
                 {
                     sh.Category = "Debug detected maps";
                     sh.Subcategory = "Misc";
                     sh.Varname = "Map :" + sh.X_axis_length + " x " + sh.Y_axis_length + " IDs: X " + sh.X_axis_ID + " Y " + sh.Y_axis_ID + " Xr " + sh.X_axis_ID / 256 + " Yr " + sh.Y_axis_ID / 256 + " Len " + sh.Length + " XaM " + sh.X_axis_ID * 0xFFF0 + " YaM " + sh.Y_axis_ID * 0xFFF0 + " [ " + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
 
-                }
+                }*/
             }
 
 
@@ -6031,7 +6063,7 @@ namespace VAGSuite
                                 }
                             }
 
-                            newSymbol.Varname = "3D Map Loc: " + newSymbol.Flash_start_address.ToString("X8") + " Size: " + newSymbol.X_axis_length + "x" + newSymbol.Y_axis_length + " IDs: X " + newSymbol.X_axis_ID.ToString("X4") + " Y " + newSymbol.Y_axis_ID.ToString("X4") + " Xr " + (newSymbol.X_axis_ID / 256).ToString("X2") + " Yr " + (newSymbol.Y_axis_ID / 256).ToString("X2") + " Len: " + newSymbol.Length;
+                            newSymbol.Varname = "3D Map Loc: " + newSymbol.Flash_start_address.ToString("X6") + " Size: " + newSymbol.X_axis_length + "x" + newSymbol.Y_axis_length + " IDs: X " + newSymbol.X_axis_ID.ToString("X4") + " Y " + newSymbol.Y_axis_ID.ToString("X4") + " Xr " + (newSymbol.X_axis_ID / 256).ToString("X2") + " Yr " + (newSymbol.Y_axis_ID / 256).ToString("X2") + " Len: " + newSymbol.Length + " Cb: [" + DetermineNumberByFlashBank(newSymbol.Flash_start_address, newCodeBlocks) + "]";
                             //Console.WriteLine(newSymbol.Varname + " " + newSymbol.Length.ToString() + " " + newSymbol.X_axis_length.ToString() + "x" + newSymbol.Y_axis_length.ToString());
                             retval = AddToSymbolCollection(newSymbols, newSymbol, newCodeBlocks);
                             if (retval)
@@ -6051,7 +6083,7 @@ namespace VAGSuite
                             newSymbol.X_axis_address = t + 4;
                             newSymbol.Length = xaxislen * 2;
                             newSymbol.Flash_start_address = t + 4 + (xaxislen * 2);
-                            newSymbol.Varname = "2D Map Loc: " + newSymbol.Flash_start_address.ToString("X8") + " Size: " + newSymbol.X_axis_length + "x" + newSymbol.Y_axis_length + " IDs: X " + newSymbol.X_axis_ID.ToString("X4") + " Y " + newSymbol.Y_axis_ID.ToString("X4") + " Xr " + (newSymbol.X_axis_ID / 256).ToString("X2") + " Yr " + (newSymbol.Y_axis_ID / 256).ToString("X2") + " Len: " + newSymbol.Length;
+                            newSymbol.Varname = "2D Map Loc: " + newSymbol.Flash_start_address.ToString("X6") + " Size: " + newSymbol.X_axis_length + "x" + newSymbol.Y_axis_length + " IDs: X " + newSymbol.X_axis_ID.ToString("X4") + " Y " + newSymbol.Y_axis_ID.ToString("X4") + " Xr " + (newSymbol.X_axis_ID / 256).ToString("X2") + " Yr " + (newSymbol.Y_axis_ID / 256).ToString("X2") + " Len: " + newSymbol.Length + " Cb: [" + DetermineNumberByFlashBank(newSymbol.Flash_start_address, newCodeBlocks) + "]";
                             //newSymbols.Add(newSymbol);
                             newSymbol.CodeBlock = DetermineCodeBlockByByAddress(newSymbol.Flash_start_address, newCodeBlocks);
                             retval = AddToSymbolCollection(newSymbols, newSymbol, newCodeBlocks);
