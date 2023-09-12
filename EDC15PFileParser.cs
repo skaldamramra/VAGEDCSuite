@@ -2615,7 +2615,7 @@ namespace VAGSuite
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Limiters";
-                        sh.Varname = "Expected fuel temperature [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Expected fuel temperature (zmwMKBT_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "zmwMKBT_KF";
                         sh.Correction = 0.1;
                         sh.Offset = -273.1;
@@ -2668,7 +2668,7 @@ namespace VAGSuite
                         sh.Subcategory = "Misc";
                         //int sodSwellCount = GetMapNameCountForCodeBlock("Start of delivery turn swell map", sh.CodeBlock, newSymbols, false);
                         //sodSwellCount--;
-                        sh.Varname = "Start of delivery ATM pressure correction map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Start of delivery ATM pressure correction map (fnwSWSN_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "fnwSWSN_KF";
                         sh.Y_axis_correction = 0.1;
                         sh.Y_axis_offset = -273.1;
@@ -2684,7 +2684,7 @@ namespace VAGSuite
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Engine Oil thermal load map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Engine Oil thermal load map (siwOEL_tKF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "siwOEL_tKF";
                         sh.X_axis_correction = 0.1;
                         sh.X_axis_offset = -273.1;
@@ -2700,7 +2700,7 @@ namespace VAGSuite
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Radiator fan-caster correction map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Radiator fan-caster correction map (kuwNLKORKF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kuwNLKORKF";
                         sh.X_axis_correction = 0.1;
                         sh.X_axis_offset = -273.1;
@@ -2714,11 +2714,40 @@ namespace VAGSuite
                         sh.X_axis_descr = "Ambient Intake Temperature (°C)";
                         sh.Z_axis_descr = "Correction (s)";
                     }
+                    else if (sh.X_axis_ID == 0xC180 && sh.Y_axis_ID == 0xC16A)
+                    {
+                        sh.Category = "Detected maps";
+                        sh.Subcategory = "Misc";
+                        int rfcCount = GetMapNameCountForCodeBlock("Radiator fan-caster correction map", sh.CodeBlock, newSymbols, false);
+                        rfcCount--;
+                        if (rfcCount % 2 == 1)
+                        {
+                            sh.Varname = "Radiator fan-caster correction map (kuwNLKORKF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            sh.Userdescription = "kuwNLKORKF";
+                            sh.Z_axis_descr = "Correction (s)";
+                        }
+                        if (rfcCount % 2 == 0)
+                        {
+                            sh.Varname = "Radiator fan-caster correction map 2 (kuwNLKORK2) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            sh.Userdescription = "kuwNLKORK2";
+                            sh.Z_axis_descr = "Correction (s)";
+                        }
+                        sh.X_axis_correction = 0.1;
+                        sh.X_axis_offset = -273.1;
+                        sh.Y_axis_correction = 0.1;
+                        sh.Y_axis_offset = -273.1;
+                        sh.Y_axis_descr = "Top of cylinder head Temperature (°C)";
+                        sh.YaxisUnits = "°C";
+                        //sh.X_axis_correction = 0.01;
+                        //sh.Correction = 0.1;
+                        sh.XaxisUnits = "°C";
+                        sh.X_axis_descr = "Ambient Intake Temperature (°C)";
+                    }
                     else if (sh.X_axis_ID / 256 == 0xF9 && sh.Y_axis_ID / 256 == 0xE9)
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Hydraulic fan speed normalization map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Hydraulic fan speed normalization map (kuwHyLFTKF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kuwHyLFTKF";
                         sh.Y_axis_descr = "Engine speed (rpm)";
                         sh.YaxisUnits = "RPM";
@@ -2728,11 +2757,11 @@ namespace VAGSuite
                         sh.X_axis_descr = "Fan speed (rpm)";
                         sh.Z_axis_descr = "Offset correction";
                     }
-                    else if (sh.X_axis_ID == 0xC19E && sh.Y_axis_ID == 0xE9E6)
+                    else if ((sh.X_axis_ID == 0xC19E || sh.X_axis_ID == 0xC16A) && (sh.Y_axis_ID == 0xE9E6 || sh.Y_axis_ID == 0xE9D8))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Radiator after-run pump time [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Radiator after-run pump time (kuwNLGRDKF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kuwNLGRDKF";
                         sh.Y_axis_correction = 0.015021;
                         //sh.X_axis_offset = -273.1;
@@ -2752,7 +2781,7 @@ namespace VAGSuite
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Radiator fan-caster correction map 2 [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Radiator fan-caster correction map 2 (kuwNLKORK2) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kuwNLKORK2";
                         sh.X_axis_correction = 0.1;
                         sh.X_axis_offset = -273.1;
@@ -2766,11 +2795,11 @@ namespace VAGSuite
                         sh.X_axis_descr = "Ambient Intake Temperature (°C)";
                         sh.Z_axis_descr = "Correction (s)";
                     }
-                    else if (sh.X_axis_ID == 0xE9D4 && sh.Y_axis_ID == 0xF94A)
+                    else if ((sh.X_axis_ID == 0xE9D4 || sh.X_axis_ID == 0xE9C6) && (sh.Y_axis_ID == 0xF94A || sh.Y_axis_ID == 0xF948))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Electric cooling fan basic speed map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Electric cooling fan basic speed map (kuwElGRDKF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kuwElGRDKF";
                         sh.Y_axis_descr = "Cooling output (W)";
                         sh.YaxisUnits = "W";
@@ -2780,11 +2809,11 @@ namespace VAGSuite
                         sh.X_axis_descr = "Engine speed (rpm)";
                         sh.Z_axis_descr = "Fan speed (rpm)";
                     }
-                    else if (sh.X_axis_ID == 0xE9CE && sh.Y_axis_ID == 0xF94A)
+                    else if ((sh.X_axis_ID == 0xE9CE || sh.X_axis_ID == 0xE9C0) && (sh.Y_axis_ID == 0xF94A || sh.Y_axis_ID == 0xF948))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Hydraulic cooling fan basic speed map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Hydraulic cooling fan basic speed map (kuwHyGRDKF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kuwHyGRDKF";
                         sh.Y_axis_descr = "Cooling output (W)";
                         sh.YaxisUnits = "W";
@@ -2794,11 +2823,11 @@ namespace VAGSuite
                         sh.X_axis_descr = "Engine speed (rpm)";
                         sh.Z_axis_descr = "Fan speed (rpm)";
                     }
-                    else if (sh.X_axis_ID == 0xE9C2 && sh.Y_axis_ID == 0xE9C0)
+                    else if ((sh.X_axis_ID == 0xE9C2 || sh.X_axis_ID == 0xE9B2) && (sh.Y_axis_ID == 0xE9C0 || sh.Y_axis_ID == 0xE9B0))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Relative cooling requirement control map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Relative cooling requirement control map (kuwSTEU_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kuwSTEU_KF";
                         sh.Y_axis_correction = 0.1;
                         sh.X_axis_correction = 0.01;
@@ -2814,7 +2843,7 @@ namespace VAGSuite
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Setpoint temperature difference will map 3 [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Setpoint temperature difference will map 3 (kuwSOLL3KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kuwSOLL3KF";
                         sh.X_axis_correction = 0.1;
                         sh.X_axis_offset = -273.1;
@@ -2832,7 +2861,7 @@ namespace VAGSuite
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Relative dynamic cooling requirement will map 4 [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Relative dynamic cooling requirement will map 4 (kuwSOLL4KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kuwSOLL4KF";
                         sh.X_axis_correction = 0.1;
                         //sh.X_axis_offset = -273.1;
@@ -2850,7 +2879,7 @@ namespace VAGSuite
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Load-dependend pre control cooling will map 2 [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Load-dependend pre control cooling will map 2 (kuwSOLL2KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kuwSOLL2KF";
                         sh.X_axis_correction = 0.1;
                         sh.X_axis_offset = -273.1;
@@ -2865,7 +2894,7 @@ namespace VAGSuite
                         sh.X_axis_descr = "Temperature (°C)";
                         sh.Z_axis_descr = "Load-dependent output Temperature (°C)";
                     }
-                    else if (sh.X_axis_ID == 0xF94A && sh.Y_axis_ID == 0xF944)
+                    else if ((sh.X_axis_ID == 0xF94A || sh.X_axis_ID == 0xF948) && sh.Y_axis_ID == 0xF944)
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2873,13 +2902,13 @@ namespace VAGSuite
                         soll1Count--;
                         if (soll1Count % 2 == 1)
                         {
-                            sh.Varname = "Water temperature basic setpoint - target will map 1 [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            sh.Varname = "Water temperature basic setpoint - target will map 1 (kuwSOLL1KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                             sh.Userdescription = "kuwSOLL1KF";
                             sh.Z_axis_descr = "Load-dependent output Temperature (°C)";
                         }
                         if (soll1Count % 2 == 0)
                         {
-                            sh.Varname = "Water temperature basic setpoint - cooler basic map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            sh.Varname = "Water temperature basic setpoint - cooler basic map (kuwGRD_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                             sh.Userdescription = "kuwGRD_KF";
                             sh.Z_axis_descr = "Temprature setpoint for cylinder head (°C)";
                         }
