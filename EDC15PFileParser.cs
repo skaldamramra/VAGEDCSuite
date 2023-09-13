@@ -2924,7 +2924,7 @@ namespace VAGSuite
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Cooler temperature characteristic field [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Cooler temperature characteristic field (kmwLTKOR_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kmwLTKOR_KF";
                         sh.Y_axis_correction = 0.1;
                         sh.Y_axis_offset = -273.1;
@@ -2937,11 +2937,11 @@ namespace VAGSuite
                         sh.X_axis_descr = "Pressure (mBar)";
                         sh.Z_axis_descr = "Output Temperature (°C)";
                     }
-                    else if (sh.X_axis_ID == 0xC270 && sh.Y_axis_ID == 0xC1B6)
+                    else if ((sh.X_axis_ID == 0xC270 && sh.Y_axis_ID == 0xC1B6) || (sh.X_axis_ID == 0xC234 && sh.Y_axis_ID == 0xC180))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Cooler setpoint correction map 2 [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Cooler setpoint correction map 2 (kmwKOR2_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kmwKOR2_KF";
                         sh.X_axis_correction = 0.1;
                         sh.X_axis_offset = -273.1;
@@ -2958,7 +2958,7 @@ namespace VAGSuite
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Water control duty cycle map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Water control duty cycle map (kmwSTEU_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "kmwSTEU_KF";
                         sh.X_axis_correction = 0.1;
                         sh.X_axis_offset = -273.1;
@@ -2969,11 +2969,11 @@ namespace VAGSuite
                         sh.Y_axis_descr = "Control temperetare deviation (°C)";
                         sh.Z_axis_descr = "Duty Cycle %";
                     }
-                    else if (sh.X_axis_ID == 0xF94A && sh.Y_axis_ID == 0xC036)
+                    else if ((sh.X_axis_ID == 0xF94A && sh.Y_axis_ID == 0xC036) || (sh.X_axis_ID == 0xF948 && sh.Y_axis_ID == 0xC032))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Boost correction basic setpoint map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Boost correction basic setpoint map (ldwTWGRDKF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "ldwTWGRDKF";
                         sh.X_axis_descr = "Engine speed (rpm)";
                         sh.XaxisUnits = "RPM";
@@ -2984,11 +2984,11 @@ namespace VAGSuite
                         sh.X_axis_address = Convert.ToInt32(sh.Flash_start_address) - 16;
                         sh.Y_axis_address = Convert.ToInt32(sh.Flash_start_address) - 36;
                     }
-                    else if (sh.X_axis_ID == 0xF94A && sh.Y_axis_ID == 0xC032)
+                    else if ((sh.X_axis_ID == 0xF94A && sh.Y_axis_ID == 0xC032) || (sh.X_axis_ID == 0xF948 && sh.Y_axis_ID == 0xC02E))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Airmass backup values map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Airmass backup values map (arwLMVGWKF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "arwLMVGWKF";
                         sh.X_axis_descr = "Boost pressure (mBar)";
                         sh.XaxisUnits = "MBAR";
@@ -3001,7 +3001,7 @@ namespace VAGSuite
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
-                        sh.Varname = "Oil level treshold map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Oil level treshold map (mrwOELNiKF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "mrwOELNiKF";
                         sh.X_axis_descr = "Temperature (°C)";
                         sh.X_axis_correction = 0.1;
@@ -4051,17 +4051,49 @@ namespace VAGSuite
                             ldwRCount--;
                             if (ldwRCount % 2 == 1)
                             {
-                                sh.Varname = "Boost control - maximum positive deviation [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Boost control - maximum positive deviation (ldwRMXpRKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "ldwRMXpRKL";
                                 sh.Z_axis_descr = "Maximum deviation (mbar)";
                                 //sh.Correction = 0.01;
                             }
                             if (ldwRCount % 2 == 0)
                             {
-                                sh.Varname = "Boost control - cold start shutdown water characteristic map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Boost control - cold start shutdown water characteristic map (ldwKSTWKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "ldwKSTWKL";
                                 sh.Z_axis_descr = "Boost switch-off time (s)";
                                 sh.Correction = 0.01;
+                            }
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Misc";
+                            sh.Y_axis_descr = "Temperature (°C)";
+                            sh.YaxisUnits = "°C";
+                            sh.Y_axis_correction = 0.1;
+                            sh.Y_axis_offset = -273.1;
+                        }
+                        else if (sh.X_axis_ID == 0xC16A)
+                        {
+                            int ldwRCount = GetMapNameCountForCodeBlock("Boost control -", sh.CodeBlock, newSymbols, false);
+                            ldwRCount--;
+                            if (ldwRCount % 3 == 1)
+                            {
+                                sh.Varname = "Boost control - maximum positive deviation (ldwRMXpRKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "ldwRMXpRKL";
+                                sh.Z_axis_descr = "Maximum deviation (mbar)";
+                                //sh.Correction = 0.01;
+                            }
+                            if (ldwRCount % 3 == 0)
+                            {
+                                sh.Varname = "Boost control - cold start shutdown water characteristic map (ldwKSTWKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "ldwKSTWKL";
+                                sh.Z_axis_descr = "Boost switch-off time (s)";
+                                sh.Correction = 0.01;
+                            }
+                            if (ldwRCount % 3 == 2)
+                            {
+                                sh.Varname = "Boost control -(fakemap probably)";
+                                //sh.Userdescription = "ldwKSTWKL";
+                                //sh.Z_axis_descr = "Boost switch-off time (s)";
+                                //sh.Correction = 0.01;
                             }
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4105,35 +4137,35 @@ namespace VAGSuite
                             //sh.Y_axis_offset = -273.1;
                             if (ece2Count % 7 == 6)
                             {
-                                sh.Varname = "   Boost pressure control ON treshold line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "   Boost pressure control ON treshold line (ldwREG1KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "ldwREG1KL";
                                 sh.Z_axis_descr = "Injected quantity (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                             if (ece2Count % 7 == 5)
                             {
-                                sh.Varname = "   Boost pressure control OFF treshold line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "   Boost pressure control OFF treshold line (ldwREG0WKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "ldwREG0WKL";
                                 sh.Z_axis_descr = "Injected quantity (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                             if (ece2Count % 7 == 4)
                             {
-                                sh.Varname = "   [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "   (fakemap)";
                                 //sh.Userdescription = "ldwREG0WKL";
                                 //sh.Z_axis_descr = "Injected quantity (mg/stroke)";
                                 //sh.Correction = 0.01;
                             }
                             if (ece2Count % 7 == 3)
                             {
-                                sh.Varname = "   [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "   (fakemap) ";
                                 //sh.Userdescription = "ldwREG0WKL";
                                 //sh.Z_axis_descr = "Injected quantity (mg/stroke)";
                                 //sh.Correction = 0.01;
                             }
                             if (ece2Count % 7 == 2)
                             {
-                                sh.Varname = "   EGR control small-quantity on characteristic line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "   EGR control small-quantity on characteristic line (arwREG1KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "arwREG1KL";
                                 sh.Z_axis_descr = "Injected quantity (mg/stroke)";
                                 sh.Correction = 0.01;
@@ -4144,7 +4176,7 @@ namespace VAGSuite
                             }
                             if (ece2Count % 7 == 1)
                             {
-                                sh.Varname = "   EGR control small-quantity off characteristic line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "   EGR control small-quantity off characteristic line (arwREG0KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "arwREG0KL";
                                 sh.Z_axis_descr = "Injected quantity (mg/stroke)";
                                 sh.Correction = 0.01;
@@ -4155,7 +4187,75 @@ namespace VAGSuite
                             }
                             if (ece2Count % 7 == 0)
                             {
-                                sh.Varname = "   Boost intake manifold vacuum detection curve [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "   Boost intake manifold vacuum detection curve (mrwLDFU_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "mrwLDFU_KL";
+                                sh.Z_axis_descr = "Pressure difference (mbar)";
+                                //sh.Correction = 0.01;
+                            }
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Misc";
+                        }
+                        else if (sh.X_axis_ID == 0xEC2C)
+                        {
+                            int ece2Count = GetMapNameCountForCodeBlock("   ", sh.CodeBlock, newSymbols, false);
+                            ece2Count--;
+                            sh.Y_axis_descr = "Engine speed (rpm";
+                            sh.YaxisUnits = "rpm";
+                            //sh.Y_axis_correction = 0.1;
+                            //sh.Y_axis_offset = -273.1;
+                            if (ece2Count % 7 == 5)
+                            {
+                                sh.Varname = "   Boost pressure control ON treshold line (ldwREG1KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "ldwREG1KL";
+                                sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                sh.Correction = 0.01;
+                            }
+                            if (ece2Count % 7 == 4)
+                            {
+                                sh.Varname = "   Boost pressure control OFF treshold line (ldwREG0WKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "ldwREG0WKL";
+                                sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                sh.Correction = 0.01;
+                            }
+                            if (ece2Count % 7 == 3)
+                            {
+                                sh.Varname = "   (fakemap)";
+                                //sh.Userdescription = "ldwREG0WKL";
+                                //sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                //sh.Correction = 0.01;
+                            }
+                            if (ece2Count % 7 == 2)
+                            {
+                                sh.Varname = "   (fakemap) ";
+                                //sh.Userdescription = "ldwREG0WKL";
+                                //sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                //sh.Correction = 0.01;
+                            }
+                            if (ece2Count % 7 == 1)
+                            {
+                                sh.Varname = "   EGR control small-quantity on characteristic line (arwREG1KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "arwREG1KL";
+                                sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                sh.Correction = 0.01;
+                                sh.Y_axis_descr = "Engine speed (rpm)";
+                                sh.YaxisUnits = "rpm";
+                                sh.Y_axis_correction = 1;
+                                sh.Y_axis_offset = 0;
+                            }
+                            if (ece2Count % 7 == 0)
+                            {
+                                sh.Varname = "   EGR control small-quantity off characteristic line (arwREG0KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "arwREG0KL";
+                                sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                sh.Correction = 0.01;
+                                sh.Y_axis_descr = "Engine speed (rpm)";
+                                sh.YaxisUnits = "rpm";
+                                sh.Y_axis_correction = 1;
+                                sh.Y_axis_offset = 0;
+                            }
+                            if (ece2Count % 7 == 6)
+                            {
+                                sh.Varname = "   Boost intake manifold vacuum detection curve (mrwLDFU_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwLDFU_KL";
                                 sh.Z_axis_descr = "Pressure difference (mbar)";
                                 //sh.Correction = 0.01;
@@ -4198,35 +4298,74 @@ namespace VAGSuite
                             //sh.Y_axis_offset = -273.1;
                             if (f94aCount % 5 == 4)
                             {
-                                sh.Varname = "Map - time for delayed shutdown[" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map - time for delayed shutdown (arwTi_abKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "arwTi_abKL";
                                 sh.Z_axis_descr = "Time (s)";
                                 sh.Correction = 0.01;
                             }
                             if (f94aCount % 5 == 3)
                             {
-                                sh.Varname = "Map - Minimum IQ control upper treshold [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map - Minimum IQ control upper treshold (zmwMEmi1KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "zmwMEmi1KL";
                                 sh.Z_axis_descr = "Injected quantity (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                             if (f94aCount % 5 == 2)
                             {
-                                sh.Varname = "Map - Minimum IQ control lower treshold [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map - Minimum IQ control lower treshold (zmwMEmi0KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "zmwMEmi0KL";
                                 sh.Z_axis_descr = "Injected quantity (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                             if (f94aCount % 5 == 1)
                             {
-                                sh.Varname = "Map - Boost intake manifold vacuum state cancellation curve [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map - Boost intake manifold vacuum state cancellation curve (mrwLDFO_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwLDFO_KL";
                                 sh.Z_axis_descr = "Pressure difference (mbar)";
                                 //sh.Correction = 0.01;
                             }
                             if (f94aCount % 5 == 0)
                             {
-                                sh.Varname = "Map - Boundary acceleration limited quantity curve [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map - Boundary acceleration limited quantity curve (mrwBdnN_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "mrwBdnN_KL";
+                                sh.Z_axis_descr = "Correction factor";
+                                sh.Correction = 0.0001;
+                            }
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Misc";
+                        }
+                        else if (sh.X_axis_ID == 0xF948)
+                        {
+                            int f94aCount = GetMapNameCountForCodeBlock("Map -", sh.CodeBlock, newSymbols, false);
+                            f94aCount--;
+                            sh.Y_axis_descr = "Engine speed (rpm)";
+                            sh.YaxisUnits = "rpm";
+                            //sh.Y_axis_correction = 0.1;
+                            //sh.Y_axis_offset = -273.1;
+                            if (f94aCount % 4 == 2)
+                            {
+                                sh.Varname = "Map - Minimum IQ control upper treshold (zmwMEmi1KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "zmwMEmi1KL";
+                                sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                sh.Correction = 0.01;
+                            }
+                            if (f94aCount % 4 == 1)
+                            {
+                                sh.Varname = "Map - Minimum IQ control lower treshold (zmwMEmi0KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "zmwMEmi0KL";
+                                sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                sh.Correction = 0.01;
+                            }
+                            if (f94aCount % 4 == 3)
+                            {
+                                sh.Varname = "Map - Boost intake manifold vacuum state cancellation curve (mrwLDFO_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "mrwLDFO_KL";
+                                sh.Z_axis_descr = "Pressure difference (mbar)";
+                                //sh.Correction = 0.01;
+                            }
+                            if (f94aCount % 4 == 0)
+                            {
+                                sh.Varname = "Map - Boundary acceleration limited quantity curve (mrwBdnN_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwBdnN_KL";
                                 sh.Z_axis_descr = "Correction factor";
                                 sh.Correction = 0.0001;
