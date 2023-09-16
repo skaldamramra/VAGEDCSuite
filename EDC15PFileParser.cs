@@ -1212,7 +1212,8 @@ namespace VAGSuite
         {
             SymbolAxesTranslator st = new SymbolAxesTranslator();
             long boosttagetmaploc = 0;
-            
+            bool eb96CylHeadPresent = false;
+
             foreach (SymbolHelper sh in newSymbols)
             {
                 //sh.X_axis_descr = st.TranslateAxisID(sh.X_axis_ID);
@@ -3715,6 +3716,19 @@ namespace VAGSuite
                             sh.Y_axis_correction = 4.88758;
                             sh.Varname = "Intake manifold temperature sensor linearization (anwSTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
+                        else if (sh.X_axis_ID == 0xEB96)
+                        {
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Misc";
+                            sh.Y_axis_descr = "mV";
+                            sh.YaxisUnits = "mV";
+                            sh.Z_axis_descr = "Temperature (°C)";
+                            sh.Offset = -273.1;
+                            sh.Correction = 0.1;
+                            sh.Y_axis_correction = 4.88758;
+                            sh.Varname = "Cylinder head water temperature sensor linearization (anwWTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            eb96CylHeadPresent = true;
+                        }
                         else if (sh.X_axis_ID == 0xEB90)
                         {
                             sh.Category = "Detected maps";
@@ -3737,7 +3751,14 @@ namespace VAGSuite
                             sh.Offset = -273.1;
                             sh.Correction = 0.1;
                             sh.Y_axis_correction = 4.88758;
-                            sh.Varname = "Air temperature sensor linearization (anwLTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            if (eb96CylHeadPresent == true)
+                            {
+                                sh.Varname = "Fuel temperature sensor linearization (anwKTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            }
+                            else
+                            {
+                                sh.Varname = "Air temperature sensor linearization (anwLTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            }
                         }
                         else if (sh.X_axis_ID == 0xEB94)
                         {
@@ -3749,7 +3770,14 @@ namespace VAGSuite
                             sh.Offset = -273.1;
                             sh.Correction = 0.1;
                             sh.Y_axis_correction = 4.88758;
-                            sh.Varname = "Cylinder head water temperature sensor linearization (anwWTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            if (eb96CylHeadPresent == true)
+                            {
+                                sh.Varname = "Air temperature sensor linearization (anwLTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            }
+                            else
+                            {
+                                sh.Varname = "Cylinder head water temperature sensor linearization (anwWTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            }
                         }
                         /*else
                         {
@@ -4658,7 +4686,7 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 7 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xC5E0)
+                        if (sh.X_axis_ID == 0xC5E0 || sh.X_axis_ID == 0xC57C)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4694,7 +4722,32 @@ namespace VAGSuite
                                 sh.Correction = 0.01;
                             }
                         }
-                        else if (sh.X_axis_ID == 0xC19C)
+                        else if (sh.X_axis_ID == 0xC16A)
+                        {
+                            int c19eCount = GetMapNameCountForCodeBlock("Water temp dependent - ", sh.CodeBlock, newSymbols, false);
+                            c19eCount--;
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Misc";
+                            sh.Y_axis_descr = "Water Temperature (°C)";
+                            sh.YaxisUnits = "°C";
+                            sh.Y_axis_correction = 0.1;
+                            sh.Y_axis_offset = -273.1;
+                            if (c19eCount % 2 == 0)
+                            {
+                                sh.Varname = "Water temp dependent - Maximum deviation factor b/w internal/external transmission [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "mrwFVHGDKL";
+                                sh.Z_axis_descr = "Deviation";
+                                sh.Correction = 0.0001;
+                            }
+                            if (c19eCount % 2 == 1)
+                            {
+                                sh.Varname = "Water temp dependent -  LLR-Integrator initial value characteristic line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "mrwSTINILL";
+                                sh.Z_axis_descr = "Value";
+                                sh.Correction = 0.01;
+                            }
+                        }
+                        else if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168)
                         {
                             int c19cCount = GetMapNameCountForCodeBlock("IAT dependent - ", sh.CodeBlock, newSymbols, false);
                             c19cCount--;
