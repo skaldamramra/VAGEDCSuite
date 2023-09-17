@@ -3348,7 +3348,7 @@ namespace VAGSuite
                 {
                     if (sh.Y_axis_length == 6 && sh.X_axis_length == 5)
                     {
-                        if (sh.Y_axis_ID == 0xC1A2)
+                        if (sh.Y_axis_ID == 0xC1A2 || sh.Y_axis_ID == 0xC16C)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -3494,7 +3494,7 @@ namespace VAGSuite
                             sh.XaxisUnits = "rpm";
                             sh.Correction = 0.01;
                         }
-                        else if (sh.X_axis_ID == 0xC1AA && sh.Y_axis_ID / 256 == 0xEC)
+                        else if ((sh.X_axis_ID == 0xC1AA || sh.X_axis_ID == 0xC174) && sh.Y_axis_ID / 256 == 0xEC)
                         {
                             //sh.Y_axis_address = Convert.ToInt32(sh.Flash_start_address) - 10;
                             //sh.X_axis_address = Convert.ToInt32(sh.Flash_start_address) - 24;
@@ -3511,7 +3511,7 @@ namespace VAGSuite
                             //sh.X_axis_offset = -273.1;
                             sh.Correction = 0.0001;
                         }
-                        else if (sh.X_axis_ID == 0xC1B0 && sh.Y_axis_ID / 256 == 0xEC)
+                        else if ((sh.X_axis_ID == 0xC1B0 || sh.X_axis_ID == 0xC17A) && sh.Y_axis_ID / 256 == 0xEC)
                         {
                             //sh.Y_axis_address = Convert.ToInt32(sh.Flash_start_address) - 10;
                             //sh.X_axis_address = Convert.ToInt32(sh.Flash_start_address) - 24;
@@ -4061,7 +4061,7 @@ namespace VAGSuite
                             sh.Offset = -273.1;
                             sh.Varname = "Heating linearization map (anwHZA_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC5E2)
+                        else if (sh.X_axis_ID == 0xC5E2 || sh.X_axis_ID == 0xC57E)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4130,7 +4130,7 @@ namespace VAGSuite
                             sh.Y_axis_correction = 0.1;
                             sh.Y_axis_offset = -273.1;
                         }
-                        else if (sh.X_axis_ID == 0xC19C)
+                        else if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4142,7 +4142,7 @@ namespace VAGSuite
                             sh.Correction = 0.1;
                             sh.Varname = "Engine-off command delay time characteristic map (khwUTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID / 256 == 0xEA)
+                        else if (sh.X_axis_ID / 256 == 0xEA || sh.X_axis_ID == 0xE9FE)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4291,7 +4291,7 @@ namespace VAGSuite
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
                         }
-                        else if (sh.X_axis_ID == 0xC1A2)
+                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC16C)
                         {
                             int c1a2Count = GetMapNameCountForCodeBlock("Delay - ", sh.CodeBlock, newSymbols, false);
                             c1a2Count--;
@@ -4301,14 +4301,14 @@ namespace VAGSuite
                             sh.Y_axis_offset = -273.1;
                             if (c1a2Count % 2 == 1)
                             {
-                                sh.Varname = "Delay - EGR start time after startup[" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Delay - EGR start time after startup (anwANSTWKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "anwANSTWKL";
                                 sh.Z_axis_descr = "Time (s)";
                                 sh.Correction = 0.01;
                             }
                             if (c1a2Count % 2 == 0)
                             {
-                                sh.Varname = "Delay - Starting IQ after startup [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Delay - Starting IQ after startup (mrwSTMFRKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwSTMFRKL";
                                 sh.Z_axis_descr = "Time (s)";
                                 sh.Correction = 0.01;
@@ -4401,7 +4401,7 @@ namespace VAGSuite
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
                         }
-                        else if (sh.X_axis_ID == 0xC1AE)
+                        else if (sh.X_axis_ID == 0xC1AE || sh.X_axis_ID == 0xC178)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4413,7 +4413,7 @@ namespace VAGSuite
                             sh.Correction = 0.00390625;
                             sh.Varname = "BIP - Fuel temperature correction curve (zmwBPKorKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xEC5E)
+                        else if (sh.X_axis_ID == 0xEC5E || sh.X_axis_ID == 0xEC5C)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4425,7 +4425,7 @@ namespace VAGSuite
                             sh.Correction = 0.1;
                             sh.Varname = "Fuel temperature correction curve (zmwMKorKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC5BA)
+                        else if (sh.X_axis_ID == 0xC5BA || sh.X_axis_ID == 0xC556)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4531,7 +4531,7 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 8 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xC1B0)
+                        if (sh.X_axis_ID == 0xC1B0 || sh.X_axis_ID == 0xC17A)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4553,62 +4553,62 @@ namespace VAGSuite
                             sh.YaxisUnits = "rpm";
                             if (f9Count % 8 == 7)
                             {
-                                sh.Varname = "Map- Cooler water temp speed correction line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map- Cooler water temp speed correction line (kuwKOR1_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "kuwKOR1_KL";
                                 sh.Z_axis_descr = "Correction factor";
                                 sh.Correction = 0.0001;
                             }
                             if (f9Count % 8 == 6)
                             {
-                                sh.Varname = "Map- EGR cooler bypass switch-off line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map- EGR cooler bypass switch-off line (arwERGnAus) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "arwERGnAus";
                                 sh.Z_axis_descr = "Air (mg/stroke)";
                                 sh.Correction = 0.1;
                             }
                             if (f9Count % 8 == 5)
                             {
-                                sh.Varname = "Map- EGR cooler bypass switch-on line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map- EGR cooler bypass switch-on line (arwERGnEin) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "arwERGnEin";
                                 sh.Z_axis_descr = "Air (mg/stroke)";
                                 sh.Correction = 0.1;
                             }
                             if (f9Count % 8 == 4)
                             {
-                                sh.Varname = "Map- Boost shutdown freezing time characteristic [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map- Boost shutdown freezing time characteristic (ldwVZDZ_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "ldwVZDZ_KL";
                                 sh.Z_axis_descr = "Factor";
                                 sh.Correction = 0.0001;
                             }
                             if (f9Count % 8 == 3)
                             {
-                                sh.Varname = "Map- ARD shaper gradient bandwidth positive trend - negative offset [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map- ARD shaper gradient bandwidth positive trend - negative offset (mrwFPoU_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwFPoU_KL";
                                 sh.Z_axis_descr = "Injected Quantity (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                             if (f9Count % 8 == 2)
                             {
-                                sh.Varname = "Map- ARD shaper gradient bandwidth positive trend - positive offset [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map- ARD shaper gradient bandwidth positive trend - positive offset (mrwFPoO_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwFPoO_KL";
                                 sh.Z_axis_descr = "Injected Quantity (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                             if (f9Count % 8 == 1)
                             {
-                                sh.Varname = "Map- ARD shaper gradient bandwidth negative trend - negative offset [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map- ARD shaper gradient bandwidth negative trend - negative offset (mrwFNoU_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwFNoU_KL";
                                 sh.Z_axis_descr = "Injected Quantity (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                             if (f9Count % 8 == 0)
                             {
-                                sh.Varname = "Map- ARD shaper gradient bandwidth negative trend - positive offset [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Map- ARD shaper gradient bandwidth negative trend - positive offset (mrwFNoO_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwFNoO_KL";
                                 sh.Z_axis_descr = "Injected Quantity (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                         }
-                        else if (sh.X_axis_ID == 0xE9D8)
+                        else if (sh.X_axis_ID == 0xE9D8 || sh.X_axis_ID == 0xE9CA)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4631,7 +4631,7 @@ namespace VAGSuite
                             sh.Offset = -273.1;
                             sh.Varname = "Ambient temperature water correction line (kmwWTkorKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xE972)
+                        else if (sh.X_axis_ID == 0xE972 || sh.X_axis_ID == 0xE968)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4709,14 +4709,14 @@ namespace VAGSuite
                             sh.Y_axis_offset = -273.1;
                             if (c19eCount % 2 == 1)
                             {
-                                sh.Varname = "Water temp dependent - Maximum deviation factor b/w internal/external transmission [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Water temp dependent - Maximum deviation factor b/w internal/external transmission (mrwFVHGDKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwFVHGDKL";
                                 sh.Z_axis_descr = "Deviation";
                                 sh.Correction = 0.0001;
                             }
                             if (c19eCount % 2 == 0)
                             {
-                                sh.Varname = "Water temp dependent -  LLR-Integrator initial value characteristic line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Water temp dependent -  LLR-Integrator initial value characteristic line (mrwSTINILL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwSTINILL";
                                 sh.Z_axis_descr = "Value";
                                 sh.Correction = 0.01;
@@ -4734,14 +4734,14 @@ namespace VAGSuite
                             sh.Y_axis_offset = -273.1;
                             if (c19eCount % 2 == 0)
                             {
-                                sh.Varname = "Water temp dependent - Maximum deviation factor b/w internal/external transmission [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Water temp dependent - Maximum deviation factor b/w internal/external transmission (mrwFVHGDKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwFVHGDKL";
                                 sh.Z_axis_descr = "Deviation";
                                 sh.Correction = 0.0001;
                             }
                             if (c19eCount % 2 == 1)
                             {
-                                sh.Varname = "Water temp dependent -  LLR-Integrator initial value characteristic line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Water temp dependent -  LLR-Integrator initial value characteristic line (mrwSTINILL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwSTINILL";
                                 sh.Z_axis_descr = "Value";
                                 sh.Correction = 0.01;
@@ -4759,21 +4759,21 @@ namespace VAGSuite
                             sh.Y_axis_offset = -273.1;
                             if (c19cCount % 3 == 2)
                             {
-                                sh.Varname = "IAT dependent - Boost correction [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "IAT dependent - Boost correction (ldwTVTLKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "ldwTVTLKL";
                                 sh.Z_axis_descr = "Correction";
                                 sh.Correction = 0.0001;
                             }
                             if (c19cCount % 3 == 1)
                             {
-                                sh.Varname = "IAT dependent - Injection correction [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "IAT dependent - Injection correction (ldwTLUEKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "ldwTLUEKL";
                                 sh.Z_axis_descr = "Correction";
                                 sh.Correction = 0.0001;
                             }
                             if (c19cCount % 3 == 0)
                             {
-                                sh.Varname = "IAT dependent - Smoke/Boost correction [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "IAT dependent - Smoke/Boost correction (mrwTSTLKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwTSTLKL";
                                 sh.Z_axis_descr = "Value";
                                 sh.Correction = 0.0001;
@@ -4805,7 +4805,7 @@ namespace VAGSuite
 
                             sh.YaxisUnits = "SOI";
                         }
-                        else if (sh.X_axis_ID == 0xEB8E)
+                        else if (sh.X_axis_ID == 0xEB8E || sh.X_axis_ID == 0xEB90)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4900,28 +4900,28 @@ namespace VAGSuite
                             sh.YaxisUnits = "rpm";
                             if (ece2Count % 6 == 5)
                             {
-                                sh.Varname = "Speed dependent - Heating generator off treshold line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Speed dependent - Heating generator off treshold line (khwKH_ABKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "khwKH_ABKL";
                                 sh.Z_axis_descr = "Generator treshold (%)";
                                 sh.Correction = 0.01;
                             }
                             if (ece2Count % 6 == 4)
                             {
-                                sh.Varname = "Speed dependent - Heating generator on treshold line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Speed dependent - Heating generator on treshold line (khwKH_ZUKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "khwKH_ZUKL";
                                 sh.Z_axis_descr = "Generator treshold (%)";
                                 sh.Correction = 0.01;
                             }
                             if (ece2Count % 6 == 3)
                             {
-                                sh.Varname = "Speed dependent - Boost actuator lower limit line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Speed dependent - Boost actuator lower limit line (ldwGRminKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "ldwGRminKL";
                                 sh.Z_axis_descr = "Actuator treshold (%)";
                                 sh.Correction = 0.01;
                             }
                             if (ece2Count % 6 == 2)
                             {
-                                sh.Varname = "Speed dependent - Ratiometric processing memory factor HFM5 line [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Speed dependent - Ratiometric processing memory factor HFM5 line (anwGFH51KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "anwGFH51KL";
                                 sh.Z_axis_descr = "-";
                                 sh.Correction = 0.000030517578;
@@ -4935,7 +4935,7 @@ namespace VAGSuite
                             }
                             if (ece2Count % 6 == 0)
                             {
-                                sh.Varname = "Speed dependent - Quantity limit treshold with active VE [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Speed dependent - Quantity limit treshold with active VE (mrwBMVE_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwBMVE_KL";
                                 sh.Z_axis_descr = "Injected quantity (mg/stroke)";
                                 sh.Correction = 0.01;
@@ -4985,7 +4985,7 @@ namespace VAGSuite
                                 sh.Z_axis_descr = "Minimum speed (rpm)";
                             }
                         }
-                        else if (sh.X_axis_ID == 0xE9E2)
+                        else if (sh.X_axis_ID == 0xE9E2 || sh.X_axis_ID == 0xE9D4)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4995,7 +4995,7 @@ namespace VAGSuite
                             sh.Y_axis_correction = 0.002;
                             sh.Varname = "Cooler refrigerant pressure characteristic line (kuwKVM_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC1A2)
+                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC16C)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5006,7 +5006,7 @@ namespace VAGSuite
                             sh.Y_axis_offset = -273.1;
                             sh.Varname = "Engine temperature-dependent idle start speed curve (mrwLLW_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC5BA)
+                        else if (sh.X_axis_ID == 0xC5BA || sh.X_axis_ID == 0xC556)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5026,7 +5026,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Imp/m";
                             sh.Varname = "Kienzle tachograph route factor characteristic curve (fgwSF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xDABC)
+                        else if (sh.X_axis_ID == 0xDABC || sh.X_axis_ID == 0xDAC0)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5062,7 +5062,7 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 5 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xC19C)
+                        if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5074,7 +5074,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Oil temperature substitute added value (°C)";
                             sh.Varname = "Oil temperature subst. value curve (anwO_LUrKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC0F4)
+                        else if (sh.X_axis_ID == 0xC0F4 || sh.X_axis_ID == 0xC0E6)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5085,7 +5085,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Oil temperature substitute added value (°C)";
                             sh.Varname = "Oil temperature subst. value curve (anwO_VBtKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC5E2)
+                        else if (sh.X_axis_ID == 0xC5E2 || sh.X_axis_ID == 0xC57E)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5126,7 +5126,7 @@ namespace VAGSuite
                                 sh.Z_axis_descr = "Engine speed (rpm)";
                             }
                         }
-                        else if (sh.X_axis_ID == 0xC1A6)
+                        else if (sh.X_axis_ID == 0xC1A6 || sh.X_axis_ID == 0xC170)
                         {
                             int c1a6Count = GetMapNameCountForCodeBlock("Coolant setpoint - ", sh.CodeBlock, newSymbols, false);
                             c1a6Count--;
@@ -5138,7 +5138,7 @@ namespace VAGSuite
                             sh.Y_axis_offset = -273.1;
                             if (c1a6Count % 2 == 1)
                             {
-                                sh.Varname = "Coolant setpoint - No climatronic correction characteristic map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Coolant setpoint - No climatronic correction characteristic map (kmwKOR4_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "kmwKOR4_KL";
                                 sh.Z_axis_descr = "Set Temperature (°C)";
                                 sh.Correction = 0.1;
@@ -5146,14 +5146,14 @@ namespace VAGSuite
                             }
                             if (c1a6Count % 2 == 0)
                             {
-                                sh.Varname = "Coolant setpoint - Heating requirement maximum selection curve [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Coolant setpoint - Heating requirement maximum selection curve (kmwKOR5_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "kmwKOR5_KL";
                                 sh.Z_axis_descr = "Set temperature (°C)";
                                 sh.Correction = 0.1;
                                 sh.Offset = -273.1;
                             }
                         }
-                        else if (sh.X_axis_ID == 0xC1B0)
+                        else if (sh.X_axis_ID == 0xC1B0 || sh.X_axis_ID == 0xC17A)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5166,7 +5166,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Temperature correction (°C)";
                             sh.Varname = "Coolant setpoint Oil temperature correction curve (kmwKOR3_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xEC2E)
+                        else if (sh.X_axis_ID == 0xEC2E || sh.X_axis_ID == 0xEC2C)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5176,7 +5176,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Injected quantity offset (mg/stroke)";
                             sh.Varname = "ARD limitation offset for limiting amount (mrwABegOKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xE940)
+                        else if (sh.X_axis_ID == 0xE940 || sh.X_axis_ID == 0xE936)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5187,7 +5187,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Pulse duty factor (%)";
                             sh.Varname = "Parallel control air quantity correction curve (arwMLTVKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC19E)
+                        else if (sh.X_axis_ID == 0xC19E || sh.X_axis_ID == 0xC16A)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5198,7 +5198,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Engine speed (rpm)";
                             sh.Varname = "EGR overrun shutdown upper treshold curve (arwREGSBN) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC0FC)
+                        else if (sh.X_axis_ID == 0xC0FC || sh.X_axis_ID == 0xC0EE)
                         {
                             int c0fcCount = GetMapNameCountForCodeBlock("ARD Disturbance controller - ", sh.CodeBlock, newSymbols, false);
                             c0fcCount--;
@@ -5208,28 +5208,28 @@ namespace VAGSuite
                             sh.YaxisUnits = "rpm";
                             if (c0fcCount % 4 == 3)
                             {
-                                sh.Varname = "ARD Disturbance controller - Load impact detected upper limit [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "ARD Disturbance controller - Load impact detected upper limit (mrwARDDoKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwARDDoKL";
                                 sh.Z_axis_descr = "Amount of intervention (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                             if (c0fcCount % 4 == 2)
                             {
-                                sh.Varname = "ARD Disturbance controller - Load impact detected lower limit [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "ARD Disturbance controller - Load impact detected lower limit (mrwARDDuKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwARDDuKL";
                                 sh.Z_axis_descr = "Amount of intervention (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                             if (c0fcCount % 4 == 1)
                             {
-                                sh.Varname = "ARD Disturbance controller - Standard operation upper limit [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "ARD Disturbance controller - Standard operation upper limit (mrwARDSoKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwARDSoKL";
                                 sh.Z_axis_descr = "Amount of intervention (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                             if (c0fcCount % 4 == 0)
                             {
-                                sh.Varname = "ARD Disturbance controller - Standard operation lower limit [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "ARD Disturbance controller - Standard operation lower limit (mrwARDSuKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwARDSuKL";
                                 sh.Z_axis_descr = "Amount of intervention (mg/stroke)";
                                 sh.Correction = 0.01;
@@ -5259,17 +5259,30 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 4 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xC030)
+                        if (sh.X_axis_ID == 0xC030 || sh.X_axis_ID == 0xC02C)
                         {
+                            int c030Count = GetMapNameCountForCodeBlock("Pressure - ", sh.CodeBlock, newSymbols, false);
+                            c030Count--;
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
                             sh.Y_axis_descr = "Air pressure (mBar)";
                             sh.YaxisUnits = "mbar";
-                            sh.Z_axis_descr = "Selected map";
-                            sh.Correction = 0.00390625;
-                            sh.Varname = "Injection advance at start map selector (fnwSWST_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                             if (c030Count % 2 == 1)
+                            {
+                                sh.Varname = "Pressure - Injection advance at start map selector (fnwSWST_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "fnwSWST_KL";
+                                sh.Z_axis_descr = "Selected map";
+                                sh.Correction = 0.00390625;
+                            }
+                            if (c030Count % 2 == 0)
+                            {
+                                sh.Varname = "Pressure - EGR Setpoint height correction (arwPAKORKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "arwPAKORKL";
+                                sh.Z_axis_descr = "mg/stroke air";
+                                sh.Correction = 0.1;
+                            }
                         }
-                        else if (sh.X_axis_ID == 0xC19C)
+                        else if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5281,7 +5294,7 @@ namespace VAGSuite
                             sh.Correction = 0.00390625;
                             sh.Varname = "Injection correction map (Air temperature) selector (fnwSWLT_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC1A2)
+                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC16C)
                         {
                             int c1a2Count = GetMapNameCountForCodeBlock("Glowplug control - ", sh.CodeBlock, newSymbols, false);
                             c1a2Count--;
@@ -5293,21 +5306,21 @@ namespace VAGSuite
                             sh.Y_axis_offset = -273.1;
                             if (c1a2Count % 3 == 2)
                             {
-                                sh.Varname = "Glowplug control - Indicator glow period [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Glowplug control - Indicator glow period (gswGAZ_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "gswGAZ_KL";
                                 sh.Z_axis_descr = "Period (s)";
                                 sh.Correction = 0.01;
                             }
                             if (c1a2Count % 3 == 1)
                             {
-                                sh.Varname = "Glowplug control - glow period time in area 1 [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Glowplug control - glow period time in area 1 (gswGS_t1KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "gswGS_t1KL";
                                 sh.Z_axis_descr = "Period (s)";
                                 sh.Correction = 0.01;
                             }
                             if (c1a2Count % 3 == 0)
                             {
-                                sh.Varname = "Glowplug control - Afterglow period [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Glowplug control - Afterglow period (gswGS_NGKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "gswGS_NGKL";
                                 sh.Z_axis_descr = "Period (s)";
                                 sh.Correction = 0.01;
@@ -5325,7 +5338,7 @@ namespace VAGSuite
                             sh.Correction = 0.0001;
                             sh.Varname = "Coolant run-on time ambient temperature correction line (kuwNLF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC082)
+                        else if (sh.X_axis_ID == 0xC082 || sh.X_axis_ID == 0xC07E)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5347,7 +5360,7 @@ namespace VAGSuite
                             sh.Correction = 0.01;
                             sh.Varname = "PGS linearization (not active) (anwPGS_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xF94A)
+                        else if (sh.X_axis_ID == 0xF94A || sh.X_axis_ID == 0xF948)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5395,7 +5408,7 @@ namespace VAGSuite
                                 sh.Correction = 0.01;
                             }
                         }
-                        else if (sh.X_axis_ID / 256 == 0xC0 && sh.Y_axis_ID / 256 == 0xE9)
+                        else if ((sh.X_axis_ID / 256 == 0xC0 || sh.X_axis_ID == 0xE918) && sh.Y_axis_ID / 256 == 0xE9)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5440,7 +5453,7 @@ namespace VAGSuite
                                 sh.Correction = 0.1;
                             }
                         }
-                        else if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xC0)
+                        else if (sh.X_axis_ID / 256 == 0xEC && (sh.Y_axis_ID / 256 == 0xC0 || sh.Y_axis_ID == 0xE918))
                         {
                             int ecCount = GetMapNameCountForCodeBlock("EGR Basic-", sh.CodeBlock, newSymbols, false);
                             ecCount--;
@@ -5544,7 +5557,7 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 3 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xC19C)
+                        if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5556,7 +5569,7 @@ namespace VAGSuite
                             sh.Correction = 0.01;
                             sh.Varname = "Glow intermediate glowing state time line (gswGS_T1ZG) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC270)
+                        else if (sh.X_axis_ID == 0xC270 || sh.X_axis_ID == 0xC234)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5641,7 +5654,7 @@ namespace VAGSuite
                             sh.Correction = 0.1;
                             sh.Varname = "Oil temperature sensor linearization map (anwOTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xEC2E)
+                        else if (sh.X_axis_ID == 0xEC2E || sh.X_axis_ID == 0xEC2C)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5681,7 +5694,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Linearization (not active)";
                             sh.Varname = "Brake light switch linearization map (anwBRE_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xEB58)
+                        else if (sh.X_axis_ID == 0xEB58 || sh.X_axis_ID == 0xEB5A)
                         {
                             int eb58Count = GetMapNameCountForCodeBlock("Voltage linearization map - ", sh.CodeBlock, newSymbols, false);
                             eb58Count--;
@@ -5691,13 +5704,13 @@ namespace VAGSuite
                             sh.YaxisUnits = "-";
                             if (eb58Count % 2 == 1)
                             {
-                                sh.Varname = "Voltage linearization map - reference (not active)[" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Voltage linearization map - reference (not active) (anwREF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "anwREF_KL";
                                 sh.Z_axis_descr = "Linearized value";
                             }
                             if (eb58Count % 2 == 0)
                             {
-                                sh.Varname = "Voltage linearization map - battery (not active) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Voltage linearization map - battery (not active) (anwUBAT_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "anwUBAT_KL";
                                 sh.Z_axis_descr = "Linearized value";
                             }
