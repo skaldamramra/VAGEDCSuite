@@ -2651,7 +2651,7 @@ namespace VAGSuite
                         sh.Subcategory = "Misc";
                         int sodSwellCount = GetMapNameCountForCodeBlock("Start of delivery turn swell map", sh.CodeBlock, newSymbols, false);
                         sodSwellCount--;
-                        sh.Varname = "Start of delivery turn swell map " + sodSwellCount.ToString("D2") + " [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                        sh.Varname = "Start of delivery turn swell map " + sodSwellCount.ToString("D2") + " (fnwUMDR_KF / fnwUMRMEKF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         sh.Userdescription = "fnwUMDR_KF / fnwUMRMEKF";
                         sh.Y_axis_correction = 0.1;
                         sh.Y_axis_offset = -273.1;
@@ -2697,7 +2697,7 @@ namespace VAGSuite
                         sh.X_axis_descr = "Engine Oil Temperature (°C)";
                         sh.Z_axis_descr = "Engine Oil thermal load index (counts into variable oil change interval)";
                     }
-                    else if (sh.X_axis_ID == 0xC1B6 && sh.Y_axis_ID == 0xC19E)
+                    else if ((sh.X_axis_ID == 0xC1B6 && sh.Y_axis_ID == 0xC19E) || (sh.X_axis_ID == 0xC1C6 && sh.Y_axis_ID == 0xC1AE))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2758,7 +2758,7 @@ namespace VAGSuite
                         sh.X_axis_descr = "Fan speed (rpm)";
                         sh.Z_axis_descr = "Offset correction";
                     }
-                    else if ((sh.X_axis_ID == 0xC19E || sh.X_axis_ID == 0xC16A) && (sh.Y_axis_ID == 0xE9E6 || sh.Y_axis_ID == 0xE9D8))
+                    else if ((sh.X_axis_ID == 0xC19E && sh.Y_axis_ID == 0xE9E6 ) || (sh.X_axis_ID == 0xC16A && sh.Y_axis_ID == 0xE9D8) || (sh.X_axis_ID == 0xC1AE && sh.Y_axis_ID == 0xE9FC))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2778,7 +2778,7 @@ namespace VAGSuite
                         sh.X_axis_address = Convert.ToInt32(sh.Flash_start_address) - 16;
                         sh.Y_axis_address = Convert.ToInt32(sh.Flash_start_address) - 36;
                     }
-                    else if (sh.X_axis_ID == 0xC19E && sh.Y_axis_ID == 0xC1B6)
+                    else if ((sh.X_axis_ID == 0xC19E && sh.Y_axis_ID == 0xC1B6) || (sh.X_axis_ID == 0xC1AE && sh.Y_axis_ID == 0xC1C6))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2796,7 +2796,7 @@ namespace VAGSuite
                         sh.X_axis_descr = "Ambient Intake Temperature (°C)";
                         sh.Z_axis_descr = "Correction (s)";
                     }
-                    else if ((sh.X_axis_ID == 0xE9D4 || sh.X_axis_ID == 0xE9C6) && (sh.Y_axis_ID == 0xF94A || sh.Y_axis_ID == 0xF948))
+                    else if ((sh.X_axis_ID == 0xE9D4 && sh.Y_axis_ID == 0xF94A) || (sh.X_axis_ID == 0xE9C6 && sh.Y_axis_ID == 0xF948) || (sh.X_axis_ID == 0xE9EA && sh.Y_axis_ID == 0xF94A))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2810,7 +2810,7 @@ namespace VAGSuite
                         sh.X_axis_descr = "Engine speed (rpm)";
                         sh.Z_axis_descr = "Fan speed (rpm)";
                     }
-                    else if ((sh.X_axis_ID == 0xE9CE || sh.X_axis_ID == 0xE9C0) && (sh.Y_axis_ID == 0xF94A || sh.Y_axis_ID == 0xF948))
+                    else if ((sh.X_axis_ID == 0xE9CE && sh.Y_axis_ID == 0xF94A ) || (sh.X_axis_ID == 0xE9C0 && sh.Y_axis_ID == 0xF948) || (sh.X_axis_ID == 0xE9E4 && sh.Y_axis_ID == 0xF94A))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2824,7 +2824,7 @@ namespace VAGSuite
                         sh.X_axis_descr = "Engine speed (rpm)";
                         sh.Z_axis_descr = "Fan speed (rpm)";
                     }
-                    else if ((sh.X_axis_ID == 0xE9C2 || sh.X_axis_ID == 0xE9B2) && (sh.Y_axis_ID == 0xE9C0 || sh.Y_axis_ID == 0xE9B0))
+                    else if ((sh.X_axis_ID == 0xE9C2 && sh.Y_axis_ID == 0xE9C0 ) || (sh.X_axis_ID == 0xE9B2 && sh.Y_axis_ID == 0xE9B0) || (sh.X_axis_ID == 0xE9D8 && sh.Y_axis_ID == 0xE9D6))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2840,7 +2840,7 @@ namespace VAGSuite
                         sh.Y_axis_descr = "Temperature difference (cooling vs. requirement) (°C)";
                         sh.Z_axis_descr = "Desired cooling power (W)";
                     }
-                    else if (sh.X_axis_ID == 0xC1B6 && sh.Y_axis_ID == 0xC1CC)
+                    else if ((sh.X_axis_ID == 0xC1B6 && sh.Y_axis_ID == 0xC1CC) || (sh.X_axis_ID == 0xC1C6 && sh.Y_axis_ID == 0xC1DC))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2858,7 +2858,7 @@ namespace VAGSuite
                         sh.X_axis_descr = "Ambient Temperature (°C)";
                         sh.Z_axis_descr = "Setpoint temperature difference (°C)";
                     }
-                    else if (sh.X_axis_ID == 0xC134 && sh.Y_axis_ID == 0xEA00)
+                    else if ((sh.X_axis_ID == 0xC134 && sh.Y_axis_ID == 0xEA00) || (sh.X_axis_ID == 0xC13C && sh.Y_axis_ID == 0xEA16))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2876,7 +2876,7 @@ namespace VAGSuite
                         sh.X_axis_descr = "Water Temperature difference (°C)";
                         sh.Z_axis_descr = "Correction (°C)";
                     }
-                    else if (sh.X_axis_ID == 0xC1CC && sh.Y_axis_ID == 0xE9B6)
+                    else if ((sh.X_axis_ID == 0xC1CC && sh.Y_axis_ID == 0xE9B6) || (sh.X_axis_ID == 0xC1DC && sh.Y_axis_ID == 0xE9CC))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2921,7 +2921,7 @@ namespace VAGSuite
                         sh.Correction = 0.1;
                         sh.Offset = -273.1;
                     }
-                    else if (sh.X_axis_ID == 0xC19C && sh.Y_axis_ID == 0xEA24)
+                    else if ((sh.X_axis_ID == 0xC19C && sh.Y_axis_ID == 0xEA24) || (sh.X_axis_ID == 0xC1AC && sh.Y_axis_ID == 0xEA3A))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2938,7 +2938,7 @@ namespace VAGSuite
                         sh.X_axis_descr = "Pressure (mBar)";
                         sh.Z_axis_descr = "Output Temperature (°C)";
                     }
-                    else if ((sh.X_axis_ID == 0xC270 && sh.Y_axis_ID == 0xC1B6) || (sh.X_axis_ID == 0xC234 && sh.Y_axis_ID == 0xC180))
+                    else if ((sh.X_axis_ID == 0xC270 && sh.Y_axis_ID == 0xC1B6) || (sh.X_axis_ID == 0xC234 && sh.Y_axis_ID == 0xC180) || (sh.X_axis_ID == 0xC27E && sh.Y_axis_ID == 0xC1C6))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2955,7 +2955,7 @@ namespace VAGSuite
                         sh.Y_axis_descr = "Vehicle speed (Km/h)";
                         sh.Z_axis_descr = "Output Temperature (°C)";
                     }
-                    else if (sh.X_axis_ID == 0xC134 && sh.Y_axis_ID == 0xC136)
+                    else if ((sh.X_axis_ID == 0xC134 && sh.Y_axis_ID == 0xC136) || (sh.X_axis_ID == 0xC13C && sh.Y_axis_ID == 0xC13E))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2970,7 +2970,7 @@ namespace VAGSuite
                         sh.Y_axis_descr = "Control temperetare deviation (°C)";
                         sh.Z_axis_descr = "Duty Cycle %";
                     }
-                    else if ((sh.X_axis_ID == 0xF94A && sh.Y_axis_ID == 0xC036) || (sh.X_axis_ID == 0xF948 && sh.Y_axis_ID == 0xC032))
+                    else if ((sh.X_axis_ID == 0xF94A && sh.Y_axis_ID == 0xC036) || (sh.X_axis_ID == 0xF948 && sh.Y_axis_ID == 0xC032) || (sh.X_axis_ID == 0xF94A && sh.Y_axis_ID == 0xC03A))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
@@ -2998,7 +2998,7 @@ namespace VAGSuite
                         sh.Z_axis_descr = "Airmass (mg/stroke)";
                         sh.Correction = 0.1;
                     }
-                    else if (sh.X_axis_ID == 0xC0FC && sh.Y_axis_ID == 0xC1B0)
+                    else if ((sh.X_axis_ID == 0xC0FC && sh.Y_axis_ID == 0xC1B0) || (sh.X_axis_ID == 0xC102 && sh.Y_axis_ID == 0xC1C0))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Misc";
