@@ -2168,7 +2168,7 @@ namespace VAGSuite
                         sh.XaxisUnits = "rpm";
                         sh.YaxisUnits = "mbar";
                     }
-                    else if ((sh.X_axis_ID == 0xC1AE || sh.X_axis_ID == 0xC178) && (sh.Y_axis_ID / 256 == 0xEC))
+                    else if ((sh.X_axis_ID == 0xC1AE || sh.X_axis_ID == 0xC178 || sh.X_axis_ID == 0xC1BE) && (sh.Y_axis_ID / 256 == 0xEC))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Limiters";
@@ -2183,7 +2183,7 @@ namespace VAGSuite
                         sh.XaxisUnits = "rpm";
                         sh.YaxisUnits = "°C";
                     }
-                    else if ((sh.X_axis_ID == 0xC1CE || sh.X_axis_ID == 0xC198) && (sh.Y_axis_ID / 256 == 0xEC))
+                    else if ((sh.X_axis_ID == 0xC1CE || sh.X_axis_ID == 0xC198 || sh.X_axis_ID == 0xC1DE) && (sh.Y_axis_ID / 256 == 0xEC))
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Limiters";
@@ -3364,7 +3364,7 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 25 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xEBB8)
+                        if (sh.X_axis_ID == 0xEBB8 || sh.X_axis_ID == 0xEBBA)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -3376,7 +3376,7 @@ namespace VAGSuite
                             sh.Offset = -273.1;
                             sh.Y_axis_correction = 4.888;
                         }
-                        else if (sh.X_axis_ID == 0xEBB4)
+                        else if (sh.X_axis_ID == 0xEBB4 || sh.X_axis_ID == 0xEBB6)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -3704,7 +3704,7 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 18 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xEBB2)
+                        if (sh.X_axis_ID == 0xEBB2 || sh.X_axis_ID == 0xEBB4)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -3987,7 +3987,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Temperature (°C)";
                             sh.Correction = 0.0000244141;
                         }
-                        else if (sh.X_axis_ID / 256 == 0xEC)
+                        else if (sh.X_axis_ID / 256 == 0xEC || sh.X_axis_ID / 256 == 0xF9)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4061,7 +4061,7 @@ namespace VAGSuite
                             sh.Offset = -273.1;
                             sh.Varname = "Heating linearization map (anwHZA_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC5E2 || sh.X_axis_ID == 0xC57E)
+                        else if (sh.X_axis_ID == 0xC5E2 || sh.X_axis_ID == 0xC57E || sh.X_axis_ID == 0xC5FE)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
