@@ -4983,6 +4983,84 @@ namespace VAGSuite
             }
         }
 
+        private void StartCSVExport()
+        {
+            ExcelInterface excelInterface = new ExcelInterface();
+            if (gridViewSymbols.SelectedRowsCount > 0)
+            {
+                int[] selrows = gridViewSymbols.GetSelectedRows();
+                if (selrows.Length > 0)
+                {
+                    SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow((int)selrows.GetValue(0));
+                    //DataRowView dr = (DataRowView)gridViewSymbols.GetRow((int)selrows.GetValue(0));
+                    //frmTableDetail tabdet = new frmTableDetail();
+                    string Map_name = sh.Varname;
+                    if ((Map_name.StartsWith("2D") || Map_name.StartsWith("3D")) && sh.Userdescription != "") Map_name = sh.Userdescription;
+                    int columns = 8;
+                    int rows = 8;
+                    int tablewidth = GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name, out columns, out rows);
+
+                    int address = (int)sh.Flash_start_address;
+                    if (address != 0)
+                    {
+                        int length = sh.Length;
+
+                        byte[] mapdata = Tools.Instance.readdatafromfile(Tools.Instance.m_currentfile, address, length, Tools.Instance.m_currentFileType);
+                        int[] xaxis = GetXaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name);
+                        int[] yaxis = GetYaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name);
+                        Map_name = Map_name.Replace(",", "");
+                        Map_name = Map_name.Replace("[", "");
+                        Map_name = Map_name.Replace("]", "");
+
+                        excelInterface.ExportToCSV(Map_name, address, length, mapdata, columns, rows, true, xaxis, yaxis, m_appSettings.ShowTablesUpsideDown, sh.X_axis_descr, sh.Y_axis_descr, sh.Z_axis_descr);
+                    }
+                }
+            }
+            else
+            {
+                frmInfoBox info = new frmInfoBox("No symbol selected in the primary symbol list");
+            }
+        }
+
+        private void StartXMLExport()
+        {
+            ExcelInterface excelInterface = new ExcelInterface();
+            if (gridViewSymbols.SelectedRowsCount > 0)
+            {
+                int[] selrows = gridViewSymbols.GetSelectedRows();
+                if (selrows.Length > 0)
+                {
+                    SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow((int)selrows.GetValue(0));
+                    //DataRowView dr = (DataRowView)gridViewSymbols.GetRow((int)selrows.GetValue(0));
+                    //frmTableDetail tabdet = new frmTableDetail();
+                    string Map_name = sh.Varname;
+                    if ((Map_name.StartsWith("2D") || Map_name.StartsWith("3D")) && sh.Userdescription != "") Map_name = sh.Userdescription;
+                    int columns = 8;
+                    int rows = 8;
+                    int tablewidth = GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name, out columns, out rows);
+
+                    int address = (int)sh.Flash_start_address;
+                    if (address != 0)
+                    {
+                        int length = sh.Length;
+
+                        byte[] mapdata = Tools.Instance.readdatafromfile(Tools.Instance.m_currentfile, address, length, Tools.Instance.m_currentFileType);
+                        int[] xaxis = GetXaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name);
+                        int[] yaxis = GetYaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name);
+                        Map_name = Map_name.Replace(",", "");
+                        Map_name = Map_name.Replace("[", "");
+                        Map_name = Map_name.Replace("]", "");
+
+                        excelInterface.ExportToXML(Map_name, address, length, mapdata, columns, rows, true, xaxis, yaxis, m_appSettings.ShowTablesUpsideDown, sh.X_axis_descr, sh.Y_axis_descr, sh.Z_axis_descr);
+                    }
+                }
+            }
+            else
+            {
+                frmInfoBox info = new frmInfoBox("No symbol selected in the primary symbol list");
+            }
+        }
+
         private void btnExportToExcel_ItemClick(object sender, ItemClickEventArgs e)
         {
             StartExcelExport();
@@ -4996,6 +5074,16 @@ namespace VAGSuite
         private void exportToExcelToolStripMenuItem_Click(object sender, EventArgs e)
         {
             StartExcelExport();
+        }
+
+        private void exportToCSVToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StartCSVExport();
+        }
+
+        private void exportToXMLToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StartXMLExport();
         }
 
         private void btnIQByMap_ItemClick(object sender, ItemClickEventArgs e)
