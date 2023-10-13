@@ -122,6 +122,8 @@
             this.editXAxisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editYAxisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToExcelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToCSVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToXMLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gridViewSymbols = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gcSymbolName = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gcSymbolAddress = new DevExpress.XtraGrid.Columns.GridColumn();
@@ -971,9 +973,11 @@
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editXAxisToolStripMenuItem,
             this.editYAxisToolStripMenuItem,
-            this.exportToExcelToolStripMenuItem});
+            this.exportToExcelToolStripMenuItem,
+            this.exportToCSVToolStripMenuItem,
+            this.exportToXMLToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(159, 70);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(159, 116);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // editXAxisToolStripMenuItem
@@ -996,6 +1000,20 @@
             this.exportToExcelToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
             this.exportToExcelToolStripMenuItem.Text = "Export to Excel";
             this.exportToExcelToolStripMenuItem.Click += new System.EventHandler(this.exportToExcelToolStripMenuItem_Click);
+            // 
+            // exportToCSVToolStripMenuItem
+            // 
+            this.exportToCSVToolStripMenuItem.Name = "exportToCSVToolStripMenuItem";
+            this.exportToCSVToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
+            this.exportToCSVToolStripMenuItem.Text = "Export to CSV";
+            this.exportToCSVToolStripMenuItem.Click += new System.EventHandler(this.exportToCSVToolStripMenuItem_Click);
+            // 
+            // exportToXMLToolStripMenuItem
+            // 
+            this.exportToXMLToolStripMenuItem.Name = "exportToXMLToolStripMenuItem";
+            this.exportToXMLToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
+            this.exportToXMLToolStripMenuItem.Text = "Export to XML";
+            this.exportToXMLToolStripMenuItem.Click += new System.EventHandler(this.exportToXMLToolStripMenuItem_Click);
             // 
             // gridViewSymbols
             // 
@@ -1331,6 +1349,8 @@
         private DevExpress.XtraBars.BarButtonItem btnExportToExcel;
         private DevExpress.XtraBars.BarButtonItem btnExcelImport;
         private System.Windows.Forms.ToolStripMenuItem exportToExcelToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportToCSVToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportToXMLToolStripMenuItem;
         private DevExpress.XtraBars.BarButtonItem btnIQByMap;
         private DevExpress.XtraBars.BarButtonItem btnIQByMAF;
         private DevExpress.XtraBars.BarButtonItem btnSOILimiter;
