@@ -4130,7 +4130,7 @@ namespace VAGSuite
                             sh.Y_axis_correction = 0.1;
                             sh.Y_axis_offset = -273.1;
                         }
-                        else if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168)
+                        else if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168 || sh.X_axis_ID == 0xC1AC)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4156,6 +4156,74 @@ namespace VAGSuite
                             sh.Varname = "Cooling water heating characteristic map (khwKHTL_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
                         else if (sh.X_axis_ID == 0xEC2E)
+                        {
+                            int ece2Count = GetMapNameCountForCodeBlock("   ", sh.CodeBlock, newSymbols, false);
+                            ece2Count--;
+                            sh.Y_axis_descr = "Engine speed (rpm";
+                            sh.YaxisUnits = "rpm";
+                            //sh.Y_axis_correction = 0.1;
+                            //sh.Y_axis_offset = -273.1;
+                            if (ece2Count % 7 == 6)
+                            {
+                                sh.Varname = "   Boost pressure control ON treshold line (ldwREG1KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "ldwREG1KL";
+                                sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                sh.Correction = 0.01;
+                            }
+                            if (ece2Count % 7 == 5)
+                            {
+                                sh.Varname = "   Boost pressure control OFF treshold line (ldwREG0WKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "ldwREG0WKL";
+                                sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                sh.Correction = 0.01;
+                            }
+                            if (ece2Count % 7 == 4)
+                            {
+                                sh.Varname = "   (fakemap)";
+                                //sh.Userdescription = "ldwREG0WKL";
+                                //sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                //sh.Correction = 0.01;
+                            }
+                            if (ece2Count % 7 == 3)
+                            {
+                                sh.Varname = "   (fakemap) ";
+                                //sh.Userdescription = "ldwREG0WKL";
+                                //sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                //sh.Correction = 0.01;
+                            }
+                            if (ece2Count % 7 == 2)
+                            {
+                                sh.Varname = "   EGR control small-quantity on characteristic line (arwREG1KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "arwREG1KL";
+                                sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                sh.Correction = 0.01;
+                                sh.Y_axis_descr = "Engine speed (rpm)";
+                                sh.YaxisUnits = "rpm";
+                                sh.Y_axis_correction = 1;
+                                sh.Y_axis_offset = 0;
+                            }
+                            if (ece2Count % 7 == 1)
+                            {
+                                sh.Varname = "   EGR control small-quantity off characteristic line (arwREG0KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "arwREG0KL";
+                                sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                sh.Correction = 0.01;
+                                sh.Y_axis_descr = "Engine speed (rpm)";
+                                sh.YaxisUnits = "rpm";
+                                sh.Y_axis_correction = 1;
+                                sh.Y_axis_offset = 0;
+                            }
+                            if (ece2Count % 7 == 0)
+                            {
+                                sh.Varname = "   Boost intake manifold vacuum detection curve (mrwLDFU_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "mrwLDFU_KL";
+                                sh.Z_axis_descr = "Pressure difference (mbar)";
+                                //sh.Correction = 0.01;
+                            }
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Misc";
+                        }
+                        else if (sh.X_axis_ID == 0xEC38)
                         {
                             int ece2Count = GetMapNameCountForCodeBlock("   ", sh.CodeBlock, newSymbols, false);
                             ece2Count--;
@@ -4291,7 +4359,7 @@ namespace VAGSuite
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
                         }
-                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC16C)
+                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC16C || sh.X_axis_ID == 0xC1B2)
                         {
                             int c1a2Count = GetMapNameCountForCodeBlock("Delay - ", sh.CodeBlock, newSymbols, false);
                             c1a2Count--;
@@ -4401,7 +4469,7 @@ namespace VAGSuite
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
                         }
-                        else if (sh.X_axis_ID == 0xC1AE || sh.X_axis_ID == 0xC178)
+                        else if (sh.X_axis_ID == 0xC1AE || sh.X_axis_ID == 0xC178 || sh.X_axis_ID == 0xC1BE)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4413,7 +4481,7 @@ namespace VAGSuite
                             sh.Correction = 0.00390625;
                             sh.Varname = "BIP - Fuel temperature correction curve (zmwBPKorKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xEC5E || sh.X_axis_ID == 0xEC5C)
+                        else if (sh.X_axis_ID == 0xEC5E || sh.X_axis_ID == 0xEC5C || sh.X_axis_ID == 0xEC68)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4425,7 +4493,7 @@ namespace VAGSuite
                             sh.Correction = 0.1;
                             sh.Varname = "Fuel temperature correction curve (zmwMKorKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC5BA || sh.X_axis_ID == 0xC556)
+                        else if (sh.X_axis_ID == 0xC5BA || sh.X_axis_ID == 0xC556 || sh.X_axis_ID == 0xC5D6)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4437,7 +4505,7 @@ namespace VAGSuite
                             //sh.Correction = 0.1;
                             sh.Varname = "BIP - Basic voltage linearization map (zmwBPGndKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xEB98)
+                        else if (sh.X_axis_ID == 0xEB98 || sh.X_axis_ID == 0xEB9A)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -6297,7 +6365,7 @@ namespace VAGSuite
                                 }
                             }
 
-                            newSymbol.Varname = "3D Map Loc: " + newSymbol.Flash_start_address.ToString("X6") + " Size: " + newSymbol.X_axis_length + "x" + newSymbol.Y_axis_length + " IDs: X " + newSymbol.X_axis_ID.ToString("X4") + " Y " + newSymbol.Y_axis_ID.ToString("X4") + " Xr " + (newSymbol.X_axis_ID / 256).ToString("X2") + " Yr " + (newSymbol.Y_axis_ID / 256).ToString("X2") + " Len: " + newSymbol.Length + " Cb: [" + DetermineNumberByFlashBank(newSymbol.Flash_start_address, newCodeBlocks) + "]";
+                            newSymbol.Varname = "3D Map Size: " + newSymbol.X_axis_length + "x" + newSymbol.Y_axis_length + " Loc: " + newSymbol.Flash_start_address.ToString("X6") + " IDs: X " + newSymbol.X_axis_ID.ToString("X4") + " Y " + newSymbol.Y_axis_ID.ToString("X4") + " Xr " + (newSymbol.X_axis_ID / 256).ToString("X2") + " Yr " + (newSymbol.Y_axis_ID / 256).ToString("X2") + " Len: " + newSymbol.Length + " Cb: [" + DetermineNumberByFlashBank(newSymbol.Flash_start_address, newCodeBlocks) + "]";
                             //Console.WriteLine(newSymbol.Varname + " " + newSymbol.Length.ToString() + " " + newSymbol.X_axis_length.ToString() + "x" + newSymbol.Y_axis_length.ToString());
                             retval = AddToSymbolCollection(newSymbols, newSymbol, newCodeBlocks);
                             if (retval)
@@ -6317,7 +6385,7 @@ namespace VAGSuite
                             newSymbol.X_axis_address = t + 4;
                             newSymbol.Length = xaxislen * 2;
                             newSymbol.Flash_start_address = t + 4 + (xaxislen * 2);
-                            newSymbol.Varname = "2D Map Loc: " + newSymbol.Flash_start_address.ToString("X6") + " Size: " + newSymbol.X_axis_length + "x" + newSymbol.Y_axis_length + " IDs: X " + newSymbol.X_axis_ID.ToString("X4") + " Y " + newSymbol.Y_axis_ID.ToString("X4") + " Xr " + (newSymbol.X_axis_ID / 256).ToString("X2") + " Yr " + (newSymbol.Y_axis_ID / 256).ToString("X2") + " Len: " + newSymbol.Length + " Cb: [" + DetermineNumberByFlashBank(newSymbol.Flash_start_address, newCodeBlocks) + "]";
+                            newSymbol.Varname = "2D Map Size: " + newSymbol.X_axis_length + "x" + newSymbol.Y_axis_length + " Loc: " + newSymbol.Flash_start_address.ToString("X6") + " IDs: X " + newSymbol.X_axis_ID.ToString("X4") + " Y " + newSymbol.Y_axis_ID.ToString("X4") + " Xr " + (newSymbol.X_axis_ID / 256).ToString("X2") + " Yr " + (newSymbol.Y_axis_ID / 256).ToString("X2") + " Len: " + newSymbol.Length + " Cb: [" + DetermineNumberByFlashBank(newSymbol.Flash_start_address, newCodeBlocks) + "]";
                             //newSymbols.Add(newSymbol);
                             newSymbol.CodeBlock = DetermineCodeBlockByByAddress(newSymbol.Flash_start_address, newCodeBlocks);
                             retval = AddToSymbolCollection(newSymbols, newSymbol, newCodeBlocks);
