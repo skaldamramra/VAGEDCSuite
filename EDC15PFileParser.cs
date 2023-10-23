@@ -5327,7 +5327,7 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 4 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xC030 || sh.X_axis_ID == 0xC02C)
+                        if (sh.X_axis_ID == 0xC030 || sh.X_axis_ID == 0xC02C || sh.X_axis_ID == 0xC034)
                         {
                             int c030Count = GetMapNameCountForCodeBlock("Pressure - ", sh.CodeBlock, newSymbols, false);
                             c030Count--;
@@ -5350,7 +5350,7 @@ namespace VAGSuite
                                 sh.Correction = 0.1;
                             }
                         }
-                        else if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168)
+                        else if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168 || sh.X_axis_ID == 0xC1AC)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5362,7 +5362,7 @@ namespace VAGSuite
                             sh.Correction = 0.00390625;
                             sh.Varname = "Injection correction map (Air temperature) selector (fnwSWLT_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC16C)
+                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC16C || sh.X_axis_ID == 0xC1B2)
                         {
                             int c1a2Count = GetMapNameCountForCodeBlock("Glowplug control - ", sh.CodeBlock, newSymbols, false);
                             c1a2Count--;
@@ -5394,7 +5394,7 @@ namespace VAGSuite
                                 sh.Correction = 0.01;
                             }
                         }
-                        else if (sh.X_axis_ID == 0xC1B6)
+                        else if (sh.X_axis_ID == 0xC1B6 || sh.X_axis_ID == 0xC1C6)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5406,7 +5406,7 @@ namespace VAGSuite
                             sh.Correction = 0.0001;
                             sh.Varname = "Coolant run-on time ambient temperature correction line (kuwNLF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC082 || sh.X_axis_ID == 0xC07E)
+                        else if (sh.X_axis_ID == 0xC082 || sh.X_axis_ID == 0xC07E || sh.X_axis_ID == 0xC088)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5417,7 +5417,7 @@ namespace VAGSuite
                             sh.Correction = 0.01;
                             sh.Varname = "Smooth-running controler LRR limiting amount characteristic (mrwLRR_BGR) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xEB9A)
+                        else if (sh.X_axis_ID == 0xEB9A || sh.X_axis_ID == 0xEB9C)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5625,7 +5625,7 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 3 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168)
+                        if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168 || sh.X_axis_ID == 0xC1AC)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5637,7 +5637,7 @@ namespace VAGSuite
                             sh.Correction = 0.01;
                             sh.Varname = "Glow intermediate glowing state time line (gswGS_T1ZG) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC270 || sh.X_axis_ID == 0xC234)
+                        else if (sh.X_axis_ID == 0xC270 || sh.X_axis_ID == 0xC234 || sh.X_axis_ID == 0xC27E)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5649,7 +5649,7 @@ namespace VAGSuite
                             sh.Correction = 0.1;
                             sh.Varname = "AC Compressor water temperature switch-off limit line (klwWTab_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC19E || sh.X_axis_ID == 0xC16A)
+                        else if (sh.X_axis_ID == 0xC19E || sh.X_axis_ID == 0xC16A || sh.X_axis_ID == 0xC1AE)
                         {
                             int c19eCount = GetMapNameCountForCodeBlock("Limiter ", sh.CodeBlock, newSymbols, false);
                             c19eCount--;
@@ -5710,19 +5710,32 @@ namespace VAGSuite
                             }
 
                         }
-                        else if (sh.X_axis_ID == 0xEBC4)
+                        else if (sh.X_axis_ID == 0xEBC4 || sh.X_axis_ID == 0xEBC6)
                         {
-                            sh.Category = "Detected maps";
-                            sh.Subcategory = "Misc";
-                            sh.Y_axis_descr = "Voltage (mV)";
-                            sh.YaxisUnits = "mv";
-                            sh.Z_axis_descr = "Oil Temperature (°C)";
-                            sh.Y_axis_correction = 4.887585532747;
-                            sh.Offset = -273.1;
-                            sh.Correction = 0.1;
-                            sh.Varname = "Oil temperature sensor linearization map (anwOTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            if (IsValidVoltageAxis(allBytes, sh, MapViewerEx.AxisIdent.X_Axis))
+                            {
+                                sh.Category = "Detected maps";
+                                sh.Subcategory = "Misc";
+                                sh.Y_axis_descr = "Voltage (mV)";
+                                sh.YaxisUnits = "mv";
+                                sh.Z_axis_descr = "Oil Temperature (°C)";
+                                sh.Y_axis_correction = 4.887585532747;
+                                sh.Offset = -273.1;
+                                sh.Correction = 0.1;
+                                sh.Varname = "Oil temperature sensor linearization map (anwOTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            }
+                            else
+                            {
+                                sh.Category = "Detected maps";
+                                sh.Subcategory = "Misc";
+                                sh.Y_axis_descr = "Voltage (mV)";
+                                sh.YaxisUnits = "mv";
+                                sh.Y_axis_correction = 4.887585532747;
+                                sh.Z_axis_descr = "Linearization (not active)";
+                                sh.Varname = "Brake light switch linearization map (anwBRE_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            }
                         }
-                        else if (sh.X_axis_ID == 0xEC2E || sh.X_axis_ID == 0xEC2C)
+                        else if (sh.X_axis_ID == 0xEC2E || sh.X_axis_ID == 0xEC2C || sh.X_axis_ID == 0xEC38)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5742,7 +5755,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Refrigerant pressure (Bar)";
                             sh.Varname = "Refrigerant pressure linearization map (anwKMD_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xEB9E)
+                        else if (sh.X_axis_ID == 0xEB9E || sh.X_axis_ID == 0xEBA0)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5783,7 +5796,7 @@ namespace VAGSuite
                                 sh.Z_axis_descr = "Linearized value";
                             }
                         }
-                        else if (sh.X_axis_ID == 0xEBA6)
+                        else if (sh.X_axis_ID == 0xEBA6 || sh.X_axis_ID == 0xEBA8)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5811,7 +5824,7 @@ namespace VAGSuite
                             sh.Correction = 0.0001;
                             sh.Varname = "Deactivation of drag torque limitation due to red thrust monitor (mrwRSch_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xE920)
+                        else if (sh.X_axis_ID == 0xE920 || sh.X_axis_ID == 0xE926)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5822,7 +5835,7 @@ namespace VAGSuite
                             sh.Y_axis_correction = 0.01;
                             sh.Varname = "RME Fuel IQ correction line (arwRME_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC042)
+                        else if (sh.X_axis_ID == 0xC042 || sh.X_axis_ID == 0xC048)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5933,6 +5946,36 @@ namespace VAGSuite
                     int val = Convert.ToInt32(allBytes[offset]) + Convert.ToInt32(allBytes[offset + 1]) * 256;
                     double tempVal = (Convert.ToDouble(val) * 0.1) - 273.1;
                     if (tempVal < -80 || tempVal > 200) retval = false;
+                    offset += 2;
+                }
+            }
+            return retval;
+        }
+
+        private bool IsValidVoltageAxis(byte[] allBytes, SymbolHelper sh, MapViewerEx.AxisIdent axisIdent)
+        {
+            bool retval = true;
+            if (axisIdent == MapViewerEx.AxisIdent.X_Axis)
+            {
+                //read x axis values
+                int offset = sh.X_axis_address;
+                for (int i = 0; i < sh.X_axis_length; i++)
+                {
+                    int val = Convert.ToInt32(allBytes[offset]) + Convert.ToInt32(allBytes[offset + 1]) * 256;
+                    double tempVal = (Convert.ToDouble(val) * 4.887585532747);
+                    if (tempVal < 10 || tempVal > 5500) retval = false;
+                    offset += 2;
+                }
+            }
+            else if (axisIdent == MapViewerEx.AxisIdent.Y_Axis)
+            {
+                //read x axis values
+                int offset = sh.Y_axis_address;
+                for (int i = 0; i < sh.Y_axis_length; i++)
+                {
+                    int val = Convert.ToInt32(allBytes[offset]) + Convert.ToInt32(allBytes[offset + 1]) * 256;
+                    double tempVal = (Convert.ToDouble(val) * 4.887585532747);
+                    if (tempVal < 10 || tempVal > 5500) retval = false;
                     offset += 2;
                 }
             }
