@@ -4599,7 +4599,7 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 8 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xC1B0 || sh.X_axis_ID == 0xC17A)
+                        if (sh.X_axis_ID == 0xC1B0 || sh.X_axis_ID == 0xC17A || sh.X_axis_ID == 0xC1C0)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4676,7 +4676,7 @@ namespace VAGSuite
                                 sh.Correction = 0.01;
                             }
                         }
-                        else if (sh.X_axis_ID == 0xE9D8 || sh.X_axis_ID == 0xE9CA)
+                        else if (sh.X_axis_ID == 0xE9D8 || sh.X_axis_ID == 0xE9CA || sh.X_axis_ID == 0xE9EE) 
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4686,7 +4686,7 @@ namespace VAGSuite
                             sh.Correction = 0.01;
                             sh.Varname = "Electric fan speed characterization curve (kuwElLFTKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xEA22)
+                        else if (sh.X_axis_ID == 0xEA22 || sh.X_axis_ID == 0xEA38)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4699,7 +4699,7 @@ namespace VAGSuite
                             sh.Offset = -273.1;
                             sh.Varname = "Ambient temperature water correction line (kmwWTkorKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xE972 || sh.X_axis_ID == 0xE968)
+                        else if (sh.X_axis_ID == 0xE972 || sh.X_axis_ID == 0xE968 || sh.X_axis_ID == 0xE97E)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4710,7 +4710,7 @@ namespace VAGSuite
                             sh.Correction = 0.01;
                             sh.Varname = "Boost shutdown freeze time curve (ldwVZAR_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC1B8 || sh.X_axis_ID == 0xC182)
+                        else if (sh.X_axis_ID == 0xC1B8 || sh.X_axis_ID == 0xC182 || sh.X_axis_ID == 0xC1C8)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4720,7 +4720,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Engine speed (rpm)";
                             sh.Varname = "Pedal position linearization map (mrwADR_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC1A2)
+                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC1B2)
                         {
                             int c1a2Count = GetMapNameCountForCodeBlock("EGR-", sh.CodeBlock, newSymbols, false);
                             c1a2Count--;
@@ -4754,7 +4754,7 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 7 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xC5E0 || sh.X_axis_ID == 0xC57C)
+                        if (sh.X_axis_ID == 0xC5E0 || sh.X_axis_ID == 0xC57C || sh.X_axis_ID == 0xC5FC)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -4765,7 +4765,7 @@ namespace VAGSuite
                             sh.Correction = 0.0234375;
                             sh.Varname = "Twisted camshaft torsion correction angle map (zmwNWkoKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC19E)
+                        else if (sh.X_axis_ID == 0xC19E || sh.X_axis_ID == 0xC1AE)
                         {
                             int c19eCount = GetMapNameCountForCodeBlock("Water temp dependent - ", sh.CodeBlock, newSymbols, false);
                             c19eCount--;
@@ -4847,6 +4847,44 @@ namespace VAGSuite
                                 sh.Correction = 0.0001;
                             }
                         }
+                        else if (sh.X_axis_ID == 0xEA9E)
+                        {
+                            int ea9eCount = GetMapNameCountForCodeBlock("IAT dependent - ", sh.CodeBlock, newSymbols, false);
+                            ea9eCount--;
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Misc";
+                            sh.Y_axis_descr = "Air Temperature (°C)";
+                            sh.YaxisUnits = "°C";
+                            sh.Y_axis_correction = 0.1;
+                            sh.Y_axis_offset = -273.1;
+                            if (ea9eCount % 2 == 1)
+                            {
+                                sh.Varname = "IAT dependent - Boost correction (ldwTVTLKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "ldwTVTLKL";
+                                sh.Z_axis_descr = "Correction";
+                                sh.Correction = 0.0001;
+                            }
+                            if (ea9eCount % 2 == 0)
+                            {
+                                sh.Varname = "IAT dependent - Injection correction (ldwTLUEKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "ldwTLUEKL";
+                                sh.Z_axis_descr = "Correction";
+                                sh.Correction = 0.0001;
+                            }
+                        }
+                        else if (sh.X_axis_ID == 0xC1AC)
+                        {
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Misc";
+                            sh.Y_axis_descr = "Air Temperature (°C)";
+                            sh.YaxisUnits = "°C";
+                            sh.Y_axis_correction = 0.1;
+                            sh.Y_axis_offset = -273.1;
+                            sh.Varname = "IAT dependent- Smoke/Boost correction (mrwTSTLKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            sh.Userdescription = "mrwTSTLKL";
+                            sh.Z_axis_descr = "Value";
+                            sh.Correction = 0.0001;
+                        }
                         /*else
                         {
                             sh.Category = "Debug detected maps";
@@ -4884,7 +4922,7 @@ namespace VAGSuite
                             sh.Offset = -273.1;
                             sh.Varname = "Digital/analog Temperature correction map (anwUTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC030)
+                        else if (sh.X_axis_ID == 0xC030 || sh.X_axis_ID == 0xC034)
                         {
                             int c030Count = GetMapNameCountForCodeBlock("Altitude dependent - ", sh.CodeBlock, newSymbols, false);
                             c030Count--;
@@ -5009,7 +5047,44 @@ namespace VAGSuite
                                 sh.Correction = 0.01;
                             }
                         }
-                        else if (sh.X_axis_ID == 0xC270)
+                        else if (sh.X_axis_ID == 0xEC38)
+                        {
+                            int ece2Count = GetMapNameCountForCodeBlock("Speed dependent - ", sh.CodeBlock, newSymbols, false);
+                            ece2Count--;
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Misc";
+                            sh.Y_axis_descr = "Engine speed (rpm)";
+                            sh.YaxisUnits = "rpm";
+                            if (ece2Count % 4 == 3)
+                            {
+                                sh.Varname = "Speed dependent - Heating generator off treshold line (khwKH_ABKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "khwKH_ABKL";
+                                sh.Z_axis_descr = "Generator treshold (%)";
+                                sh.Correction = 0.01;
+                            }
+                            if (ece2Count % 4 == 2)
+                            {
+                                sh.Varname = "Speed dependent - Boost actuator lower limit line (ldwGRminKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "ldwGRminKL";
+                                sh.Z_axis_descr = "Actuator treshold (%)";
+                                sh.Correction = 0.01;
+                            }
+                            if (ece2Count % 4 == 1)
+                            {
+                                sh.Varname = "Speed dependent - Ratiometric processing memory factor HFM5 line (anwGFH51KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "anwGFH51KL";
+                                sh.Z_axis_descr = "-";
+                                sh.Correction = 0.000030517578;
+                            }
+                            if (ece2Count % 4 == 0)
+                            {
+                                sh.Varname = "Speed dependent - IQ limit in case of error (mrwBEM_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "mrwBEM_KL";
+                                sh.Z_axis_descr = "Injected quantity (mg/stroke)";
+                                sh.Correction = 0.01;
+                            }
+                        }
+                        else if (sh.X_axis_ID == 0xC270 || sh.X_axis_ID == 0xC27E)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5020,7 +5095,7 @@ namespace VAGSuite
                             sh.Y_axis_correction = 0.01;
                             sh.Varname = "Cooling fan speed correction curve (kuwANKORKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC260)
+                        else if (sh.X_axis_ID == 0xC260 || sh.X_axis_ID == 0xC26E)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5031,7 +5106,7 @@ namespace VAGSuite
                             sh.Y_axis_correction = 0.01;
                             sh.Varname = "CAN relative cooling capacity characteristic curve (kuwTV_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xE9F2)
+                        else if (sh.X_axis_ID == 0xE9F2 || sh.X_axis_ID == 0xEA08)
                         {
                             int e9f2Count = GetMapNameCountForCodeBlock("Cooling fan - ", sh.CodeBlock, newSymbols, false);
                             e9f2Count--;
@@ -5053,7 +5128,7 @@ namespace VAGSuite
                                 sh.Z_axis_descr = "Minimum speed (rpm)";
                             }
                         }
-                        else if (sh.X_axis_ID == 0xE9E2 || sh.X_axis_ID == 0xE9D4)
+                        else if (sh.X_axis_ID == 0xE9E2 || sh.X_axis_ID == 0xE9D4 || sh.X_axis_ID == 0xE9F8)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5063,7 +5138,7 @@ namespace VAGSuite
                             sh.Y_axis_correction = 0.002;
                             sh.Varname = "Cooler refrigerant pressure characteristic line (kuwKVM_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC16C)
+                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC16C || sh.X_axis_ID == 0xC1B2)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5074,7 +5149,7 @@ namespace VAGSuite
                             sh.Y_axis_offset = -273.1;
                             sh.Varname = "Engine temperature-dependent idle start speed curve (mrwLLW_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC5BA || sh.X_axis_ID == 0xC556)
+                        else if (sh.X_axis_ID == 0xC5BA || sh.X_axis_ID == 0xC556 || sh.X_axis_ID == 0xC5D6)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5085,7 +5160,7 @@ namespace VAGSuite
                             sh.Y_axis_correction = 0.020372434017595;
                             sh.Varname = "BIP Start-up max Battery voltage dependent line (zmwBPAnIKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xEBE8)
+                        else if (sh.X_axis_ID == 0xEBE8 || sh.X_axis_ID == 0xEBEA)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5130,7 +5205,7 @@ namespace VAGSuite
                 {
                     if (sh.X_axis_length == 5 && sh.Y_axis_length == 1)
                     {
-                        if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168)
+                        if (sh.X_axis_ID == 0xC19C || sh.X_axis_ID == 0xC168 || sh.X_axis_ID == 0xC1AC)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5142,7 +5217,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Oil temperature substitute added value (°C)";
                             sh.Varname = "Oil temperature subst. value curve (anwO_LUrKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC0F4 || sh.X_axis_ID == 0xC0E6)
+                        else if (sh.X_axis_ID == 0xC0F4 || sh.X_axis_ID == 0xC0E6 || sh.X_axis_ID == 0xC0FA )
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5153,7 +5228,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Oil temperature substitute added value (°C)";
                             sh.Varname = "Oil temperature subst. value curve (anwO_VBtKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC5E2 || sh.X_axis_ID == 0xC57E)
+                        else if (sh.X_axis_ID == 0xC5E2 || sh.X_axis_ID == 0xC57E || sh.X_axis_ID == 0xC5FE)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5165,7 +5240,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Dynamic advance map selected";
                             sh.Varname = "Injector dynamic advance selector map (fnwSWDY_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC16C)
+                        else if (sh.X_axis_ID == 0xC1A2 || sh.X_axis_ID == 0xC16C || sh.X_axis_ID == 0xC1B2)
                         {
                             int c1a2Count = GetMapNameCountForCodeBlock("Engine temp dependent - ", sh.CodeBlock, newSymbols, false);
                             c1a2Count--;
@@ -5194,7 +5269,7 @@ namespace VAGSuite
                                 sh.Z_axis_descr = "Engine speed (rpm)";
                             }
                         }
-                        else if (sh.X_axis_ID == 0xC1A6 || sh.X_axis_ID == 0xC170)
+                        else if (sh.X_axis_ID == 0xC1A6 || sh.X_axis_ID == 0xC170 || sh.X_axis_ID == 0xC1B6)
                         {
                             int c1a6Count = GetMapNameCountForCodeBlock("Coolant setpoint - ", sh.CodeBlock, newSymbols, false);
                             c1a6Count--;
@@ -5221,7 +5296,7 @@ namespace VAGSuite
                                 sh.Offset = -273.1;
                             }
                         }
-                        else if (sh.X_axis_ID == 0xC1B0 || sh.X_axis_ID == 0xC17A)
+                        else if (sh.X_axis_ID == 0xC1B0 || sh.X_axis_ID == 0xC17A || sh.X_axis_ID == 0xC1C0)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5244,7 +5319,27 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Injected quantity offset (mg/stroke)";
                             sh.Varname = "ARD limitation offset for limiting amount (mrwABegOKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xE940 || sh.X_axis_ID == 0xE936)
+                        else if (sh.X_axis_ID == 0xEC38)
+                        {
+                            int ec38Count = GetMapNameCountForCodeBlock("ARD limitation", sh.CodeBlock, newSymbols, false);
+                            ec38Count--;
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Misc";
+                            sh.YaxisUnits = "rpm";
+                            if (ec38Count % 2 == 0)
+                            {
+                                sh.Varname = "ARD limitation offset for limiting amount (mrwABegOKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "mrwABegOKL"; 
+                                sh.Z_axis_descr = "Injected quantity offset (mg/stroke)";
+                                sh.Correction = 0.01;
+                            }
+                            if (ec38Count % 2 == 1)
+                            {
+                                sh.Varname = "ARD limitation unknown map (probably fake or not even ARD related) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Userdescription = "";
+                            }
+                        }
+                        else if (sh.X_axis_ID == 0xE940 || sh.X_axis_ID == 0xE936 || sh.X_axis_ID == 0xE94C)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5255,7 +5350,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Pulse duty factor (%)";
                             sh.Varname = "Parallel control air quantity correction curve (arwMLTVKL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC19E || sh.X_axis_ID == 0xC16A)
+                        else if (sh.X_axis_ID == 0xC19E || sh.X_axis_ID == 0xC16A || sh.X_axis_ID == 0xC1AE)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5266,7 +5361,7 @@ namespace VAGSuite
                             sh.Z_axis_descr = "Engine speed (rpm)";
                             sh.Varname = "EGR overrun shutdown upper treshold curve (arwREGSBN) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID == 0xC0FC || sh.X_axis_ID == 0xC0EE)
+                        else if (sh.X_axis_ID == 0xC0FC || sh.X_axis_ID == 0xC0EE || sh.X_axis_ID == 0xC102)
                         {
                             int c0fcCount = GetMapNameCountForCodeBlock("ARD Disturbance controller - ", sh.CodeBlock, newSymbols, false);
                             c0fcCount--;
@@ -5303,7 +5398,7 @@ namespace VAGSuite
                                 sh.Correction = 0.01;
                             }
                         }
-                        else if (sh.X_axis_ID == 0xC042)
+                        else if (sh.X_axis_ID == 0xC042 || sh.X_axis_ID == 0xC048)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
