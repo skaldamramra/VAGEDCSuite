@@ -2612,6 +2612,42 @@ namespace VAGSuite
                         }
 
                     }
+                    else if ((sh.X_axis_ID / 256 == 0xEA || sh.X_axis_ID / 256 == 0xEB) && sh.Y_axis_ID / 256 == 0xC0)
+                    {
+                        if (IsValidTemperatureAxis(allBytes, sh, MapViewerEx.AxisIdent.X_Axis))
+                        {
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Limiters";
+                            sh.Varname = "Boost correction by water temperature (ldwTW_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            sh.Userdescription = "ldwTW_KF";
+                            sh.Y_axis_correction = 0.1;
+                            sh.Y_axis_offset = -273.1;
+                            sh.Y_axis_descr = "Temperature (°C)";
+                            sh.YaxisUnits = "°C";
+                            sh.X_axis_correction = 0.01;
+                            sh.Correction = 0.01;
+                            sh.XaxisUnits = "mg/st";
+                            sh.X_axis_descr = "IQ (mg/stroke)";
+                            sh.Z_axis_descr = "Limitation of Boost (in %)";
+                        }
+                        else // EXPERIMENTAL
+                        {
+                            sh.Category = "Detected maps";
+                            sh.Subcategory = "Limiters";
+                            sh.Varname = "Expected fuel temperature (zmwMKBT_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                            sh.Userdescription = "zmwMKBT_KF";
+                            sh.Correction = 0.1;
+                            sh.Offset = -273.1;
+                            sh.Y_axis_descr = "Engine speed (rpm)";
+                            sh.YaxisUnits = "rpm";
+                            sh.X_axis_correction = 0.01;
+                            sh.XaxisUnits = "mg/st";
+                            sh.X_axis_descr = "IQ (mg/stroke)";
+                            sh.Z_axis_descr = "Fuel temperature °C";
+
+
+                        }
+                    }
                     else if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xC0) // EXPERIMENTAL
                     {
                         sh.Category = "Detected maps";
@@ -2628,22 +2664,6 @@ namespace VAGSuite
                         sh.Z_axis_descr = "Fuel temperature °C";
 
 
-                    }
-                    else if ((sh.X_axis_ID / 256 == 0xEA || sh.X_axis_ID / 256 == 0xEB) && sh.Y_axis_ID / 256 == 0xC0)
-                    {
-                        sh.Category = "Detected maps";
-                        sh.Subcategory = "Limiters";
-                        sh.Varname = "Boost correction by water temperature (ldwTW_KF) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
-                        sh.Userdescription = "ldwTW_KF";
-                        sh.Y_axis_correction = 0.1;
-                        sh.Y_axis_offset = -273.1;
-                        sh.Y_axis_descr = "Temperature (°C)";
-                        sh.YaxisUnits = "°C";
-                        sh.X_axis_correction = 0.01;
-                        sh.Correction = 0.01;
-                        sh.XaxisUnits = "mg/st";
-                        sh.X_axis_descr = "IQ (mg/stroke)";
-                        sh.Z_axis_descr = "Limitation of Boost (in %)";
                     }
                     else if (sh.X_axis_ID / 256 == 0xC5 && sh.Y_axis_ID / 256 == 0xC1)
                     {
@@ -4142,7 +4162,7 @@ namespace VAGSuite
                             sh.Correction = 0.1;
                             sh.Varname = "Engine-off command delay time characteristic map (khwUTF_KL) [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                         }
-                        else if (sh.X_axis_ID / 256 == 0xEA || sh.X_axis_ID == 0xE9FE)
+                        else if (sh.X_axis_ID == 0xEA3C || sh.X_axis_ID == 0xEA52 || sh.X_axis_ID == 0xE9FE)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5663,7 +5683,7 @@ namespace VAGSuite
                         }
                         else if (sh.X_axis_ID / 256 == 0xC2 && sh.Y_axis_ID / 256 == 0xEC)
                         {
-                            int c2Count = GetMapNameCountForCodeBlock("Torque limiter - ", sh.CodeBlock, newSymbols, false);
+                            int c2Count = GetMapNameCountForCodeBlock("Torq limiter - ", sh.CodeBlock, newSymbols, false);
                             c2Count--;
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Misc";
@@ -5676,14 +5696,14 @@ namespace VAGSuite
                             sh.Y_axis_address = Convert.ToInt32(sh.Flash_start_address) - 12;
                             if (c2Count % 2 == 1)
                             {
-                                sh.Varname = "Torque limiter - Min map PI [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Torq limiter - Min map PI [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwADB2_KF";
                                 sh.Z_axis_descr = "Torque limit (mg/stroke)";
                                 sh.Correction = 0.01;
                             }
                             if (c2Count % 2 == 0)
                             {
-                                sh.Varname = "Torque limiter - Min map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
+                                sh.Varname = "Torq limiter - Min map [" + DetermineNumberByFlashBank(sh.Flash_start_address, newCodeBlocks) + "]";
                                 sh.Userdescription = "mrwADB_KF";
                                 sh.Z_axis_descr = "Torque limit (mg/stroke)";
                                 sh.Correction = 0.01;

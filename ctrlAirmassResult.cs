@@ -250,7 +250,7 @@ namespace VAGSuite
             // do the math!
             PerformanceResults pr = new PerformanceResults();
             FillComboBoxBankSelection();
-            
+
             SymbolHelper driverWishHelper = GetSymbolLike(symbols, "Driver wish", selectedBank);
             int[] pedalrequestmap = readIntdatafromfile(filename, (int)driverWishHelper.Flash_start_address, driverWishHelper.Length);
             limitermap = new int[pedalrequestmap.Length];
@@ -294,12 +294,12 @@ namespace VAGSuite
             }
             // now fill the table rows
             m_MaxValueInTable = 0;
-            for (int r = 0; r < pedalXAxis.Length ; r++)
+            for (int r = 0; r < pedalXAxis.Length; r++)
             {
                 object[] values = new object[columns];
                 for (int t = 0; t < pedalYAxis.Length; t++)
                 {
-                    int currValue = (int)resulttable.GetValue( (((t + 1) * rows) - 1) - r  );
+                    int currValue = (int)resulttable.GetValue((((t + 1) * rows) - 1) - r);
                     if (currValue > m_MaxValueInTable) m_MaxValueInTable = currValue;
                     values.SetValue(currValue, t);
                 }
@@ -328,8 +328,8 @@ namespace VAGSuite
                     }
                     int horsepower = Tools.Instance.TorqueToPower(torque, rpm);
 
-                   // if (checkEdit5.Checked) horsepower = Tools.Instance.TorqueToPowerkW(torque, rpm);
-                   // if (checkEdit6.Checked) torque = Tools.Instance.IQToTorque(Convert.ToInt32(o), rpm, m_numberCylinders);//AirmassToTorqueLbft(Convert.ToInt32(o), rpm);
+                    // if (checkEdit5.Checked) horsepower = Tools.Instance.TorqueToPowerkW(torque, rpm);
+                    // if (checkEdit6.Checked) torque = Tools.Instance.IQToTorque(Convert.ToInt32(o), rpm, m_numberCylinders);//AirmassToTorqueLbft(Convert.ToInt32(o), rpm);
 
                     horsepower /= 100;
                     torque /= 100;
@@ -419,7 +419,7 @@ namespace VAGSuite
                 //requestedairmass
                 if (requestedQuantity > IQlimit)
                 {
-//                    Console.WriteLine("IQ is limited from " + requestedQuantity.ToString() + " to " + IQlimit.ToString() + " at " + rpm.ToString() + " rpm");
+                    //                    Console.WriteLine("IQ is limited from " + requestedQuantity.ToString() + " to " + IQlimit.ToString() + " at " + rpm.ToString() + " rpm");
                     requestedQuantity = IQlimit;
 
                     limiterType = limitType.TorqueLimiterEngine;
@@ -493,7 +493,7 @@ namespace VAGSuite
 
         private int CheckAgainstTurboSpeedLimiter(SymbolCollection symbols, string filename, int rpm, int requestedairmass, ref limitType AirmassLimiter)
         {
-         
+
             int cols = GetSymbolLength(symbols, "LimEngCal.p_AirSP") / 2;
             int[] turbospeed = readIntdatafromfile(filename, (int)GetSymbolAddress(symbols, "LimEngCal.TurboSpeedTab"), GetSymbolLength(symbols, "LimEngCal.TurboSpeedTab"));
             int[] xaxis = new int[1];
@@ -757,7 +757,7 @@ namespace VAGSuite
 
 
         }
-      
+
 
         /*private int AirmassToTorqueLbft(int IQ, int rpm)
         {
@@ -769,7 +769,7 @@ namespace VAGSuite
             return Convert.ToInt32(tq);
         }*/
 
-        
+
 
         private void CastStartViewerEvent(string mapname)
         {
@@ -778,7 +778,7 @@ namespace VAGSuite
                 onStartTableViewer(this, new StartTableViewerEventArgs(mapname));
             }
         }
-        
+
         int powerSeries = -1;
         int torqueSeries = -1;
 
@@ -791,7 +791,7 @@ namespace VAGSuite
 
 
 
-        
+
 
         private void LoadGraphWithDetails()
         {
@@ -867,7 +867,7 @@ namespace VAGSuite
 
         }
 
-        
+
         private void UpdateGraphVisibility()
         {
             if (powerSeries >= 0) chartControl1.Series[powerSeries].Visible = checkEdit8.Checked;
@@ -877,7 +877,7 @@ namespace VAGSuite
         string m_current_comparefilename = string.Empty;
         SymbolCollection Compare_symbol_collection = new SymbolCollection();
 
-        
+
 
 
         private void simpleButton3_Click(object sender, EventArgs e)
@@ -900,7 +900,7 @@ namespace VAGSuite
                 {
                     Console.WriteLine(E2.Message);
                 }
-                
+
                 // show the dynograph
                 xtraTabControl1.SelectedTabPage = xtraTabPage2;
                 LoadGraphWithDetails(); // initial values from original bin
@@ -981,7 +981,7 @@ namespace VAGSuite
             {
                 LoadGraphWithDetails();
             }
-            
+
         }
 
         private void checkEdit6_CheckedChanged(object sender, EventArgs e)
@@ -993,7 +993,7 @@ namespace VAGSuite
             {
                 LoadGraphWithDetails();
             }
-           
+
         }
 
         private void labelControl8_DoubleClick(object sender, EventArgs e)
@@ -1029,7 +1029,7 @@ namespace VAGSuite
 
         private void labelControl12_DoubleClick(object sender, EventArgs e)
         {
-            
+
 
 
         }
@@ -1249,7 +1249,7 @@ namespace VAGSuite
             }
         }
 
-       
+
         private void checkEdit8_CheckedChanged(object sender, EventArgs e)
         {
             UpdateGraphVisibility();
