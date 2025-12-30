@@ -128,6 +128,9 @@ namespace VAGSuite
         private FileComparisonService _fileComparisonService;
         private ViewSynchronizationService _viewSyncService;
         private TransactionService _transactionService;
+        private MapViewerService _mapViewerService;
+        private ProjectService _projectService;
+        private ExportService _exportService;
 
         public frmMain()
         {
@@ -166,6 +169,9 @@ namespace VAGSuite
             _fileComparisonService = new FileComparisonService(m_appSettings);
             _viewSyncService = new ViewSynchronizationService(m_appSettings);
             _transactionService = new TransactionService(m_appSettings);
+            _mapViewerService = new MapViewerService(dockManager1, m_appSettings);
+            _projectService = new ProjectService(m_appSettings);
+            _exportService = new ExportService(m_appSettings);
         }
 
 
@@ -355,7 +361,7 @@ namespace VAGSuite
         /// DEPRECATED: Use _fileOperationsManager.DetectMaps() instead.
         /// Kept for backward compatibility during refactoring.
         /// </summary>
-        private SymbolCollection DetectMaps(string filename, out List<CodeBlock> newCodeBlocks, 
+        private SymbolCollection DetectMaps(string filename, out List<CodeBlock> newCodeBlocks,
             out List<AxisHelper> newAxisHelpers, bool showMessage, bool isPrimaryFile)
         {
             return _fileOperationsManager.DetectMaps(filename, out newCodeBlocks, out newAxisHelpers, showMessage, isPrimaryFile);
@@ -380,9 +386,6 @@ namespace VAGSuite
             }
             return true;
         }
-
-
-        
 
         
         
@@ -576,80 +579,12 @@ namespace VAGSuite
 
         private bool CheckMapViewerActive(SymbolHelper sh)
         {
-            bool retval = false;
-            try
-            {
-                foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
-                {
-                    if (pnl.Text == "Symbol: " + sh.Varname + " [" + Path.GetFileName(Tools.Instance.m_currentfile) + "]")
-                    {
-                        if (pnl.Tag.ToString() == Tools.Instance.m_currentfile)
-                        {
-                            if (isSymbolDisplaySameAddress(sh, pnl))
-                            {
-                                retval = true;
-                                pnl.Show();
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine(E.Message);
-            }
-            return retval;
+            return _mapViewerService.CheckMapViewerActive(sh, Tools.Instance.m_currentfile);
         }
 
         private bool isSymbolDisplaySameAddress(SymbolHelper sh, DockPanel pnl)
         {
-            bool retval = false;
-            try
-            {
-                if (pnl.Text.StartsWith("Symbol: "))
-                {
-                    foreach (Control c in pnl.Controls)
-                    {
-                        if (c is MapViewerEx)
-                        {
-                            MapViewerEx vwr = (MapViewerEx)c;
-                            if (vwr.Map_address == sh.Flash_start_address) retval = true;
-                        }
-                        else if (c is DevExpress.XtraBars.Docking.DockPanel)
-                        {
-                            DevExpress.XtraBars.Docking.DockPanel tpnl = (DevExpress.XtraBars.Docking.DockPanel)c;
-                            foreach (Control c2 in tpnl.Controls)
-                            {
-                                if (c2 is MapViewerEx)
-                                {
-                                    MapViewerEx vwr2 = (MapViewerEx)c2;
-                                    if (vwr2.Map_address == sh.Flash_start_address) retval = true;
-
-                                }
-                            }
-                        }
-                        else if (c is DevExpress.XtraBars.Docking.ControlContainer)
-                        {
-                            DevExpress.XtraBars.Docking.ControlContainer cntr = (DevExpress.XtraBars.Docking.ControlContainer)c;
-                            foreach (Control c3 in cntr.Controls)
-                            {
-                                if (c3 is MapViewerEx)
-                                {
-                                    MapViewerEx vwr3 = (MapViewerEx)c3;
-                                    if (vwr3.Map_address == sh.Flash_start_address) retval = true;
-                                }
-                            }
-                        }
-                    }
-
-
-                }
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine("isSymbolDisplaySameAddress error: " + E.Message);
-            }
-            return retval;
+            return _mapViewerService.IsSymbolDisplaySameAddress(sh, pnl);
         }
 
         void tabdet_onAxisEditorRequested(object sender, MapViewerEx.AxisEditorRequestedEventArgs e)
@@ -659,8 +594,8 @@ namespace VAGSuite
             {
                 if (sh.Varname == e.Mapname)
                 {
-                    if (e.Axisident == MapViewerEx.AxisIdent.X_Axis) StartAxisViewer(sh, Axis.XAxis);
-                    else if (e.Axisident == MapViewerEx.AxisIdent.Y_Axis) StartAxisViewer(sh, Axis.YAxis);
+                    if (e.Axisident == MapViewerEx.AxisIdent.X_Axis) StartAxisViewer(sh, MapViewerService.Axis.XAxis);
+                    else if (e.Axisident == MapViewerEx.AxisIdent.Y_Axis) StartAxisViewer(sh, MapViewerService.Axis.YAxis);
 
                     break;
                 }
@@ -994,143 +929,7 @@ namespace VAGSuite
 
         private void StartCompareMapViewer(string SymbolName, string Filename, int SymbolAddress, int SymbolLength, SymbolCollection curSymbols, int symbolnumber)
         {
-            try
-            {
-                SymbolHelper sh = FindSymbol(curSymbols, SymbolName);
-                
-                DevExpress.XtraBars.Docking.DockPanel dockPanel;
-                bool pnlfound = false;
-                foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
-                {
-
-                    if (pnl.Text == "Symbol: " + SymbolName + " [" + Path.GetFileName(Filename) + "]")
-                    {
-                        if (pnl.Tag.ToString() == Filename) // <GS-10052011>
-                        {
-                            dockPanel = pnl;
-                            pnlfound = true;
-                            dockPanel.Show();
-                        }
-                    }
-                }
-                if (!pnlfound)
-                {
-                    dockManager1.BeginUpdate();
-                    try
-                    {
-                        dockPanel = dockManager1.AddPanel(new System.Drawing.Point(-500, -500));
-                        dockPanel.Tag = Filename;// Tools.Instance.m_currentfile; changed 24/01/2008
-                        MapViewerEx tabdet = new MapViewerEx();
-
-                        tabdet.AutoUpdateIfSRAM = false;// m_appSettings.AutoUpdateSRAMViewers;
-                        tabdet.AutoUpdateInterval = 99999;
-                        tabdet.SetViewSize(ViewSize.NormalView);
-
-                        //tabdet.IsHexMode = barViewInHex.Checked;
-                        tabdet.Viewtype = m_appSettings.DefaultViewType;
-                        tabdet.DisableColors = m_appSettings.DisableMapviewerColors;
-                        tabdet.AutoSizeColumns = m_appSettings.AutoSizeColumnsInWindows;
-                        tabdet.GraphVisible = m_appSettings.ShowGraphs;
-                        tabdet.IsRedWhite = m_appSettings.ShowRedWhite;
-                        tabdet.SetViewSize(m_appSettings.DefaultViewSize);
-                        tabdet.Filename = Filename;
-                        tabdet.Map_name = SymbolName;
-                        tabdet.Map_descr = tabdet.Map_name;
-                        tabdet.Map_cat = XDFCategories.Undocumented;
-                        tabdet.X_axisvalues = GetXaxisValues(Filename, curSymbols, tabdet.Map_name);
-                        tabdet.Y_axisvalues = GetYaxisValues(Filename, curSymbols, tabdet.Map_name);
-
-                        SymbolAxesTranslator axestrans = new SymbolAxesTranslator();
-                        string x_axis = string.Empty;
-                        string y_axis = string.Empty;
-                        string x_axis_descr = string.Empty;
-                        string y_axis_descr = string.Empty;
-                        string z_axis_descr = string.Empty;
-
-                        tabdet.X_axis_name = sh.X_axis_descr;
-                        tabdet.Y_axis_name = sh.Y_axis_descr;
-                        tabdet.Z_axis_name = sh.Z_axis_descr;
-                        tabdet.XaxisUnits = sh.XaxisUnits;
-                        tabdet.YaxisUnits = sh.YaxisUnits;
-                        tabdet.X_axisAddress = sh.Y_axis_address;
-                        tabdet.Y_axisAddress = sh.X_axis_address;
-
-                        tabdet.Xaxiscorrectionfactor = sh.X_axis_correction;
-                        tabdet.Yaxiscorrectionfactor = sh.Y_axis_correction;
-
-                        //tabdet.X_axisvalues = GetXaxisValues(Tools.Instance.m_currentfile, curSymbols, tabdet.Map_name);
-                        //tabdet.Y_axisvalues = GetYaxisValues(Tools.Instance.m_currentfile, curSymbols, tabdet.Map_name);
-
-                        int columns = 8;
-                        int rows = 8;
-                        int tablewidth = GetTableMatrixWitdhByName(Filename, curSymbols, tabdet.Map_name, out columns, out rows);
-                        int address = Convert.ToInt32(SymbolAddress);
-                        if (address != 0)
-                        {
-                            tabdet.Map_address = address;
-                            int length = SymbolLength;
-                            tabdet.Map_length = length;
-                            byte[] mapdata = Tools.Instance.readdatafromfile(Filename, address, length, Tools.Instance.m_currentFileType);
-                            tabdet.Map_content = mapdata;
-                            tabdet.Correction_factor = sh.Correction;
-                            tabdet.Correction_offset = sh.Offset;// GetMapCorrectionOffset(tabdet.Map_name);
-                            tabdet.IsUpsideDown = m_appSettings.ShowTablesUpsideDown;
-                            tabdet.ShowTable(columns, true);
-                            tabdet.Dock = DockStyle.Fill;
-                            tabdet.onSymbolSave += new VAGSuite.MapViewerEx.NotifySaveSymbol(tabdet_onSymbolSave);
-                            tabdet.onSymbolRead += new VAGSuite.MapViewerEx.NotifyReadSymbol(tabdet_onSymbolRead);
-                            tabdet.onClose += new VAGSuite.MapViewerEx.ViewerClose(tabdet_onClose);
-
-                            tabdet.onSliderMove += new MapViewerEx.NotifySliderMove(tabdet_onSliderMove);
-                            tabdet.onSplitterMoved += new MapViewerEx.SplitterMoved(tabdet_onSplitterMoved);
-                            tabdet.onSelectionChanged += new MapViewerEx.SelectionChanged(tabdet_onSelectionChanged);
-                            tabdet.onSurfaceGraphViewChangedEx += new MapViewerEx.SurfaceGraphViewChangedEx(tabdet_onSurfaceGraphViewChangedEx);
-                            tabdet.onAxisLock += new MapViewerEx.NotifyAxisLock(tabdet_onAxisLock);
-                            tabdet.onViewTypeChanged += new MapViewerEx.ViewTypeChanged(tabdet_onViewTypeChanged);
-
-
-                            //dockPanel.DockAsTab(dockPanel1);
-                            dockPanel.Text = "Symbol: " + SymbolName + " [" + Path.GetFileName(Filename) + "]";
-                            dockPanel.DockTo(dockManager1, DevExpress.XtraBars.Docking.DockingStyle.Right, 1);
-                            bool isDocked = false;
-                            // Try to dock to same symbol
-                            foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
-                            {
-                                if (pnl.Text.StartsWith("Symbol: " + SymbolName) && pnl != dockPanel && (pnl.Visibility == DevExpress.XtraBars.Docking.DockVisibility.Visible))
-                                {
-                                    dockPanel.DockAsTab(pnl, 0);
-                                    isDocked = true;
-                                    break;
-                                }
-                            }
-                            if (!isDocked)
-                            {
-                                int width = 500;
-                                if (tabdet.X_axisvalues.Length > 0)
-                                {
-                                    width = 30 + ((tabdet.X_axisvalues.Length + 1) * 45);
-                                }
-                                if (width < 500) width = 500;
-                                if (width > 800) width = 800;
-
-                                dockPanel.Width = width;
-                            }
-                            dockPanel.Controls.Add(tabdet);
-                        }
-                    }
-                    catch (Exception E)
-                    {
-                        Console.WriteLine(E.Message);
-                    }
-                    dockManager1.EndUpdate();
-                    System.Windows.Forms.Application.DoEvents();
-                }
-            }
-            catch (Exception startnewcompareE)
-            {
-                Console.WriteLine(startnewcompareE.Message);
-            }
-
+            _mapViewerService.StartCompareMapViewer(SymbolName, Filename, SymbolAddress, SymbolLength, curSymbols, symbolnumber);
         }
 
         /// <summary>
@@ -1181,146 +980,12 @@ namespace VAGSuite
 
         private void StartCompareDifferenceViewer(SymbolHelper sh, string Filename, int SymbolAddress)
         {
-            DevExpress.XtraBars.Docking.DockPanel dockPanel;
-            bool pnlfound = false;
-            foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
-            {
-
-                if (pnl.Text == "Symbol difference: " + sh.Varname + " [" + Path.GetFileName(Tools.Instance.m_currentfile) + "]")
-                {
-                    dockPanel = pnl;
-                    pnlfound = true;
-                    dockPanel.Show();
-                }
-            }
-            if (!pnlfound)
-            {
-                dockManager1.BeginUpdate();
-                try
-                {
-                    dockPanel = dockManager1.AddPanel(new System.Drawing.Point(-500, -500));
-                    dockPanel.Tag = Tools.Instance.m_currentfile;
-                    MapViewerEx tabdet = new MapViewerEx();
-                    tabdet.Map_name = sh.Varname;
-                    tabdet.IsDifferenceViewer = true;
-                    tabdet.AutoUpdateIfSRAM = false;
-                    tabdet.AutoUpdateInterval = 999999;
-                    tabdet.Viewtype = m_appSettings.DefaultViewType;
-                    tabdet.DisableColors = m_appSettings.DisableMapviewerColors;
-                    tabdet.AutoSizeColumns = m_appSettings.AutoSizeColumnsInWindows;
-                    tabdet.GraphVisible = m_appSettings.ShowGraphs;
-                    tabdet.IsRedWhite = m_appSettings.ShowRedWhite;
-                    tabdet.SetViewSize(m_appSettings.DefaultViewSize);
-                    tabdet.Filename = Filename;
-                    tabdet.Map_descr = tabdet.Map_name;
-                    tabdet.Map_cat = XDFCategories.Undocumented;
-                    tabdet.X_axisvalues = GetXaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, tabdet.Map_name);
-                    tabdet.Y_axisvalues = GetYaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, tabdet.Map_name);
-
-                    SymbolAxesTranslator axestrans = new SymbolAxesTranslator();
-                    string x_axis = string.Empty;
-                    string y_axis = string.Empty;
-                    string x_axis_descr = string.Empty;
-                    string y_axis_descr = string.Empty;
-                    string z_axis_descr = string.Empty;
-
-                    tabdet.X_axis_name = sh.X_axis_descr;
-                    tabdet.Y_axis_name = sh.Y_axis_descr;
-                    tabdet.Z_axis_name = sh.Z_axis_descr;
-                    tabdet.XaxisUnits = sh.XaxisUnits;
-                    tabdet.YaxisUnits = sh.YaxisUnits;
-                    tabdet.X_axisAddress = sh.Y_axis_address;
-                    tabdet.Y_axisAddress = sh.X_axis_address;
-
-                    tabdet.Xaxiscorrectionfactor = sh.X_axis_correction;
-                    tabdet.Yaxiscorrectionfactor = sh.Y_axis_correction;
-
-                    tabdet.X_axisvalues = GetXaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, tabdet.Map_name);
-                    tabdet.Y_axisvalues = GetYaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, tabdet.Map_name);
-                    
-
-                    //tabdet.Map_sramaddress = GetSymbolAddressSRAM(SymbolName);
-                    int columns = 8;
-                    int rows = 8;
-                    int tablewidth = GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, tabdet.Map_name, out columns, out rows);
-                    int address = Convert.ToInt32(SymbolAddress);
-                    if (address != 0)
-                    {
-                        tabdet.Map_address = address;
-                        int length = sh.Length;
-                        tabdet.Map_length = length;
-                        byte[] mapdata = Tools.Instance.readdatafromfile(Filename, address, length, Tools.Instance.m_currentFileType);
-                        byte[] mapdataorig = Tools.Instance.readdatafromfile(Filename, address, length, Tools.Instance.m_currentFileType);
-                        byte[] mapdata2 = Tools.Instance.readdatafromfile(Tools.Instance.m_currentfile, (int)GetSymbolAddress(Tools.Instance.m_symbols, sh.Varname), GetSymbolLength(Tools.Instance.m_symbols, sh.Varname), Tools.Instance.m_currentFileType);
-
-                        tabdet.Map_original_content = mapdataorig;
-                        tabdet.Map_compare_content = mapdata2;
-
-                        if (mapdata.Length == mapdata2.Length)
-                        {
-
-                            for (int bt = 0; bt < mapdata2.Length; bt += 2)
-                            {
-                                int value1 = Convert.ToInt16(mapdata.GetValue(bt)) * 256 + Convert.ToInt16(mapdata.GetValue(bt + 1));
-                                int value2 = Convert.ToInt16(mapdata2.GetValue(bt)) * 256 + Convert.ToInt16(mapdata2.GetValue(bt + 1));
-                                value1 = Math.Abs((int)value1 - (int)value2);
-                                byte v1 = (byte)(value1 / 256);
-                                byte v2 = (byte)(value1 - (int)v1 * 256);
-                                mapdata.SetValue(v1, bt);
-                                mapdata.SetValue(v2, bt + 1);
-                            }
-
-
-                            tabdet.Map_content = mapdata;
-                            tabdet.UseNewCompare = true;
-                            tabdet.Correction_factor = sh.Correction;
-                            tabdet.Correction_offset = sh.Offset;
-                            tabdet.IsUpsideDown = m_appSettings.ShowTablesUpsideDown;
-                            tabdet.ShowTable(columns, true);
-                            tabdet.Dock = DockStyle.Fill;
-                            tabdet.onClose += new MapViewerEx.ViewerClose(tabdet_onClose);
-                            dockPanel.Text = "Symbol difference: " + sh.Varname + " [" + Path.GetFileName(Filename) + "]";
-                            bool isDocked = false;
-
-                            if (!isDocked)
-                            {
-                                dockPanel.DockTo(dockManager1, DevExpress.XtraBars.Docking.DockingStyle.Right, 0);
-                                if (m_appSettings.AutoSizeNewWindows)
-                                {
-                                    if (tabdet.X_axisvalues.Length > 0)
-                                    {
-                                        dockPanel.Width = 30 + ((tabdet.X_axisvalues.Length + 1) * 45);
-                                    }
-                                    else
-                                    {
-                                        //dockPanel.Width = this.Width - dockSymbols.Width - 10;
-
-                                    }
-                                }
-                                if (dockPanel.Width < 400) dockPanel.Width = 400;
-
-                                //                    dockPanel.Width = 400;
-                            }
-                            dockPanel.Controls.Add(tabdet);
-
-                        }
-                        else
-                        {
-                            frmInfoBox info = new frmInfoBox("Map lengths don't match...");
-                        }
-                    }
-                }
-                catch (Exception E)
-                {
-
-                    Console.WriteLine(E.Message);
-                }
-                dockManager1.EndUpdate();
-            }
+            _mapViewerService.StartCompareDifferenceViewer(sh, Filename, SymbolAddress);
         }
 
         private void DumpDockWindows()
         {
+            // Delegate to FileComparisonService
             _fileComparisonService.DumpDockWindows(dockManager1);
         }
 
@@ -1942,38 +1607,7 @@ namespace VAGSuite
 
         private void StartHexViewer()
         {
-            if (Tools.Instance.m_currentfile != "")
-            {
-                dockManager1.BeginUpdate();
-                try
-                {
-                    DevExpress.XtraBars.Docking.DockPanel dockPanel;
-                    //= dockManager1.AddPanel(DevExpress.XtraBars.Docking.DockingStyle.Right);
-                    if (!m_appSettings.NewPanelsFloating)
-                    {
-                        dockPanel = dockManager1.AddPanel(DevExpress.XtraBars.Docking.DockingStyle.Right);
-                    }
-                    else
-                    {
-                        System.Drawing.Point floatpoint = this.PointToClient(new System.Drawing.Point(dockSymbols.Location.X + dockSymbols.Width + 30, dockSymbols.Location.Y + 10));
-                        dockPanel = dockManager1.AddPanel(floatpoint);
-                    }
-
-                    dockPanel.Text = "Hexviewer: " + Path.GetFileName(Tools.Instance.m_currentfile);
-                    HexViewer hv = new HexViewer();
-                    hv.Issramviewer = false;
-                    hv.Dock = DockStyle.Fill;
-                    dockPanel.Width = 580;
-                    hv.LoadDataFromFile(Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
-                    dockPanel.ClosedPanel += new DevExpress.XtraBars.Docking.DockPanelEventHandler(dockPanel_ClosedPanel);
-                    dockPanel.Controls.Add(hv);
-                }
-                catch (Exception E)
-                {
-                    Console.WriteLine(E.Message);
-                }
-                dockManager1.EndUpdate();
-            }
+            _mapViewerService.StartHexViewer(Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
         }
 
         private bool ValidateFile()
@@ -2233,46 +1867,23 @@ namespace VAGSuite
 
         private void OpenProject(string projectname)
         {
-            //TODO: Are there pending changes in the optionally currently opened binary file / project?
-            if (Directory.Exists(m_appSettings.ProjectFolder + "\\" + projectname))
+            // Use the ProjectService for project operations
+            bool hasTransactionLog = false;
+            _projectService.OpenProject(projectname, ref Tools.Instance.m_currentfile,
+                ref Tools.Instance.m_ProjectTransactionLog, ref Tools.Instance.m_ProjectLog, ref hasTransactionLog);
+            
+            if (Tools.Instance.m_currentfile != string.Empty)
             {
-                m_appSettings.LastOpenedType = 1;
-                Tools.Instance.m_CurrentWorkingProject = projectname;
-                Tools.Instance.m_ProjectLog.OpenProjectLog(m_appSettings.ProjectFolder + "\\" + projectname);
-                //Load the binary file that comes with this project
-                LoadBinaryForProject(projectname);
-                //LoadAFRMapsForProject(projectname); // <GS-27072010> TODO: nog bekijken voor T7
-                if (Tools.Instance.m_currentfile != string.Empty)
-                {
-                    // transaction log <GS-15032010>
-
-                    Tools.Instance.m_ProjectTransactionLog = new TransactionLog();
-                    if (Tools.Instance.m_ProjectTransactionLog.OpenTransActionLog(m_appSettings.ProjectFolder, projectname))
-                    {
-                        Tools.Instance.m_ProjectTransactionLog.ReadTransactionFile();
-                        if (Tools.Instance.m_ProjectTransactionLog.TransCollection.Count > 2000)
-                        {
-                            frmProjectTransactionPurge frmPurge = new frmProjectTransactionPurge();
-                            frmPurge.SetNumberOfTransactions(Tools.Instance.m_ProjectTransactionLog.TransCollection.Count);
-                            if (frmPurge.ShowDialog() == DialogResult.OK)
-                            {
-                                Tools.Instance.m_ProjectTransactionLog.Purge();
-                            }
-                        }
-                    }
-                    // transaction log <GS-15032010>
-                    btnCloseProject.Enabled = true;
-                    btnAddNoteToProject.Enabled = true;
-                    btnEditProject.Enabled = true;
-                    btnShowProjectLogbook.Enabled = true;
-                    btnProduceLatestBinary.Enabled = true;
-                    //btncreateb                    
-                    btnRebuildFile.Enabled = true;
-                    CreateProjectBackupFile();
-                    UpdateRollbackForwardControls();
-                    m_appSettings.Lastprojectname = Tools.Instance.m_CurrentWorkingProject;
-                    this.Text = "VAGEDCSuite [Project: " + projectname + "]";
-                }
+                btnCloseProject.Enabled = true;
+                btnAddNoteToProject.Enabled = true;
+                btnEditProject.Enabled = true;
+                btnShowProjectLogbook.Enabled = true;
+                btnProduceLatestBinary.Enabled = true;
+                btnRebuildFile.Enabled = true;
+                CreateProjectBackupFile();
+                UpdateRollbackForwardControls();
+                m_appSettings.Lastprojectname = Tools.Instance.m_CurrentWorkingProject;
+                this.Text = "VAGEDCSuite [Project: " + projectname + "]";
             }
         }
 
@@ -2983,82 +2594,17 @@ namespace VAGSuite
 
         private void editXAxisToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // 
+            //
             object o = gridViewSymbols.GetFocusedRow();
             if (o is SymbolHelper)
             {
                 SymbolHelper sh = (SymbolHelper)o;
-                StartAxisViewer(sh, Axis.XAxis);//sh.X_axis_descr, sh.Y_axis_address, sh.Y_axis_length, sh.Y_axis_ID);
+                StartAxisViewer(sh, MapViewerService.Axis.XAxis);
             }
         }
-        public enum Axis
+        private void StartAxisViewer(SymbolHelper symbol, MapViewerService.Axis AxisToShow)
         {
-            XAxis,
-            YAxis
-        }
-        private void StartAxisViewer(SymbolHelper symbol, Axis AxisToShow)//string Name, int address, int length, int axisID)
-        {
-
-            DevExpress.XtraBars.Docking.DockPanel dockPanel;
-            dockManager1.BeginUpdate();
-            try
-            {
-
-
-                dockPanel = dockManager1.AddPanel(DevExpress.XtraBars.Docking.DockingStyle.Right);
-                int dw = 650;
-                dockPanel.FloatSize = new Size(dw, 900);
-                dockPanel.Width = dw;
-                dockPanel.Tag = Tools.Instance.m_currentfile;
-                ctrlAxisEditor tabdet = new ctrlAxisEditor();
-                tabdet.FileName = Tools.Instance.m_currentfile;
-
-
-                if (AxisToShow == Axis.XAxis)
-                {
-                    tabdet.AxisID = symbol.Y_axis_ID;
-                    tabdet.AxisAddress = symbol.Y_axis_address;
-                    tabdet.Map_name = symbol.X_axis_descr + " (" + symbol.Y_axis_address.ToString("X8") + ")";
-                    int[] values = GetXaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, symbol.Varname);
-                    float[] dataValues = new float[values.Length];
-                    for (int i = 0; i < values.Length; i++)
-                    {
-                        float fValue = (float)Convert.ToDouble(values.GetValue(i)) * (float)symbol.X_axis_correction;
-                        dataValues.SetValue(fValue, i);
-                    }
-                    tabdet.CorrectionFactor = (float)symbol.X_axis_correction;
-                    tabdet.SetData(dataValues);
-                    dockPanel.Text = "Axis: (X) " + tabdet.Map_name + " [" + Path.GetFileName(Tools.Instance.m_currentfile) + "]";
-                }
-                else if (AxisToShow == Axis.YAxis)
-                {
-                    tabdet.AxisID = symbol.X_axis_ID;
-                    tabdet.AxisAddress = symbol.X_axis_address;
-                    tabdet.Map_name = symbol.Y_axis_descr + " (" + symbol.X_axis_address.ToString("X8") + ")";
-                    int[] values = GetYaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, symbol.Varname);
-                    float[] dataValues = new float[values.Length];
-                    for (int i = 0; i < values.Length; i++)
-                    {
-                        float fValue = (float)Convert.ToDouble(values.GetValue(i)) * (float)symbol.Y_axis_correction;
-                        dataValues.SetValue(fValue, i);
-                    }
-                    tabdet.CorrectionFactor = (float)symbol.Y_axis_correction;
-                    tabdet.SetData(dataValues);
-                    dockPanel.Text = "Axis: (Y) " + tabdet.Map_name + " [" + Path.GetFileName(Tools.Instance.m_currentfile) + "]";
-                }
-
-                tabdet.onClose += new ctrlAxisEditor.ViewerClose(axis_Close);
-                tabdet.onSave += new ctrlAxisEditor.DataSave(axis_Save);
-                tabdet.Dock = DockStyle.Fill;
-                dockPanel.Controls.Add(tabdet);
-            }
-            catch (Exception newdockE)
-            {
-                Console.WriteLine(newdockE.Message);
-            }
-            dockManager1.EndUpdate();
-
-            System.Windows.Forms.Application.DoEvents();
+            _mapViewerService.StartAxisViewer(symbol, AxisToShow, Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
         }
         
         void axis_Save(object sender, EventArgs e)
@@ -3104,101 +2650,12 @@ namespace VAGSuite
 
         private void UpdateViewer(MapViewerEx tabdet)
         {
-            string mapname = tabdet.Map_name;
-            if (tabdet.Filename == Tools.Instance.m_currentfile)
-            {
-                foreach (SymbolHelper sh in Tools.Instance.m_symbols)
-                {
-                    if (sh.Varname == mapname)
-                    {
-                        // refresh data and axis in the viewer
-                        SymbolAxesTranslator axestrans = new SymbolAxesTranslator();
-                        string x_axis = string.Empty;
-                        string y_axis = string.Empty;
-                        string x_axis_descr = string.Empty;
-                        string y_axis_descr = string.Empty;
-                        string z_axis_descr = string.Empty;
-                        tabdet.X_axis_name = sh.X_axis_descr;
-                        tabdet.Y_axis_name = sh.Y_axis_descr;
-                        tabdet.Z_axis_name = sh.Z_axis_descr;
-                        tabdet.X_axisAddress = sh.Y_axis_address;
-                        tabdet.Y_axisAddress = sh.X_axis_address;
-                        tabdet.Xaxiscorrectionfactor = sh.X_axis_correction;
-                        tabdet.Yaxiscorrectionfactor = sh.Y_axis_correction;
-                        tabdet.Xaxiscorrectionoffset = sh.X_axis_offset;
-                        tabdet.Yaxiscorrectionoffset = sh.Y_axis_offset;
-                        tabdet.X_axisvalues = GetXaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, tabdet.Map_name);
-                        tabdet.Y_axisvalues = GetYaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, tabdet.Map_name);
-                        int columns = 8;
-                        int rows = 8;
-                        int tablewidth = GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, tabdet.Map_name, out columns, out rows);
-                        int address = Convert.ToInt32(sh.Flash_start_address);
-                        tabdet.ShowTable(columns, true);
-                        break;
-                    }
-                }
-            }
+            _mapViewerService.UpdateViewer(tabdet, Tools.Instance.m_symbols);
         }
 
         private void UpdateOpenViewers(string filename)
         {
-
-            try
-            {
-                // convert feedback map in memory to byte[] in stead of float[]
-                foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
-                {
-                    if (pnl.Text.StartsWith("Symbol: "))
-                    {
-                        foreach (Control c in pnl.Controls)
-                        {
-                            if (c is MapViewerEx)
-                            {
-                                MapViewerEx vwr = (MapViewerEx)c;
-                                if (vwr.Filename == filename || filename == string.Empty)
-                                {
-                                    UpdateViewer(vwr);
-                                }
-                            }
-                            else if (c is DevExpress.XtraBars.Docking.DockPanel)
-                            {
-                                DevExpress.XtraBars.Docking.DockPanel tpnl = (DevExpress.XtraBars.Docking.DockPanel)c;
-                                foreach (Control c2 in tpnl.Controls)
-                                {
-                                    if (c2 is MapViewerEx)
-                                    {
-                                        MapViewerEx vwr2 = (MapViewerEx)c2;
-                                        if (vwr2.Filename == filename || filename == string.Empty)
-                                        {
-                                            UpdateViewer(vwr2);
-                                        }
-                                    }
-                                }
-                            }
-                            else if (c is DevExpress.XtraBars.Docking.ControlContainer)
-                            {
-                                DevExpress.XtraBars.Docking.ControlContainer cntr = (DevExpress.XtraBars.Docking.ControlContainer)c;
-                                foreach (Control c3 in cntr.Controls)
-                                {
-                                    if (c3 is MapViewerEx)
-                                    {
-                                        MapViewerEx vwr3 = (MapViewerEx)c3;
-                                        if (vwr3.Filename == filename || filename == string.Empty)
-                                        {
-                                            UpdateViewer(vwr3);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine("Refresh viewer error: " + E.Message);
-            }
+            _mapViewerService.UpdateOpenViewers(filename, Tools.Instance.m_symbols);
         }
 
         void axis_Close(object sender, EventArgs e)
@@ -3212,7 +2669,7 @@ namespace VAGSuite
             if (o is SymbolHelper)
             {
                 SymbolHelper sh = (SymbolHelper)o;
-                StartAxisViewer(sh, Axis.YAxis);
+                StartAxisViewer(sh, MapViewerService.Axis.YAxis);
             }
         }
 
@@ -3363,67 +2820,12 @@ namespace VAGSuite
             StartTableViewer(e.SymbolName, 2);
         }
 
+        /// <summary>
+        /// DEPRECATED: Use _exportService.StartXDFExport() instead.
+        /// </summary>
         private void btnExportXDF_ItemClick(object sender, ItemClickEventArgs e)
         {
-            SaveFileDialog saveFileDialog2 = new SaveFileDialog();
-            saveFileDialog2.Filter = "XDF files|*.xdf";
-            if (gridControl1.DataSource != null)
-            {
-                XDFWriter xdf = new XDFWriter();
-
-                string filename = Path.Combine(Path.GetDirectoryName(Tools.Instance.m_currentfile), Path.GetFileNameWithoutExtension(Tools.Instance.m_currentfile));
-                saveFileDialog2.FileName = filename;
-                if (saveFileDialog2.ShowDialog() == DialogResult.OK)
-                {
-                    //filename += ".xdf";
-                    filename = saveFileDialog2.FileName;
-
-                    xdf.CreateXDF(filename, Tools.Instance.m_currentfile, Tools.Instance.m_currentfilelength, Tools.Instance.m_currentfilelength);
-                    foreach (SymbolHelper sh in Tools.Instance.m_symbols)
-                    {
-                        if (sh.Flash_start_address != 0)
-                        {
-                            int fileoffset = (int)sh.Flash_start_address;
-                            while (fileoffset > Tools.Instance.m_currentfilelength) fileoffset -= Tools.Instance.m_currentfilelength;
-                            /*if (sh.Varname == "Pgm_mod!") // VSS vlag
-                            {
-                                xdf.AddFlag("VSS", sh.Flash_start_address, 0x07);
-                            }*/
-                            if (sh.Varname.StartsWith("SVBL"))
-                            {
-                                
-                            }
-                            else 
-                            {
-                                string xaxis = sh.X_axis_descr;
-                                string yaxis = sh.Y_axis_descr;
-                                string zaxis = sh.Z_axis_descr;
-                                bool m_issixteenbit = true;
-                                // special maps are:
-                                int xaxisaddress = sh.X_axis_address;
-                                int yaxisaddress = sh.Y_axis_address;
-                                bool isxaxissixteenbit = true;
-                                bool isyaxissixteenbit = true;
-                                int columns = sh.X_axis_length;
-                                int rows = sh.Y_axis_length;
-                                //int tablewidth = GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, sh.Varname, out columns, out rows);
-                                xdf.AddTable(sh.Varname, sh.Description, XDFCategories.Fuel, xaxis, yaxis, zaxis, columns, rows, fileoffset, m_issixteenbit, xaxisaddress, yaxisaddress, isxaxissixteenbit, isyaxissixteenbit, 1.0F, 1.0F, 1.0F);
-
-                            }
-                            /*else
-                            {
-                                xdf.AddConstant(55, sh.Varname, XDFCategories.Idle, "Aantal", sh.Length, fileoffset, true);
-                            }*/
-                        }
-                    }
-                    // add some specific stuff
-                    //int fileoffset2 = Tools.Instance.m_currentfile_size - 0x4C;
-
-                    //xdf.AddTable("Vehice Security Code", "VSS code", XDFCategories.Idle, "", "", "", 1, 6, fileoffset2 /*0x3FFB4*/, false, 0, 0, false, false, 1.0F, 1.0F, 1.0F);
-
-                    xdf.CloseFile();
-                }
-            }
+            _exportService.StartXDFExport(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Tools.Instance.m_currentfilelength);
         }
 
         // van t5
@@ -4052,272 +3454,98 @@ namespace VAGSuite
 
         private void ImportFileInExcelFormat()
         {
-            OpenFileDialog openFileDialog2 = new OpenFileDialog();
-            openFileDialog2.Multiselect = false;
-            
-            if (openFileDialog2.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    string mapname = string.Empty;
-                    string realmapname = string.Empty;
-                    int tildeindex = openFileDialog2.FileName.LastIndexOf("~");
-                    bool symbolfound = false;
-                    if (tildeindex > 0)
-                    {
-                        tildeindex++;
-                        mapname = openFileDialog2.FileName.Substring(tildeindex, openFileDialog2.FileName.Length - tildeindex);
-                        mapname = mapname.Replace(".xls", "");
-                        mapname = mapname.Replace(".XLS", "");
-                        mapname = mapname.Replace(".Xls", "");
-                       
-                        // look if it is a valid symbolname
-                        foreach (SymbolHelper sh in Tools.Instance.m_symbols)
-                        {
-                            if (sh.Varname.Replace(",", "").Replace("[","").Replace("]","") == mapname || sh.Userdescription.Replace(",", "") == mapname)
-                            {
-                                symbolfound = true;
-                                realmapname = sh.Varname;
-                                if (MessageBox.Show("Found valid symbol for import: " + sh.Varname + ". Are you sure you want to overwrite the map in the binary?", "Confirmation", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                                {
-                                    // ok, overwrite info in binary
-                                }
-                                else
-                                {
-                                    mapname = string.Empty; // do nothing
-                                    realmapname = string.Empty;
-                                }
-                            }
-                        }
-                        if (!symbolfound)
-                        {
-                            // ask user for symbol designation
-                            frmSymbolSelect frmselect = new frmSymbolSelect(Tools.Instance.m_symbols);
-                            if (frmselect.ShowDialog() == DialogResult.OK)
-                            {
-                                mapname = frmselect.SelectedSymbol;
-                                realmapname = frmselect.SelectedSymbol;
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        // ask user for symbol designation
-                        frmSymbolSelect frmselect = new frmSymbolSelect(Tools.Instance.m_symbols);
-                        if (frmselect.ShowDialog() == DialogResult.OK)
-                        {
-                            mapname = frmselect.SelectedSymbol;
-                            realmapname = frmselect.SelectedSymbol;
-                        }
-
-                    }
-                    if (realmapname != string.Empty)
-                    {
-                        ImportExcelSymbol(realmapname, openFileDialog2.FileName);
-                    }
-
-                }
-                catch (Exception E)
-                {
-                    frmInfoBox info = new frmInfoBox("Failed to import map from excel: " + E.Message);
-                }
-            }
+            _exportService.ImportFileInExcelFormat(Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
         }
 
         private void ImportExcelSymbol(string symbolname, string filename)
         {
-            ExcelInterface excelInterface = new ExcelInterface();
-            bool issixteenbit = true;
-            System.Data.DataTable dt = excelInterface.getDataFromXLS(filename);
-            int symbollength = GetSymbolLength(Tools.Instance.m_symbols, symbolname);
-            int datalength = symbollength;
-            if (issixteenbit) datalength /= 2;
-            int[] buffer = new int[datalength];
-            int bcount = 0;
-            //            for (int rtel = 1; rtel < dt.Rows.Count; rtel++)
-            for (int rtel = dt.Rows.Count; rtel >= 1; rtel--)
-            {
-                try
-                {
-                    int idx = 0;
-                    foreach (object o in dt.Rows[rtel].ItemArray)
-                    {
-                        if (idx > 0)
-                        {
-                            if (o != null)
-                            {
-                                if (o != DBNull.Value)
-                                {
-                                    if (bcount < buffer.Length)
-                                    {
-                                        buffer.SetValue(Convert.ToInt32(o), bcount++);
-                                    }
-                                    else
-                                    {
-                                        frmInfoBox info = new frmInfoBox("Too much information in file, abort");
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                        idx++;
-                    }
-                }
-                catch (Exception E)
-                {
-                    Console.WriteLine("ImportExcelSymbol: " + E.Message);
-                }
-
-            }
-            if (bcount >= datalength)
-            {
-                byte[] data = new byte[symbollength];
-                int cellcount = 0;
-                if (issixteenbit)
-                {
-                    for (int dcnt = 0; dcnt < buffer.Length; dcnt++)
-                    {
-                        string bstr1 = "0";
-                        string bstr2 = "0";
-                        int cellvalue = Convert.ToInt32(buffer.GetValue(dcnt));
-                        string svalue = cellvalue.ToString("X4");
-
-                        bstr1 = svalue.Substring(svalue.Length - 4, 2);
-                        bstr2 = svalue.Substring(svalue.Length - 2, 2);
-                        data.SetValue(Convert.ToByte(bstr1, 16), cellcount++);
-                        data.SetValue(Convert.ToByte(bstr2, 16), cellcount++);
-                    }
-                }
-                else
-                {
-                    for (int dcnt = 0; dcnt < buffer.Length; dcnt++)
-                    {
-                        int cellvalue = Convert.ToInt32(buffer.GetValue(dcnt));
-                        data.SetValue(Convert.ToByte(cellvalue.ToString()), cellcount++);
-                    }
-                }
-                Tools.Instance.savedatatobinary((int)GetSymbolAddress(Tools.Instance.m_symbols, symbolname), symbollength, data, Tools.Instance.m_currentfile, true, Tools.Instance.m_currentFileType);
-                Tools.Instance.UpdateChecksum(Tools.Instance.m_currentfile, false);
-            }
-
-
+            _exportService.ImportExcelSymbol(symbolname, filename, Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
         }
 
         private void StartExcelExport()
         {
-            ExcelInterface excelInterface = new ExcelInterface();
             if (gridViewSymbols.SelectedRowsCount > 0)
             {
                 int[] selrows = gridViewSymbols.GetSelectedRows();
                 if (selrows.Length > 0)
                 {
                     SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow((int)selrows.GetValue(0));
-                    //DataRowView dr = (DataRowView)gridViewSymbols.GetRow((int)selrows.GetValue(0));
-                    //frmTableDetail tabdet = new frmTableDetail();
                     string Map_name = sh.Varname;
                     if ((Map_name.StartsWith("2D") || Map_name.StartsWith("3D")) && sh.Userdescription != "") Map_name = sh.Userdescription;
+                    
                     int columns = 8;
                     int rows = 8;
-                    int tablewidth = GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name, out columns, out rows);
-
+                    GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name, out columns, out rows);
                     int address = (int)sh.Flash_start_address;
+                    
                     if (address != 0)
                     {
                         int length = sh.Length;
-
                         byte[] mapdata = Tools.Instance.readdatafromfile(Tools.Instance.m_currentfile, address, length, Tools.Instance.m_currentFileType);
                         int[] xaxis = GetXaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name);
                         int[] yaxis = GetYaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name);
-                        Map_name = Map_name.Replace(",", "");
-                        Map_name = Map_name.Replace("[", "");
-                        Map_name = Map_name.Replace("]", "");
-
-                        excelInterface.ExportToExcel(Map_name, address, length, mapdata, columns, rows, true, xaxis, yaxis, m_appSettings.ShowTablesUpsideDown, sh.X_axis_descr, sh.Y_axis_descr, sh.Z_axis_descr);
+                        
+                        _exportService.StartExcelExport(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name, address, length, mapdata, columns, rows, xaxis, yaxis, sh);
                     }
                 }
-            }
-            else
-            {
-                frmInfoBox info = new frmInfoBox("No symbol selected in the primary symbol list");
             }
         }
 
         private void StartCSVExport()
         {
-            ExcelInterface excelInterface = new ExcelInterface();
             if (gridViewSymbols.SelectedRowsCount > 0)
             {
                 int[] selrows = gridViewSymbols.GetSelectedRows();
                 if (selrows.Length > 0)
                 {
                     SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow((int)selrows.GetValue(0));
-                    //DataRowView dr = (DataRowView)gridViewSymbols.GetRow((int)selrows.GetValue(0));
-                    //frmTableDetail tabdet = new frmTableDetail();
                     string Map_name = sh.Varname;
                     if ((Map_name.StartsWith("2D") || Map_name.StartsWith("3D")) && sh.Userdescription != "") Map_name = sh.Userdescription;
+                    
                     int columns = 8;
                     int rows = 8;
-                    int tablewidth = GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name, out columns, out rows);
-
+                    GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name, out columns, out rows);
                     int address = (int)sh.Flash_start_address;
+                    
                     if (address != 0)
                     {
                         int length = sh.Length;
-
                         byte[] mapdata = Tools.Instance.readdatafromfile(Tools.Instance.m_currentfile, address, length, Tools.Instance.m_currentFileType);
                         int[] xaxis = GetXaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name);
                         int[] yaxis = GetYaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name);
-                        Map_name = Map_name.Replace(",", "");
-                        Map_name = Map_name.Replace("[", "");
-                        Map_name = Map_name.Replace("]", "");
-
-                        excelInterface.ExportToCSV(Map_name, address, length, mapdata, columns, rows, true, xaxis, yaxis, m_appSettings.ShowTablesUpsideDown, sh.X_axis_descr, sh.Y_axis_descr, sh.Z_axis_descr);
+                        
+                        _exportService.StartCSVExport(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name, address, length, mapdata, columns, rows, xaxis, yaxis, sh);
                     }
                 }
-            }
-            else
-            {
-                frmInfoBox info = new frmInfoBox("No symbol selected in the primary symbol list");
             }
         }
 
         private void StartXMLExport()
         {
-            ExcelInterface excelInterface = new ExcelInterface();
             if (gridViewSymbols.SelectedRowsCount > 0)
             {
                 int[] selrows = gridViewSymbols.GetSelectedRows();
                 if (selrows.Length > 0)
                 {
                     SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow((int)selrows.GetValue(0));
-                    //DataRowView dr = (DataRowView)gridViewSymbols.GetRow((int)selrows.GetValue(0));
-                    //frmTableDetail tabdet = new frmTableDetail();
                     string Map_name = sh.Varname;
                     if ((Map_name.StartsWith("2D") || Map_name.StartsWith("3D")) && sh.Userdescription != "") Map_name = sh.Userdescription;
+                    
                     int columns = 8;
                     int rows = 8;
-                    int tablewidth = GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name, out columns, out rows);
-
+                    GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name, out columns, out rows);
                     int address = (int)sh.Flash_start_address;
+                    
                     if (address != 0)
                     {
                         int length = sh.Length;
-
                         byte[] mapdata = Tools.Instance.readdatafromfile(Tools.Instance.m_currentfile, address, length, Tools.Instance.m_currentFileType);
                         int[] xaxis = GetXaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name);
                         int[] yaxis = GetYaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name);
-                        Map_name = Map_name.Replace(",", "");
-                        Map_name = Map_name.Replace("[", "");
-                        Map_name = Map_name.Replace("]", "");
-
-                        excelInterface.ExportToXML(Map_name, address, length, mapdata, columns, rows, true, xaxis, yaxis, m_appSettings.ShowTablesUpsideDown, sh.X_axis_descr, sh.Y_axis_descr, sh.Z_axis_descr);
+                        
+                        _exportService.StartXMLExport(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, Map_name, address, length, mapdata, columns, rows, xaxis, yaxis, sh);
                     }
                 }
-            }
-            else
-            {
-                frmInfoBox info = new frmInfoBox("No symbol selected in the primary symbol list");
             }
         }
 
@@ -4359,7 +3587,6 @@ namespace VAGSuite
         private void btnSOILimiter_ItemClick(object sender, ItemClickEventArgs e)
         {
             StartTableViewer("SOI limiter", 2);
-            
         }
 
         private void btnStartOfInjection_ItemClick(object sender, ItemClickEventArgs e)

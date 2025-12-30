@@ -89,6 +89,10 @@
     <Compile Include="Services\FileComparisonService.cs" />
     <Compile Include="Services\ViewSynchronizationService.cs" />
     <Compile Include="Services\TransactionService.cs" />
+    <Compile Include="Services\MapViewerService.cs" />
+    <Compile Include="Services\ProjectService.cs" />
+    <Compile Include="Services\ExportService.cs" />
+    <Compile Include="Services\QuickAccessService.cs" />
     <Compile Include="Helpers\SymbolQueryHelper.cs" />
     <Compile Include="CompareResults.cs">
       <SubType>UserControl</SubType>
