@@ -76,7 +76,7 @@ namespace vbAccelerator.Components.Controls
                     }
                 }
             }
-            if (msg.Msg == WM_VSCROLL || msg.Msg == WM_MOUSEWHEEL)
+            if (msg.Msg == WM_VSCROLL)
             {
                 if (OnVerticalScroll != null)
                 {
@@ -91,6 +91,17 @@ namespace vbAccelerator.Components.Controls
                         si.nPos);
                         OnVerticalScroll(this, sargs);
                     }
+                }
+            }
+            if (msg.Msg == WM_MOUSEWHEEL)
+            {
+                if (OnVerticalScroll != null)
+                {
+                    // WM_MOUSEWHEEL doesn't use SB_ENDSCROLL, just fire the event
+                    ScrollEventArgs sargs = new ScrollEventArgs(
+                        ScrollEventType.EndScroll,
+                        0);
+                    OnVerticalScroll(this, sargs);
                 }
             }
             base.WndProc(ref msg);
