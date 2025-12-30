@@ -125,6 +125,9 @@ namespace VAGSuite
         private ChecksumService _checksumService;
         private MapViewerCoordinator _mapViewerCoordinator;
         private ImportExportService _importExportService;
+        private FileComparisonService _fileComparisonService;
+        private ViewSynchronizationService _viewSyncService;
+        private TransactionService _transactionService;
 
         public frmMain()
         {
@@ -160,6 +163,9 @@ namespace VAGSuite
             _checksumService = new ChecksumService(m_appSettings);
             _mapViewerCoordinator = new MapViewerCoordinator(dockManager1, m_appSettings);
             _importExportService = new ImportExportService(m_appSettings);
+            _fileComparisonService = new FileComparisonService(m_appSettings);
+            _viewSyncService = new ViewSynchronizationService(m_appSettings);
+            _transactionService = new TransactionService(m_appSettings);
         }
 
 
@@ -945,73 +951,31 @@ namespace VAGSuite
                     dockPanel.Text = "Compare results: " + Path.GetFileName(filename);
                     dockPanel.DockTo(dockManager1, DevExpress.XtraBars.Docking.DockingStyle.Left, 1);
                     dockPanel.Width = 500;
-                    SymbolCollection compare_symbols = new SymbolCollection();
+                    
+                    // Detect maps in comparison file
                     List<CodeBlock> compare_blocks = new List<CodeBlock>();
                     List<AxisHelper> compare_axis = new List<AxisHelper>();
-                    compare_symbols = DetectMaps(filename, out compare_blocks, out compare_axis, false, false);
+                    SymbolCollection compare_symbols = DetectMaps(filename, out compare_blocks, out compare_axis, false, false);
+                    
                     System.Windows.Forms.Application.DoEvents();
-
                     Console.WriteLine("ori : " + Tools.Instance.m_symbols.Count.ToString());
                     Console.WriteLine("comp : " + compare_symbols.Count.ToString());
 
-                    System.Data.DataTable dt = new System.Data.DataTable();
-                    dt.Columns.Add("SYMBOLNAME");
-                    dt.Columns.Add("SRAMADDRESS", Type.GetType("System.Int32"));
-                    dt.Columns.Add("FLASHADDRESS", Type.GetType("System.Int32"));
-                    dt.Columns.Add("LENGTHBYTES", Type.GetType("System.Int32"));
-                    dt.Columns.Add("LENGTHVALUES", Type.GetType("System.Int32"));
-                    dt.Columns.Add("DESCRIPTION");
-                    dt.Columns.Add("ISCHANGED", Type.GetType("System.Boolean"));
-                    dt.Columns.Add("CATEGORY", Type.GetType("System.Int32")); //0
-                    dt.Columns.Add("DIFFPERCENTAGE", Type.GetType("System.Double"));
-                    dt.Columns.Add("DIFFABSOLUTE", Type.GetType("System.Int32"));
-                    dt.Columns.Add("DIFFAVERAGE", Type.GetType("System.Double"));
-                    dt.Columns.Add("CATEGORYNAME");
-                    dt.Columns.Add("SUBCATEGORYNAME");
-                    dt.Columns.Add("SymbolNumber1", Type.GetType("System.Int32"));
-                    dt.Columns.Add("SymbolNumber2", Type.GetType("System.Int32"));
-                    dt.Columns.Add("Userdescription");
-                    dt.Columns.Add("MissingInOriFile", Type.GetType("System.Boolean"));
-                    dt.Columns.Add("MissingInCompareFile", Type.GetType("System.Boolean"));
-                    dt.Columns.Add("CodeBlock1", Type.GetType("System.Int32"));
-                    dt.Columns.Add("CodeBlock2", Type.GetType("System.Int32"));
-                    string category = "";
-                    string ht = string.Empty;
-                    double diffperc = 0;
-                    int diffabs = 0;
-                    double diffavg = 0;
-                    int percentageDone = 0;
-                    int symNumber = 0;
-                    XDFCategories cat = XDFCategories.Undocumented;
-                    XDFSubCategory subcat = XDFSubCategory.Undocumented;
-                    if (compare_symbols.Count > 0)
-                    {
-                        CompareResults cr = new CompareResults();
-                        cr.ShowAddressesInHex = true;
-                        cr.SetFilterMode(true);
-                        foreach (SymbolHelper sh_compare in compare_symbols)
-                        {
-                            foreach (SymbolHelper sh_org in Tools.Instance.m_symbols)
-                            {
-                                if ((sh_compare.Flash_start_address == sh_org.Flash_start_address) || (sh_compare.Varname == sh_org.Varname))
-                                {
-                                    // compare
-                                    if (!CompareSymbolToCurrentFile(sh_compare.Varname, (int)sh_compare.Flash_start_address, sh_compare.Length, filename, out diffperc, out diffabs, out diffavg, sh_compare.Correction))
-                                    {
-                                        dt.Rows.Add(sh_compare.Varname, sh_compare.Start_address, sh_compare.Flash_start_address, sh_compare.Length, sh_compare.Length, sh_compare.Varname, false, 0, diffperc, diffabs, diffavg, category, "", sh_org.Symbol_number, sh_compare.Symbol_number, "", false, false, sh_org.CodeBlock, sh_compare.CodeBlock);
-
-                                    }
-                                }
-                            }
-                        }
-                        
-                        tabdet.CompareSymbolCollection = compare_symbols;
-                        tabdet.OriginalSymbolCollection = Tools.Instance.m_symbols;
-                        tabdet.OriginalFilename = Tools.Instance.m_currentfile;
-                        tabdet.CompareFilename = filename;
-                        tabdet.OpenGridViewGroups(tabdet.gridControl1, 1);
-                        tabdet.gridControl1.DataSource = dt.Copy();
-                    }
+                    // Use FileComparisonService for comparison
+                    System.Data.DataTable dt = _fileComparisonService.CompareToFile(
+                        filename,
+                        Tools.Instance.m_currentfile,
+                        Tools.Instance.m_symbols,
+                        compare_blocks,
+                        dockManager1,
+                        tabdet_onSymbolSelect);
+                    
+                    tabdet.CompareSymbolCollection = compare_symbols;
+                    tabdet.OriginalSymbolCollection = Tools.Instance.m_symbols;
+                    tabdet.OriginalFilename = Tools.Instance.m_currentfile;
+                    tabdet.CompareFilename = filename;
+                    tabdet.OpenGridViewGroups(tabdet.gridControl1, 1);
+                    tabdet.gridControl1.DataSource = dt.Copy();
                 }
                 catch (Exception E)
                 {
@@ -1357,11 +1321,7 @@ namespace VAGSuite
 
         private void DumpDockWindows()
         {
-            foreach(DockPanel dp in dockManager1.Panels)
-            {
-                Console.WriteLine(dp.Text);
-
-            }
+            _fileComparisonService.DumpDockWindows(dockManager1);
         }
 
         
@@ -3578,259 +3538,22 @@ namespace VAGSuite
         // van t5
         void tabdet_onViewTypeChanged(object sender, MapViewerEx.ViewTypeChangedEventArgs e)
         {
-            if (m_appSettings.SynchronizeMapviewers || m_appSettings.SynchronizeMapviewersDifferentMaps)
-            {
-                foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
-                {
-                    foreach (Control c in pnl.Controls)
-                    {
-                        if (c is MapViewerEx)
-                        {
-                            if (c != sender)
-                            {
-                                MapViewerEx vwr = (MapViewerEx)c;
-                                if (vwr.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                {
-                                    vwr.Viewtype = e.View;
-                                    vwr.ReShowTable();
-                                    vwr.Invalidate();
-                                }
-                            }
-                        }
-                        else if (c is DevExpress.XtraBars.Docking.DockPanel)
-                        {
-                            DevExpress.XtraBars.Docking.DockPanel tpnl = (DevExpress.XtraBars.Docking.DockPanel)c;
-                            foreach (Control c2 in tpnl.Controls)
-                            {
-                                if (c2 is MapViewerEx)
-                                {
-                                    if (c2 != sender)
-                                    {
-                                        MapViewerEx vwr2 = (MapViewerEx)c2;
-                                        if (vwr2.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr2.Viewtype = e.View;
-                                            vwr2.ReShowTable();
-                                            vwr2.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (c is DevExpress.XtraBars.Docking.ControlContainer)
-                        {
-                            DevExpress.XtraBars.Docking.ControlContainer cntr = (DevExpress.XtraBars.Docking.ControlContainer)c;
-                            foreach (Control c3 in cntr.Controls)
-                            {
-                                if (c3 is MapViewerEx)
-                                {
-                                    if (c3 != sender)
-                                    {
-                                        MapViewerEx vwr3 = (MapViewerEx)c3;
-                                        if (vwr3.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr3.Viewtype = e.View;
-                                            vwr3.ReShowTable();
-                                            vwr3.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            _viewSyncService.OnViewTypeChanged(sender, e, dockManager1);
         }
 
         void tabdet_onSurfaceGraphViewChangedEx(object sender, MapViewerEx.SurfaceGraphViewChangedEventArgsEx e)
         {
-            if (m_appSettings.SynchronizeMapviewers || m_appSettings.SynchronizeMapviewersDifferentMaps)
-            {
-                foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
-                {
-                    foreach (Control c in pnl.Controls)
-                    {
-                        if (c is MapViewerEx)
-                        {
-                            if (c != sender)
-                            {
-                                MapViewerEx vwr = (MapViewerEx)c;
-                                if (vwr.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                {
-                                    vwr.SetSurfaceGraphViewEx(e.DepthX, e.DepthY, e.Zoom, e.Rotation, e.Elevation);
-                                    vwr.Invalidate();
-                                }
-                            }
-                        }
-                        else if (c is DevExpress.XtraBars.Docking.DockPanel)
-                        {
-                            DevExpress.XtraBars.Docking.DockPanel tpnl = (DevExpress.XtraBars.Docking.DockPanel)c;
-                            foreach (Control c2 in tpnl.Controls)
-                            {
-                                if (c2 is MapViewerEx)
-                                {
-                                    if (c2 != sender)
-                                    {
-                                        MapViewerEx vwr2 = (MapViewerEx)c2;
-                                        if (vwr2.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr2.SetSurfaceGraphViewEx(e.DepthX, e.DepthY, e.Zoom, e.Rotation, e.Elevation);
-                                            vwr2.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (c is DevExpress.XtraBars.Docking.ControlContainer)
-                        {
-                            DevExpress.XtraBars.Docking.ControlContainer cntr = (DevExpress.XtraBars.Docking.ControlContainer)c;
-                            foreach (Control c3 in cntr.Controls)
-                            {
-                                if (c3 is MapViewerEx)
-                                {
-                                    if (c3 != sender)
-                                    {
-                                        MapViewerEx vwr3 = (MapViewerEx)c3;
-                                        if (vwr3.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr3.SetSurfaceGraphViewEx(e.DepthX, e.DepthY, e.Zoom, e.Rotation, e.Elevation);
-                                            vwr3.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            _viewSyncService.OnSurfaceGraphViewChangedEx(sender, e, dockManager1);
         }
 
         void tabdet_onSplitterMoved(object sender, MapViewerEx.SplitterMovedEventArgs e)
         {
-            if (m_appSettings.SynchronizeMapviewers || m_appSettings.SynchronizeMapviewersDifferentMaps)
-            {
-                // andere cell geselecteerd, doe dat ook bij andere viewers met hetzelfde symbool (mapname)
-                foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
-                {
-                    foreach (Control c in pnl.Controls)
-                    {
-                        if (c is MapViewerEx)
-                        {
-                            if (c != sender)
-                            {
-                                MapViewerEx vwr = (MapViewerEx)c;
-                                if (vwr.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                {
-                                    vwr.SetSplitter(e.Panel1height, e.Panel2height, e.Splitdistance, e.Panel1collapsed, e.Panel2collapsed);
-                                    vwr.Invalidate();
-                                }
-                            }
-                        }
-                        else if (c is DevExpress.XtraBars.Docking.DockPanel)
-                        {
-                            DevExpress.XtraBars.Docking.DockPanel tpnl = (DevExpress.XtraBars.Docking.DockPanel)c;
-                            foreach (Control c2 in tpnl.Controls)
-                            {
-                                if (c2 is MapViewerEx)
-                                {
-                                    if (c2 != sender)
-                                    {
-                                        MapViewerEx vwr2 = (MapViewerEx)c2;
-                                        if (vwr2.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr2.SetSplitter(e.Panel1height, e.Panel2height, e.Splitdistance, e.Panel1collapsed, e.Panel2collapsed);
-                                            vwr2.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (c is DevExpress.XtraBars.Docking.ControlContainer)
-                        {
-                            DevExpress.XtraBars.Docking.ControlContainer cntr = (DevExpress.XtraBars.Docking.ControlContainer)c;
-                            foreach (Control c3 in cntr.Controls)
-                            {
-                                if (c3 is MapViewerEx)
-                                {
-                                    if (c3 != sender)
-                                    {
-                                        MapViewerEx vwr3 = (MapViewerEx)c3;
-                                        if (vwr3.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr3.SetSplitter(e.Panel1height, e.Panel2height, e.Splitdistance, e.Panel1collapsed, e.Panel2collapsed);
-                                            vwr3.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            _viewSyncService.OnSplitterMoved(sender, e, dockManager1);
         }
 
         void tabdet_onSelectionChanged(object sender, MapViewerEx.CellSelectionChangedEventArgs e)
         {
-            if (m_appSettings.SynchronizeMapviewers || m_appSettings.SynchronizeMapviewersDifferentMaps)
-            {
-                // andere cell geselecteerd, doe dat ook bij andere viewers met hetzelfde symbool (mapname)
-                foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
-                {
-                    foreach (Control c in pnl.Controls)
-                    {
-                        if (c is MapViewerEx)
-                        {
-                            if (c != sender)
-                            {
-                                MapViewerEx vwr = (MapViewerEx)c;
-                                if (vwr.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                {
-                                    vwr.SelectCell(e.Rowhandle, e.Colindex);
-                                    vwr.Invalidate();
-                                }
-                            }
-                        }
-                        else if (c is DevExpress.XtraBars.Docking.DockPanel)
-                        {
-                            DevExpress.XtraBars.Docking.DockPanel tpnl = (DevExpress.XtraBars.Docking.DockPanel)c;
-                            foreach (Control c2 in tpnl.Controls)
-                            {
-                                if (c2 is MapViewerEx)
-                                {
-                                    if (c2 != sender)
-                                    {
-                                        MapViewerEx vwr2 = (MapViewerEx)c2;
-                                        if (vwr2.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr2.SelectCell(e.Rowhandle, e.Colindex);
-                                            vwr2.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (c is DevExpress.XtraBars.Docking.ControlContainer)
-                        {
-                            DevExpress.XtraBars.Docking.ControlContainer cntr = (DevExpress.XtraBars.Docking.ControlContainer)c;
-                            foreach (Control c3 in cntr.Controls)
-                            {
-                                if (c3 is MapViewerEx)
-                                {
-                                    if (c3 != sender)
-                                    {
-                                        MapViewerEx vwr3 = (MapViewerEx)c3;
-                                        if (vwr3.Map_name == e.Mapname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr3.SelectCell(e.Rowhandle, e.Colindex);
-                                            vwr3.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            _viewSyncService.OnSelectionChanged(sender, e, dockManager1);
         }
 
         private void SetMapSliderPosition(string filename, string symbolname, int sliderposition)
@@ -3887,10 +3610,7 @@ namespace VAGSuite
 
         void tabdet_onSliderMove(object sender, MapViewerEx.SliderMoveEventArgs e)
         {
-            if (m_appSettings.SynchronizeMapviewers || m_appSettings.SynchronizeMapviewersDifferentMaps)
-            {
-                SetMapSliderPosition(e.Filename, e.SymbolName, e.SliderPosition);
-            }
+            _viewSyncService.OnSliderMove(sender, e, dockManager1);
         }
 
         private void SetMapScale(string filename, string symbolname, int axismax, int lockmode)
@@ -4004,15 +3724,7 @@ namespace VAGSuite
 
         void tabdet_onAxisLock(object sender, MapViewerEx.AxisLockEventArgs e)
         {
-            if (m_appSettings.SynchronizeMapviewers || m_appSettings.SynchronizeMapviewersDifferentMaps)
-            {
-                int axismaxvalue = e.AxisMaxValue;
-                if (e.LockMode == 1)
-                {
-                    axismaxvalue = FindMaxTableValue(e.SymbolName, axismaxvalue);
-                }
-                SetMapScale(e.Filename, e.SymbolName, axismaxvalue, e.LockMode);
-            }
+            _viewSyncService.OnAxisLock(sender, e, dockManager1);
         }
 
         private void btnActivateLaunchControl_ItemClick(object sender, ItemClickEventArgs e)
