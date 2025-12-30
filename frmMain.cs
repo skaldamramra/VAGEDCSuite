@@ -866,116 +866,21 @@ namespace VAGSuite
         }
 
         
+        /// <summary>
+        /// DEPRECATED: Use _quickAccessService methods instead.
+        /// This method is kept for backward compatibility with compare results and search functionality.
+        /// </summary>
         private void StartTableViewer(string symbolname, int codeblock)
         {
-            int rtel = 0;
-            bool _vwrstarted = false;
-            try
+            // Find the symbol by name and codeblock
+            foreach (SymbolHelper sh in Tools.Instance.m_symbols)
             {
-                if (Tools.Instance.GetSymbolAddressLike(Tools.Instance.m_symbols, symbolname) > 0)
+                if ((sh.Varname.StartsWith(symbolname) && sh.CodeBlock == codeblock)
+                    || (sh.Userdescription != null && sh.Userdescription.StartsWith(symbolname) && sh.CodeBlock == codeblock))
                 {
-                    //Console.WriteLine("Option one");
-                    gridViewSymbols.ActiveFilter.Clear(); // clear filter
-                    gridViewSymbols.ApplyFindFilter("");
-
-                    SymbolCollection sc = (SymbolCollection)gridControl1.DataSource;
-                    rtel = 0;
-                    foreach (SymbolHelper sh in sc)
-                    {
-                        if (sh.Varname.StartsWith(symbolname) && sh.CodeBlock == codeblock)
-                        {
-                            try
-                            {
-                                int rhandle = gridViewSymbols.GetRowHandle(rtel);
-                                gridViewSymbols.OptionsSelection.MultiSelect = true;
-                                gridViewSymbols.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.RowSelect;
-                                gridViewSymbols.ClearSelection();
-                                gridViewSymbols.SelectRow(rhandle);
-                                //gridViewSymbols.SelectRows(rhandle, rhandle);
-                                gridViewSymbols.MakeRowVisible(rhandle, true);
-                                gridViewSymbols.FocusedRowHandle = rhandle;
-                                //gridViewSymbols.SelectRange(rhandle, rhandle);
-                                _vwrstarted = true;
-                                StartTableViewer();
-                                break;
-                            }
-                            catch (Exception E)
-                            {
-                                MessageBox.Show(E.Message);
-                            }
-                        }
-
-                        rtel++;
-                    }
-                    if (!_vwrstarted)
-                    {
-                        rtel = 0;
-                        foreach (SymbolHelper sh in sc)
-                        {
-                            if (sh.Userdescription.StartsWith(symbolname) && sh.CodeBlock == codeblock)
-                            {
-                                try
-                                {
-                                    int rhandle = gridViewSymbols.GetRowHandle(rtel);
-                                    gridViewSymbols.OptionsSelection.MultiSelect = true;
-                                    gridViewSymbols.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.RowSelect;
-                                    gridViewSymbols.ClearSelection();
-                                    gridViewSymbols.SelectRow(rhandle);
-                                    //gridViewSymbols.SelectRows(rhandle, rhandle);
-                                    gridViewSymbols.MakeRowVisible(rhandle, true);
-                                    gridViewSymbols.FocusedRowHandle = rhandle;
-                                    //gridViewSymbols.SelectRange(rhandle, rhandle);
-                                    _vwrstarted = true;
-                                    StartTableViewer();
-                                    break;
-                                }
-                                catch (Exception E)
-                                {
-                                    MessageBox.Show(E.Message);
-                                }
-                            }
-                            rtel++;
-                        }
-                    }
+                    _mapViewerService.StartTableViewer(sh, Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
+                    return;
                 }
-                else
-                {
-                    //Console.WriteLine("Option two");
-                    gridViewSymbols.ActiveFilter.Clear(); // clear filter
-                    SymbolCollection sc = (SymbolCollection)gridControl1.DataSource;
-
-                    rtel = 0;
-                    foreach (SymbolHelper sh in sc)
-                    {
-                        if (sh.Userdescription.StartsWith(symbolname) && sh.CodeBlock == codeblock)
-                        {
-                            try
-                            {
-                                int rhandle = gridViewSymbols.GetRowHandle(rtel);
-                                gridViewSymbols.OptionsSelection.MultiSelect = true;
-                                gridViewSymbols.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.RowSelect;
-                                gridViewSymbols.ClearSelection();
-                                gridViewSymbols.SelectRow(rhandle);
-                                //gridViewSymbols.SelectRows(rhandle, rhandle);
-                                gridViewSymbols.MakeRowVisible(rhandle, true);
-                                gridViewSymbols.FocusedRowHandle = rhandle;
-                                //gridViewSymbols.SelectRange(rhandle, rhandle);
-                                _vwrstarted = true;
-                                StartTableViewer();
-                                break;
-                            }
-                            catch (Exception E)
-                            {
-                                MessageBox.Show(E.Message);
-                            }
-                        }
-                        rtel++;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                frmInfoBox info = new frmInfoBox("There seems to be a problem opening this map, do you have a file opened?");
             }
         }
 
@@ -2435,37 +2340,37 @@ namespace VAGSuite
 
         private void btnDriverWish_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("Driver wish", 2);
+            _quickAccessService.OpenDriverWish();
         }
 
         private void btnTorqueLimiter_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("Torque limiter", 2);
+            _quickAccessService.OpenTorqueLimiter();
         }
 
         private void btnSmokeLimiter_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("Smoke limiter", 2);
+            _quickAccessService.OpenSmokeLimiter();
         }
 
         private void btnTargetBoost_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("Boost target map", 2);
+            _quickAccessService.OpenBoostTargetMap();
         }
 
         private void btnBoostPressureLimiter_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("Boost limit map", 2);
+            _quickAccessService.OpenBoostLimitMap();
         }
 
         private void btnBoostPressureLimitSVBL_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("SVBL Boost limiter", 2);
+            _quickAccessService.OpenSVBLBoostLimiter();
         }
 
         private void btnN75Map_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("N75 duty cycle", 2);
+            _quickAccessService.OpenN75DutyCycle();
         }
 
         private void editXAxisToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2601,7 +2506,7 @@ namespace VAGSuite
 
         private void btnEGRMap_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("EGR", 2);
+            _quickAccessService.OpenEGRMap();
         }
 
         DevExpress.XtraGrid.Views.Grid.ViewInfo.GridHitInfo gvhi;
@@ -3452,32 +3357,32 @@ namespace VAGSuite
 
         private void btnIQByMap_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("IQ by MAP", 2);
+            _quickAccessService.OpenIQByMAP();
         }
 
         private void btnIQByMAF_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("IQ by MAF", 2);
+            _quickAccessService.OpenIQByMAF();
         }
 
         private void btnSOILimiter_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("SOI limiter", 2);
+            _quickAccessService.OpenSOILimiter();
         }
 
         private void btnStartOfInjection_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("Start of injection", 2);
+            _quickAccessService.OpenStartOfInjection();
         }
 
         private void btnInjectorDuration_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("Injector duration", 2);
+            _quickAccessService.OpenInjectorDuration();
         }
 
         private void btnStartIQ_ItemClick(object sender, ItemClickEventArgs e)
         {
-            StartTableViewer("Start IQ", 2);
+            _quickAccessService.OpenStartIQ();
         }
 
     }
