@@ -131,6 +131,7 @@ namespace VAGSuite
         private MapViewerService _mapViewerService;
         private ProjectService _projectService;
         private ExportService _exportService;
+        private QuickAccessService _quickAccessService;
 
         public frmMain()
         {
@@ -172,6 +173,7 @@ namespace VAGSuite
             _mapViewerService = new MapViewerService(dockManager1, m_appSettings);
             _projectService = new ProjectService(m_appSettings);
             _exportService = new ExportService(m_appSettings);
+            _quickAccessService = new QuickAccessService(_mapViewerService, Tools.Instance.m_symbols);
         }
 
 
@@ -430,6 +432,10 @@ namespace VAGSuite
             }
         }
 
+        /// <summary>
+        /// Opens a table viewer for the currently selected symbol.
+        /// Delegates to MapViewerService.StartTableViewer().
+        /// </summary>
         private void StartTableViewer()
         {
             if (gridViewSymbols.SelectedRowsCount > 0)
@@ -440,141 +446,11 @@ namespace VAGSuite
                     int row = (int)selrows.GetValue(0);
                     if (row >= 0)
                     {
-                        SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow((int)selrows.GetValue(0));
-                        if (sh.Flash_start_address == 0 && sh.Start_address == 0) return;
-                        
-                        if (sh == null) return;
-                        DevExpress.XtraBars.Docking.DockPanel dockPanel;
-                        bool pnlfound = false;
-                        pnlfound = CheckMapViewerActive(sh);
-                        if (!pnlfound)
-                        {
-                            dockManager1.BeginUpdate();
-                            try
-                            {
-                                MapViewerEx tabdet = new MapViewerEx();
-                                tabdet.AutoUpdateIfSRAM = false;
-                                tabdet.AutoUpdateInterval = 99999;
-                                tabdet.SetViewSize(ViewSize.NormalView);
-                                tabdet.Visible = false;
-                                tabdet.Filename = Tools.Instance.m_currentfile;
-                                tabdet.GraphVisible = true;
-                                tabdet.Viewtype = m_appSettings.DefaultViewType;
-                                tabdet.DisableColors = m_appSettings.DisableMapviewerColors;
-                                tabdet.AutoSizeColumns = m_appSettings.AutoSizeColumnsInWindows;
-                                tabdet.GraphVisible = m_appSettings.ShowGraphs;
-                                tabdet.IsRedWhite = m_appSettings.ShowRedWhite;
-                                tabdet.SetViewSize(m_appSettings.DefaultViewSize);
-                                tabdet.Map_name = sh.Varname;
-                                tabdet.Map_descr = tabdet.Map_name;
-                                tabdet.Map_cat = XDFCategories.Undocumented;
-                                SymbolAxesTranslator axestrans = new SymbolAxesTranslator();
-                                string x_axis = string.Empty;
-                                string y_axis = string.Empty;
-                                string x_axis_descr = string.Empty;
-                                string y_axis_descr = string.Empty;
-                                string z_axis_descr = string.Empty;
-                                tabdet.X_axis_name = sh.X_axis_descr;
-                                tabdet.Y_axis_name = sh.Y_axis_descr;
-                                tabdet.Z_axis_name = sh.Z_axis_descr;
-                                tabdet.XaxisUnits = sh.XaxisUnits;
-                                tabdet.YaxisUnits = sh.YaxisUnits;
-                                tabdet.X_axisAddress = sh.Y_axis_address;
-                                tabdet.Y_axisAddress = sh.X_axis_address;
-
-                                tabdet.Xaxiscorrectionfactor = sh.X_axis_correction;
-                                tabdet.Yaxiscorrectionfactor = sh.Y_axis_correction;
-                                tabdet.Xaxiscorrectionoffset = sh.X_axis_offset;
-                                tabdet.Yaxiscorrectionoffset = sh.Y_axis_offset;
-
-                                tabdet.X_axisvalues = GetXaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, tabdet.Map_name);
-                                tabdet.Y_axisvalues = GetYaxisValues(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, tabdet.Map_name);
-
-
-                                dockPanel = dockManager1.AddPanel(DevExpress.XtraBars.Docking.DockingStyle.Right);
-                                int dw = 650;
-                                if (tabdet.X_axisvalues.Length > 0)
-                                {
-                                    dw = 30 + ((tabdet.X_axisvalues.Length + 1) * 45);
-                                }
-                                if (dw < 400) dw = 400;
-                                if (dw > 800) dw = 800;
-                                dockPanel.FloatSize = new Size(dw, 900);
-
-
-
-                                dockPanel.Tag = Tools.Instance.m_currentfile;
-                                dockPanel.ClosedPanel += new DevExpress.XtraBars.Docking.DockPanelEventHandler(dockPanel_ClosedPanel);
-
-                                int columns = 8;
-                                int rows = 8;
-                                int tablewidth = GetTableMatrixWitdhByName(Tools.Instance.m_currentfile, Tools.Instance.m_symbols, tabdet.Map_name, out columns, out rows);
-                                int address = Convert.ToInt32(sh.Flash_start_address);
-                                int sramaddress = 0;
-                                if (address != 0)
-                                {
-                                    tabdet.Map_address = address;
-                                    tabdet.Map_sramaddress = sramaddress;
-                                    int length = Convert.ToInt32(sh.Length);
-                                    tabdet.Map_length = length;
-                                    byte[] mapdata = new byte[sh.Length];
-                                    mapdata.Initialize();
-                                    mapdata = Tools.Instance.readdatafromfile(Tools.Instance.m_currentfile, address, length, Tools.Instance.m_currentFileType);
-                                    tabdet.Map_content = mapdata;
-                                    tabdet.Correction_factor = sh.Correction;// GetMapCorrectionFactor(tabdet.Map_name);
-                                    tabdet.Correction_offset = sh.Offset;// GetMapCorrectionOffset(tabdet.Map_name);
-                                    tabdet.IsUpsideDown = m_appSettings.ShowTablesUpsideDown;
-                                    tabdet.ShowTable(columns, true);
-                                    tabdet.Dock = DockStyle.Fill;
-                                    tabdet.onSymbolSave += new VAGSuite.MapViewerEx.NotifySaveSymbol(tabdet_onSymbolSave);
-                                    tabdet.onSymbolRead += new VAGSuite.MapViewerEx.NotifyReadSymbol(tabdet_onSymbolRead);
-                                    tabdet.onClose += new VAGSuite.MapViewerEx.ViewerClose(tabdet_onClose);
-                                    tabdet.onAxisEditorRequested += new MapViewerEx.AxisEditorRequested(tabdet_onAxisEditorRequested);
-
-                                    tabdet.onSliderMove +=new MapViewerEx.NotifySliderMove(tabdet_onSliderMove);
-                                    tabdet.onSplitterMoved +=new MapViewerEx.SplitterMoved(tabdet_onSplitterMoved);
-                                    tabdet.onSelectionChanged +=new MapViewerEx.SelectionChanged(tabdet_onSelectionChanged);
-                                    tabdet.onSurfaceGraphViewChangedEx += new MapViewerEx.SurfaceGraphViewChangedEx(tabdet_onSurfaceGraphViewChangedEx);
-                                    tabdet.onAxisLock +=new MapViewerEx.NotifyAxisLock(tabdet_onAxisLock);
-                                    tabdet.onViewTypeChanged +=new MapViewerEx.ViewTypeChanged(tabdet_onViewTypeChanged);
-
-                                    dockPanel.Text = "Symbol: " + tabdet.Map_name + " [" + Path.GetFileName(Tools.Instance.m_currentfile) + "]";
-                                    bool isDocked = false;
-
-                                    if (!isDocked)
-                                    {
-                                        int width = 500;
-                                        if (tabdet.X_axisvalues.Length > 0)
-                                        {
-                                            width = 30 + ((tabdet.X_axisvalues.Length + 1) * 45);
-                                        }
-                                        if (width < 500) width = 500;
-                                        if (width > 800) width = 800;
-
-                                        dockPanel.Width = width;
-                                    }
-                                    dockPanel.Controls.Add(tabdet);
-                                }
-                                else
-                                {
-                                    byte[] mapdata = new byte[sh.Length];
-                                    mapdata.Initialize();
-
-                                }
-                                tabdet.Visible = true;
-                            }
-                            catch (Exception newdockE)
-                            {
-                                Console.WriteLine(newdockE.Message);
-                            }
-                            Console.WriteLine("End update");
-                            dockManager1.EndUpdate();
-                        }
+                        SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow(row);
+                        _mapViewerService.StartTableViewer(sh, Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
                     }
-                    System.Windows.Forms.Application.DoEvents();
                 }
             }
-
         }
 
         private bool CheckMapViewerActive(SymbolHelper sh)

@@ -4,12 +4,21 @@ namespace VAGSuite.Services
 {
     public class QuickAccessService
     {
+        private MapViewerService _mapViewerService;
+        private SymbolCollection _symbols;
+
+        public QuickAccessService(MapViewerService mapViewerService, SymbolCollection symbols)
+        {
+            _mapViewerService = mapViewerService;
+            _symbols = symbols;
+        }
+
         /// <summary>
         /// Opens a table viewer for Driver wish map
         /// </summary>
         public void OpenDriverWish()
         {
-            // Delegates to frmMain.StartTableViewer("Driver wish", 2);
+            FindAndOpenTableViewer("Driver wish", 2);
         }
 
         /// <summary>
@@ -17,7 +26,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenTorqueLimiter()
         {
-            // Delegates to frmMain.StartTableViewer("Torque limiter", 2);
+            FindAndOpenTableViewer("Torque limiter", 2);
         }
 
         /// <summary>
@@ -25,7 +34,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenSmokeLimiter()
         {
-            // Delegates to frmMain.StartTableViewer("Smoke limiter", 2);
+            FindAndOpenTableViewer("Smoke limiter", 2);
         }
 
         /// <summary>
@@ -33,7 +42,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenBoostTargetMap()
         {
-            // Delegates to frmMain.StartTableViewer("Boost target map", 2);
+            FindAndOpenTableViewer("Boost target map", 2);
         }
 
         /// <summary>
@@ -41,7 +50,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenBoostLimitMap()
         {
-            // Delegates to frmMain.StartTableViewer("Boost limit map", 2);
+            FindAndOpenTableViewer("Boost limit map", 2);
         }
 
         /// <summary>
@@ -49,7 +58,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenSVBLBoostLimiter()
         {
-            // Delegates to frmMain.StartTableViewer("SVBL Boost limiter", 2);
+            FindAndOpenTableViewer("SVBL Boost limiter", 2);
         }
 
         /// <summary>
@@ -57,7 +66,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenN75DutyCycle()
         {
-            // Delegates to frmMain.StartTableViewer("N75 duty cycle", 2);
+            FindAndOpenTableViewer("N75 duty cycle", 2);
         }
 
         /// <summary>
@@ -65,7 +74,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenEGRMap()
         {
-            // Delegates to frmMain.StartTableViewer("EGR", 2);
+            FindAndOpenTableViewer("EGR", 2);
         }
 
         /// <summary>
@@ -73,7 +82,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenIQByMAP()
         {
-            // Delegates to frmMain.StartTableViewer("IQ by MAP", 2);
+            FindAndOpenTableViewer("IQ by MAP", 2);
         }
 
         /// <summary>
@@ -81,7 +90,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenIQByMAF()
         {
-            // Delegates to frmMain.StartTableViewer("IQ by MAF", 2);
+            FindAndOpenTableViewer("IQ by MAF", 2);
         }
 
         /// <summary>
@@ -89,7 +98,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenSOILimiter()
         {
-            // Delegates to frmMain.StartTableViewer("SOI limiter", 2);
+            FindAndOpenTableViewer("SOI limiter", 2);
         }
 
         /// <summary>
@@ -97,7 +106,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenStartOfInjection()
         {
-            // Delegates to frmMain.StartTableViewer("Start of injection", 2);
+            FindAndOpenTableViewer("Start of injection", 2);
         }
 
         /// <summary>
@@ -105,7 +114,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenInjectorDuration()
         {
-            // Delegates to frmMain.StartTableViewer("Injector duration", 2);
+            FindAndOpenTableViewer("Injector duration", 2);
         }
 
         /// <summary>
@@ -113,7 +122,34 @@ namespace VAGSuite.Services
         /// </summary>
         public void OpenStartIQ()
         {
-            // Delegates to frmMain.StartTableViewer("Start IQ", 2);
+            FindAndOpenTableViewer("Start IQ", 2);
+        }
+
+        /// <summary>
+        /// Helper method to find and open a table viewer by symbol name and code block
+        /// </summary>
+        private void FindAndOpenTableViewer(string symbolName, int codeBlock)
+        {
+            if (_symbols == null) return;
+
+            foreach (SymbolHelper sh in _symbols)
+            {
+                if (sh.Varname.StartsWith(symbolName) && sh.CodeBlock == codeBlock)
+                {
+                    _mapViewerService.StartTableViewer(sh, Tools.Instance.m_currentfile, _symbols);
+                    return;
+                }
+            }
+
+            // Try userdescription as fallback
+            foreach (SymbolHelper sh in _symbols)
+            {
+                if (sh.Userdescription != null && sh.Userdescription.StartsWith(symbolName) && sh.CodeBlock == codeBlock)
+                {
+                    _mapViewerService.StartTableViewer(sh, Tools.Instance.m_currentfile, _symbols);
+                    return;
+                }
+            }
         }
     }
 }
