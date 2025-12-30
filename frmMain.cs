@@ -1,4 +1,4 @@
-﻿//DONE: Make a codeblock sequencer.
+//DONE: Make a codeblock sequencer.
 //DONE: Make sure SOI maps are detected correctly (see screenshot of 4 axis maps issue)
 //DONE: Make filelength a variable
 //DONE: Axis collection, browser and editor support (refresh open maps after editing an axis)
@@ -64,6 +64,8 @@ using System.IO;
 using DevExpress.XtraBars.Docking;
 using DevExpress.XtraBars;
 using DevExpress.Skins;
+using VAGSuite.Services;
+using VAGSuite.Helpers;
 
 namespace VAGSuite
 {
@@ -117,6 +119,12 @@ namespace VAGSuite
         private msiupdater m_msiUpdater;
         public DelegateStartReleaseNotePanel m_DelegateStartReleaseNotePanel;
         private frmSplash splash;
+
+        // Refactored services
+        private FileOperationsManager _fileOperationsManager;
+        private ChecksumService _checksumService;
+        private MapViewerCoordinator _mapViewerCoordinator;
+
         public frmMain()
         {
             try
@@ -140,6 +148,16 @@ namespace VAGSuite
                 Console.WriteLine(E.Message);
             }
 
+        }
+
+        /// <summary>
+        /// Initialize services after app settings are loaded
+        /// </summary>
+        private void InitializeServices()
+        {
+            _fileOperationsManager = new FileOperationsManager(m_appSettings);
+            _checksumService = new ChecksumService(m_appSettings);
+            _mapViewerCoordinator = new MapViewerCoordinator(dockManager1, m_appSettings);
         }
 
 
@@ -205,51 +223,118 @@ namespace VAGSuite
                 btnOpenProject.Enabled = false;
                 try
                 {
+                    // Use the FileOperationsManager service
+                    var result = _fileOperationsManager.OpenFile(fileName, showMessage);
 
-                    Tools.Instance.m_currentfile = fileName;
-                    FileInfo fi = new FileInfo(fileName);
-                    Tools.Instance.m_currentfilelength = (int)fi.Length;
-                    try
+                    if (!result.Success)
                     {
-                        fi.IsReadOnly = false;
-                        barReadOnly.Caption = "Ok";
+                        MessageBox.Show($"Failed to open file: {result.ErrorMessage}", "Error", 
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
                     }
-                    catch (Exception E)
-                    {
-                        Console.WriteLine("Failed to remove read only flag: " + E.Message);
-                        barReadOnly.Caption = "File is READ ONLY";
-                    }
-                    this.Text = "VAGEDCSuite [ " + Path.GetFileName(Tools.Instance.m_currentfile) + " ]";
-                    Tools.Instance.m_symbols = new SymbolCollection();
-                    Tools.Instance.codeBlockList = new List<CodeBlock>();
+
+                    // Update UI with file information
+                    barReadOnly.Caption = result.IsReadOnly ? "File is READ ONLY" : "Ok";
+                    this.Text = $"VAGEDCSuite [ {Path.GetFileName(result.FileName)} ]";
                     barFilenameText.Caption = Path.GetFileName(fileName);
 
-                    Tools.Instance.m_symbols = DetectMaps(Tools.Instance.m_currentfile, out Tools.Instance.codeBlockList, out Tools.Instance.AxisList, showMessage, true);
-
+                    // Update grid
                     gridControl1.DataSource = null;
                     Application.DoEvents();
-                    gridControl1.DataSource = Tools.Instance.m_symbols;
-                    //gridViewSymbols.BestFitColumns();
+                    gridControl1.DataSource = result.Symbols;
                     Application.DoEvents();
+                    
                     try
                     {
                         gridViewSymbols.ExpandAllGroups();
                     }
                     catch (Exception)
                     {
-
                     }
-                    m_appSettings.Lastfilename = Tools.Instance.m_currentfile;
+
+                    // Update status bar with file information
+                    UpdateStatusBarAfterFileOpen(result, showMessage);
+
+                    // Verify checksum
                     VerifyChecksum(fileName, !m_appSettings.AutoChecksum, false);
 
-                    TryToLoadAdditionalSymbols(fileName, ImportFileType.XML, Tools.Instance.m_symbols, true);
+                    // Load additional symbol descriptions
+                    TryToLoadAdditionalSymbols(fileName, ImportFileType.XML, result.Symbols, true);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error opening file: {ex.Message}", "Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    btnOpenFile.Enabled = true;
+                    btnOpenProject.Enabled = true;
+                }
+            }
+        }
 
+        /// <summary>
+        /// Updates status bar after successfully opening a file
+        /// </summary>
+        private void UpdateStatusBarAfterFileOpen(FileOperationsManager.OpenFileResult result, bool showMessage)
+        {
+            byte[] allBytes = File.ReadAllBytes(result.FileName);
+            IEDCFileParser parser = Tools.Instance.GetParserForFile(result.FileName, true);
+            
+            if (parser != null)
+            {
+                string partNo = parser.ExtractPartnumber(allBytes);
+                string softwareNumber = parser.ExtractSoftwareNumber(allBytes);
+                string boschnumber = parser.ExtractBoschPartnumber(allBytes);
+                
+                partNumberConverter pnc = new partNumberConverter();
+                ECUInfo info = pnc.ConvertPartnumber(boschnumber, allBytes.Length);
+
+                partNo = Tools.Instance.StripNonAscii(partNo);
+                softwareNumber = Tools.Instance.StripNonAscii(softwareNumber);
+                
+                barPartnumber.Caption = $"{partNo} {softwareNumber}";
+                barAdditionalInfo.Caption = $"{info.PartNumber} {info.CarMake} {info.EcuType} {parser.ExtractInfo(allBytes)}";
+                barSymCount.Caption = $"{result.Symbols.Count} symbols";
+
+                // Update launch control button
+                if (_fileOperationsManager.GetMapCount("Launch control map", result.Symbols) == 0)
+                {
+                    btnActivateLaunchControl.Enabled = true;
+                }
+                else
+                {
+                    btnActivateLaunchControl.Enabled = false;
+                }
+
+                // Update smoke limiter button
+                btnActivateSmokeLimiters.Enabled = false;
+                try
+                {
+                    if (result.CodeBlocks.Count > 0)
+                    {
+                        if ((_fileOperationsManager.GetMapCount("Smoke limiter", result.Symbols) / result.CodeBlocks.Count) == 1)
+                        {
+                            btnActivateSmokeLimiters.Enabled = true;
+                        }
+                    }
                 }
                 catch (Exception)
                 {
                 }
-                btnOpenFile.Enabled = true;
-                btnOpenProject.Enabled = true;
+
+                // Show missing maps warning if needed
+                var missingMaps = _fileOperationsManager.GetMissingCriticalMaps(result.Symbols, parser);
+                if (missingMaps.Count > 0 && showMessage)
+                {
+                    string message = string.Empty;
+                    foreach (string mapName in missingMaps)
+                    {
+                        message += mapName + " missing" + Environment.NewLine;
+                    }
+                    frmInfoBox infobx = new frmInfoBox(message);
+                }
             }
         }
 
@@ -258,126 +343,27 @@ namespace VAGSuite
 
 
 
-        private SymbolCollection DetectMaps(string filename, out List<CodeBlock> newCodeBlocks, out List<AxisHelper> newAxisHelpers, bool showMessage, bool isPrimaryFile)
+        /// <summary>
+        /// DEPRECATED: Use _fileOperationsManager.DetectMaps() instead.
+        /// Kept for backward compatibility during refactoring.
+        /// </summary>
+        private SymbolCollection DetectMaps(string filename, out List<CodeBlock> newCodeBlocks, 
+            out List<AxisHelper> newAxisHelpers, bool showMessage, bool isPrimaryFile)
         {
-            IEDCFileParser parser = Tools.Instance.GetParserForFile(filename, isPrimaryFile);
-            newCodeBlocks = new List<CodeBlock>();
-            newAxisHelpers = new List<AxisHelper>();
-            SymbolCollection newSymbols = new SymbolCollection();
-            
-            if (parser != null)
-            {
-                byte[] allBytes = File.ReadAllBytes(filename);
-                string boschnumber = parser.ExtractBoschPartnumber(allBytes);
-                string softwareNumber = parser.ExtractSoftwareNumber(allBytes);
-                partNumberConverter pnc = new partNumberConverter();
-                ECUInfo info = pnc.ConvertPartnumber(boschnumber,allBytes.Length);
-                //MessageBox.Show("Car: " + info.CarMake + "\nECU:" + info.EcuType);
-
-                //1) Vw Hardware Number: 38906019GF, Vw System Type: 1,9l R4 EDC15P, Vw Software Number: SG  1434;
-                //2) Vw Hardware Number: 38906019LJ, Vw System Type: 1,9l R4 EDC15P, Vw Software Number: SG  5934.
-
-                if (!info.EcuType.StartsWith("EDC15P") && !info.EcuType.StartsWith("EDC15VM") && info.EcuType != string.Empty && showMessage)
-                {
-                    frmInfoBox infobx = new frmInfoBox("No EDC15P/VM file [" + info.EcuType + "] " + Path.GetFileName(filename));
-                }
-                if (info.EcuType == string.Empty)
-                {
-                    Console.WriteLine("partnumber " + info.PartNumber + " unknown " + filename);
-                }
-                if (isPrimaryFile)
-                {
-                    string partNo = parser.ExtractPartnumber(allBytes);
-                    partNo = Tools.Instance.StripNonAscii(partNo);
-                    softwareNumber = Tools.Instance.StripNonAscii(softwareNumber);
-                    barPartnumber.Caption =  partNo + " " + softwareNumber;
-                    barAdditionalInfo.Caption = info.PartNumber + " " + info.CarMake + " " + info.EcuType + " " + parser.ExtractInfo(allBytes);
-                }
-
-                newSymbols = parser.parseFile(filename, out newCodeBlocks, out newAxisHelpers);
-                newSymbols.SortColumn = "Flash_start_address";
-                newSymbols.SortingOrder = GenericComparer.SortOrder.Ascending;
-                newSymbols.Sort();
-                //parser.NameKnownMaps(allBytes, newSymbols, newCodeBlocks);
-                //parser.FindSVBL(allBytes, filename, newSymbols, newCodeBlocks);
-                /*SymbolTranslator strans = new SymbolTranslator();
-                foreach (SymbolHelper sh in newSymbols)
-                {
-                    sh.Description = strans.TranslateSymbolToHelpText(sh.Varname);
-                }*/
-                // check for must have maps... if there are maps missing, report it
-                if (showMessage && (parser is EDC15PFileParser || parser is EDC15P6FileParser))
-                {
-                    string _message = string.Empty;
-                    if (MapsWithNameMissing("EGR", newSymbols)) _message += "EGR maps missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("SVBL", newSymbols)) _message += "SVBL missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("Torque limiter", newSymbols)) _message += "Torque limiter missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("Smoke limiter", newSymbols)) _message += "Smoke limiter missing" + Environment.NewLine;
-                    //if (MapsWithNameMissing("IQ by MAF limiter", newSymbols)) _message += "IQ by MAF limiter missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("Injector duration", newSymbols)) _message += "Injector duration maps missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("Start of injection", newSymbols)) _message += "Start of injection maps missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("N75 duty cycle", newSymbols)) _message += "N75 duty cycle map missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("Inverse driver wish", newSymbols)) _message += "Inverse driver wish map missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("Boost target map", newSymbols)) _message += "Boost target map missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("SOI limiter", newSymbols)) _message += "SOI limiter missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("Driver wish", newSymbols)) _message += "Driver wish map missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("Boost limit map", newSymbols)) _message += "Boost limit map missing" + Environment.NewLine;
-
-                    if (MapsWithNameMissing("MAF correction", newSymbols)) _message += "MAF correction map missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("MAF linearization", newSymbols)) _message += "MAF linearization map missing" + Environment.NewLine;
-                    if (MapsWithNameMissing("MAP linearization", newSymbols)) _message += "MAP linearization map missing" + Environment.NewLine;
-                    if (_message != string.Empty)
-                    {
-                        frmInfoBox infobx = new frmInfoBox(_message);
-                    }
-                }
-                if (isPrimaryFile)
-                {
-                    barSymCount.Caption = newSymbols.Count.ToString() + " symbols";
-
-                    if (MapsWithNameMissing("Launch control map", newSymbols))
-                    {
-                        btnActivateLaunchControl.Enabled = true;
-                    }
-                    else
-                    {
-                        btnActivateLaunchControl.Enabled = false;
-                    }
-                    btnActivateSmokeLimiters.Enabled = false;
-                    try
-                    {
-                        if (Tools.Instance.codeBlockList.Count > 0)
-                        {
-                            if ((GetMapCount("Smoke limiter", newSymbols) / Tools.Instance.codeBlockList.Count) == 1)
-                            {
-                                btnActivateSmokeLimiters.Enabled = true;
-                            }
-                            else
-                            {
-                                btnActivateSmokeLimiters.Enabled = false;
-                            }
-                        }
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-                }
-            }
-            return newSymbols;
-
+            return _fileOperationsManager.DetectMaps(filename, out newCodeBlocks, out newAxisHelpers, showMessage, isPrimaryFile);
         }
 
+        /// <summary>
+        /// DEPRECATED: Use _fileOperationsManager.GetMapCount() instead.
+        /// </summary>
         private int GetMapCount(string varName, SymbolCollection newSymbols)
         {
-            int mapCount = 0;
-            foreach (SymbolHelper sh in newSymbols)
-            {
-                if (sh.Varname.StartsWith(varName)) mapCount ++;
-            }
-            return mapCount;
+            return _fileOperationsManager.GetMapCount(varName, newSymbols);
         }
 
+        /// <summary>
+        /// DEPRECATED: Use _fileOperationsManager internally.
+        /// </summary>
         private bool MapsWithNameMissing(string varName, SymbolCollection newSymbols)
         {
             foreach (SymbolHelper sh in newSymbols)
@@ -737,120 +723,21 @@ namespace VAGSuite
 
         private void SaveDataIncludingSyncOption(string fileName, string varName, int address, int length, byte[] data, bool useNote, string note)
         {
-            Tools.Instance.savedatatobinary(address, length, data, fileName, useNote, note, Tools.Instance.m_currentFileType);
-            if (m_appSettings.CodeBlockSyncActive)
-            {
-                // check for other symbols with the same length and the same END address
-                if (fileName == Tools.Instance.m_currentfile)
-                {
-                    
-                    int codeBlockOffset = -1;
-                    foreach (SymbolHelper sh in Tools.Instance.m_symbols)
-                    {
-                        if (sh.Flash_start_address == address && sh.Length == length)
-                        {
-                            if (sh.CodeBlock > 0)
-                            {
-                                foreach (CodeBlock cb in Tools.Instance.codeBlockList)
-                                {
-                                    if (cb.CodeID == sh.CodeBlock)
-                                    {
-                                        codeBlockOffset = address - cb.StartAddress;
-                                        break;
-                                    }
-                                }
-                            }
-                            break;
-                            
-                        }
-                    }
-                    foreach (SymbolHelper sh in Tools.Instance.m_symbols)
-                    {
-                        bool shSaved = false;
-                        if (sh.Length == length)
-                        {
-                            if (sh.Flash_start_address != address)
-                            {
-                                if ((sh.Flash_start_address & 0x0FFFF) == (address & 0x0FFFF))
-                                {
-                                    // 
-                                    // if (MessageBox.Show("Do you want to save " + sh.Varname + " at address " + sh.Flash_start_address.ToString("X8") + " as well?", "Codeblock synchronizer", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                                    {
-                                        Tools.Instance.savedatatobinary((int)sh.Flash_start_address, length, data, fileName, useNote, note, Tools.Instance.m_currentFileType);
-                                        shSaved = true;
-                                    }
-                                }
-                                // also check wether codeblock start + offset is equal
-                            }
-                        }
-                        if (!shSaved && codeBlockOffset >= 0)
-                        {
-                            if (sh.Length == length)
-                            {
-                                if (sh.Flash_start_address != address)
-                                {
-                                    // determine codeblock offset for this symbol
-                                    if (sh.CodeBlock > 0)
-                                    {
-                                        foreach (CodeBlock cb in Tools.Instance.codeBlockList)
-                                        {
-                                            if (cb.CodeID == sh.CodeBlock)
-                                            {
-                                                int thiscodeBlockOffset = (int)sh.Flash_start_address - cb.StartAddress;
-                                                if (thiscodeBlockOffset == codeBlockOffset)
-                                                {
-                                                    // save this as well
-                                                    Tools.Instance.savedatatobinary((int)sh.Flash_start_address, length, data, fileName, useNote, note, Tools.Instance.m_currentFileType);
-                                                }
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            // Use the FileOperationsManager service
+            _fileOperationsManager.SaveDataWithSync(fileName, varName, address, length, data, useNote, note, 
+                Tools.Instance.m_symbols, Tools.Instance.codeBlockList);
+            
             UpdateRollbackForwardControls();
             VerifyChecksum(fileName, false, false);
         }
 
         private void SaveAxisDataIncludingSyncOption(int address, int length, byte[] data, string fileName, bool useNote, string note)
         {
-            Tools.Instance.savedatatobinary(address, length, data, fileName, useNote, note, Tools.Instance.m_currentFileType);
-            if (m_appSettings.CodeBlockSyncActive)
-            {
-                // check for other symbols with the same length and the same END address
-                if (fileName == Tools.Instance.m_currentfile)
-                {
-                    foreach (SymbolHelper sh in Tools.Instance.m_symbols)
-                    {
-                        if (sh.X_axis_address != address)
-                        {
-                            if ((sh.X_axis_address & 0x0FFFF) == (address & 0x0FFFF))
-                            {
-                                if (sh.X_axis_length * 2 == length)
-                                {
-                                    Tools.Instance.savedatatobinary(sh.X_axis_address, length, data, fileName, useNote, note, Tools.Instance.m_currentFileType);
-                                }
-                            }
-                        }
-                        else if (sh.Y_axis_address != address)
-                        {
-                            if ((sh.Y_axis_address & 0x0FFFF) == (address & 0x0FFFF))
-                            {
-                                if (sh.Y_axis_length * 2 == length)
-                                {
-                                    Tools.Instance.savedatatobinary(sh.Y_axis_address, length, data, fileName, useNote, note, Tools.Instance.m_currentFileType);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            // Use the FileOperationsManager service
+            _fileOperationsManager.SaveAxisDataWithSync(address, length, data, fileName, useNote, note, 
+                Tools.Instance.m_symbols);
+            
             UpdateRollbackForwardControls();
-
             VerifyChecksum(Tools.Instance.m_currentfile, false, false);
         }
 
@@ -859,85 +746,34 @@ namespace VAGSuite
 
         private void VerifyChecksum(string filename, bool showQuestion, bool showInfo)
         {
-            
-            string chkType = string.Empty;
-            barChecksum.Caption = "---";
-            ChecksumResultDetails result = new ChecksumResultDetails();
-            if (m_appSettings.AutoChecksum)
-            {
-                result = Tools.Instance.UpdateChecksum(filename, false);
-                if (showInfo)
-                {
-                    if (result.CalculationOk)
-                    {
-                        if (result.TypeResult == ChecksumType.VAG_EDC15P_V41) chkType = " V4.1";
-                        else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41V2) chkType = " V4.1v2";
-                        else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41_2002) chkType = " V4.1 2002";
-                        else if (result.TypeResult != ChecksumType.Unknown) chkType = result.TypeResult.ToString();
-                        frmInfoBox info = new frmInfoBox("Checksums are correct [" + chkType + "]");
-                    }
-                    else
-                    {
-                        if (result.TypeResult == ChecksumType.VAG_EDC15P_V41) chkType = " V4.1";
-                        else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41V2) chkType = " V4.1v2";
-                        else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41_2002) chkType = " V4.1 2002";
-                        else if (result.TypeResult != ChecksumType.Unknown) chkType = result.TypeResult.ToString();
-                        frmInfoBox info = new frmInfoBox("Checksums are INCORRECT [" + chkType + "]");
+            // Use the ChecksumService
+            var result = _checksumService.VerifyChecksum(filename, showQuestion, showInfo);
 
-                    }
-                }
-            }
-            else
+            // Update status bar
+            barChecksum.Caption = _checksumService.GetStatusBarMessage(result);
+
+            // Show dialog if needed
+            if (showInfo && !string.IsNullOrEmpty(result.StatusMessage))
             {
-                result = Tools.Instance.UpdateChecksum(filename, true);
-                if (!result.CalculationOk)
+                frmInfoBox info = new frmInfoBox(result.StatusMessage);
+            }
+
+            // If checksum is invalid and user should be asked
+            if (!result.IsValid && showQuestion && result.Type != ChecksumType.Unknown && !result.WasUpdated)
+            {
+                frmChecksumIncorrect frmchk = new frmChecksumIncorrect();
+                frmchk.ChecksumType = result.TypeDescription;
+                frmchk.NumberChecksums = result.NumberTotal;
+                frmchk.NumberChecksumsFailed = result.NumberFailed;
+                frmchk.NumberChecksumsPassed = result.NumberPassed;
+
+                if (frmchk.ShowDialog() == DialogResult.OK)
                 {
-                    if (showQuestion && result.TypeResult != ChecksumType.Unknown)
-                    {
-                         if (result.TypeResult == ChecksumType.VAG_EDC15P_V41) chkType = " V4.1";
-                         else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41V2) chkType = " V4.1v2";
-                         else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41_2002) chkType = " V4.1 2002";
-                         else if (result.TypeResult != ChecksumType.Unknown) chkType = result.TypeResult.ToString();
-                        frmChecksumIncorrect frmchk = new frmChecksumIncorrect();
-                        frmchk.ChecksumType = chkType;
-                        frmchk.NumberChecksums = result.NumberChecksumsTotal;
-                        frmchk.NumberChecksumsFailed = result.NumberChecksumsFail;
-                        frmchk.NumberChecksumsPassed = result.NumberChecksumsOk;
-                        if(frmchk.ShowDialog() == DialogResult.OK)
-                        //if (MessageBox.Show("Checksums are invalid. Do you wish to correct them?", "Warning", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                        {
-                            result = Tools.Instance.UpdateChecksum(filename, false);
-                        }
-                    }
-                    else if (showInfo && result.TypeResult == ChecksumType.Unknown)
-                    {
-                        frmInfoBox info = new frmInfoBox("Checksum for this filetype is not yet implemented");
-                    }
-                }
-                else
-                {
-                    if (showInfo)
-                    {
-                        if (result.TypeResult == ChecksumType.VAG_EDC15P_V41) chkType = " V4.1";
-                        else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41V2) chkType = " V4.1v2";
-                        else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41_2002) chkType = " V4.1 2002";
-                        else if (result.TypeResult != ChecksumType.Unknown) chkType = result.TypeResult.ToString();
-                        frmInfoBox info = new frmInfoBox("Checksums are correct [" + chkType + "]");
-                    }
+                    var correctedResult = _checksumService.CorrectChecksum(filename);
+                    barChecksum.Caption = _checksumService.GetStatusBarMessage(correctedResult);
                 }
             }
 
-            if (result.TypeResult == ChecksumType.VAG_EDC15P_V41) chkType = " V4.1";
-            else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41V2) chkType = " V4.1v2";
-            else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41_2002) chkType = " V4.1 2002";
-            if (!result.CalculationOk)
-            {
-                barChecksum.Caption = "Checksum failed" + chkType;
-            }
-            else
-            {
-                barChecksum.Caption = "Checksum Ok" + chkType;
-            }
             Application.DoEvents();
         }
 
@@ -950,58 +786,45 @@ namespace VAGSuite
             return 0;
         }
 
+        /// <summary>
+        /// DEPRECATED: Use SymbolQueryHelper.GetTableDimensions() instead.
+        /// </summary>
         private int GetTableMatrixWitdhByName(string filename, SymbolCollection curSymbols, string symbolname, out int columns, out int rows)
         {
-            columns = GetSymbolWidth(curSymbols, symbolname);
-            rows = GetSymbolHeight(curSymbols, symbolname);
+            SymbolQueryHelper.GetTableDimensions(curSymbols, symbolname, out columns, out rows);
             return columns;
         }
 
+        /// <summary>
+        /// DEPRECATED: Use SymbolQueryHelper.GetSymbolWidth() instead.
+        /// </summary>
         private int GetSymbolWidth(SymbolCollection curSymbolCollection, string symbolname)
         {
-            foreach (SymbolHelper sh in curSymbolCollection)
-            {
-                if (sh.Varname == symbolname || sh.Userdescription == symbolname)
-                {
-                    return sh.Y_axis_length;
-                }
-            }
-            return 0;
+            return SymbolQueryHelper.GetSymbolWidth(curSymbolCollection, symbolname);
         }
 
+        /// <summary>
+        /// DEPRECATED: Use SymbolQueryHelper.GetSymbolHeight() instead.
+        /// </summary>
         private int GetSymbolHeight(SymbolCollection curSymbolCollection, string symbolname)
         {
-            foreach (SymbolHelper sh in curSymbolCollection)
-            {
-                if (sh.Varname == symbolname || sh.Userdescription == symbolname)
-                {
-                    return sh.X_axis_length;
-                }
-            }
-            return 0;
+            return SymbolQueryHelper.GetSymbolHeight(curSymbolCollection, symbolname);
         }
 
+        /// <summary>
+        /// DEPRECATED: Use SymbolQueryHelper.GetSymbolLength() instead.
+        /// </summary>
         private int GetSymbolLength(SymbolCollection curSymbolCollection, string symbolname)
         {
-            foreach (SymbolHelper sh in curSymbolCollection)
-            {
-                if (sh.Varname == symbolname || sh.Userdescription == symbolname)
-                {
-                    return sh.Length;
-                }
-            }
-            return 0;
+            return SymbolQueryHelper.GetSymbolLength(curSymbolCollection, symbolname);
         }
+
+        /// <summary>
+        /// DEPRECATED: Use SymbolQueryHelper.GetSymbolAddress() instead.
+        /// </summary>
         private Int64 GetSymbolAddress(SymbolCollection curSymbolCollection, string symbolname)
         {
-            foreach (SymbolHelper sh in curSymbolCollection)
-            {
-                if (sh.Varname == symbolname || sh.Userdescription == symbolname)
-                {
-                    return sh.Flash_start_address;
-                }
-            }
-            return 0;
+            return SymbolQueryHelper.GetSymbolAddress(curSymbolCollection, symbolname);
         }
 
         private double GetMapCorrectionFactor(string symbolname)
@@ -1015,54 +838,36 @@ namespace VAGSuite
 
         
 
+        /// <summary>
+        /// DEPRECATED: Use SymbolQueryHelper.GetYAxisValues() instead.
+        /// </summary>
         private int[] GetYaxisValues(string filename, SymbolCollection curSymbols, string symbolname)
         {
-            int xlen = GetSymbolHeight(curSymbols, symbolname);
-            int xaddress = GetXAxisAddress(curSymbols, symbolname);
-            int[] retval = new int[xlen];
-            retval.Initialize();
-            if(xaddress > 0)
-            {
-                retval = Tools.Instance.readdatafromfileasint(filename, xaddress, xlen, Tools.Instance.m_currentFileType);
-            }
-            return retval;
+            return SymbolQueryHelper.GetYAxisValues(filename, curSymbols, symbolname);
         }
 
+        /// <summary>
+        /// DEPRECATED: Use SymbolQueryHelper.GetXAxisAddress() instead.
+        /// </summary>
         private int GetXAxisAddress(SymbolCollection curSymbols, string symbolname)
         {
-            foreach (SymbolHelper sh in curSymbols)
-            {
-                if (sh.Varname == symbolname || sh.Userdescription == symbolname)
-                {
-                    return sh.X_axis_address;
-                }
-            }
-            return 0;
+            return SymbolQueryHelper.GetXAxisAddress(curSymbols, symbolname);
         }
 
+        /// <summary>
+        /// DEPRECATED: Use SymbolQueryHelper.GetYAxisAddress() instead.
+        /// </summary>
         private int GetYAxisAddress(SymbolCollection curSymbols, string symbolname)
         {
-            foreach (SymbolHelper sh in curSymbols)
-            {
-                if (sh.Varname == symbolname || sh.Userdescription == symbolname)
-                {
-                    return sh.Y_axis_address;
-                }
-            }
-            return 0;
+            return SymbolQueryHelper.GetYAxisAddress(curSymbols, symbolname);
         }
+
+        /// <summary>
+        /// DEPRECATED: Use SymbolQueryHelper.GetXAxisValues() instead.
+        /// </summary>
         private int[] GetXaxisValues(string filename, SymbolCollection curSymbols, string symbolname)
         {
-            int ylen = GetSymbolWidth(curSymbols, symbolname);
-            int yaddress = GetYAxisAddress(curSymbols, symbolname);
-            int[] retval = new int[ylen];
-            retval.Initialize();
-            if (yaddress > 0)
-            {
-                retval = Tools.Instance.readdatafromfileasint(filename, yaddress, ylen, Tools.Instance.m_currentFileType);
-            }
-            return retval;
-
+            return SymbolQueryHelper.GetXAxisValues(filename, curSymbols, symbolname);
         }
 
         void dockPanel_ClosedPanel(object sender, DevExpress.XtraBars.Docking.DockPanelEventArgs e)
@@ -1213,13 +1018,12 @@ namespace VAGSuite
                 dockManager1.EndUpdate();
             }
         }
+        /// <summary>
+        /// DEPRECATED: Use SymbolQueryHelper.SymbolExists() instead.
+        /// </summary>
         private bool SymbolExists(string symbolname)
         {
-            foreach (SymbolHelper sh in Tools.Instance.m_symbols)
-            {
-                if (sh.Varname == symbolname || sh.Userdescription == symbolname) return true;
-            }
-            return false;
+            return SymbolQueryHelper.SymbolExists(Tools.Instance.m_symbols, symbolname);
         }
 
         private void StartCompareMapViewer(string SymbolName, string Filename, int SymbolAddress, int SymbolLength, SymbolCollection curSymbols, int symbolnumber)
@@ -1363,13 +1167,12 @@ namespace VAGSuite
 
         }
 
+        /// <summary>
+        /// DEPRECATED: Use SymbolQueryHelper.FindSymbol() instead.
+        /// </summary>
         private SymbolHelper FindSymbol(SymbolCollection curSymbols, string SymbolName)
         {
-            foreach (SymbolHelper sh in curSymbols)
-            {
-                if (sh.Varname == SymbolName || sh.Userdescription == SymbolName) return sh;
-            }
-            return new SymbolHelper();
+            return SymbolQueryHelper.FindSymbol(curSymbols, SymbolName);
         }
 
         void tabdet_onSymbolSelect(object sender, CompareResults.SelectSymbolEventArgs e)
@@ -2012,6 +1815,9 @@ namespace VAGSuite
             try
             {
                 m_appSettings = new AppSettings();
+                
+                // Initialize refactored services
+                InitializeServices();
             }
             catch (Exception)
             {
