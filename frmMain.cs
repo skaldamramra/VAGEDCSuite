@@ -2278,109 +2278,42 @@ namespace VAGSuite
 
         private void UpdateRollbackForwardControls()
         {
-            btnRollback.Enabled = false;
-            btnRollforward.Enabled = false;
-            btnShowTransactionLog.Enabled = false;
-            if (Tools.Instance.m_ProjectTransactionLog != null)
-            {
-                for (int t = Tools.Instance.m_ProjectTransactionLog.TransCollection.Count - 1; t >= 0; t--)
-                {
-                    if (!btnShowTransactionLog.Enabled) btnShowTransactionLog.Enabled = true;
-                    if (Tools.Instance.m_ProjectTransactionLog.TransCollection[t].IsRolledBack)
-                    {
-                        btnRollforward.Enabled = true;
-                    }
-                    else
-                    {
-                        btnRollback.Enabled = true;
-                    }
-                }
-            }
+            bool rollbackEnabled = false;
+            bool rollforwardEnabled = false;
+            bool showTransactionLogEnabled = false;
+            
+            _transactionService.UpdateRollbackForwardControls(Tools.Instance.m_ProjectTransactionLog,
+                ref rollbackEnabled, ref rollforwardEnabled, ref showTransactionLogEnabled);
+            
+            btnRollback.Enabled = rollbackEnabled;
+            btnRollforward.Enabled = rollforwardEnabled;
+            btnShowTransactionLog.Enabled = showTransactionLogEnabled;
         }
 
         private void CreateProjectBackupFile()
         {
-            // create a backup file automatically! <GS-16032010>
-            if (!Directory.Exists(m_appSettings.ProjectFolder + "\\" + Tools.Instance.m_CurrentWorkingProject + "\\Backups")) Directory.CreateDirectory(m_appSettings.ProjectFolder + "\\" + Tools.Instance.m_CurrentWorkingProject + "\\Backups");
-            string filename = m_appSettings.ProjectFolder + "\\" + Tools.Instance.m_CurrentWorkingProject + "\\Backups\\" + Path.GetFileNameWithoutExtension(GetBinaryForProject(Tools.Instance.m_CurrentWorkingProject)) + "-backup-" + DateTime.Now.ToString("MMddyyyyHHmmss") + ".BIN";
-            File.Copy(GetBinaryForProject(Tools.Instance.m_CurrentWorkingProject), filename);
-            if (Tools.Instance.m_CurrentWorkingProject != string.Empty)
-            {
-                Tools.Instance.m_ProjectLog.WriteLogbookEntry(LogbookEntryType.BackupfileCreated, filename);
-            }
-
-
+            _transactionService.CreateProjectBackupFile(m_appSettings.ProjectFolder, Tools.Instance.m_CurrentWorkingProject,
+                Tools.Instance.m_currentfile, Tools.Instance.m_ProjectLog);
         }
 
 
         private void LoadBinaryForProject(string projectname)
         {
-            if (File.Exists(m_appSettings.ProjectFolder + "\\" + projectname + "\\projectproperties.xml"))
+            _transactionService.LoadBinaryForProject(projectname, m_appSettings.ProjectFolder, ref Tools.Instance.m_currentfile);
+            if (!string.IsNullOrEmpty(Tools.Instance.m_currentfile))
             {
-                System.Data.DataTable projectprops = new System.Data.DataTable("T5PROJECT");
-                projectprops.Columns.Add("CARMAKE");
-                projectprops.Columns.Add("CARMODEL");
-                projectprops.Columns.Add("CARMY");
-                projectprops.Columns.Add("CARVIN");
-                projectprops.Columns.Add("NAME");
-                projectprops.Columns.Add("BINFILE");
-                projectprops.Columns.Add("VERSION");
-                projectprops.ReadXml(m_appSettings.ProjectFolder + "\\" + projectname + "\\projectproperties.xml");
-                // valid project, add it to the list
-                if (projectprops.Rows.Count > 0)
-                {
-                    OpenFile(projectprops.Rows[0]["BINFILE"].ToString(), true);
-                }
+                OpenFile(Tools.Instance.m_currentfile, true);
             }
         }
 
         private string GetBinaryForProject(string projectname)
         {
-            string retval = Tools.Instance.m_currentfile;
-            if (File.Exists(m_appSettings.ProjectFolder + "\\" + projectname + "\\projectproperties.xml"))
-            {
-                System.Data.DataTable projectprops = new System.Data.DataTable("T5PROJECT");
-                projectprops.Columns.Add("CARMAKE");
-                projectprops.Columns.Add("CARMODEL");
-                projectprops.Columns.Add("CARMY");
-                projectprops.Columns.Add("CARVIN");
-                projectprops.Columns.Add("NAME");
-                projectprops.Columns.Add("BINFILE");
-                projectprops.Columns.Add("VERSION");
-                projectprops.ReadXml(m_appSettings.ProjectFolder + "\\" + projectname + "\\projectproperties.xml");
-                // valid project, add it to the list
-                if (projectprops.Rows.Count > 0)
-                {
-                    retval = projectprops.Rows[0]["BINFILE"].ToString();
-                }
-            }
-            return retval;
+            return _transactionService.GetBinaryForProject(projectname, m_appSettings.ProjectFolder, Tools.Instance.m_currentfile);
         }
 
         private string GetBackupOlderThanDateTime(string project, DateTime mileDT)
         {
-            string retval = Tools.Instance.m_currentfile; // default = current file
-            string BackupPath = m_appSettings.ProjectFolder + "\\" + project + "\\Backups";
-            DateTime MaxDateTime = DateTime.MinValue;
-            string foundBackupfile = string.Empty;
-            if (Directory.Exists(BackupPath))
-            {
-                string[] backupfiles = Directory.GetFiles(BackupPath, "*.bin");
-                foreach (string backupfile in backupfiles)
-                {
-                    FileInfo fi = new FileInfo(backupfile);
-                    if (fi.LastAccessTime > MaxDateTime && fi.LastAccessTime <= mileDT)
-                    {
-                        MaxDateTime = fi.LastAccessTime;
-                        foundBackupfile = backupfile;
-                    }
-                }
-            }
-            if (foundBackupfile != string.Empty)
-            {
-                retval = foundBackupfile;
-            }
-            return retval;
+            return _transactionService.GetBackupOlderThanDateTime(project, mileDT, m_appSettings.ProjectFolder, Tools.Instance.m_currentfile);
         }
 
         private void btnRebuildFile_ItemClick(object sender, ItemClickEventArgs e)
@@ -2445,10 +2378,7 @@ namespace VAGSuite
 
         private void RollForwardOnFile(string file2Rollback, TransactionEntry entry)
         {
-            FileInfo fi = new FileInfo(file2Rollback);
-            int addressToWrite = entry.SymbolAddress;
-            while (addressToWrite > fi.Length) addressToWrite -= (int)fi.Length;
-            Tools.Instance.savedatatobinary(addressToWrite, entry.SymbolLength, entry.DataAfter, file2Rollback, false, Tools.Instance.m_currentFileType);
+            _transactionService.RollForwardOnFile(file2Rollback, entry, Tools.Instance.m_currentFileType);
             VerifyChecksum(Tools.Instance.m_currentfile, false, false);
         }
 
@@ -2568,37 +2498,17 @@ namespace VAGSuite
 
         private int GetNumberOfBackups(string project)
         {
-            int retval = 0;
-            string dirname = m_appSettings.ProjectFolder + "\\" + project + "\\Backups";
-            if (!Directory.Exists(dirname)) Directory.CreateDirectory(dirname);
-            string[] backupfiles = Directory.GetFiles(dirname, "*.bin");
-            retval = backupfiles.Length;
-            return retval;
+            return _transactionService.GetNumberOfBackups(project, m_appSettings.ProjectFolder);
         }
 
         private int GetNumberOfTransactions(string project)
         {
-            int retval = 0;
-            string filename = m_appSettings.ProjectFolder + "\\" + project + "\\TransActionLogV2.ttl";
-            if (File.Exists(filename))
-            {
-                TransactionLog translog = new TransactionLog();
-                translog.OpenTransActionLog(m_appSettings.ProjectFolder, project);
-                translog.ReadTransactionFile();
-                retval = translog.TransCollection.Count;
-            }
-            return retval;
+            return _transactionService.GetNumberOfTransactions(project, m_appSettings.ProjectFolder);
         }
 
         private DateTime GetLastAccessTime(string filename)
         {
-            DateTime retval = DateTime.MinValue;
-            if (File.Exists(filename))
-            {
-                FileInfo fi = new FileInfo(filename);
-                retval = fi.LastAccessTime;
-            }
-            return retval;
+            return _transactionService.GetLastAccessTime(filename);
         }
 
         private void btnCloseProject_ItemClick(object sender, ItemClickEventArgs e)
@@ -2650,19 +2560,8 @@ namespace VAGSuite
 
         private void RollForward(TransactionEntry entry)
         {
-            int addressToWrite = entry.SymbolAddress;
-            Tools.Instance.savedatatobinary(addressToWrite, entry.SymbolLength, entry.DataAfter, Tools.Instance.m_currentfile, false, Tools.Instance.m_currentFileType);
-            VerifyChecksum(Tools.Instance.m_currentfile, false, false);
-            if (Tools.Instance.m_ProjectTransactionLog != null)
-            {
-                Tools.Instance.m_ProjectTransactionLog.SetEntryRolledForward(entry.TransactionNumber);
-            }
-            if (Tools.Instance.m_CurrentWorkingProject != string.Empty)
-            {
-
-                Tools.Instance.m_ProjectLog.WriteLogbookEntry(LogbookEntryType.TransactionRolledforward, Tools.Instance.GetSymbolNameByAddress(entry.SymbolAddress) + " " + entry.Note + " " + entry.TransactionNumber.ToString());
-            }
-
+            _transactionService.RollForward(entry, Tools.Instance.m_currentfile, Tools.Instance.m_currentFileType,
+                Tools.Instance.m_ProjectTransactionLog, Tools.Instance.m_ProjectLog);
             UpdateRollbackForwardControls();
         }
 
@@ -2682,17 +2581,9 @@ namespace VAGSuite
 
         private void RollBack(TransactionEntry entry)
         {
-            int addressToWrite = entry.SymbolAddress;
-            Tools.Instance.savedatatobinary(addressToWrite, entry.SymbolLength, entry.DataBefore, Tools.Instance.m_currentfile, false, Tools.Instance.m_currentFileType);
+            _transactionService.RollBack(entry, Tools.Instance.m_currentfile, Tools.Instance.m_currentFileType,
+                Tools.Instance.m_ProjectTransactionLog, Tools.Instance.m_ProjectLog);
             VerifyChecksum(Tools.Instance.m_currentfile, false, false);
-            if (Tools.Instance.m_ProjectTransactionLog != null)
-            {
-                Tools.Instance.m_ProjectTransactionLog.SetEntryRolledBack(entry.TransactionNumber);
-            }
-            if (Tools.Instance.m_CurrentWorkingProject != string.Empty)
-            {
-                Tools.Instance.m_ProjectLog.WriteLogbookEntry(LogbookEntryType.TransactionRolledback, Tools.Instance.GetSymbolNameByAddress(entry.SymbolAddress) + " " + entry.Note + " " + entry.TransactionNumber.ToString());
-            }
             UpdateRollbackForwardControls();
         }
 
