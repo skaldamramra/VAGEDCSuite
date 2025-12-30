@@ -3385,5 +3385,155 @@ namespace VAGSuite
             _quickAccessService.OpenStartIQ();
         }
 
+        private void btnBIPBasicCharacteristic_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenBIPBasicCharacteristic();
+        }
+
+        private void btnPIDMapP_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenPIDMapP();
+        }
+
+        private void btnPIDMapI_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenPIDMapI();
+        }
+
+        private void btnPIDMapD_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenPIDMapD();
+        }
+
+        private void btnDurationLimiter_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenDurationLimiter();
+        }
+
+        private void btnMAFLimiter_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenMAFLimiter();
+        }
+
+        private void btnMAPLimiter_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenMAPLimiter();
+        }
+
+        private void btnMAFLinearization_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenMAFLinearization();
+        }
+
+        private void btnMAPLinearization_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenMAPLinearization();
+        }
+
+        // VCDS Diagnostic Limits - IQ Limits (1-10)
+        private void btnVCDSDiagIQLimit1_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticIQLimit(1);
+        }
+
+        private void btnVCDSDiagIQLimit2_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticIQLimit(2);
+        }
+
+        private void btnVCDSDiagIQLimit3_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticIQLimit(3);
+        }
+
+        private void btnVCDSDiagIQLimit4_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticIQLimit(4);
+        }
+
+        private void btnVCDSDiagIQLimit5_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticIQLimit(5);
+        }
+
+        private void btnVCDSDiagIQLimit6_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticIQLimit(6);
+        }
+
+        private void btnVCDSDiagIQLimit7_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticIQLimit(7);
+        }
+
+        private void btnVCDSDiagIQLimit8_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticIQLimit(8);
+        }
+
+        private void btnVCDSDiagIQLimit9_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticIQLimit(9);
+        }
+
+        private void btnVCDSDiagIQLimit10_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticIQLimit(10);
+        }
+
+        // VCDS Diagnostic Limits - MAF Limits (1-2)
+        private void btnVCDSDiagMAFLimit1_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticMAFLimit(1);
+        }
+
+        private void btnVCDSDiagMAFLimit2_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticMAFLimit(2);
+        }
+
+        // VCDS Diagnostic Limits - MAP Limits (1-3)
+        private void btnVCDSDiagMAPLimit1_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticMAPLimit(1);
+        }
+
+        private void btnVCDSDiagMAPLimit2_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticMAPLimit(2);
+        }
+
+        private void btnVCDSDiagMAPLimit3_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticMAPLimit(3);
+        }
+
+        // VCDS Diagnostic Limits - Torque Limit
+        private void btnVCDSDiagTorqueLimit_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticTorqueLimit();
+        }
+
+        // VCDS Diagnostic Limits - Display Offsets
+        private void btnVCDSDiagTorqueOffset_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticTorqueOffset();
+        }
+
+        private void btnVCDSDiagMAFOffset_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticMAFOffset();
+        }
+
+        private void btnVCDSDiagMAPOffset_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticMAPOffset();
+        }
+
+        private void btnVCDSDiagIQOffset_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            _quickAccessService.OpenVCDSDiagnosticIQOffset();
+        }
+
     }
 }

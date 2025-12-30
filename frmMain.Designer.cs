@@ -97,6 +97,36 @@
             this.btnExcelImport = new DevExpress.XtraBars.BarButtonItem();
             this.btnIQByMap = new DevExpress.XtraBars.BarButtonItem();
             this.btnIQByMAF = new DevExpress.XtraBars.BarButtonItem();
+            this.btnBIPBasicCharacteristic = new DevExpress.XtraBars.BarButtonItem();
+            this.btnPIDMapP = new DevExpress.XtraBars.BarButtonItem();
+            this.btnPIDMapI = new DevExpress.XtraBars.BarButtonItem();
+            this.btnPIDMapD = new DevExpress.XtraBars.BarButtonItem();
+            this.btnDurationLimiter = new DevExpress.XtraBars.BarButtonItem();
+            this.btnMAFLimiter = new DevExpress.XtraBars.BarButtonItem();
+            this.btnMAPLimiter = new DevExpress.XtraBars.BarButtonItem();
+            this.btnMAFLinearization = new DevExpress.XtraBars.BarButtonItem();
+            this.btnMAPLinearization = new DevExpress.XtraBars.BarButtonItem();
+            this.barSubItemVCDSDiag = new DevExpress.XtraBars.BarSubItem();
+            this.btnVCDSDiagnosticIQLimit1 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticIQLimit2 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticIQLimit3 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticIQLimit4 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticIQLimit5 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticIQLimit6 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticIQLimit7 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticIQLimit8 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticIQLimit9 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticIQLimit10 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticMAFLimit1 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticMAFLimit2 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticMAPLimit1 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticMAPLimit2 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticMAPLimit3 = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticTorqueLimit = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticTorqueOffset = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticMAFOffset = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticMAPOffset = new DevExpress.XtraBars.BarButtonItem();
+            this.btnVCDSDiagnosticIQOffset = new DevExpress.XtraBars.BarButtonItem();
             this.ribFile = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.rbpgGeneralFile = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.rbnSettings = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
@@ -233,9 +263,39 @@
             this.btnSOILimiter,
             this.btnStartOfInjection,
             this.btnInjectorDuration,
-            this.btnStartIQ});
+            this.btnStartIQ,
+            this.btnBIPBasicCharacteristic,
+            this.btnPIDMapP,
+            this.btnPIDMapI,
+            this.btnPIDMapD,
+            this.btnDurationLimiter,
+            this.btnMAFLimiter,
+            this.btnMAPLimiter,
+            this.btnMAFLinearization,
+            this.btnMAPLinearization,
+            this.barSubItemVCDSDiag,
+            this.btnVCDSDiagnosticIQLimit1,
+            this.btnVCDSDiagnosticIQLimit2,
+            this.btnVCDSDiagnosticIQLimit3,
+            this.btnVCDSDiagnosticIQLimit4,
+            this.btnVCDSDiagnosticIQLimit5,
+            this.btnVCDSDiagnosticIQLimit6,
+            this.btnVCDSDiagnosticIQLimit7,
+            this.btnVCDSDiagnosticIQLimit8,
+            this.btnVCDSDiagnosticIQLimit9,
+            this.btnVCDSDiagnosticIQLimit10,
+            this.btnVCDSDiagnosticMAFLimit1,
+            this.btnVCDSDiagnosticMAFLimit2,
+            this.btnVCDSDiagnosticMAPLimit1,
+            this.btnVCDSDiagnosticMAPLimit2,
+            this.btnVCDSDiagnosticMAPLimit3,
+            this.btnVCDSDiagnosticTorqueLimit,
+            this.btnVCDSDiagnosticTorqueOffset,
+            this.btnVCDSDiagnosticMAFOffset,
+            this.btnVCDSDiagnosticMAPOffset,
+            this.btnVCDSDiagnosticIQOffset});
             this.ribbonControl1.Location = new System.Drawing.Point(0, 0);
-            this.ribbonControl1.MaxItemId = 70;
+            this.ribbonControl1.MaxItemId = 100;
             this.ribbonControl1.Name = "ribbonControl1";
             this.ribbonControl1.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] {
             this.ribFile,
@@ -737,7 +797,237 @@
             this.btnIQByMAF.Id = 65;
             this.btnIQByMAF.Name = "btnIQByMAF";
             this.btnIQByMAF.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnIQByMAF_ItemClick);
-            // 
+            //
+            // btnBIPBasicCharacteristic
+            //
+            this.btnBIPBasicCharacteristic.Caption = "BIP Basic characteristic";
+            this.btnBIPBasicCharacteristic.Id = 70;
+            this.btnBIPBasicCharacteristic.Name = "btnBIPBasicCharacteristic";
+            this.btnBIPBasicCharacteristic.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnBIPBasicCharacteristic_ItemClick);
+            //
+            // btnPIDMapP
+            //
+            this.btnPIDMapP.Caption = "PID Map P";
+            this.btnPIDMapP.Id = 71;
+            this.btnPIDMapP.Name = "btnPIDMapP";
+            this.btnPIDMapP.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnPIDMapP_ItemClick);
+            //
+            // btnPIDMapI
+            //
+            this.btnPIDMapI.Caption = "PID Map I";
+            this.btnPIDMapI.Id = 72;
+            this.btnPIDMapI.Name = "btnPIDMapI";
+            this.btnPIDMapI.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnPIDMapI_ItemClick);
+            //
+            // btnPIDMapD
+            //
+            this.btnPIDMapD.Caption = "PID Map D";
+            this.btnPIDMapD.Id = 73;
+            this.btnPIDMapD.Name = "btnPIDMapD";
+            this.btnPIDMapD.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnPIDMapD_ItemClick);
+            //
+            // btnDurationLimiter
+            //
+            this.btnDurationLimiter.Caption = "Duration limiter";
+            this.btnDurationLimiter.Id = 74;
+            this.btnDurationLimiter.Name = "btnDurationLimiter";
+            this.btnDurationLimiter.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnDurationLimiter_ItemClick);
+            //
+            // btnMAFLimiter
+            //
+            this.btnMAFLimiter.Caption = "MAF limiter";
+            this.btnMAFLimiter.Id = 75;
+            this.btnMAFLimiter.Name = "btnMAFLimiter";
+            this.btnMAFLimiter.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnMAFLimiter_ItemClick);
+            //
+            // btnMAPLimiter
+            //
+            this.btnMAPLimiter.Caption = "MAP limiter";
+            this.btnMAPLimiter.Id = 76;
+            this.btnMAPLimiter.Name = "btnMAPLimiter";
+            this.btnMAPLimiter.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnMAPLimiter_ItemClick);
+            //
+            // btnMAFLinearization
+            //
+            this.btnMAFLinearization.Caption = "MAF linearization";
+            this.btnMAFLinearization.Id = 77;
+            this.btnMAFLinearization.Name = "btnMAFLinearization";
+            this.btnMAFLinearization.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnMAFLinearization_ItemClick);
+            //
+            // btnMAPLinearization
+            //
+            this.btnMAPLinearization.Caption = "MAP linearization";
+            this.btnMAPLinearization.Id = 78;
+            this.btnMAPLinearization.Name = "btnMAPLinearization";
+            this.btnMAPLinearization.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnMAPLinearization_ItemClick);
+            //
+            // barSubItemVCDSDiag
+            //
+            this.barSubItemVCDSDiag.Caption = "VCDS Diagnostic Limits";
+            this.barSubItemVCDSDiag.Id = 79;
+            this.barSubItemVCDSDiag.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticIQLimit1),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticIQLimit2),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticIQLimit3),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticIQLimit4),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticIQLimit5),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticIQLimit6),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticIQLimit7),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticIQLimit8),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticIQLimit9),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticIQLimit10),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticMAFLimit1),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticMAFLimit2),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticMAPLimit1),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticMAPLimit2),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticMAPLimit3),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticTorqueLimit),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticTorqueOffset),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticMAFOffset),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticMAPOffset),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnVCDSDiagnosticIQOffset)});
+            this.barSubItemVCDSDiag.Name = "barSubItemVCDSDiag";
+            //
+            // btnVCDSDiagnosticIQLimit1
+            //
+            this.btnVCDSDiagnosticIQLimit1.Caption = "VCDS IQ Limit 1";
+            this.btnVCDSDiagnosticIQLimit1.Id = 80;
+            this.btnVCDSDiagnosticIQLimit1.Name = "btnVCDSDiagnosticIQLimit1";
+            this.btnVCDSDiagnosticIQLimit1.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit1_ItemClick);
+            //
+            // btnVCDSDiagnosticIQLimit2
+            //
+            this.btnVCDSDiagnosticIQLimit2.Caption = "VCDS IQ Limit 2";
+            this.btnVCDSDiagnosticIQLimit2.Id = 81;
+            this.btnVCDSDiagnosticIQLimit2.Name = "btnVCDSDiagnosticIQLimit2";
+            this.btnVCDSDiagnosticIQLimit2.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit2_ItemClick);
+            //
+            // btnVCDSDiagnosticIQLimit3
+            //
+            this.btnVCDSDiagnosticIQLimit3.Caption = "VCDS IQ Limit 3";
+            this.btnVCDSDiagnosticIQLimit3.Id = 82;
+            this.btnVCDSDiagnosticIQLimit3.Name = "btnVCDSDiagnosticIQLimit3";
+            this.btnVCDSDiagnosticIQLimit3.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit3_ItemClick);
+            //
+            // btnVCDSDiagnosticIQLimit4
+            //
+            this.btnVCDSDiagnosticIQLimit4.Caption = "VCDS IQ Limit 4";
+            this.btnVCDSDiagnosticIQLimit4.Id = 83;
+            this.btnVCDSDiagnosticIQLimit4.Name = "btnVCDSDiagnosticIQLimit4";
+            this.btnVCDSDiagnosticIQLimit4.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit4_ItemClick);
+            //
+            // btnVCDSDiagnosticIQLimit5
+            //
+            this.btnVCDSDiagnosticIQLimit5.Caption = "VCDS IQ Limit 5";
+            this.btnVCDSDiagnosticIQLimit5.Id = 84;
+            this.btnVCDSDiagnosticIQLimit5.Name = "btnVCDSDiagnosticIQLimit5";
+            this.btnVCDSDiagnosticIQLimit5.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit5_ItemClick);
+            //
+            // btnVCDSDiagnosticIQLimit6
+            //
+            this.btnVCDSDiagnosticIQLimit6.Caption = "VCDS IQ Limit 6";
+            this.btnVCDSDiagnosticIQLimit6.Id = 85;
+            this.btnVCDSDiagnosticIQLimit6.Name = "btnVCDSDiagnosticIQLimit6";
+            this.btnVCDSDiagnosticIQLimit6.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit6_ItemClick);
+            //
+            // btnVCDSDiagnosticIQLimit7
+            //
+            this.btnVCDSDiagnosticIQLimit7.Caption = "VCDS IQ Limit 7";
+            this.btnVCDSDiagnosticIQLimit7.Id = 86;
+            this.btnVCDSDiagnosticIQLimit7.Name = "btnVCDSDiagnosticIQLimit7";
+            this.btnVCDSDiagnosticIQLimit7.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit7_ItemClick);
+            //
+            // btnVCDSDiagnosticIQLimit8
+            //
+            this.btnVCDSDiagnosticIQLimit8.Caption = "VCDS IQ Limit 8";
+            this.btnVCDSDiagnosticIQLimit8.Id = 87;
+            this.btnVCDSDiagnosticIQLimit8.Name = "btnVCDSDiagnosticIQLimit8";
+            this.btnVCDSDiagnosticIQLimit8.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit8_ItemClick);
+            //
+            // btnVCDSDiagnosticIQLimit9
+            //
+            this.btnVCDSDiagnosticIQLimit9.Caption = "VCDS IQ Limit 9";
+            this.btnVCDSDiagnosticIQLimit9.Id = 88;
+            this.btnVCDSDiagnosticIQLimit9.Name = "btnVCDSDiagnosticIQLimit9";
+            this.btnVCDSDiagnosticIQLimit9.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit9_ItemClick);
+            //
+            // btnVCDSDiagnosticIQLimit10
+            //
+            this.btnVCDSDiagnosticIQLimit10.Caption = "VCDS IQ Limit 10";
+            this.btnVCDSDiagnosticIQLimit10.Id = 89;
+            this.btnVCDSDiagnosticIQLimit10.Name = "btnVCDSDiagnosticIQLimit10";
+            this.btnVCDSDiagnosticIQLimit10.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit10_ItemClick);
+            //
+            // btnVCDSDiagnosticMAFLimit1
+            //
+            this.btnVCDSDiagnosticMAFLimit1.Caption = "VCDS MAF Limit 1";
+            this.btnVCDSDiagnosticMAFLimit1.Id = 90;
+            this.btnVCDSDiagnosticMAFLimit1.Name = "btnVCDSDiagnosticMAFLimit1";
+            this.btnVCDSDiagnosticMAFLimit1.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAFLimit1_ItemClick);
+            //
+            // btnVCDSDiagnosticMAFLimit2
+            //
+            this.btnVCDSDiagnosticMAFLimit2.Caption = "VCDS MAF Limit 2";
+            this.btnVCDSDiagnosticMAFLimit2.Id = 91;
+            this.btnVCDSDiagnosticMAFLimit2.Name = "btnVCDSDiagnosticMAFLimit2";
+            this.btnVCDSDiagnosticMAFLimit2.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAFLimit2_ItemClick);
+            //
+            // btnVCDSDiagnosticMAPLimit1
+            //
+            this.btnVCDSDiagnosticMAPLimit1.Caption = "VCDS MAP Limit 1";
+            this.btnVCDSDiagnosticMAPLimit1.Id = 92;
+            this.btnVCDSDiagnosticMAPLimit1.Name = "btnVCDSDiagnosticMAPLimit1";
+            this.btnVCDSDiagnosticMAPLimit1.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAPLimit1_ItemClick);
+            //
+            // btnVCDSDiagnosticMAPLimit2
+            //
+            this.btnVCDSDiagnosticMAPLimit2.Caption = "VCDS MAP Limit 2";
+            this.btnVCDSDiagnosticMAPLimit2.Id = 93;
+            this.btnVCDSDiagnosticMAPLimit2.Name = "btnVCDSDiagnosticMAPLimit2";
+            this.btnVCDSDiagnosticMAPLimit2.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAPLimit2_ItemClick);
+            //
+            // btnVCDSDiagnosticMAPLimit3
+            //
+            this.btnVCDSDiagnosticMAPLimit3.Caption = "VCDS MAP Limit 3";
+            this.btnVCDSDiagnosticMAPLimit3.Id = 94;
+            this.btnVCDSDiagnosticMAPLimit3.Name = "btnVCDSDiagnosticMAPLimit3";
+            this.btnVCDSDiagnosticMAPLimit3.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAPLimit3_ItemClick);
+            //
+            // btnVCDSDiagnosticTorqueLimit
+            //
+            this.btnVCDSDiagnosticTorqueLimit.Caption = "VCDS Torque Limit";
+            this.btnVCDSDiagnosticTorqueLimit.Id = 95;
+            this.btnVCDSDiagnosticTorqueLimit.Name = "btnVCDSDiagnosticTorqueLimit";
+            this.btnVCDSDiagnosticTorqueLimit.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagTorqueLimit_ItemClick);
+            //
+            // btnVCDSDiagnosticTorqueOffset
+            //
+            this.btnVCDSDiagnosticTorqueOffset.Caption = "VCDS Torque Offset";
+            this.btnVCDSDiagnosticTorqueOffset.Id = 96;
+            this.btnVCDSDiagnosticTorqueOffset.Name = "btnVCDSDiagnosticTorqueOffset";
+            this.btnVCDSDiagnosticTorqueOffset.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagTorqueOffset_ItemClick);
+            //
+            // btnVCDSDiagnosticMAFOffset
+            //
+            this.btnVCDSDiagnosticMAFOffset.Caption = "VCDS MAF Offset";
+            this.btnVCDSDiagnosticMAFOffset.Id = 97;
+            this.btnVCDSDiagnosticMAFOffset.Name = "btnVCDSDiagnosticMAFOffset";
+            this.btnVCDSDiagnosticMAFOffset.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAFOffset_ItemClick);
+            //
+            // btnVCDSDiagnosticMAPOffset
+            //
+            this.btnVCDSDiagnosticMAPOffset.Caption = "VCDS MAP Offset";
+            this.btnVCDSDiagnosticMAPOffset.Id = 98;
+            this.btnVCDSDiagnosticMAPOffset.Name = "btnVCDSDiagnosticMAPOffset";
+            this.btnVCDSDiagnosticMAPOffset.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAPOffset_ItemClick);
+            //
+            // btnVCDSDiagnosticIQOffset
+            //
+            this.btnVCDSDiagnosticIQOffset.Caption = "VCDS IQ Offset";
+            this.btnVCDSDiagnosticIQOffset.Id = 99;
+            this.btnVCDSDiagnosticIQOffset.Name = "btnVCDSDiagnosticIQOffset";
+            this.btnVCDSDiagnosticIQOffset.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQOffset_ItemClick);
+            //
             // ribFile
             // 
             this.ribFile.Groups.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPageGroup[] {
@@ -847,6 +1137,14 @@
             this.rbnPageInjection.ItemLinks.Add(this.btnStartOfInjection);
             this.rbnPageInjection.ItemLinks.Add(this.btnInjectorDuration);
             this.rbnPageInjection.ItemLinks.Add(this.btnStartIQ);
+            this.rbnPageInjection.ItemLinks.Add(this.btnBIPBasicCharacteristic, true);
+            this.rbnPageInjection.ItemLinks.Add(this.btnPIDMapP);
+            this.rbnPageInjection.ItemLinks.Add(this.btnPIDMapI);
+            this.rbnPageInjection.ItemLinks.Add(this.btnPIDMapD);
+            this.rbnPageInjection.ItemLinks.Add(this.btnDurationLimiter);
+            this.rbnPageInjection.ItemLinks.Add(this.btnMAFLimiter);
+            this.rbnPageInjection.ItemLinks.Add(this.btnMAPLimiter);
+            this.rbnPageInjection.ItemLinks.Add(this.barSubItemVCDSDiag, true);
             this.rbnPageInjection.Name = "rbnPageInjection";
             this.rbnPageInjection.Text = "Injection quantity";
             // 
@@ -858,6 +1156,8 @@
             this.rbnPageTurbo.ItemLinks.Add(this.btnBoostPressureLimitSVBL);
             this.rbnPageTurbo.ItemLinks.Add(this.btnN75Map);
             this.rbnPageTurbo.ItemLinks.Add(this.btnEGRMap);
+            this.rbnPageTurbo.ItemLinks.Add(this.btnMAFLinearization, true);
+            this.rbnPageTurbo.ItemLinks.Add(this.btnMAPLinearization);
             this.rbnPageTurbo.Name = "rbnPageTurbo";
             this.rbnPageTurbo.Text = "Turbo";
             // 
@@ -1357,6 +1657,36 @@
         private DevExpress.XtraBars.BarButtonItem btnStartOfInjection;
         private DevExpress.XtraBars.BarButtonItem btnInjectorDuration;
         private DevExpress.XtraBars.BarButtonItem btnStartIQ;
+        private DevExpress.XtraBars.BarButtonItem btnBIPBasicCharacteristic;
+        private DevExpress.XtraBars.BarButtonItem btnPIDMapP;
+        private DevExpress.XtraBars.BarButtonItem btnPIDMapI;
+        private DevExpress.XtraBars.BarButtonItem btnPIDMapD;
+        private DevExpress.XtraBars.BarButtonItem btnDurationLimiter;
+        private DevExpress.XtraBars.BarButtonItem btnMAFLimiter;
+        private DevExpress.XtraBars.BarButtonItem btnMAPLimiter;
+        private DevExpress.XtraBars.BarButtonItem btnMAFLinearization;
+        private DevExpress.XtraBars.BarButtonItem btnMAPLinearization;
+        private DevExpress.XtraBars.BarSubItem barSubItemVCDSDiag;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticIQLimit1;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticIQLimit2;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticIQLimit3;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticIQLimit4;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticIQLimit5;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticIQLimit6;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticIQLimit7;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticIQLimit8;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticIQLimit9;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticIQLimit10;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticMAFLimit1;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticMAFLimit2;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticMAPLimit1;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticMAPLimit2;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticMAPLimit3;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticTorqueLimit;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticTorqueOffset;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticMAFOffset;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticMAPOffset;
+        private DevExpress.XtraBars.BarButtonItem btnVCDSDiagnosticIQOffset;
 
     }
 }

@@ -124,6 +124,145 @@ namespace VAGSuite.Services
         }
 
         /// <summary>
+        /// Opens a table viewer for BIP Basic characteristic line
+        /// </summary>
+        public void OpenBIPBasicCharacteristic()
+        {
+            FindAndOpenTableViewer("BIP Basic characteristic line", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for PID map P (Proportional)
+        /// </summary>
+        public void OpenPIDMapP()
+        {
+            FindAndOpenTableViewer("PID map - P amplification", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for PID map I (Integral)
+        /// </summary>
+        public void OpenPIDMapI()
+        {
+            FindAndOpenTableViewer("PID map - I amplification", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for PID map D (Derivative)
+        /// </summary>
+        public void OpenPIDMapD()
+        {
+            FindAndOpenTableViewer("PID map - D amplification", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for Injection duration limiter
+        /// </summary>
+        public void OpenDurationLimiter()
+        {
+            FindAndOpenTableViewer("Injection duration limiter B", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for IQ by MAF limiter
+        /// </summary>
+        public void OpenMAFLimiter()
+        {
+            FindAndOpenTableViewer("IQ by MAF limiter 1", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for IQ by MAP limiter
+        /// </summary>
+        public void OpenMAPLimiter()
+        {
+            FindAndOpenTableViewer("IQ by MAP limiter", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for MAF linearization
+        /// </summary>
+        public void OpenMAFLinearization()
+        {
+            FindAndOpenTableViewer("MAF linearization", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for MAP linearization
+        /// </summary>
+        public void OpenMAPLinearization()
+        {
+            FindAndOpenTableViewer("MAP linearization", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for VCDS Diagnostic IQ Limit (1-10)
+        /// </summary>
+        public void OpenVCDSDiagnosticIQLimit(int limitNumber)
+        {
+            if (limitNumber < 1 || limitNumber > 10) return;
+            FindAndOpenTableViewer("VCDS Diagnostic IQ Limit " + limitNumber, 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for VCDS Diagnostic MAF Limit (1-2)
+        /// </summary>
+        public void OpenVCDSDiagnosticMAFLimit(int limitNumber)
+        {
+            if (limitNumber < 1 || limitNumber > 2) return;
+            FindAndOpenTableViewer("VCDS Diagnostic MAF Limit " + limitNumber, 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for VCDS Diagnostic MAP Limit (1-3)
+        /// </summary>
+        public void OpenVCDSDiagnosticMAPLimit(int limitNumber)
+        {
+            if (limitNumber < 1 || limitNumber > 3) return;
+            FindAndOpenTableViewer("VCDS Diagnostic MAP Limit " + limitNumber, 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for VCDS Diagnostic Torque Limit
+        /// </summary>
+        public void OpenVCDSDiagnosticTorqueLimit()
+        {
+            FindAndOpenTableViewer("VCDS Diagnostic Torque Limit", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for VCDS Diagnostic Torque Display offset
+        /// </summary>
+        public void OpenVCDSDiagnosticTorqueOffset()
+        {
+            FindAndOpenTableViewer("VCDS Diagnostic Torque Display offset", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for VCDS Diagnostic MAF Display offset
+        /// </summary>
+        public void OpenVCDSDiagnosticMAFOffset()
+        {
+            FindAndOpenTableViewer("VCDS Diagnostic MAF Display offset", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for VCDS Diagnostic MAP Display offset
+        /// </summary>
+        public void OpenVCDSDiagnosticMAPOffset()
+        {
+            FindAndOpenTableViewer("VCDS Diagnostic MAP Display offset", 2);
+        }
+
+        /// <summary>
+        /// Opens a table viewer for VCDS Diagnostic IQ Display offset
+        /// </summary>
+        public void OpenVCDSDiagnosticIQOffset()
+        {
+            FindAndOpenTableViewer("VCDS Diagnostic IQ Display offset", 2);
+        }
+
+        /// <summary>
         /// Helper method to find and open a table viewer by symbol name and code block
         /// </summary>
         private void FindAndOpenTableViewer(string symbolName, int codeBlock)
