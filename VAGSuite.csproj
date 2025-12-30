@@ -85,6 +85,7 @@
     <Compile Include="Services\FileOperationsManager.cs" />
     <Compile Include="Services\ChecksumService.cs" />
     <Compile Include="Services\MapViewerCoordinator.cs" />
+    <Compile Include="Services\ImportExportService.cs" />
     <Compile Include="Helpers\SymbolQueryHelper.cs" />
     <Compile Include="CompareResults.cs">
       <SubType>UserControl</SubType>

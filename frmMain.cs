@@ -124,6 +124,7 @@ namespace VAGSuite
         private FileOperationsManager _fileOperationsManager;
         private ChecksumService _checksumService;
         private MapViewerCoordinator _mapViewerCoordinator;
+        private ImportExportService _importExportService;
 
         public frmMain()
         {
@@ -158,6 +159,7 @@ namespace VAGSuite
             _fileOperationsManager = new FileOperationsManager(m_appSettings);
             _checksumService = new ChecksumService(m_appSettings);
             _mapViewerCoordinator = new MapViewerCoordinator(dockManager1, m_appSettings);
+            _importExportService = new ImportExportService(m_appSettings);
         }
 
 
@@ -4291,232 +4293,81 @@ namespace VAGSuite
 
         private void SaveAdditionalSymbols()
         {
-            System.Data.DataTable dt = new System.Data.DataTable(Path.GetFileNameWithoutExtension(Tools.Instance.m_currentfile));
-            dt.Columns.Add("SYMBOLNAME");
-            dt.Columns.Add("SYMBOLNUMBER", Type.GetType("System.Int32"));
-            dt.Columns.Add("FLASHADDRESS", Type.GetType("System.Int32"));
-            dt.Columns.Add("DESCRIPTION");
-            byte[] allBytes = File.ReadAllBytes(Tools.Instance.m_currentfile);
-            string boschpartNumber = Tools.Instance.ExtractBoschPartnumber(allBytes);
-            partNumberConverter pnc = new partNumberConverter();
-            ECUInfo info = pnc.ConvertPartnumber(boschpartNumber,allBytes.Length);
-            string checkstring = boschpartNumber + "_" + info.SoftwareID;
+            _importExportService.SaveAdditionalSymbols(Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
+        }
 
-            string xmlfilename = Tools.Instance.GetWorkingDirectory() + "\\repository\\" + Path.GetFileNameWithoutExtension(Tools.Instance.m_currentfile) + File.GetCreationTime(Tools.Instance.m_currentfile).ToString("yyyyMMddHHmmss") + checkstring + ".xml";
-            if (!Directory.Exists(Tools.Instance.GetWorkingDirectory() + "\\repository"))
-            {
-                Directory.CreateDirectory(Tools.Instance.GetWorkingDirectory() + "\\repository");
-            }
-            if (File.Exists(xmlfilename))
-            {
-                File.Delete(xmlfilename);
-            }
-            foreach (SymbolHelper sh in Tools.Instance.m_symbols)
-            {
-                if (sh.Userdescription != "")
-                {
-                    dt.Rows.Add(sh.Varname, sh.Symbol_number, sh.Flash_start_address, sh.Userdescription);
-                }
-            }
-            dt.WriteXml(xmlfilename);
+        /// <summary>
+        /// DEPRECATED: Use _importExportService.SaveAdditionalSymbols() instead.
+        /// Kept for backward compatibility during refactoring.
+        /// </summary>
+        private void SaveAdditionalSymbols_OLD()
+        {
+            _importExportService.SaveAdditionalSymbols(Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
         }
 
         private void TryToLoadAdditionalSymbols(string filename, ImportFileType importFileType, SymbolCollection symbolCollection, bool fromRepository)
         {
-            if (importFileType == ImportFileType.XML)
-            {
-                ImportXMLFile(filename, symbolCollection, fromRepository);
-            }
-            else if (importFileType == ImportFileType.AS2)
-            {
-                TryToLoadAdditionalAS2Symbols(filename, symbolCollection);
-            }
-            else if (importFileType == ImportFileType.CSV)
-            {
-                TryToLoadAdditionalCSVSymbols(filename, symbolCollection);
-            }
+            _importExportService.TryToLoadAdditionalSymbols(filename, importFileType, symbolCollection, fromRepository);
+        }
+
+        /// <summary>
+        /// DEPRECATED: Use _importExportService.TryToLoadAdditionalSymbols() instead.
+        /// </summary>
+        private void TryToLoadAdditionalSymbols_OLD(string filename, ImportFileType importFileType, SymbolCollection symbolCollection, bool fromRepository)
+        {
+            _importExportService.TryToLoadAdditionalSymbols(filename, importFileType, symbolCollection, fromRepository);
         }
 
         private void TryToLoadAdditionalCSVSymbols(string filename, SymbolCollection coll2load)
         {
-            // convert to CSV file format
-            // ADDRESS;NAME;;;
-            try
-            {
-                SymbolTranslator st = new SymbolTranslator();
-                char[] sep = new char[1];
-                sep.SetValue(';', 0);
-                string[] fileContent = File.ReadAllLines(filename);
-                foreach (string line in fileContent)
-                {
-                    string[] values = line.Split(sep);
-                    try
-                    {
-                        string varname = (string)values.GetValue(1);
-                        int flashaddress = Convert.ToInt32(values.GetValue(0));
-                        foreach (SymbolHelper sh in coll2load)
-                        {
-                            if (sh.Flash_start_address == flashaddress)
-                            {
-                                sh.Userdescription = varname;
-                            }
-                        }
-                    }
-                    catch (Exception lineE)
-                    {
-                        Console.WriteLine("Failed to import a symbol from CSV file " + line + ": " + lineE.Message);
-                    }
-                }
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine("Failed to import additional CSV symbols: " + E.Message);
-            }
+            _importExportService.TryToLoadAdditionalCSVSymbols(filename, coll2load);
+        }
+
+        /// <summary>
+        /// DEPRECATED: Use _importExportService.TryToLoadAdditionalCSVSymbols() instead.
+        /// </summary>
+        private void TryToLoadAdditionalCSVSymbols_OLD(string filename, SymbolCollection coll2load)
+        {
+            _importExportService.TryToLoadAdditionalCSVSymbols(filename, coll2load);
         }
 
         private void TryToLoadAdditionalAS2Symbols(string filename, SymbolCollection coll2load)
         {
-            // convert to AS2 file format
+            _importExportService.TryToLoadAdditionalAS2Symbols(filename, coll2load);
+        }
 
-            try
-            {
-                SymbolTranslator st = new SymbolTranslator();
-                char[] sep = new char[1];
-                sep.SetValue(';', 0);
-                string[] fileContent = File.ReadAllLines(filename);
-                int symbolnumber = 0;
-                foreach (string line in fileContent)
-                {
-                    if (line.StartsWith("*"))
-                    {
-                        symbolnumber++;
-                        string[] values = line.Split(sep);
-                        try
-                        {
-
-                            string varname = (string)values.GetValue(0);
-                            varname = varname.Substring(1);
-                            int idxSymTab = 0;
-                            foreach (SymbolHelper sh in coll2load)
-                            {
-                                if (sh.Length > 0) idxSymTab++;
-                                if (idxSymTab == symbolnumber)
-                                {
-                                    sh.Userdescription = varname;
-                                    break;
-                                }
-                            }
-                        }
-                        catch (Exception lineE)
-                        {
-                            Console.WriteLine("Failed to import a symbol from AS2 file " + line + ": " + lineE.Message);
-                        }
-
-                    }
-                }
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine("Failed to import additional AS2 symbols: " + E.Message);
-            }
+        /// <summary>
+        /// DEPRECATED: Use _importExportService.TryToLoadAdditionalAS2Symbols() instead.
+        /// </summary>
+        private void TryToLoadAdditionalAS2Symbols_OLD(string filename, SymbolCollection coll2load)
+        {
+            _importExportService.TryToLoadAdditionalAS2Symbols(filename, coll2load);
         }
 
         private bool ImportXMLFile(string filename, SymbolCollection coll2load, bool ImportFromRepository)
         {
-            bool retval = false;
-            SymbolTranslator st = new SymbolTranslator();
-            System.Data.DataTable dt = new System.Data.DataTable(Path.GetFileNameWithoutExtension(filename));
-            dt.Columns.Add("SYMBOLNAME");
-            dt.Columns.Add("SYMBOLNUMBER", Type.GetType("System.Int32"));
-            dt.Columns.Add("FLASHADDRESS", Type.GetType("System.Int32"));
-            dt.Columns.Add("DESCRIPTION");
-            if (ImportFromRepository)
-            {
-                byte[] allBytes = File.ReadAllBytes(filename);
-                string boschpartNumber = Tools.Instance.ExtractBoschPartnumber(allBytes);
-                partNumberConverter pnc = new partNumberConverter();
-                ECUInfo info = pnc.ConvertPartnumber(boschpartNumber, allBytes.Length);
-                string checkstring = boschpartNumber + "_" + info.SoftwareID;
+            return _importExportService.ImportXMLFile(filename, coll2load, ImportFromRepository);
+        }
 
-                string xmlfilename = Tools.Instance.GetWorkingDirectory() + "\\repository\\" + Path.GetFileNameWithoutExtension(filename) + File.GetCreationTime(filename).ToString("yyyyMMddHHmmss") + checkstring + ".xml";
-                if (!Directory.Exists(Tools.Instance.GetWorkingDirectory() + "\\repository"))
-                {
-                    Directory.CreateDirectory(Tools.Instance.GetWorkingDirectory() + "\\repository");
-                }
-                if (File.Exists(xmlfilename))
-                {
-                    dt.ReadXml(xmlfilename);
-                    retval = true;
-                }
-            }
-            else
-            {
-                string binname = GetFileDescriptionFromFile(filename);
-                if (binname != string.Empty)
-                {
-                    dt = new System.Data.DataTable(binname);
-                    dt.Columns.Add("SYMBOLNAME");
-                    dt.Columns.Add("SYMBOLNUMBER", Type.GetType("System.Int32"));
-                    dt.Columns.Add("FLASHADDRESS", Type.GetType("System.Int32"));
-                    dt.Columns.Add("DESCRIPTION");
-                    if (File.Exists(filename))
-                    {
-                        dt.ReadXml(filename);
-                        retval = true;
-                    }
-                }
-            }
-            foreach (SymbolHelper sh in coll2load)
-            {
-                foreach (DataRow dr in dt.Rows)
-                {
-                    try
-                    {
-                        //if (dr["SYMBOLNAME"].ToString() == sh.Varname)
-                        {
-                            if (sh.Flash_start_address == Convert.ToInt32(dr["FLASHADDRESS"]))
-                            {
-                                sh.Userdescription = dr["DESCRIPTION"].ToString();
-                                break;
-                            }
-                        }
-                    }
-                    catch (Exception E)
-                    {
-                        Console.WriteLine(E.Message);
-                    }
-                }
-            }
-            return retval;
+        /// <summary>
+        /// DEPRECATED: Use _importExportService.ImportXMLFile() instead.
+        /// </summary>
+        private bool ImportXMLFile_OLD(string filename, SymbolCollection coll2load, bool ImportFromRepository)
+        {
+            return _importExportService.ImportXMLFile(filename, coll2load, ImportFromRepository);
         }
 
         private string GetFileDescriptionFromFile(string file)
         {
-            string retval = string.Empty;
-            try
-            {
-                using (StreamReader sr = new StreamReader(file))
-                {
-                    sr.ReadLine();
-                    sr.ReadLine();
-                    string name = sr.ReadLine();
-                    name = name.Trim();
-                    name = name.Replace("<", "");
-                    name = name.Replace(">", "");
-                    //name = name.Replace("x0020", " ");
-                    name = name.Replace("_x0020_", " ");
-                    for (int i = 0; i <= 9; i++)
-                    {
-                        name = name.Replace("_x003" + i.ToString() + "_", i.ToString());
-                    }
-                    retval = name;
-                }
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine(E.Message);
-            }
-            return retval;
+            return _importExportService.GetFileDescriptionFromFile(file);
+        }
+
+        /// <summary>
+        /// DEPRECATED: Use _importExportService.GetFileDescriptionFromFile() instead.
+        /// </summary>
+        private string GetFileDescriptionFromFile_OLD(string file)
+        {
+            return _importExportService.GetFileDescriptionFromFile(file);
         }
 
         private void gridViewSymbols_CellValueChanged(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
@@ -4524,7 +4375,7 @@ namespace VAGSuite
 
             if (e.Column.Name == gcSymbolUserdescription.Name)
             {
-                SaveAdditionalSymbols();
+                _importExportService.SaveAdditionalSymbols(Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
             }
         }
 
