@@ -66,7 +66,7 @@ namespace vbAccelerator.Components.Controls
                     ScrollInfoStruct si = new ScrollInfoStruct();
                     si.fMask = SIF_ALL;
                     si.cbSize = Marshal.SizeOf(si);
-                    GetScrollInfo(msg.HWnd, 0, ref si);
+                    GetScrollInfo(this.Handle, 0, ref si);
                     if (msg.WParam.ToInt32() == SB_ENDSCROLL)
                     {
                         ScrollEventArgs sargs = new ScrollEventArgs(
@@ -83,7 +83,7 @@ namespace vbAccelerator.Components.Controls
                     ScrollInfoStruct si = new ScrollInfoStruct();
                     si.fMask = SIF_ALL;
                     si.cbSize = Marshal.SizeOf(si);
-                    GetScrollInfo(msg.HWnd, 0, ref si);
+                    GetScrollInfo(this.Handle, 0, ref si);
                     if (msg.WParam.ToInt32() == SB_ENDSCROLL)
                     {
                         ScrollEventArgs sargs = new ScrollEventArgs(

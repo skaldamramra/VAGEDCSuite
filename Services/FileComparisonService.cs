@@ -5,6 +5,7 @@ using System.IO;
 using System.Windows.Forms;
 using DevExpress.XtraBars.Docking;
 using VAGSuite;
+using VAGSuite.Helpers;
 
 namespace VAGSuite.Services
 {
@@ -61,38 +62,24 @@ namespace VAGSuite.Services
 
             if (symbols.Count > 0)
             {
-                SymbolCollection compare_symbols = new SymbolCollection();
-                List<CodeBlock> compare_blocks = new List<CodeBlock>();
-                List<AxisHelper> compare_axis = new List<AxisHelper>();
-                
-                // Detect maps in the comparison file
-                //compare_symbols = DetectMaps(filename, out compare_blocks, out compare_axis, false, false);
-                
-                foreach (SymbolHelper sh_compare in compare_symbols)
+                // Compare each symbol from the current file with the comparison file
+                foreach (SymbolHelper sh in symbols)
                 {
-                    foreach (SymbolHelper sh_org in symbols)
+                    double diffperc = 0;
+                    int diffabs = 0;
+                    double diffavg = 0;
+                    
+                    if (!CompareSymbolToCurrentFile(sh.Varname, 
+                        (int)sh.Flash_start_address, sh.Length, filename, 
+                        out diffperc, out diffabs, out diffavg, sh.Correction))
                     {
-                        if ((sh_compare.Flash_start_address == sh_org.Flash_start_address) || 
-                            (sh_compare.Varname == sh_org.Varname))
-                        {
-                            double diffperc = 0;
-                            int diffabs = 0;
-                            double diffavg = 0;
-                            
-                            if (!CompareSymbolToCurrentFile(sh_compare.Varname, 
-                                (int)sh_compare.Flash_start_address, sh_compare.Length, filename, 
-                                out diffperc, out diffabs, out diffavg, sh_compare.Correction))
-                            {
-                                string category = "";
-                                string ht = string.Empty;
-                                
-                                dt.Rows.Add(sh_compare.Varname, sh_compare.Start_address, 
-                                    sh_compare.Flash_start_address, sh_compare.Length, sh_compare.Length, 
-                                    sh_compare.Varname, false, 0, diffperc, diffabs, diffavg, 
-                                    category, "", sh_org.Symbol_number, sh_compare.Symbol_number, 
-                                    "", false, false, sh_org.CodeBlock, sh_compare.CodeBlock);
-                            }
-                        }
+                        string category = "";
+                        
+                        dt.Rows.Add(sh.Varname, sh.Start_address, 
+                            sh.Flash_start_address, sh.Length, sh.Length, 
+                            sh.Varname, false, 0, diffperc, diffabs, diffavg, 
+                            category, "", sh.Symbol_number, sh.Symbol_number, 
+                            "", false, false, sh.CodeBlock, sh.CodeBlock);
                     }
                 }
             }
@@ -119,18 +106,41 @@ namespace VAGSuite.Services
             
             if (address > 0)
             {
-                // This is a simplified implementation - full implementation requires Tools.Instance access
-                // The actual implementation reads both files and compares byte by byte
+                // Read current file data
+                byte[] curdata = Tools.Instance.readdatafromfile(Tools.Instance.m_currentfile, address, length, Tools.Instance.m_currentFileType);
+                byte[] compdata = Tools.Instance.readdatafromfile(filename, address, length, Tools.Instance.m_currentFileType);
                 
-                // Placeholder for actual comparison logic
-                // In the full implementation, this would:
-                // 1. Read the current file data
-                // 2. Read the comparison file data
-                // 3. Compare each byte pair
-                // 4. Calculate diff percentage, absolute difference, and average difference
+                if (curdata.Length != compdata.Length)
+                {
+                    Console.WriteLine("Lengths didn't match: " + symbolname);
+                    diffabs = length;
+                    return false;
+                }
                 
-                // For now, return true (no difference detected)
-                retval = true;
+                double totalvalue1 = 0;
+                double totalvalue2 = 0;
+                
+                for (int offset = 0; offset < curdata.Length; offset += 2)
+                {
+                    int ival1 = Convert.ToInt32(curdata.GetValue(offset)) * 256 + Convert.ToInt32(curdata.GetValue(offset + 1));
+                    int ival2 = Convert.ToInt32(compdata.GetValue(offset)) * 256 + Convert.ToInt32(compdata.GetValue(offset + 1));
+                    if (ival1 != ival2)
+                    {
+                        retval = false;
+                        diffabs++;
+                    }
+                    totalvalue1 += Convert.ToDouble(ival1);
+                    totalvalue2 += Convert.ToDouble(ival2);
+                }
+                
+                if (curdata.Length > 0)
+                {
+                    totalvalue1 /= (curdata.Length / 2);
+                    totalvalue2 /= (compdata.Length / 2);
+                }
+                
+                diffavg = Math.Abs(totalvalue1 - totalvalue2) * correction;
+                diffperc = (diffabs * 100) / (length / 2);
             }
             
             return retval;
@@ -224,8 +234,7 @@ namespace VAGSuite.Services
         /// </summary>
         public int[] GetXaxisValues(string filename, SymbolCollection symbols, string symbolname)
         {
-            // This would use SymbolQueryHelper.GetXAxisValues
-            return new int[0];
+            return SymbolQueryHelper.GetXAxisValues(filename, symbols, symbolname);
         }
 
         /// <summary>
@@ -233,8 +242,7 @@ namespace VAGSuite.Services
         /// </summary>
         public int[] GetYaxisValues(string filename, SymbolCollection symbols, string symbolname)
         {
-            // This would use SymbolQueryHelper.GetYAxisValues
-            return new int[0];
+            return SymbolQueryHelper.GetYAxisValues(filename, symbols, symbolname);
         }
 
         /// <summary>
@@ -242,11 +250,7 @@ namespace VAGSuite.Services
         /// </summary>
         public Int64 GetSymbolAddress(SymbolCollection symbols, string symbolname)
         {
-            foreach (SymbolHelper sh in symbols)
-            {
-                if (sh.Varname == symbolname) return sh.Flash_start_address;
-            }
-            return 0;
+            return SymbolQueryHelper.GetSymbolAddress(symbols, symbolname);
         }
 
         /// <summary>
@@ -254,11 +258,7 @@ namespace VAGSuite.Services
         /// </summary>
         public int GetSymbolLength(SymbolCollection symbols, string symbolname)
         {
-            foreach (SymbolHelper sh in symbols)
-            {
-                if (sh.Varname == symbolname) return sh.Length;
-            }
-            return 0;
+            return SymbolQueryHelper.GetSymbolLength(symbols, symbolname);
         }
 
         #endregion
