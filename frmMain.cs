@@ -173,7 +173,7 @@ namespace VAGSuite
             _mapViewerService = new MapViewerService(dockManager1, m_appSettings);
             _projectService = new ProjectService(m_appSettings);
             _exportService = new ExportService(m_appSettings);
-            _quickAccessService = new QuickAccessService(_mapViewerService, Tools.Instance.m_symbols);
+            _quickAccessService = new QuickAccessService(_mapViewerService);
         }
 
 

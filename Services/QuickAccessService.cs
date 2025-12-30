@@ -5,12 +5,10 @@ namespace VAGSuite.Services
     public class QuickAccessService
     {
         private MapViewerService _mapViewerService;
-        private SymbolCollection _symbols;
 
-        public QuickAccessService(MapViewerService mapViewerService, SymbolCollection symbols)
+        public QuickAccessService(MapViewerService mapViewerService)
         {
             _mapViewerService = mapViewerService;
-            _symbols = symbols;
         }
 
         /// <summary>
@@ -130,23 +128,25 @@ namespace VAGSuite.Services
         /// </summary>
         private void FindAndOpenTableViewer(string symbolName, int codeBlock)
         {
-            if (_symbols == null) return;
+            // Access symbols dynamically from Tools.Instance
+            SymbolCollection currentSymbols = Tools.Instance.m_symbols;
+            if (currentSymbols == null) return;
 
-            foreach (SymbolHelper sh in _symbols)
+            foreach (SymbolHelper sh in currentSymbols)
             {
                 if (sh.Varname.StartsWith(symbolName) && sh.CodeBlock == codeBlock)
                 {
-                    _mapViewerService.StartTableViewer(sh, Tools.Instance.m_currentfile, _symbols);
+                    _mapViewerService.StartTableViewer(sh, Tools.Instance.m_currentfile, currentSymbols);
                     return;
                 }
             }
 
             // Try userdescription as fallback
-            foreach (SymbolHelper sh in _symbols)
+            foreach (SymbolHelper sh in currentSymbols)
             {
                 if (sh.Userdescription != null && sh.Userdescription.StartsWith(symbolName) && sh.CodeBlock == codeBlock)
                 {
-                    _mapViewerService.StartTableViewer(sh, Tools.Instance.m_currentfile, _symbols);
+                    _mapViewerService.StartTableViewer(sh, Tools.Instance.m_currentfile, currentSymbols);
                     return;
                 }
             }
