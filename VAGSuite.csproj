@@ -121,6 +121,18 @@
     <Compile Include="Services\LaunchControlService.cs" />
     <Compile Include="Services\SmokeLimiterService.cs" />
     <Compile Include="Services\ProjectRebuildService.cs" />
+    <Compile Include="Services\IDataConversionService.cs" />
+    <Compile Include="Services\DataConversionService.cs" />
+    <Compile Include="Services\IMapRenderingService.cs" />
+    <Compile Include="Services\MapRenderingService.cs" />
+    <Compile Include="Services\IChartService.cs" />
+    <Compile Include="Services\ChartService.cs" />
+    <Compile Include="Services\IClipboardService.cs" />
+    <Compile Include="Services\ClipboardService.cs" />
+    <Compile Include="Services\ISmoothingService.cs" />
+    <Compile Include="Services\SmoothingService.cs" />
+    <Compile Include="Services\IMapDataService.cs" />
+    <Compile Include="Services\MapDataService.cs" />
     <Compile Include="Helpers\SymbolQueryHelper.cs" />
     <Compile Include="CompareResults.cs">
       <SubType>UserControl</SubType>
