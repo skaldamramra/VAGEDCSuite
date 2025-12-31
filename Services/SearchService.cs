@@ -171,7 +171,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Creates a dock panel for displaying search results
         /// </summary>
-        public DockPanel CreateSearchResultsPanel(string currentFile, SymbolCollection resultCollection, DataTable dt)
+        public DockPanel CreateSearchResultsPanel(string currentFile, SymbolCollection resultCollection, DataTable dt, CompareResults.NotifySelectSymbol onSymbolSelect)
         {
             _dockManager.BeginUpdate();
             try
@@ -183,6 +183,7 @@ namespace VAGSuite.Services
                 tabdet.Dock = DockStyle.Fill;
                 tabdet.UseForFind = true;
                 tabdet.Filename = currentFile;
+                tabdet.onSymbolSelect += onSymbolSelect;
                 dockPanel.Controls.Add(tabdet);
                 dockPanel.Text = "Search results: " + Path.GetFileName(currentFile);
                 dockPanel.DockTo(_dockManager, DockingStyle.Left, 1);

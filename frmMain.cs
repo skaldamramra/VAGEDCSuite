@@ -132,6 +132,11 @@ namespace VAGSuite
         private ProjectService _projectService;
         private ExportService _exportService;
         private QuickAccessService _quickAccessService;
+        private LayoutService _layoutService;
+        private SearchService _searchService;
+        private FirmwareService _firmwareService;
+        private LaunchControlService _launchControlService;
+        private SmokeLimiterService _smokeLimiterService;
 
         public frmMain()
         {
@@ -174,6 +179,11 @@ namespace VAGSuite
             _projectService = new ProjectService(m_appSettings);
             _exportService = new ExportService(m_appSettings);
             _quickAccessService = new QuickAccessService(_mapViewerService);
+            _layoutService = new LayoutService(m_appSettings);
+            _searchService = new SearchService(dockManager1, m_appSettings);
+            _firmwareService = new FirmwareService(m_appSettings);
+            _launchControlService = new LaunchControlService(m_appSettings);
+            _smokeLimiterService = new SmokeLimiterService(m_appSettings);
         }
 
 
@@ -1180,42 +1190,39 @@ namespace VAGSuite
             SetToolstripTheme();
         }
 
+        /// <summary>
+        /// DEPRECATED: Use _layoutService.GetAppDataPath() instead.
+        /// </summary>
         private string GetAppDataPath()
         {
-            return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            return _layoutService.GetAppDataPath();
         }
 
+        /// <summary>
+        /// DEPRECATED: Use _layoutService.LoadLayoutFiles() instead.
+        /// </summary>
         private void LoadLayoutFiles()
         {
-            try
+            _layoutService.LoadLayoutFiles("SymbolViewLayout.xml", () =>
             {
-                if (File.Exists(Path.Combine(GetAppDataPath(), "SymbolViewLayout.xml")))
-                {
-                    gridViewSymbols.RestoreLayoutFromXml(Path.Combine(GetAppDataPath(), "SymbolViewLayout.xml"));
-                }
-                if(m_appSettings.SymbolDockWidth > 2)
-                {
-                    dockSymbols.Width = m_appSettings.SymbolDockWidth;
-                }
-            }
-            catch (Exception E1)
+                gridViewSymbols.RestoreLayoutFromXml(Path.Combine(_layoutService.GetAppDataPath(), "SymbolViewLayout.xml"));
+            });
+            if (_layoutService.GetSymbolDockWidth() > 2)
             {
-                Console.WriteLine(E1.Message);
+                dockSymbols.Width = _layoutService.GetSymbolDockWidth();
             }
         }
 
+        /// <summary>
+        /// DEPRECATED: Use _layoutService.SaveLayoutFiles() instead.
+        /// </summary>
         private void SaveLayoutFiles()
         {
-            try
+            _layoutService.SetSymbolDockWidth(dockSymbols.Width);
+            _layoutService.SaveLayoutFiles("SymbolViewLayout.xml", () =>
             {
-                m_appSettings.SymbolDockWidth = dockSymbols.Width;
-                gridViewSymbols.SaveLayoutToXml(Path.Combine(GetAppDataPath(), "SymbolViewLayout.xml"));
-
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine(E.Message);
-            }
+                gridViewSymbols.SaveLayoutToXml(Path.Combine(_layoutService.GetAppDataPath(), "SymbolViewLayout.xml"));
+            });
         }
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -1417,183 +1424,37 @@ namespace VAGSuite
             return retval;
         }
 
+        /// <summary>
+        /// Performs a search for symbols and map data matching the specified criteria.
+        /// Delegates to SearchService.PerformSearch() and creates results panel.
+        /// </summary>
         private void btnSearchMaps_ItemClick(object sender, ItemClickEventArgs e)
         {
-            // ask the user for which value to search and if searching should include symbolnames and/or symbol description
             if (ValidateFile())
             {
                 SymbolCollection result_Collection = new SymbolCollection();
                 frmSearchMaps searchoptions = new frmSearchMaps();
-                if (searchoptions.ShowDialog() == DialogResult.OK)
+                
+                // Use SearchService to perform the search
+                System.Data.DataTable dt = _searchService.PerformSearch(
+                    Tools.Instance.m_currentfile,
+                    Tools.Instance.m_symbols,
+                    Tools.Instance.m_currentfilelength,
+                    searchoptions,
+                    ref result_Collection);
+                
+                if (result_Collection.Count == 0)
                 {
-                    frmProgress progress = new frmProgress();
-                    progress.SetProgress("Start searching data...");
-                    progress.SetProgressPercentage(0);
-                    progress.Show();
-                    System.Windows.Forms.Application.DoEvents();
-                    int cnt = 0;
-                    foreach (SymbolHelper sh in Tools.Instance.m_symbols)
-                    {
-                        progress.SetProgress("Searching " + sh.Varname);
-                        progress.SetProgressPercentage((cnt * 100) / Tools.Instance.m_symbols.Count);
-                        bool hit_found = false;
-                        if (searchoptions.IncludeSymbolNames)
-                        {
-                            if (searchoptions.SearchForNumericValues)
-                            {
-                                if (sh.Varname.Contains(searchoptions.NumericValueToSearchFor.ToString()))
-                                {
-                                    hit_found = true;
-                                }
-                            }
-                            if (searchoptions.SearchForStringValues)
-                            {
-                                if (searchoptions.StringValueToSearchFor != string.Empty)
-                                {
-                                    if (sh.Varname.Contains(searchoptions.StringValueToSearchFor))
-                                    {
-                                        hit_found = true;
-                                    }
-                                }
-                            }
-                        }
-                        if (searchoptions.IncludeSymbolDescription)
-                        {
-                            if (searchoptions.SearchForNumericValues)
-                            {
-                                if (sh.Description.Contains(searchoptions.NumericValueToSearchFor.ToString()))
-                                {
-                                    hit_found = true;
-                                }
-                            }
-                            if (searchoptions.SearchForStringValues)
-                            {
-                                if (searchoptions.StringValueToSearchFor != string.Empty)
-                                {
-                                    if (sh.Description.Contains(searchoptions.StringValueToSearchFor))
-                                    {
-                                        hit_found = true;
-                                    }
-                                }
-                            }
-                        }
-                        // now search the symbol data
-                        if (sh.Flash_start_address < Tools.Instance.m_currentfilelength)
-                        {
-                            byte[] symboldata = Tools.Instance.readdatafromfile(Tools.Instance.m_currentfile, (int)sh.Flash_start_address, sh.Length, Tools.Instance.m_currentFileType);
-                            if (searchoptions.SearchForNumericValues)
-                            {
-                                for (int i = 0; i < symboldata.Length / 2; i += 2)
-                                {
-                                    float value = Convert.ToInt32(symboldata.GetValue(i)) * 256;
-                                    value += Convert.ToInt32(symboldata.GetValue(i + 1));
-                                    value *= (float)GetMapCorrectionFactor(sh.Varname);
-                                    value += (float)GetMapCorrectionOffset(sh.Varname);
-                                    if (value == (float)searchoptions.NumericValueToSearchFor)
-                                    {
-                                        hit_found = true;
-                                    }
-                                }
-                            }
-                            if (searchoptions.SearchForStringValues)
-                            {
-                                if (searchoptions.StringValueToSearchFor.Length > symboldata.Length)
-                                {
-                                    // possible...
-                                    string symboldataasstring = System.Text.Encoding.ASCII.GetString(symboldata);
-                                    if (symboldataasstring.Contains(searchoptions.StringValueToSearchFor))
-                                    {
-                                        hit_found = true;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (hit_found)
-                        {
-                            // add to collection
-                            result_Collection.Add(sh);
-                        }
-                        cnt++;
-                    }
-                    progress.Close();
-                    if (result_Collection.Count == 0)
-                    {
-                        frmInfoBox info = new frmInfoBox("No results found...");
-                    }
-                    else
-                    {
-                        // start result screen
-                        dockManager1.BeginUpdate();
-                        try
-                        {
-                            SymbolTranslator st = new SymbolTranslator();
-                            DevExpress.XtraBars.Docking.DockPanel dockPanel = dockManager1.AddPanel(new System.Drawing.Point(-500, -500));
-                            CompareResults tabdet = new CompareResults();
-                            tabdet.ShowAddressesInHex = m_appSettings.ShowAddressesInHex;
-                            tabdet.SetFilterMode(m_appSettings.ShowAddressesInHex);
-                            tabdet.Dock = DockStyle.Fill;
-                            tabdet.UseForFind = true;
-                            tabdet.Filename = Tools.Instance.m_currentfile;
-                            tabdet.onSymbolSelect += new CompareResults.NotifySelectSymbol(tabdet_onSymbolSelectForFind);
-                            dockPanel.Controls.Add(tabdet);
-                            dockPanel.Text = "Search results: " + Path.GetFileName(Tools.Instance.m_currentfile);
-                            dockPanel.DockTo(dockManager1, DevExpress.XtraBars.Docking.DockingStyle.Left, 1);
-
-                            dockPanel.Width = 500;
-
-                            System.Data.DataTable dt = new System.Data.DataTable();
-                            dt.Columns.Add("SYMBOLNAME");
-                            dt.Columns.Add("SRAMADDRESS", Type.GetType("System.Int32"));
-                            dt.Columns.Add("FLASHADDRESS", Type.GetType("System.Int32"));
-                            dt.Columns.Add("LENGTHBYTES", Type.GetType("System.Int32"));
-                            dt.Columns.Add("LENGTHVALUES", Type.GetType("System.Int32"));
-                            dt.Columns.Add("DESCRIPTION");
-                            dt.Columns.Add("ISCHANGED", Type.GetType("System.Boolean"));
-                            dt.Columns.Add("CATEGORY"); //0
-                            dt.Columns.Add("DIFFPERCENTAGE", Type.GetType("System.Double"));
-                            dt.Columns.Add("DIFFABSOLUTE", Type.GetType("System.Int32"));
-                            dt.Columns.Add("DIFFAVERAGE", Type.GetType("System.Double"));
-                            dt.Columns.Add("CATEGORYNAME");
-                            dt.Columns.Add("SUBCATEGORYNAME");
-                            dt.Columns.Add("SymbolNumber1", Type.GetType("System.Int32"));
-                            dt.Columns.Add("SymbolNumber2", Type.GetType("System.Int32"));
-                            dt.Columns.Add("CodeBlock1", Type.GetType("System.Int32"));
-                            dt.Columns.Add("CodeBlock2", Type.GetType("System.Int32"));
-
-                            string ht = string.Empty;
-                            XDFCategories cat = XDFCategories.Undocumented;
-                            XDFSubCategory subcat = XDFSubCategory.Undocumented;
-                            foreach (SymbolHelper shfound in result_Collection)
-                            {
-                                string helptext = st.TranslateSymbolToHelpText(shfound.Varname);
-                                if (shfound.Varname.Contains("."))
-                                {
-                                    try
-                                    {
-                                        shfound.Category = shfound.Varname.Substring(0, shfound.Varname.IndexOf("."));
-                                    }
-                                    catch (Exception cE)
-                                    {
-                                        Console.WriteLine("Failed to assign category to symbol: " + shfound.Varname + " err: " + cE.Message);
-                                    }
-                                }
-                                dt.Rows.Add(shfound.Varname, shfound.Start_address, shfound.Flash_start_address, shfound.Length, shfound.Length, helptext, false, 0, 0, 0, 0, shfound.Category, "", shfound.Symbol_number, shfound.Symbol_number, shfound.CodeBlock, shfound.CodeBlock);
-                            }
-                            tabdet.CompareSymbolCollection = result_Collection;
-                            tabdet.OpenGridViewGroups(tabdet.gridControl1, 1);
-                            tabdet.gridControl1.DataSource = dt.Copy();
-
-                        }
-                        catch (Exception E)
-                        {
-                            Console.WriteLine(E.Message);
-                        }
-                        dockManager1.EndUpdate();
-
-                    }
-
-
+                    frmInfoBox info = new frmInfoBox("No results found...");
+                }
+                else
+                {
+                    // Create the search results panel using SearchService
+                    _searchService.CreateSearchResultsPanel(
+                        Tools.Instance.m_currentfile,
+                        result_Collection,
+                        dt,
+                        tabdet_onSymbolSelectForFind);
                 }
             }
         }
@@ -2246,64 +2107,35 @@ namespace VAGSuite
             }
         }
 
+        /// <summary>
+        /// Displays firmware information dialog using FirmwareService.
+        /// </summary>
         private void btnFirmwareInformation_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (Tools.Instance.m_currentfile != string.Empty)
+            if (Tools.Instance.m_currentfile != string.Empty && File.Exists(Tools.Instance.m_currentfile))
             {
-                if(File.Exists(Tools.Instance.m_currentfile))
-                {
-
-                    byte[] allBytes = File.ReadAllBytes(Tools.Instance.m_currentfile);
-                    IEDCFileParser parser = Tools.Instance.GetParserForFile(Tools.Instance.m_currentfile, false);
-                    partNumberConverter pnc = new partNumberConverter();
-                    ECUInfo ecuinfo = pnc.ConvertPartnumber(parser.ExtractBoschPartnumber(allBytes), allBytes.Length);
-                    frmFirmwareInfo info = new frmFirmwareInfo();
-                    info.InfoString = parser.ExtractInfo(allBytes);
-                    info.partNumber = parser.ExtractBoschPartnumber(allBytes);
-                    if(ecuinfo.SoftwareID == "") ecuinfo.SoftwareID = parser.ExtractPartnumber(allBytes);
-                    info.SoftwareID = ecuinfo.SoftwareID + " " + parser.ExtractSoftwareNumber(allBytes);
-                    info.carDetails = ecuinfo.CarMake + " " + ecuinfo.CarType;
-                    string enginedetails = ecuinfo.EngineType;
-                    string hpinfo = string.Empty;
-                    string tqinfo = string.Empty;
-                    if (ecuinfo.HP > 0) hpinfo = ecuinfo.HP.ToString() + " bhp";
-                    if (ecuinfo.TQ > 0) tqinfo = ecuinfo.TQ.ToString() + " Nm";
-                    if (hpinfo != string.Empty || tqinfo != string.Empty)
-                    {
-                        enginedetails += " (";
-                        if (hpinfo != string.Empty) enginedetails += hpinfo;
-                        if (hpinfo != string.Empty && tqinfo != string.Empty) enginedetails += "/";
-                        if (tqinfo != string.Empty) enginedetails += tqinfo;
-                        enginedetails += ")";
-                    }
-                    info.EngineType = /*ecuinfo.EngineType*/ enginedetails;
-                    info.ecuDetails = ecuinfo.EcuType;
-                    //DumpECUInfo(ecuinfo);
-                    ChecksumResultDetails result = Tools.Instance.UpdateChecksum(Tools.Instance.m_currentfile, true);
-                    string chkType = string.Empty;
-                    if (result.TypeResult == ChecksumType.VAG_EDC15P_V41) chkType = "VAG EDC15P V4.1";
-                    else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41V2) chkType = "VAG EDC15P V4.1v2";
-                    else if (result.TypeResult == ChecksumType.VAG_EDC15P_V41_2002) chkType = "VAG EDC15P V4.1 2002+";
-                    else if (result.TypeResult != ChecksumType.Unknown) chkType = result.TypeResult.ToString();
-
-                    chkType += " " + result.CalculationResult.ToString();
-
-                    info.checksumType = chkType;
-                    // number of codeblocks?
-                    info.codeBlocks = DetermineNumberOfCodeblocks().ToString();
-                    info.ShowDialog();
-                }
+                // Use FirmwareService to get firmware info
+                var firmwareInfo = _firmwareService.GetFirmwareInfo(Tools.Instance.m_currentfile);
+                
+                frmFirmwareInfo info = new frmFirmwareInfo();
+                info.InfoString = firmwareInfo.AdditionalInfo;
+                info.partNumber = firmwareInfo.PartNumber;
+                info.SoftwareID = firmwareInfo.SoftwareID + " " + firmwareInfo.SoftwareVersion;
+                info.carDetails = firmwareInfo.CarMake + " " + firmwareInfo.CarType;
+                info.EngineType = firmwareInfo.EngineType;
+                info.ecuDetails = firmwareInfo.EcuType;
+                info.checksumType = firmwareInfo.ChecksumType;
+                info.codeBlocks = firmwareInfo.NumberOfCodeblocks.ToString();
+                info.ShowDialog();
             }
         }
 
+        /// <summary>
+        /// DEPRECATED: Use _firmwareService.DetermineNumberOfCodeblocks() instead.
+        /// </summary>
         private int DetermineNumberOfCodeblocks()
         {
-            List<int> blockIds = new List<int>();
-            foreach (SymbolHelper sh in Tools.Instance.m_symbols)
-            {
-                if (!blockIds.Contains(sh.CodeBlock) && sh.CodeBlock != 0) blockIds.Add(sh.CodeBlock);
-            }
-            return blockIds.Count;
+            return _firmwareService.DetermineNumberOfCodeblocks();
         }
 
         private void DumpECUInfo(ECUInfo ecuinfo)
@@ -3176,42 +3008,18 @@ namespace VAGSuite
             {
                 if (File.Exists(Tools.Instance.m_currentfile))
                 {
-                    btnActivateSmokeLimiters.Enabled = false;
-                    // find the smoke limiter control map (selector)
-                    foreach (SymbolHelper sh in Tools.Instance.m_symbols)
+                    // Use SmokeLimiterService to activate smoke limiters
+                    bool activated = _smokeLimiterService.ActivateSmokeLimiters(Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
+                    
+                    if (activated)
                     {
-                        if (sh.Varname.StartsWith("Smoke limiter"))
-                        {
-                            byte[] mapdata = new byte[sh.Length];
-                            mapdata.Initialize();
-                            mapdata = Tools.Instance.readdatafromfile(Tools.Instance.m_currentfile, (int)sh.Flash_start_address, sh.Length, Tools.Instance.m_currentFileType);
-
-                            int selectorAddress = sh.MapSelector.StartAddress;
-                            if (selectorAddress > 0)
-                            {
-                                byte[] mapIndexes = new byte[sh.MapSelector.MapIndexes.Length * 2];
-                                int bIdx = 0;
-                                for (int i = 0; i < sh.MapSelector.MapIndexes.Length; i++)
-                                {
-                                    mapIndexes[bIdx++] = Convert.ToByte(i);
-                                    mapIndexes[bIdx++] = 0;
-                                }
-                                Tools.Instance.savedatatobinary(selectorAddress + mapIndexes.Length, mapIndexes.Length, mapIndexes, Tools.Instance.m_currentfile, false, Tools.Instance.m_currentFileType);
-                            }
-                            for (int i = 1; i < sh.MapSelector.MapIndexes.Length; i++)
-                            {
-                                // save the map data (copy)
-                                int saveAddress = (int)sh.Flash_start_address + i * sh.Length;
-                                Tools.Instance.savedatatobinary(saveAddress, sh.Length, mapdata, Tools.Instance.m_currentfile, false, Tools.Instance.m_currentFileType);
-                            }
-                        }
+                        VerifyChecksum(Tools.Instance.m_currentfile, false, false);
                     }
-
-                    VerifyChecksum(Tools.Instance.m_currentfile, false, false);
                 }
             }
             Application.DoEvents();
-
+            
+            // Refresh symbols after activation
             if (!btnActivateSmokeLimiters.Enabled)
             {
                 Tools.Instance.m_symbols = DetectMaps(Tools.Instance.m_currentfile, out Tools.Instance.codeBlockList, out Tools.Instance.AxisList, false, true);
@@ -3221,15 +3029,12 @@ namespace VAGSuite
                 Application.DoEvents();
                 try
                 {
-
                     gridViewSymbols.ExpandAllGroups();
                 }
                 catch (Exception)
                 {
-
                 }
                 Application.DoEvents();
-
             }
         }
 

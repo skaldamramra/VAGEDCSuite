@@ -96,6 +96,8 @@
     <Compile Include="Services\SearchService.cs" />
     <Compile Include="Services\LayoutService.cs" />
     <Compile Include="Services\FirmwareService.cs" />
+    <Compile Include="Services\LaunchControlService.cs" />
+    <Compile Include="Services\SmokeLimiterService.cs" />
     <Compile Include="Helpers\SymbolQueryHelper.cs" />
     <Compile Include="CompareResults.cs">
       <SubType>UserControl</SubType>
