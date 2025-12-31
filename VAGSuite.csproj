@@ -76,6 +76,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MapViewerEventArgs\AxisEditorRequestedEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\ViewTypeChangedEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\AxisLockEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\SliderMoveEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\SplitterMovedEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\CellSelectionChangedEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\ReadFromSRAMEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\WriteToSRAMEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\ReadSymbolEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\SaveSymbolEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\GraphSelectionChangedEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\SurfaceGraphViewChangedEventArgs.cs" />
+    <Compile Include="MapViewerEventArgs\SurfaceGraphViewChangedEventArgsEx.cs" />
+    <Compile Include="MapViewerEnums.cs" />
     <Compile Include="Theming\VAGEDCColorPalette.cs" />
     <Compile Include="Theming\VAGEDCTheme.cs" />
     <Compile Include="Theming\VAGEDCThemeManager.cs" />
