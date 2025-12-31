@@ -2639,72 +2639,18 @@ namespace VAGSuite
             {
                 if (File.Exists(Tools.Instance.m_currentfile))
                 {
-                    if (MapsWithNameMissing("Launch control map", Tools.Instance.m_symbols))
+                    // Use LaunchControlService to activate launch control
+                    bool activated = _launchControlService.ActivateLaunchControl(Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
+
+                    if (activated)
                     {
-                        byte[] allBytes = File.ReadAllBytes(Tools.Instance.m_currentfile);
-                        bool found = true;
-                        int offset = 0;
-                        while (found)
-                        {
-                            int LCAddress = Tools.Instance.findSequence(allBytes, offset, new byte[16] { 0xFF, 0xFF, 0x02, 0x00, 0x80, 0x00, 0x00, 0x0A, 0xFF, 0xFF, 0x02, 0x00, 0x00, 0x00, 0x70, 0x17 }, new byte[16] { 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1 });
-                            if (LCAddress > 0)
-                            {
-                                //Console.WriteLine("Working on " + LCAddress.ToString("X8"));
-                                btnActivateLaunchControl.Enabled = false;
-
-                                byte[] saveByte = new byte[(0x0E * 2) + 2];
-                                int i = 0;
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(0x0E), i++);
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(0), i++); // 1st value = 0 km/h
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(20), i++); // 2nd value = 6 km/h (6 / 0.000039 = 
-
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(40), i++); // 
-
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(60), i++); // 
-
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(80), i++); // 
-
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(100), i++); // 
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(120), i++); // 
-
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(140), i++); // 
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(160), i++); // 
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(180), i++); // 
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(200), i++); // 
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(220), i++); // 
-                                saveByte.SetValue(Convert.ToByte(0), i++);
-                                saveByte.SetValue(Convert.ToByte(240), i++); // 
-                                saveByte.SetValue(Convert.ToByte(1), i++);
-                                saveByte.SetValue(Convert.ToByte(4), i++); // 
-
-                                Tools.Instance.savedatatobinary(LCAddress + 2, saveByte.Length, saveByte, Tools.Instance.m_currentfile, false, Tools.Instance.m_currentFileType);
-                                // fill the map with default values as well!
-                                VerifyChecksum(Tools.Instance.m_currentfile, false, false);
-                                
-                                offset = LCAddress + 1;
-
-
-                            }
-                            else found = false;
-                        }
+                        VerifyChecksum(Tools.Instance.m_currentfile, false, false);
                     }
                 }
             }
             Application.DoEvents();
-            //C2 02 00 xx xx xx xx xx EC 02 00 70 17*/
+
+            // Refresh symbols after activation
             if (!btnActivateLaunchControl.Enabled)
             {
                 Tools.Instance.m_symbols = DetectMaps(Tools.Instance.m_currentfile, out Tools.Instance.codeBlockList, out Tools.Instance.AxisList, false, true);
@@ -2721,9 +2667,7 @@ namespace VAGSuite
 
                 }
                 Application.DoEvents();
-
             }
-
         }
 
         private void btnEditEEProm_ItemClick(object sender, ItemClickEventArgs e)
