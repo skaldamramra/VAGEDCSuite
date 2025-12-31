@@ -1118,13 +1118,15 @@ namespace VAGSuite
                     }
                     else
                     {
-                        surface.Palette.Add(now_realMinValue, Color.Green);
-                        surface.Palette.Add(now_realMinValue + 0.25 * diff, Color.Yellow);
-                        surface.Palette.Add(now_realMinValue + 0.50 * diff, Color.Orange);
-                        surface.Palette.Add(now_realMinValue + 0.75 * diff, Color.OrangeRed);
+                        // VAGEDC Dark Skin: Blue→Green→Yellow→Orange→Red gradient for better low-value visibility
+                        surface.Palette.Add(now_realMinValue, Color.FromArgb(30, 58, 138));  // Navy Blue (#1E3A8A) for low values
+                        surface.Palette.Add(now_realMinValue + 0.20 * diff, Color.FromArgb(16, 185, 129));  // Emerald Green (#10B981)
+                        surface.Palette.Add(now_realMinValue + 0.40 * diff, Color.Yellow);
+                        surface.Palette.Add(now_realMinValue + 0.60 * diff, Color.Orange);
+                        surface.Palette.Add(now_realMinValue + 0.80 * diff, Color.OrangeRed);
                         surface.Palette.Add(now_realMinValue + diff, Color.Red);
                     }
-                    surface.PaletteSteps = 4;
+                    surface.PaletteSteps = 5;  // Increased from 4 to 5 for smoother gradient
                     surface.AutomaticPalette = false;
                 }
                 /*if (m_issixteenbit)

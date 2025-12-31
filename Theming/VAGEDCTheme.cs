@@ -35,6 +35,9 @@ namespace VAGSuite.Theming
         public Color GridBorder { get; set; }
         public Color GridHeaderBackground { get; set; }
         public Color GridHeaderText { get; set; }
+        public Color GridHoverRow { get; set; }
+        public Font GridHeaderFont { get; set; }
+        public Font GridCellFont { get; set; }
         
         // Toolbar/StatusBar colors
         public Color ToolbarBackground { get; set; }
@@ -83,8 +86,11 @@ namespace VAGSuite.Theming
                 GridAlternateRow = VAGEDCColorPalette.Gray700,
                 GridSelection = VAGEDCColorPalette.Primary500,
                 GridBorder = VAGEDCColorPalette.Gray600,
-                GridHeaderBackground = VAGEDCColorPalette.Gray700,
+                GridHeaderBackground = VAGEDCColorPalette.Gray800,  // Changed from Gray700 to Gray800 for darker headers
                 GridHeaderText = VAGEDCColorPalette.TextPrimaryDark,
+                GridHoverRow = Color.FromArgb(128, 45, 55, 72),  // Gray700 at 50% opacity (#2D3748)
+                GridHeaderFont = new Font("Segoe UI", 12f, FontStyle.Bold),  // Semibold 12px for headers
+                GridCellFont = new Font("Segoe UI", 12f, FontStyle.Regular),  // Regular 12px for cells
                 
                 // Toolbar/StatusBar
                 ToolbarBackground = VAGEDCColorPalette.Gray800,

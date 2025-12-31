@@ -20,11 +20,12 @@ namespace VAGSuite.Theming
         public static readonly Color Danger500 = Color.FromArgb(220, 38, 38);       // Blood Red
         
         // ===== DARK MODE NEUTRALS =====
-        public static readonly Color Gray900 = Color.FromArgb(15, 23, 42);          // Onyx (Background)
-        public static readonly Color Gray800 = Color.FromArgb(30, 41, 59);          // Panels
-        public static readonly Color Gray700 = Color.FromArgb(51, 65, 85);          // Cards/Elevated
-        public static readonly Color Gray600 = Color.FromArgb(71, 85, 105);         // Borders
-        public static readonly Color Gray500 = Color.FromArgb(100, 116, 139);       // Disabled
+        public static readonly Color Gray900 = Color.FromArgb(15, 23, 42);          // Onyx (Background) - #0F172A
+        public static readonly Color Gray800 = Color.FromArgb(30, 41, 59);          // Charcoal/Panels - #1E293B
+        public static readonly Color Gray700 = Color.FromArgb(51, 65, 85);          // Cards/Elevated - #334155
+        public static readonly Color Gray600 = Color.FromArgb(71, 85, 105);         // Borders - #475569
+        public static readonly Color Gray500 = Color.FromArgb(100, 116, 139);       // Disabled - #64748B
+        public static readonly Color Gray400 = Color.FromArgb(148, 163, 184);       // Muted text - #94A3B8
         
         // ===== LIGHT MODE NEUTRALS =====
         public static readonly Color Gray50 = Color.FromArgb(248, 250, 252);        // Light Background

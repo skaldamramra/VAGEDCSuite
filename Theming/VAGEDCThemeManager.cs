@@ -203,9 +203,13 @@ namespace VAGSuite.Theming
             else if (control is TreeView)
             {
                 TreeView treeView = (TreeView)control;
-                treeView.BackColor = _currentTheme.GridBackground;
+                treeView.BackColor = _currentTheme.WindowBackground;  // Use Gray900 (true black/onyx) for better contrast
                 treeView.ForeColor = _currentTheme.TextPrimary;
                 treeView.BorderStyle = BorderStyle.FixedSingle;
+                treeView.LineColor = _currentTheme.BorderPrimary;
+                
+                // Note: TreeView selection colors are set via DrawMode in individual forms
+                // Selected items should use Navy blue (#1E3A8A) with white text
             }
             // Standard ListView
             else if (control is ListView)
@@ -240,9 +244,10 @@ namespace VAGSuite.Theming
         {
             if (grid.MainView is GridView gridView)
             {
-                // Appearance settings
+                // Row appearance settings
                 gridView.Appearance.Row.BackColor = _currentTheme.GridBackground;
                 gridView.Appearance.Row.ForeColor = _currentTheme.TextPrimary;
+                gridView.Appearance.Row.Font = _currentTheme.GridCellFont;
                 
                 gridView.Appearance.SelectedRow.BackColor = _currentTheme.GridSelection;
                 gridView.Appearance.SelectedRow.ForeColor = Color.White;
@@ -250,8 +255,11 @@ namespace VAGSuite.Theming
                 gridView.Appearance.FocusedRow.BackColor = _currentTheme.GridSelection;
                 gridView.Appearance.FocusedRow.ForeColor = Color.White;
                 
+                // Header appearance with improved typography
                 gridView.Appearance.HeaderPanel.BackColor = _currentTheme.GridHeaderBackground;
                 gridView.Appearance.HeaderPanel.ForeColor = _currentTheme.GridHeaderText;
+                gridView.Appearance.HeaderPanel.Font = _currentTheme.GridHeaderFont;
+                gridView.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
                 
                 gridView.Appearance.GroupRow.BackColor = _currentTheme.GridHeaderBackground;
                 gridView.Appearance.GroupRow.ForeColor = _currentTheme.TextPrimary;
@@ -259,6 +267,18 @@ namespace VAGSuite.Theming
                 // Enable alternating row colors
                 gridView.OptionsView.EnableAppearanceOddRow = true;
                 gridView.Appearance.OddRow.BackColor = _currentTheme.GridAlternateRow;
+                
+                // Hover state appearance
+                gridView.Appearance.HideSelectionRow.BackColor = _currentTheme.GridHoverRow;
+                gridView.Appearance.HideSelectionRow.ForeColor = _currentTheme.TextPrimary;
+                
+                // Reduce border opacity for subtle appearance
+                gridView.Appearance.VertLine.BackColor = Color.FromArgb(51, _currentTheme.GridBorder);  // 20% opacity
+                gridView.Appearance.HorzLine.BackColor = Color.FromArgb(51, _currentTheme.GridBorder);  // 20% opacity
+                
+                // Selected cell with navy border (2px)
+                gridView.Appearance.FocusedCell.BackColor = Color.Transparent;
+                gridView.Appearance.FocusedCell.BorderColor = _currentTheme.AccentPrimary;
             }
         }
         
