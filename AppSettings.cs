@@ -116,6 +116,18 @@ namespace VAGSuite
             }
         }
 
+        private bool m_useVAGEDCDarkTheme = false;
+
+        public bool UseVAGEDCDarkTheme
+        {
+            get { return m_useVAGEDCDarkTheme; }
+            set
+            {
+                m_useVAGEDCDarkTheme = value;
+                SaveRegistrySetting("UseVAGEDCDarkTheme", m_useVAGEDCDarkTheme ? "1" : "0");
+            }
+        }
+
        
 
         private bool m_SynchronizeMapviewers = true;
@@ -539,6 +551,10 @@ namespace VAGSuite
                             else if (a == "Skinname")
                             {
                                 m_skinname = Settings.GetValue(a).ToString();
+                            }
+                            else if (a == "UseVAGEDCDarkTheme")
+                            {
+                                m_useVAGEDCDarkTheme = Settings.GetValue(a).ToString() == "1";
                             }
                             else if (a == "RequestProjectNotes")
                             {

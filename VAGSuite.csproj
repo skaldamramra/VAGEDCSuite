@@ -76,6 +76,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Theming\VAGEDCColorPalette.cs" />
+    <Compile Include="Theming\VAGEDCTheme.cs" />
+    <Compile Include="Theming\VAGEDCThemeManager.cs" />
     <Compile Include="AppSettings.cs" />
     <Compile Include="AxisHelper.cs" />
     <Compile Include="CellHelper.cs" />

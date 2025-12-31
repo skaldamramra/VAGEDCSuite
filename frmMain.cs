@@ -66,6 +66,7 @@ using DevExpress.XtraBars;
 using DevExpress.Skins;
 using VAGSuite.Services;
 using VAGSuite.Helpers;
+using VAGSuite.Theming;
 
 namespace VAGSuite
 {
@@ -1119,6 +1120,16 @@ namespace VAGSuite
             DevExpress.Skins.SkinManager.Default.RegisterAssembly(typeof(DevExpress.UserSkins.BonusSkins).Assembly);
             DevExpress.Skins.SkinManager.Default.RegisterAssembly(typeof(DevExpress.UserSkins.OfficeSkins).Assembly);
 
+            // Add VAGEDC Dark as first option
+            item = new BarButtonItem();
+            item.Caption = "VAGEDC Dark";
+            item.Tag = "CUSTOM_VAGEDC_DARK"; // Special tag to identify custom theme
+            rbnPageGroupSkins.ItemLinks.Add(item);
+            item.ItemClick += new ItemClickEventHandler(OnSkinClick);
+            
+            // Add separator
+            rbnPageGroupSkins.ItemLinks.Add(new BarButtonItem { Caption = "───────────", Enabled = false });
+
             foreach (DevExpress.Skins.SkinContainer cnt in DevExpress.Skins.SkinManager.Default.Skins)
             {
                 item = new BarButtonItem();
@@ -1128,19 +1139,44 @@ namespace VAGSuite
                 item.ItemClick += new ItemClickEventHandler(OnSkinClick);
             }
 
-            try
+            // Apply saved theme
+            if (m_appSettings.UseVAGEDCDarkTheme)
             {
-                DevExpress.LookAndFeel.UserLookAndFeel.Default.SetSkinStyle(m_appSettings.Skinname);
+                ApplyVAGEDCDarkTheme();
             }
-            catch (Exception E)
+            else
             {
-                Console.WriteLine(E.Message);
+                try
+                {
+                    DevExpress.LookAndFeel.UserLookAndFeel.Default.SetSkinStyle(m_appSettings.Skinname);
+                }
+                catch (Exception E)
+                {
+                    Console.WriteLine(E.Message);
+                }
+                SetToolstripTheme();
             }
-            SetToolstripTheme();
+        }
+        
+        private void ApplyVAGEDCDarkTheme()
+        {
+            // First, set a compatible base DevExpress skin (dark)
+            DevExpress.LookAndFeel.UserLookAndFeel.Default.SetSkinStyle("DevExpress Dark Style");
+            
+            // Then apply our custom theme on top
+            VAGEDCThemeManager.Instance.ActivateVAGEDCDark(this);
+            
+            // Apply to ToolStrips
+            ToolStripManager.RenderMode = ToolStripManagerRenderMode.Professional;
+            ToolStripManager.Renderer = VAGEDCThemeManager.Instance.GetToolStripRenderer();
         }
 
         private void SetToolstripTheme()
         {
+            // Don't override if custom theme is active
+            if (VAGEDCThemeManager.Instance.IsCustomThemeActive)
+                return;
+                
             //Console.WriteLine("Rendermode was: " + ToolStripManager.RenderMode.ToString());
             //Console.WriteLine("Visual styles: " + ToolStripManager.VisualStylesEnabled.ToString());
             //Console.WriteLine("Skinname: " + appSettings.SkinName);
@@ -1173,9 +1209,23 @@ namespace VAGSuite
         void OnSkinClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             string skinName = e.Item.Caption;
-            DevExpress.LookAndFeel.UserLookAndFeel.Default.SetSkinStyle(skinName);
-            m_appSettings.Skinname = skinName;
-            SetToolstripTheme();
+            
+            // Check if it's our custom theme
+            if (e.Item.Tag != null && e.Item.Tag.ToString() == "CUSTOM_VAGEDC_DARK")
+            {
+                ApplyVAGEDCDarkTheme();
+                m_appSettings.UseVAGEDCDarkTheme = true;
+                m_appSettings.Skinname = "VAGEDC Dark";
+            }
+            else
+            {
+                // Standard DevExpress skin
+                DevExpress.LookAndFeel.UserLookAndFeel.Default.SetSkinStyle(skinName);
+                m_appSettings.Skinname = skinName;
+                m_appSettings.UseVAGEDCDarkTheme = false;
+                VAGEDCThemeManager.Instance.DeactivateCustomTheme();
+                SetToolstripTheme();
+            }
         }
 
         /// <summary>
