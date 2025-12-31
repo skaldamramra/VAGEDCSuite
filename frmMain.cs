@@ -141,27 +141,13 @@ namespace VAGSuite
 
         public frmMain()
         {
-            try
-            {
-                splash = new frmSplash();
-                splash.Show();
-                Application.DoEvents();
-            }
-            catch (Exception)
-            {
-
-            }
+            splash = new frmSplash();
+            splash.Show();
+            Application.DoEvents();
                 
             InitializeComponent();
-            try
-            {
-                m_DelegateStartReleaseNotePanel = new DelegateStartReleaseNotePanel(this.StartReleaseNotesViewer);
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine(E.Message);
-            }
 
+            m_DelegateStartReleaseNotePanel = new DelegateStartReleaseNotePanel(this.StartReleaseNotesViewer);
         }
 
         /// <summary>
@@ -1236,11 +1222,13 @@ namespace VAGSuite
                 // Initialize refactored services
                 InitializeServices();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine("Error initializing services: " + ex.ToString());
             }
+            
             InitSkins();
+            
             LoadLayoutFiles();
             
             if (m_appSettings.DebugMode)

@@ -49,6 +49,9 @@ namespace VAGSuite
             // Default look and feel
             this.defaultLookAndFeel1 = new DevExpress.LookAndFeel.DefaultLookAndFeel(this.components);
 
+            // Resource manager (needed for icon loading)
+            resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
+
             // Begin initialization
             ((System.ComponentModel.ISupportInitialize)(this.ribbonControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barAndDockingController1)).BeginInit();
@@ -372,6 +375,121 @@ namespace VAGSuite
                 this.barCodeBlock1, this.barCodeBlock2, this.barCodeBlock3,
                 this.barSymCount, this.barUpdateText
             });
+        }
+
+        /// <summary>
+        /// Finalizes initialization by wiring event handlers and calling EndInit
+        /// </summary>
+        private void FinalizeInitialization()
+        {
+            // Wire event handlers for all buttons
+            this.btnBinaryCompare.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnBinaryCompare_ItemClick);
+            this.btnOpenFile.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnOpenFile_ItemClick);
+            this.btnCompareFiles.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnCompareFiles_ItemClick);
+            this.btnTestFiles.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnTestFiles_ItemClick);
+            this.btnAppSettings.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnAppSettings_ItemClick);
+            this.btnCheckForUpdates.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnCheckForUpdates_ItemClick);
+            this.btnReleaseNotes.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnReleaseNotes_ItemClick);
+            this.btnEDC15PDocumentation.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnEDC15PDocumentation_ItemClick);
+            this.btnAbout.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnAbout_ItemClick);
+            this.btnChecksum.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnChecksum_ItemClick);
+            this.btnFirmwareInformation.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnFirmwareInformation_ItemClick);
+            this.btnVINDecoder.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVINDecoder_ItemClick);
+            this.btnViewFileInHex.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnViewFileInHex_ItemClick);
+            this.btnSearchMaps.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnSearchMaps_ItemClick);
+            this.btnSaveAs.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnSaveAs_ItemClick);
+            this.btnCreateAProject.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnCreateAProject_ItemClick);
+            this.btnOpenProject.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnOpenProject_ItemClick);
+            this.btnCloseProject.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnCloseProject_ItemClick);
+            this.btnShowTransactionLog.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnShowTransactionLog_ItemClick);
+            this.btnRollback.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnRollback_ItemClick);
+            this.btnRollforward.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnRollforward_ItemClick);
+            this.btnRebuildFile.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnRebuildFile_ItemClick_1);
+            this.btnEditProject.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnEditProject_ItemClick);
+            this.btnAddNoteToProject.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnAddNoteToProject_ItemClick);
+            this.btnShowProjectLogbook.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnShowProjectLogbook_ItemClick);
+            this.btnProduceLatestBinary.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnProduceLatestBinary_ItemClick);
+            this.btnCreateBackup.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnCreateBackup_ItemClick);
+            this.btnLookupPartnumber.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnLookupPartnumber_ItemClick);
+            this.btnDriverWish.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnDriverWish_ItemClick);
+            this.btnTorqueLimiter.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnTorqueLimiter_ItemClick);
+            this.btnSmokeLimiter.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnSmokeLimiter_ItemClick);
+            this.btnTargetBoost.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnTargetBoost_ItemClick);
+            this.btnBoostPressureLimiter.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnBoostPressureLimiter_ItemClick);
+            this.btnBoostPressureLimitSVBL.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnBoostPressureLimitSVBL_ItemClick);
+            this.btnN75Map.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnN75Map_ItemClick);
+            this.btnEGRMap.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnEGRMap_ItemClick);
+            this.btnAirmassResult.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnAirmassResult_ItemClick);
+            this.btnExportXDF.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnExportXDF_ItemClick);
+            this.btnActivateLaunchControl.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnActivateLaunchControl_ItemClick);
+            this.btnEditEEProm.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnEditEEProm_ItemClick);
+            this.btnMergeFiles.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnMergeFiles_ItemClick);
+            this.btnSplitFiles.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnSplitFiles_ItemClick);
+            this.btnBuildLibrary.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnBuildLibrary_ItemClick);
+            this.btnUserManual.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnUserManual_ItemClick);
+            this.barButtonItem1.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barButtonItem1_ItemClick);
+            this.barButtonItem2.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barButtonItem2_ItemClick);
+            this.barButtonItem3.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barButtonItem3_ItemClick);
+            this.barButtonItem4.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barButtonItem4_ItemClick);
+            this.barButtonItem5.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barButtonItem5_ItemClick);
+            this.btnActivateSmokeLimiters.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnActivateSmokeLimiters_ItemClick);
+            this.btnExportToExcel.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnExportToExcel_ItemClick);
+            this.btnExcelImport.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnExcelImport_ItemClick);
+            this.btnIQByMap.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnIQByMap_ItemClick);
+            this.btnIQByMAF.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnIQByMAF_ItemClick);
+            this.btnSOILimiter.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnSOILimiter_ItemClick);
+            this.btnStartOfInjection.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnStartOfInjection_ItemClick);
+            this.btnInjectorDuration.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnInjectorDuration_ItemClick);
+            this.btnStartIQ.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnStartIQ_ItemClick);
+            this.btnBIPBasicCharacteristic.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnBIPBasicCharacteristic_ItemClick);
+            this.btnPIDMapP.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnPIDMapP_ItemClick);
+            this.btnPIDMapI.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnPIDMapI_ItemClick);
+            this.btnPIDMapD.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnPIDMapD_ItemClick);
+            this.btnDurationLimiter.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnDurationLimiter_ItemClick);
+            this.btnMAFLimiter.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnMAFLimiter_ItemClick);
+            this.btnMAPLimiter.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnMAPLimiter_ItemClick);
+            this.btnMAFLinearization.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnMAFLinearization_ItemClick);
+            this.btnMAPLinearization.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnMAPLinearization_ItemClick);
+            
+            // VCDS Diagnostic buttons
+            this.btnVCDSDiagnosticIQLimit1.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit1_ItemClick);
+            this.btnVCDSDiagnosticIQLimit2.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit2_ItemClick);
+            this.btnVCDSDiagnosticIQLimit3.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit3_ItemClick);
+            this.btnVCDSDiagnosticIQLimit4.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit4_ItemClick);
+            this.btnVCDSDiagnosticIQLimit5.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit5_ItemClick);
+            this.btnVCDSDiagnosticIQLimit6.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit6_ItemClick);
+            this.btnVCDSDiagnosticIQLimit7.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit7_ItemClick);
+            this.btnVCDSDiagnosticIQLimit8.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit8_ItemClick);
+            this.btnVCDSDiagnosticIQLimit9.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit9_ItemClick);
+            this.btnVCDSDiagnosticIQLimit10.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQLimit10_ItemClick);
+            this.btnVCDSDiagnosticMAFLimit1.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAFLimit1_ItemClick);
+            this.btnVCDSDiagnosticMAFLimit2.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAFLimit2_ItemClick);
+            this.btnVCDSDiagnosticMAPLimit1.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAPLimit1_ItemClick);
+            this.btnVCDSDiagnosticMAPLimit2.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAPLimit2_ItemClick);
+            this.btnVCDSDiagnosticMAPLimit3.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAPLimit3_ItemClick);
+            this.btnVCDSDiagnosticTorqueLimit.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagTorqueLimit_ItemClick);
+            this.btnVCDSDiagnosticTorqueOffset.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagTorqueOffset_ItemClick);
+            this.btnVCDSDiagnosticMAFOffset.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAFOffset_ItemClick);
+            this.btnVCDSDiagnosticMAPOffset.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAPOffset_ItemClick);
+            this.btnVCDSDiagnosticIQOffset.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQOffset_ItemClick);
+
+            // Dock manager layout upgrade
+            this.dockManager1.LayoutUpgrade += new DevExpress.Utils.LayoutUpgadeEventHandler(this.dockManager1_LayoutUpgrade);
+        }
+
+        /// <summary>
+        /// Ends initialization by calling EndInit on all components and resuming layouts
+        /// </summary>
+        private void EndComponentInitialization()
+        {
+            ((System.ComponentModel.ISupportInitialize)(this.ribbonControl1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.barAndDockingController1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dockManager1)).EndInit();
+            this.dockSymbols.ResumeLayout(false);
+            this.dockPanel1_Container.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.gridViewSymbols)).EndInit();
         }
     }
 }
