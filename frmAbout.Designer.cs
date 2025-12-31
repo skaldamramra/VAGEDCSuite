@@ -114,7 +114,7 @@ namespace VAGSuite
             this.labelControl5.Name = "labelControl5";
             this.labelControl5.Size = new System.Drawing.Size(188, 36);
             this.labelControl5.TabIndex = 5;
-            this.labelControl5.Text = "You can send an email for support to t5suite@home.nl";
+            this.labelControl5.Text = "You can send an email for support to skaldamramra@yahoo.com";
             this.labelControl5.DoubleClick += new System.EventHandler(this.labelControl5_DoubleClick);
             // 
             // labelControl6
@@ -127,7 +127,7 @@ namespace VAGSuite
             this.labelControl6.Name = "labelControl6";
             this.labelControl6.Size = new System.Drawing.Size(332, 34);
             this.labelControl6.TabIndex = 6;
-            this.labelControl6.Text = "rkam, Pixis5, othmar77, dieseljohnny, bazare, bondiblu, Relic, Macadam";
+            this.labelControl6.Text = "rkam, Pixis5, othmar77, dieseljohnny, bazare, bondiblu, Relic, Macadam, dilemma";
             // 
             // hyperLinkEdit1
             // 
