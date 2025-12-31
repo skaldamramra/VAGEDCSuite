@@ -137,6 +137,7 @@ namespace VAGSuite
         private FirmwareService _firmwareService;
         private LaunchControlService _launchControlService;
         private SmokeLimiterService _smokeLimiterService;
+        private ProjectRebuildService _projectRebuildService;
 
         public frmMain()
         {
@@ -184,6 +185,7 @@ namespace VAGSuite
             _firmwareService = new FirmwareService(m_appSettings);
             _launchControlService = new LaunchControlService(m_appSettings);
             _smokeLimiterService = new SmokeLimiterService(m_appSettings);
+            _projectRebuildService = new ProjectRebuildService(m_appSettings, _transactionService);
         }
 
 
