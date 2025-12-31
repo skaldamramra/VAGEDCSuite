@@ -238,6 +238,11 @@
     <Compile Include="frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmMain.LayoutConstants.cs" />
+    <Compile Include="frmMain.DesignerHelpers.cs" />
+    <Compile Include="frmMain.DesignerInit.cs" />
+    <Compile Include="frmMain.DesignerInit2.cs" />
+    <Compile Include="frmMain.DesignerLayout.cs" />
     <Compile Include="frmPartNumberList.cs">
       <SubType>Form</SubType>
     </Compile>
