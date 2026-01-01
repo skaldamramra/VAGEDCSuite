@@ -20,7 +20,8 @@ namespace VAGSuite.Components
 
         private readonly IChartService _chartService;
         
-        private Nevron.Chart.WinForm.NChartControl nChartControl1;
+        // Reference to the external chart control (provided by MapViewerEx designer)
+        private Nevron.Chart.WinForm.NChartControl _externalChartControl;
         
         // State references
         private int _tableWidth;
@@ -55,13 +56,20 @@ namespace VAGSuite.Components
         public Chart3DComponent()
         {
             _chartService = new ChartService();
-            InitializeComponent();
         }
 
         public Chart3DComponent(IChartService chartService)
         {
             _chartService = chartService ?? throw new ArgumentNullException("chartService");
-            InitializeComponent();
+        }
+
+        /// <summary>
+        /// Sets the external NChartControl to use instead of creating a new one.
+        /// This allows the component to share the designer's chart control.
+        /// </summary>
+        public void SetChartControl(Nevron.Chart.WinForm.NChartControl externalChart)
+        {
+            _externalChartControl = externalChart;
         }
 
         #endregion
@@ -107,12 +115,13 @@ namespace VAGSuite.Components
         /// </summary>
         public void SetView(float rotation, float elevation, float zoom)
         {
-            if (nChartControl1 != null && nChartControl1.Charts.Count > 0)
+            var chartControl = GetChartControl();
+            if (chartControl != null && chartControl.Charts.Count > 0)
             {
-                nChartControl1.Charts[0].Projection.Rotation = rotation;
-                nChartControl1.Charts[0].Projection.Elevation = elevation;
-                nChartControl1.Charts[0].Projection.Zoom = zoom;
-                nChartControl1.Refresh();
+                chartControl.Charts[0].Projection.Rotation = rotation;
+                chartControl.Charts[0].Projection.Elevation = elevation;
+                chartControl.Charts[0].Projection.Zoom = zoom;
+                chartControl.Refresh();
             }
         }
 
@@ -125,11 +134,12 @@ namespace VAGSuite.Components
             elevation = 0;
             zoom = 0;
 
-            if (nChartControl1 != null && nChartControl1.Charts.Count > 0)
+            var chartControl = GetChartControl();
+            if (chartControl != null && chartControl.Charts.Count > 0)
             {
-                rotation = nChartControl1.Charts[0].Projection.Rotation;
-                elevation = nChartControl1.Charts[0].Projection.Elevation;
-                zoom = nChartControl1.Charts[0].Projection.Zoom;
+                rotation = chartControl.Charts[0].Projection.Rotation;
+                elevation = chartControl.Charts[0].Projection.Elevation;
+                zoom = chartControl.Charts[0].Projection.Zoom;
             }
         }
 
@@ -148,34 +158,24 @@ namespace VAGSuite.Components
 
         private void InitializeComponent()
         {
-            // Create chart control
-            nChartControl1 = new Nevron.Chart.WinForm.NChartControl();
-            
-            // 
-            // nChartControl1
-            // 
-            nChartControl1.Dock = DockStyle.Fill;
-            nChartControl1.Location = new Point(0, 0);
-            nChartControl1.Name = "nChartControl1";
-            nChartControl1.Size = new Size(400, 300);
-            nChartControl1.TabIndex = 0;
-            nChartControl1.Visible = true;
+            // Don't create a new chart control - use the external one if provided
+            // This component acts as a wrapper around an existing chart control
+        }
 
-            // Wire up mouse events
-            nChartControl1.MouseWheel += NChartControl1_MouseWheel;
-            nChartControl1.MouseDown += NChartControl1_MouseDown;
-            nChartControl1.MouseUp += NChartControl1_MouseUp;
-
-            this.Controls.Add(nChartControl1);
-            this.Dock = DockStyle.Fill;
-            this.Size = new Size(400, 300);
+        /// <summary>
+        /// Gets the chart control to use (external or null)
+        /// </summary>
+        private Nevron.Chart.WinForm.NChartControl GetChartControl()
+        {
+            return _externalChartControl;
         }
 
         private void ConfigureChart()
         {
-            if (nChartControl1.Charts.Count == 0) return;
+            var chartControl = GetChartControl();
+            if (chartControl == null || chartControl.Charts.Count == 0) return;
 
-            NChart chart = nChartControl1.Charts[0];
+            NChart chart = chartControl.Charts[0];
             
             // Configure for 3D
             chart.Enable3D = true;
@@ -186,7 +186,7 @@ namespace VAGSuite.Components
             chart.LightModel.SetPredefinedLightModel(PredefinedLightModel.ShinyTopLeft);
 
             // Set title
-            NLabel title = nChartControl1.Labels.AddHeader(_mapName);
+            NLabel title = chartControl.Labels.AddHeader(_mapName);
             title.TextStyle.FontStyle = new NFontStyle("Times New Roman", 18, FontStyle.Italic);
             title.TextStyle.FillStyle = new NColorFillStyle(Color.FromArgb(68, 90, 108));
 
@@ -243,9 +243,9 @@ namespace VAGSuite.Components
             chart.Wall(ChartWallType.Floor).Visible = false;
 
             // Configure tools
-            nChartControl1.Settings.ShapeRenderingMode = ShapeRenderingMode.HighSpeed;
-            nChartControl1.Controller.Tools.Add(new NSelectorTool());
-            nChartControl1.Controller.Tools.Add(new NTrackballTool());
+            chartControl.Settings.ShapeRenderingMode = ShapeRenderingMode.HighSpeed;
+            chartControl.Controller.Tools.Add(new NSelectorTool());
+            chartControl.Controller.Tools.Add(new NTrackballTool());
 
             RefreshMeshGraph();
         }
@@ -344,9 +344,10 @@ namespace VAGSuite.Components
         {
             try
             {
-                if (nChartControl1.Charts.Count == 0) return;
+                var chartControl = GetChartControl();
+                if (chartControl == null || chartControl.Charts.Count == 0) return;
 
-                NChart chart = nChartControl1.Charts[0];
+                NChart chart = chartControl.Charts[0];
                 
                 // Get main surface
                 NMeshSurfaceSeries surface = null;
@@ -382,7 +383,8 @@ namespace VAGSuite.Components
                     }
                 }
 
-                nChartControl1.Refresh();
+                // Refresh the chart
+                chartControl.Refresh();
             }
             catch (Exception ex)
             {
@@ -629,38 +631,44 @@ namespace VAGSuite.Components
 
         private void NChartControl1_MouseWheel(object sender, MouseEventArgs e)
         {
-            if (nChartControl1.Charts.Count > 0)
+            var chartControl = GetChartControl();
+            if (chartControl == null || chartControl.Charts.Count > 0) return;
+            
+            if (e.Delta > 0)
             {
-                if (e.Delta > 0)
-                {
-                    nChartControl1.Charts[0].Projection.Zoom += 5;
-                }
-                else
-                {
-                    nChartControl1.Charts[0].Projection.Zoom -= 5;
-                }
-                nChartControl1.Refresh();
-                RaiseViewChanged();
+                chartControl.Charts[0].Projection.Zoom += 5;
             }
+            else
+            {
+                chartControl.Charts[0].Projection.Zoom -= 5;
+            }
+            chartControl.Refresh();
+            RaiseViewChanged();
         }
 
         private void NChartControl1_MouseDown(object sender, MouseEventArgs e)
         {
+            var chartControl = GetChartControl();
+            if (chartControl == null) return;
+            
             if (e.Button == MouseButtons.Right)
             {
-                nChartControl1.Controller.Tools.Clear();
+                chartControl.Controller.Tools.Clear();
                 NOffsetTool dragTool = new NOffsetTool();
-                nChartControl1.Controller.Tools.Add(dragTool);
+                chartControl.Controller.Tools.Add(dragTool);
             }
         }
 
         private void NChartControl1_MouseUp(object sender, MouseEventArgs e)
         {
+            var chartControl = GetChartControl();
+            if (chartControl == null) return;
+            
             if (e.Button == MouseButtons.Right)
             {
-                nChartControl1.Controller.Tools.Clear();
+                chartControl.Controller.Tools.Clear();
                 NTrackballTool dragTool = new NTrackballTool();
-                nChartControl1.Controller.Tools.Add(dragTool);
+                chartControl.Controller.Tools.Add(dragTool);
             }
 
             RaiseViewChanged();
@@ -668,16 +676,16 @@ namespace VAGSuite.Components
 
         private void RaiseViewChanged()
         {
-            if (nChartControl1.Charts.Count > 0)
-            {
-                ViewChanged?.Invoke(this, new SurfaceGraphViewChangedEventArgsEx(
-                    nChartControl1.Charts[0].Projection.XDepth,
-                    nChartControl1.Charts[0].Projection.YDepth,
-                    nChartControl1.Charts[0].Projection.Zoom,
-                    nChartControl1.Charts[0].Projection.Rotation,
-                    nChartControl1.Charts[0].Projection.Elevation,
-                    _mapName));
-            }
+            var chartControl = GetChartControl();
+            if (chartControl == null || chartControl.Charts.Count == 0) return;
+            
+            ViewChanged?.Invoke(this, new SurfaceGraphViewChangedEventArgsEx(
+                chartControl.Charts[0].Projection.XDepth,
+                chartControl.Charts[0].Projection.YDepth,
+                chartControl.Charts[0].Projection.Zoom,
+                chartControl.Charts[0].Projection.Rotation,
+                chartControl.Charts[0].Projection.Elevation,
+                _mapName));
         }
 
         #endregion

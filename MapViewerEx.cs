@@ -421,75 +421,68 @@ namespace VAGSuite
         {
             try
             {
-                NChart chart = nChartControl1.Charts[0];
-                NMeshSurfaceSeries surface = null;
-                NMeshSurfaceSeries surface2 = null;
-                NMeshSurfaceSeries surface3 = null;
-                if (chart.Series.Count == 0)
-                {
-                    surface = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
-                }
-                else
-                {
-                    surface = (NMeshSurfaceSeries)chart.Series[0];
-                    if (chart.Series.Count > 1)
-                    {
-                        surface2 = (NMeshSurfaceSeries)chart.Series[1];
-                        if (chart.Series.Count > 2)
-                        {
-                            surface3 = (NMeshSurfaceSeries)chart.Series[2];
-                        }
-                    }
-                }
-
-                //SetPallete();
-
-                FillData(surface);
-                // hier
-                if (surface2 != null)
-                {
-                    surface2.Palette.Clear();
-                    surface2.Palette.Add(-255, Color.YellowGreen);
-                    surface2.Palette.Add(255, Color.YellowGreen);
-                    surface2.AutomaticPalette = false;
-                    //surface2.FillStyle = new NColorFillStyle(Color.YellowGreen);
-                    //surface2.FillMode = SurfaceFillMode.CustomColors;
-                    FillDataOriginal(surface2);
-                    if (!m_OverlayVisible)
-                    {
-                        surface2.Visible = false;
-                    }
-                    else
-                    {
-                        surface2.Visible = true;
-                    }
-
-                }
-                if (surface3 != null)
-                {
-                    surface3.Palette.Clear();
-                    surface3.Palette.Add(-255, Color.BlueViolet);
-                    surface3.Palette.Add(255, Color.BlueViolet);
-                    surface3.AutomaticPalette = false;
-                    //surface3.FillStyle = new NColorFillStyle(Color.BlueViolet);
-                    //surface3.FillMode = SurfaceFillMode.CustomColors;
-
-                    FillDataCompare(surface3);
-                    if (!m_OverlayVisible)
-                    {
-                        surface3.Visible = false;
-                    }
-                }
-
-                nChartControl1.Refresh();
-                Console.WriteLine("Chartcontrol refreshed");
-                
-                // ALSO call the refactored component version for testing
-                // This allows comparing inline vs refactored implementation
+                // Use the refactored Chart3DComponent
                 if (_chart3DComponent != null)
                 {
                     _chart3DComponent.LoadData(CreateMapViewerState());
                     _chart3DComponent.RefreshChart();
+                }
+                else
+                {
+                    // Fallback to inline code if component not available
+                    NChart chart = nChartControl1.Charts[0];
+                    NMeshSurfaceSeries surface = null;
+                    NMeshSurfaceSeries surface2 = null;
+                    NMeshSurfaceSeries surface3 = null;
+                    if (chart.Series.Count == 0)
+                    {
+                        surface = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
+                    }
+                    else
+                    {
+                        surface = (NMeshSurfaceSeries)chart.Series[0];
+                        if (chart.Series.Count > 1)
+                        {
+                            surface2 = (NMeshSurfaceSeries)chart.Series[1];
+                            if (chart.Series.Count > 2)
+                            {
+                                surface3 = (NMeshSurfaceSeries)chart.Series[2];
+                            }
+                        }
+                    }
+
+                    FillData(surface);
+                    if (surface2 != null)
+                    {
+                        surface2.Palette.Clear();
+                        surface2.Palette.Add(-255, Color.YellowGreen);
+                        surface2.Palette.Add(255, Color.YellowGreen);
+                        surface2.AutomaticPalette = false;
+                        FillDataOriginal(surface2);
+                        if (!m_OverlayVisible)
+                        {
+                            surface2.Visible = false;
+                        }
+                        else
+                        {
+                            surface2.Visible = true;
+                        }
+
+                    }
+                    if (surface3 != null)
+                    {
+                        surface3.Palette.Clear();
+                        surface3.Palette.Add(-255, Color.BlueViolet);
+                        surface3.Palette.Add(255, Color.BlueViolet);
+                        surface3.AutomaticPalette = false;
+                        FillDataCompare(surface3);
+                        if (!m_OverlayVisible)
+                        {
+                            surface3.Visible = false;
+                        }
+                    }
+
+                    nChartControl1.Refresh();
                 }
             }
             catch (Exception E)
@@ -1050,6 +1043,9 @@ namespace VAGSuite
             _chart3DComponent = new Chart3DComponent(_chartService);
             _chart2DComponent = new Chart2DComponent(_chartService);
             
+            // Wire up the external chart control to the component
+            _chart3DComponent.SetChartControl(nChartControl1);
+            
             // Wire up component events to MapViewerEx handlers
             _chart3DComponent.ViewChanged += OnChart3DViewChanged;
         }
@@ -1290,7 +1286,7 @@ namespace VAGSuite
                                      b = -b;
                                  }*/
 
-                                
+                               
                                 if (b > m_MaxValueInTable) m_MaxValueInTable = b;
                                 m_realValue = b;
                                 m_realValue *= correction_factor;
@@ -1628,34 +1624,19 @@ namespace VAGSuite
                 chart.Height = 35.0f;
                 chart.Projection.SetPredefinedProjection(PredefinedProjection.PerspectiveTilted);
                 chart.LightModel.SetPredefinedLightModel(PredefinedLightModel.ShinyTopLeft);
-                /*NOrdinalScaleConfigurator ordinalScale = (NOrdinalScaleConfigurator)chart.Axis(StandardAxis.PrimaryX).ScaleConfigurator;
-                ordinalScale.MajorGridStyle.SetShowAtWall(ChartWallType.Floor, true);
-                ordinalScale.MajorGridStyle.SetShowAtWall(ChartWallType.Back, true);
-                ordinalScale.DisplayDataPointsBetweenTicks = false;*/
 
                 // oud
                 NStandardScaleConfigurator scaleConfiguratorX = (NStandardScaleConfigurator)chart.Axis(StandardAxis.PrimaryX).ScaleConfigurator;
                 scaleConfiguratorX.MaxTickCount = dt.Rows.Count;
                 scaleConfiguratorX.MajorTickMode = MajorTickMode.AutoMaxCount;
 
-
-                // nieuw
-                /*NLinearScaleConfigurator scaleConfiguratorX = new NLinearScaleConfigurator();
-                chart.Axis(StandardAxis.PrimaryX).ScaleConfigurator = scaleConfiguratorX;
-                scaleConfiguratorX.MajorGridStyle.SetShowAtWall(ChartWallType.Floor, true);
-                scaleConfiguratorX.MajorGridStyle.SetShowAtWall(ChartWallType.Back, true);
-                scaleConfiguratorX.RoundToTickMax = false;
-                scaleConfiguratorX.RoundToTickMin = false;*/
-
                 NScaleTitleStyle titleStyleX = (NScaleTitleStyle)scaleConfiguratorX.Title;
                 titleStyleX.Text = m_y_axis_name;
-                //<GS-08032010> as waarden nog omzetten indien noodzakelijk (MAP etc)
                 scaleConfiguratorX.AutoLabels = false;
                 scaleConfiguratorX.Labels.Clear();
 
                 for (int t = y_axisvalues.Length - 1; t >= 0; t--)
                 {
-
                     string yvalue = ConvertYAxisValue(y_axisvalues.GetValue(t).ToString());
                     scaleConfiguratorX.Labels.Add(yvalue);
                 }
@@ -1753,10 +1734,7 @@ namespace VAGSuite
                 chart.Wall(ChartWallType.Floor).Visible = false;
 
                 surface.Name = "Surface";
-                //surface.Legend.Mode = SeriesLegendMode.SeriesLogic;
                 surface.PositionValue = 10.0;
-
-                // always 256 * 256 ?
 
                 if (m_issixteenbit)
                 {
@@ -1766,27 +1744,20 @@ namespace VAGSuite
                 {
                     surface.Data.SetGridSize(m_map_content.Length / m_TableWidth, m_TableWidth);
                 }
-                //surface.SyncPaletteWithAxisScale = true;
-                //surface.PaletteSteps = 16;
                 surface.ValueFormatter.FormatSpecifier = "0.00";
-                //surface.FillStyle = new NColorFillStyle(Color.Green);
 
-
-                surface.FillMode = SurfaceFillMode.Zone; // <GS-08032010>
+                surface.FillMode = SurfaceFillMode.Zone;
                 surface.SmoothPalette = true;
                 surface.FrameColorMode = SurfaceFrameColorMode.Uniform;
                 surface.FillStyle.SetTransparencyPercent(25);
                 surface.FrameMode = SurfaceFrameMode.MeshContour;
-                RefreshMeshGraph();
-
-                //byte[] bts = GetDataFromGridView(false);
-                //UpdateChartControlSlice(bts);
-
-                /*
-                x = "MAP";
-                y = "RPM";
-                z = "Degrees";
-                 */
+                
+                // ALSO call the refactored component version for testing
+                if (_chart3DComponent != null)
+                {
+                    _chart3DComponent.LoadData(CreateMapViewerState());
+                    _chart3DComponent.RefreshChart();
+                }
             }
             else if (m_TableWidth == 1)
             {
@@ -1829,15 +1800,12 @@ namespace VAGSuite
                         valcount++;
                     }
                 }
-                //chartControl1.Series[0].Label.Text = m_map_name;
-                /*chartControl1.Series[0].LegendText = m_map_name;
-                chartControl1.DataSource = chartdt;
-                string[] datamembers = new string[1];
-                chartControl1.Series[0].ValueDataMembers.Clear();
-                datamembers.SetValue("Y", 0);
-                chartControl1.Series[0].ValueDataMembers.AddRange(datamembers);
-                chartControl1.Series[0].ArgumentDataMember = "X";
-                chartControl1.Visible = true;*/
+                
+                // ALSO call the refactored component version for testing
+                if (_chart2DComponent != null)
+                {
+                    _chart2DComponent.LoadData(m_map_content, m_map_length, CreateMapViewerState());
+                }
             }
             Init2dChart();
             m_trackbarBlocked = false;
