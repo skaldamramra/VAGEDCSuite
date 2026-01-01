@@ -740,7 +740,15 @@ namespace VAGSuite
         public byte[] Map_content
         {
             get { return m_map_content; }
-            set { m_map_content = value; }
+            set
+            {
+                m_map_content = value;
+                // Initialize m_map_original_content when m_map_content is first set
+                if (m_map_original_content == null && value != null)
+                {
+                    m_map_original_content = (byte[])value.Clone();
+                }
+            }
         }
 
         private byte[] m_map_compare_content;
@@ -2261,10 +2269,15 @@ namespace VAGSuite
 
         private void simpleButton3_Click(object sender, EventArgs e)
         {
+            // Restore original map content
+            if (m_map_original_content != null)
+            {
+                m_map_content = (byte[])m_map_original_content.Clone();
+            }
             ShowTable(m_TableWidth, m_issixteenbit);
             m_datasourceMutated = false;
-            //simpleButton2.Enabled = false;
-//            simpleButton3.Enabled = false;
+            simpleButton2.Enabled = false;
+            simpleButton3.Enabled = false;
         }
 
         private void simpleButton2_Click(object sender, EventArgs e)
@@ -2581,7 +2594,9 @@ namespace VAGSuite
             
             m_datasourceMutated = true;
             simpleButton2.Enabled = true;
-//            simpleButton3.Enabled = true;
+            simpleButton3.Enabled = true; // Enable the undo button when data is mutated
+            // Update m_map_content with the latest data from the grid
+            m_map_content = GetDataFromGridView(m_isUpsideDown);
             if (nChartControl1.Visible)
             {
                 StartSurfaceChartUpdateTimer();
