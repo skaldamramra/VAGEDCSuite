@@ -41,6 +41,7 @@ namespace VAGSuite.Components
         private bool _isCompareViewer;
         private bool _onlineMode;
         private bool _overlayVisible;
+        private bool _isUpsideDown;
 
         #endregion
 
@@ -98,6 +99,7 @@ namespace VAGSuite.Components
             _isCompareViewer = state.IsCompareMode;
             _onlineMode = state.IsOnlineMode;
             _overlayVisible = true;
+            _isUpsideDown = state.Configuration.IsUpsideDown; // Load IsUpsideDown from state
 
             ConfigureChart();
         }
@@ -334,32 +336,34 @@ namespace VAGSuite.Components
 
         private void ConfigureAxis(NChart chart)
         {
-            // Configure X axis (Y-axis values)
+            // Configure X axis (X-axis values)
             NStandardScaleConfigurator scaleConfiguratorX = (NStandardScaleConfigurator)chart.Axis(StandardAxis.PrimaryX).ScaleConfigurator;
             scaleConfiguratorX.MajorTickMode = MajorTickMode.AutoMaxCount;
             
             NScaleTitleStyle titleStyleX = (NScaleTitleStyle)scaleConfiguratorX.Title;
-            titleStyleX.Text = _yAxisName;
+            titleStyleX.Text = _xAxisName;
             scaleConfiguratorX.AutoLabels = false;
-
-            for (int t = _yAxisValues.Length - 1; t >= 0; t--)
-            {
-                string yvalue = ConvertYAxisValue(_yAxisValues[t].ToString());
-                scaleConfiguratorX.Labels.Add(yvalue);
-            }
-
-            // Configure Y axis (X-axis values)
-            NStandardScaleConfigurator scaleConfiguratorY = (NStandardScaleConfigurator)chart.Axis(StandardAxis.Depth).ScaleConfigurator;
-            scaleConfiguratorY.MajorTickMode = MajorTickMode.AutoMaxCount;
-            
-            NScaleTitleStyle titleStyleY = (NScaleTitleStyle)scaleConfiguratorY.Title;
-            titleStyleY.Text = _xAxisName;
-            scaleConfiguratorY.AutoLabels = false;
 
             for (int t = 0; t < _xAxisValues.Length; t++)
             {
                 string xvalue = ConvertXAxisValue(_xAxisValues[t].ToString());
-                scaleConfiguratorY.Labels.Add(xvalue);
+                scaleConfiguratorX.Labels.Add(xvalue);
+            }
+
+            // Configure Y axis (Y-axis values)
+            NStandardScaleConfigurator scaleConfiguratorY = (NStandardScaleConfigurator)chart.Axis(StandardAxis.Depth).ScaleConfigurator;
+            scaleConfiguratorY.MajorTickMode = MajorTickMode.AutoMaxCount;
+            
+            NScaleTitleStyle titleStyleY = (NScaleTitleStyle)scaleConfiguratorY.Title;
+            titleStyleY.Text = _yAxisName;
+            scaleConfiguratorY.AutoLabels = false;
+
+            for (int t = (_isUpsideDown ? 0 : _yAxisValues.Length - 1);
+                 (_isUpsideDown ? t < _yAxisValues.Length : t >= 0);
+                 t += (_isUpsideDown ? 1 : -1))
+            {
+                string yvalue = ConvertYAxisValue(_yAxisValues[t].ToString());
+                scaleConfiguratorY.Labels.Add(yvalue);
             }
 
             // Configure Z axis
@@ -485,7 +489,9 @@ namespace VAGSuite.Components
                     for (int col = 0; col < _tableWidth; col++)
                     {
                         double value = GetValueFromContent(row, col);
-                        surface.Data.SetValue(row, col, value, row, col);
+                        // Conditionally flip Y axis if _isUpsideDown is true
+                        int yIndex = _isUpsideDown ? (rowCount - 1) - row : row;
+                        surface.Data.SetValue(yIndex, col, value, yIndex, col);
                     }
                 }
 
@@ -510,8 +516,8 @@ namespace VAGSuite.Components
                     for (int col = 0; col < _tableWidth; col++)
                     {
                         double value = GetOriginalValueFromContent(row, col);
-                        // Match original code: flip Y axis by using (rowCount - 1) - row
-                        surface.Data.SetValue((rowCount - 1) - row, col, value, (rowCount - 1) - row, col);
+                        int yIndex = _isUpsideDown ? (rowCount - 1) - row : row;
+                        surface.Data.SetValue(yIndex, col, value, yIndex, col);
                     }
                 }
             }
@@ -533,7 +539,8 @@ namespace VAGSuite.Components
                     for (int col = _tableWidth - 1; col >= 0; col--)
                     {
                         double value = GetCompareValueFromContent(row, col);
-                        surface.Data.SetValue((rowCount - 1) - row, col, value, (rowCount - 1) - row, col);
+                        int yIndex = _isUpsideDown ? (rowCount - 1) - row : row;
+                        surface.Data.SetValue(yIndex, col, value, yIndex, col);
                     }
                 }
             }

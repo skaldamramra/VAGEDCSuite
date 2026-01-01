@@ -256,7 +256,6 @@ namespace VAGSuite
         }
 
         private string m_filename;
-        //private bool m_isHexMode = true;
         private bool m_isRedWhite = false;
         private int m_textheight = 12;
         private string m_xformatstringforhex = "X4";
@@ -329,20 +328,10 @@ namespace VAGSuite
         {
             get
             {
-                //_max_y_axis_value = ((XYDiagram)chartControl1.Diagram).AxisY.Range.MaxValueInternal;
                 return _max_y_axis_value;
             }
-            set { 
+            set {
                 _max_y_axis_value = value;
-                /*if (_max_y_axis_value > 0)
-                {
-                    ((XYDiagram)chartControl1.Diagram).AxisY.Range.MaxValueInternal = (_max_y_axis_value + correction_offset) * correction_factor;
-                }
-                else 
-                {
-                    // set to autoscale
-                    ((XYDiagram)chartControl1.Diagram).AxisY.Range.Auto = true;
-                }*/
             }
         }
 
@@ -497,22 +486,6 @@ namespace VAGSuite
                     surface.PaletteSteps = 5;  // Increased from 4 to 5 for smoother gradient
                     surface.AutomaticPalette = false;
                 }
-                /*if (m_issixteenbit)
-                {
-                    for (int tel = 0; tel < m_map_content.Length; tel+=2)
-                    {
-                    
-                    }
-                }
-                else
-                {
-                    for (int tel = 0; tel < m_map_content.Length; tel++)
-                    {
-                        int _y = tel / m_TableWidth;
-                        int _x = tel % m_TableWidth;
-                        surface.Data.SetValue(_x, _y, Convert.ToInt32(m_map_content[tel]));
-                    }
-                }*/
             }
             catch (Exception E)
             {
@@ -539,9 +512,6 @@ namespace VAGSuite
                                 Int32 ivalue = Convert.ToInt32(m_map_original_content[indexinmap]) * 256;
                                 ivalue += Convert.ToInt32(m_map_original_content[indexinmap + 1]);
 
-                                //Int32 diffivalue = Convert.ToInt32(m_map_content[indexinmap]) * 256;
-                                //diffivalue += Convert.ToInt32(m_map_content[indexinmap + 1]);
-                                //if (diffivalue != 0)
                                 {
                                     if (ivalue > 32000)
                                     {
@@ -564,8 +534,6 @@ namespace VAGSuite
 
                                 int indexinmap = ((row * colcount) + col);
                                 Int32 ivalue = Convert.ToInt32(m_map_original_content[indexinmap]);
-                                //Int32 diffivalue = Convert.ToInt32(m_map_content[indexinmap]);
-                                //if (diffivalue != 0)
                                 {
                                     double value = ivalue;
                                     if (m_viewtype != ViewType.Decimal && m_viewtype != ViewType.Hexadecimal && m_viewtype != ViewType.ASCII)
@@ -606,9 +574,6 @@ namespace VAGSuite
                         int indexinmap = ((row * colcount) + col) * 2;
                         Int32 ivalue = Convert.ToInt32(m_map_compare_content[indexinmap]) * 256;
                         ivalue += Convert.ToInt32(m_map_compare_content[indexinmap + 1]);
-                        //Int32 diffivalue = Convert.ToInt32(m_map_content[indexinmap]) * 256;
-                        //diffivalue += Convert.ToInt32(m_map_content[indexinmap + 1]);
-                        //if (diffivalue != 0)
                         {
                             if (ivalue > 32000)
                             {
@@ -631,8 +596,6 @@ namespace VAGSuite
 
                         int indexinmap = ((row * colcount) + col);
                         Int32 ivalue = Convert.ToInt32(m_map_compare_content[indexinmap]);
-                        //Int32 diffivalue = Convert.ToInt32(m_map_content[indexinmap]);
-                        //if (diffivalue != 0)
                         {
                             double value = ivalue;
                             if (m_viewtype != ViewType.Decimal && m_viewtype != ViewType.Hexadecimal && m_viewtype != ViewType.ASCII)
@@ -653,11 +616,6 @@ namespace VAGSuite
             set { m_isRedWhite = value; }
         }
 
-        /*public bool IsHexMode
-        {
-            get { return m_isHexMode; }
-            set { m_isHexMode = value; }
-        }*/
 
         public string Filename
         {
@@ -902,13 +860,6 @@ namespace VAGSuite
 
             gridView1.MouseMove += new MouseEventHandler(gridView1_MouseMove);
             
-            /*string[] datamembers = new string[1];
-            chartControl1.Series[0].ValueDataMembers.Clear();
-            datamembers.SetValue("Y", 0);
-            
-            chartControl1.Series[0].ValueDataMembers.AddRange(datamembers);
-            timer4.Enabled = false;*/
-             /*            chartControl1.Series[0].ArgumentDataMember = "X";*/
 
             // Initialize Phase 3 Services with default implementations
             _mapRenderingService = new MapRenderingService();
@@ -1171,7 +1122,6 @@ namespace VAGSuite
             double m_realValue;
 
             m_MaxValueInTable = 0;
-            //if (m_isHexMode)
             if (m_viewtype == ViewType.Hexadecimal)
             {
                 int lenvals = m_map_length;
@@ -1219,26 +1169,11 @@ namespace VAGSuite
                                 b = (byte)m_map_content.GetValue(map_offset++);
                                 b *= 256;
                                 b += (byte)m_map_content.GetValue(map_offset++);
-                                /*if ( (b & 0x8000) > 0)
-                                {
-                                    //valtot = 0x10000 - valtot;
-                                    b &= 0x7FFF;
-                                    b = -b;
-                                }*/
                                 if (b > 0xF000)
                                 {
-                                    //b ^= 0xFFFF;
                                     b = 0x10000 - b;
                                     b = -b;
                                 }
-                                // TEST!!!
-                                /* else if ((b & 0x8000) > 0)
-                                 {
-                                     //valtot = 0x10000 - valtot;
-                                     b &= 0x7FFF;
-                                     b = -b;
-                                 }*/
-
                                
                                 if (b > m_MaxValueInTable) m_MaxValueInTable = b;
                                 m_realValue = b;
@@ -1246,11 +1181,6 @@ namespace VAGSuite
                                 if (!_isCompareViewer) m_realValue += correction_offset;
                                 if (m_realValue > m_realMaxValue) m_realMaxValue = m_realValue;
                                 if (m_realValue < m_realMinValue) m_realMinValue = m_realValue;
-                                // TEST
-                                //b = (int)(correction_factor * (double)b);
-                                //b = (int)(correction_offset + (double)b);
-                                // TEST
-                                //if (m_isHexMode)
                                 if (m_viewtype == ViewType.Hexadecimal)
                                 {
                                     objarr.SetValue(b.ToString("X4"), j);
@@ -1304,42 +1234,15 @@ namespace VAGSuite
                                     b += (byte)m_map_content.GetValue(map_offset++);
                                     if (b > 0xF000)
                                     {
-                                        //                                        b ^= 0xFFFF;
                                         b = 0x10000 - b;
-
                                         b = -b;
                                     }
-                                    /*if (b > 0x10000)
-                                    {
-                                        b ^= 0xFFFF;
-                                        b = -b;
-                                    }*/
-                                    // TEST!!!
-                                    /*  else if ((b & 0x8000) > 0)
-                                      {
-                                          //valtot = 0x10000 - valtot;
-                                          b &= 0x7FFF;
-                                          b = -b;
-                                      }*/
-                                    /*if ((b & 0x8000) > 0)
-                                    {
-                                        //valtot = 0x10000 - valtot;
-                                        b &= 0x7FFF;
-                                        b = -b;
-                                    }*/
                                     if (b > m_MaxValueInTable) m_MaxValueInTable = b;
                                     m_realValue = b;
                                     m_realValue *= correction_factor;
                                     if (!_isCompareViewer) m_realValue += correction_offset;
                                     if (m_realValue > m_realMaxValue) m_realMaxValue = m_realValue;
                                     if (m_realValue < m_realMinValue) m_realMinValue = m_realValue;
-                                    // TEST
-                                    //b = (int)(correction_factor * (double)b);
-                                    //b = (int)(correction_offset + (double)b);
-
-                                    // TEST
-
-                                    //                                    if (m_isHexMode)
                                     if (m_viewtype == ViewType.Hexadecimal)
                                     {
                                         objarr.SetValue(b.ToString("X4"), sicnt);
@@ -1393,13 +1296,6 @@ namespace VAGSuite
                                 if (!_isCompareViewer) m_realValue += correction_offset;
                                 if (m_realValue > m_realMaxValue) m_realMaxValue = m_realValue;
                                 if (m_realValue < m_realMinValue) m_realMinValue = m_realValue;
-                                // TEST
-                                //b = (byte)(correction_factor * (double)b);
-                                //b = (byte)(correction_offset + (double)b);
-
-                                // TEST
-
-                                //if (m_isHexMode)
                                 if (m_viewtype == ViewType.Hexadecimal)
                                 {
                                     objarr.SetValue(b.ToString("X2"), j);
@@ -1442,13 +1338,6 @@ namespace VAGSuite
                                 if (!_isCompareViewer) m_realValue += correction_offset;
                                 if (m_realValue > m_realMaxValue) m_realMaxValue = m_realValue;
                                 if (m_realValue < m_realMinValue) m_realMinValue = m_realValue;
-                                // TEST
-                                //b = (byte)(correction_factor * (double)b);
-                                //b = (byte)(correction_offset + (double)b);
-
-                                // TEST
-
-                                //if (m_isHexMode)
                                 if (m_viewtype == ViewType.Hexadecimal)
                                 {
                                     objarr.SetValue(b.ToString("X2"), sicnt);
@@ -1528,17 +1417,6 @@ namespace VAGSuite
                         x_axisvalues.SetValue(xval, i);
                     }
 
-                    /* if (xval > 0x10000)
-                     {
-                         xval ^= 0xFFFF;
-                         xval = -xval;
-                     }
-                     else if ((xval & 0x8000) > 0)
-                     {
-                         //valtot = 0x10000 - valtot;
-                         xval &= 0x7FFF;
-                         xval = -xval;
-                     }*/
 
                     if (xval > maxxval) maxxval = xval;
                 }
@@ -1844,7 +1722,6 @@ namespace VAGSuite
         {
             m_datasourceMutated = true;
             simpleButton2.Enabled = true;
-//            simpleButton3.Enabled = true;
         }
 
         private void simpleButton3_Click(object sender, EventArgs e)
@@ -1862,13 +1739,9 @@ namespace VAGSuite
 
         private void simpleButton2_Click(object sender, EventArgs e)
         {
-            //if (m_isRAMViewer) return;
-            //else
-            //{
                 m_SaveChanges = true;
                 m_datasourceMutated = false;
                 CastSaveEvent();
-            //}
         }
 
         private byte[] GetDataFromGridView(bool upsidedown)
@@ -1903,10 +1776,6 @@ namespace VAGSuite
                                         {
                                             cellvalue = Convert.ToInt32(o.ToString());
                                         }
-                                        /*if (cellvalue < 0)
-                                        {
-                                            Console.WriteLine("value < 0");
-                                        }*/
                                         bstr1 = cellvalue.ToString("X8").Substring(4, 2);
                                         bstr2 = cellvalue.ToString("X8").Substring(6, 2);
                                         retval.SetValue(Convert.ToByte(bstr1, 16), cellcount++);
@@ -1966,10 +1835,6 @@ namespace VAGSuite
                                         bstr2 = cellvalue.ToString("X8").Substring(6, 2);
                                         retval.SetValue(Convert.ToByte(bstr1, 16), cellcount++);
                                         retval.SetValue(Convert.ToByte(bstr2, 16), cellcount++); 
-/*                                        bstr1 = cellvalue.ToString("X4").Substring(0, 2);
-                                        bstr2 = cellvalue.ToString("X4").Substring(2, 2);
-                                        retval.SetValue(Convert.ToByte(bstr1, 16), cellcount++);
-                                        retval.SetValue(Convert.ToByte(bstr2, 16), cellcount++);*/
                                     }
                                     else
                                     {
@@ -2098,8 +1963,6 @@ namespace VAGSuite
                     splitContainer1.Panel1Collapsed = false;
 
                     splitContainer1.SplitterDistance = splitdistance;
-                  //  splitContainer1.Panel1.Height = panel1height;
-                  //  splitContainer1.Panel2.Height = panel2height;
                 }
 
                 m_prohibitsplitchange = false;
@@ -2119,8 +1982,6 @@ namespace VAGSuite
                 byte[] mutateddata = GetDataFromGridView(m_isUpsideDown);
                 onSymbolSave(this, new SaveSymbolEventArgs(m_map_address, m_map_length, mutateddata, m_map_name, Filename));
                 m_datasourceMutated = false;
-                //simpleButton2.Enabled = false;
-//                simpleButton3.Enabled = false;
             }
             else
             {
@@ -2225,7 +2086,6 @@ namespace VAGSuite
                     e.SuppressKeyPress = true;
                     foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
                     {
-                        //if (IsHexMode)
                         if(m_viewtype == ViewType.Hexadecimal)
                         {
                             int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString(), 16);
@@ -2268,7 +2128,6 @@ namespace VAGSuite
                     e.SuppressKeyPress = true;
                     foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
                     {
-                        //if (IsHexMode)
                         if (m_viewtype == ViewType.Hexadecimal)
                         {
                             int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString(), 16);
@@ -2312,7 +2171,6 @@ namespace VAGSuite
                     e.SuppressKeyPress = true;
                     foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
                     {
-                        //if (IsHexMode)
                         if (m_viewtype == ViewType.Hexadecimal)
                         {
                             int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString(), 16);
@@ -2355,7 +2213,6 @@ namespace VAGSuite
                     e.SuppressKeyPress = true;
                     foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
                     {
-                        //if (IsHexMode)
                         if (m_viewtype == ViewType.Hexadecimal)
                         {
                             int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString(), 16);
@@ -2399,7 +2256,6 @@ namespace VAGSuite
                     e.SuppressKeyPress = true;
                     foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
                     {
-                        //if (IsHexMode)
                         if (m_viewtype == ViewType.Hexadecimal)
                         {
 
@@ -2442,7 +2298,6 @@ namespace VAGSuite
                     e.SuppressKeyPress = true;
                     foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
                     {
-                        //if (IsHexMode)
                         if (m_viewtype == ViewType.Hexadecimal)
                         {
                             int value = 0;
@@ -2695,11 +2550,6 @@ namespace VAGSuite
 
         private void chartControl1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-           /* object[] objs = chartControl1.HitTest(e.X, e.Y);
-            foreach (object o in objs)
-            {
-                Console.WriteLine("Double clicked: " + o.ToString());
-            }*/
         }
 
         private SeriesPoint _sp_dragging;
@@ -2835,48 +2685,6 @@ namespace VAGSuite
 
         private void chartControl1_MouseMove(object sender, MouseEventArgs e)
         {
-            /*if (m_isDragging)
-            {
-                int delta_y = e.Y - _mouse_drag_y;
-                if (Math.Abs(delta_y) > 0)//be able to hover!
-                {
-                    _mouse_drag_y = e.Y;
-                    _mouse_drag_x = e.X;
-
-                    
-                    double yaxissize = (double)((XYDiagram)chartControl1.Diagram).AxisY.Range.MaxValue - (double)((XYDiagram)chartControl1.Diagram).AxisY.Range.MinValue;
-
-                    double yaxissizepxls = chartControl1.Height - (((XYDiagram)chartControl1.Diagram).Padding.Top + ((XYDiagram)chartControl1.Diagram).Padding.Bottom) - (chartControl1.Margin.Top + chartControl1.Margin.Bottom);
-                    yaxissizepxls -= 64;//(yaxissizepxls / 6);
-                    //chartControl1.d
-                    double deltavalue = delta_y * (yaxissize / yaxissizepxls);
-                    //deltavalue -= correction_offset;
-                    //deltavalue *= 1 / correction_factor;
-                    //Console.WriteLine("Delta: " + deltavalue.ToString());
-                    if (_sp_dragging != null)
-                    {
-                        double curval = Convert.ToDouble(_sp_dragging.Values.GetValue(0));
-                        double newvalue = (curval - deltavalue);
-                        // if (newvalue < 0) newvalue = 0;
-                        //Console.WriteLine("Current: " + curval.ToString() + " delta: " + deltavalue.ToString() + " new: " + newvalue.ToString());
-                        _sp_dragging.Values.SetValue(newvalue, 0);
-                        DataTable dt = (DataTable)chartControl1.DataSource;
-                        foreach (DataRow dr in dt.Rows)
-                        {
-                            if (dr[0].ToString() == _sp_dragging.Argument)
-                            {
-                                dr[1] = newvalue;
-                                // zet ook de betreffende waarde in de tabel!
-                                SetDataValueInMap(_sp_dragging.Argument, newvalue);
-                                //Console.WriteLine("Written: " + _sp_dragging.Argument + " : " + newvalue);
-                                //sp.Values.SetValue(curval - 1, 0);
-                                //chartControl1.Invalidate();
-                            }
-                        }
-
-                    }
-                }
-            }*/
         }
 
 
@@ -2916,24 +2724,10 @@ namespace VAGSuite
 
         private void gridView1_SelectionChanged(object sender, DevExpress.Data.SelectionChangedEventArgs e)
         {
-           /* DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-            if (cellcollection.Length == 1)
-            {
-                gridView1.ShowEditor();
-            }*/            
         }
 
         private void gridView1_CustomRowCellEdit(object sender, DevExpress.XtraGrid.Views.Grid.CustomRowCellEditEventArgs e)
         {
-             /*DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-             if (cellcollection.Length == 1)
-             {
-                 e.RepositoryItem = MapViewerCellEdit;
-             }
-             else
-             {
-                 e.RepositoryItem = null;
-             }*/
         }
 
         private void MapViewerCellEdit_KeyDown(object sender, KeyEventArgs e)
@@ -2946,7 +2740,6 @@ namespace VAGSuite
                     e.SuppressKeyPress = true;
                     e.Handled = true;
 
-                    //if (IsHexMode)
                     if (m_viewtype == ViewType.Hexadecimal)
                     {
                         int value = Convert.ToInt32(txtedit.Text, 16);
@@ -2987,7 +2780,6 @@ namespace VAGSuite
                 {
                     e.SuppressKeyPress = true;
                     e.Handled = true;
-                    //if (IsHexMode)
                     if (m_viewtype == ViewType.Hexadecimal)
                     {
                         int value = Convert.ToInt32(txtedit.Text, 16);
@@ -3019,154 +2811,6 @@ namespace VAGSuite
                     }
 
                 }
-                /*else if (e.KeyCode == Keys.PageUp)
-                {
-                    e.Handled = true;
-                    foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
-                    {
-                        if (IsHexMode)
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString(), 16);
-                            value += 0x10;
-                            if (value > m_MaxValueInTable) m_MaxValueInTable = value;
-                            if (m_issixteenbit)
-                            {
-                                if (value > 0xFFFF) value = 0xFFFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X4"));
-                            }
-                            else
-                            {
-                                if (value > 0xFF) value = 0xFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X2"));
-                            }
-                        }
-                        else
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString());
-                            value += 10;
-                            if (value > m_MaxValueInTable) m_MaxValueInTable = value;
-                            if (m_issixteenbit)
-                            {
-                                if (value > 0xFFFF) value = 0xFFFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            else
-                            {
-                                if (value > 0xFF) value = 0xFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-
-                        }
-                    }
-                }
-                else if (e.KeyCode == Keys.PageDown)
-                {
-                    e.Handled = true;
-                    foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
-                    {
-                        if (IsHexMode)
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString(), 16);
-                            value -= 0x10;
-                            if (value < 0) value = 0;
-                            if (m_issixteenbit)
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X4"));
-                            }
-                            else
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X2"));
-                            }
-                        }
-                        else
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString());
-                            value -= 10;
-                            if (value < 0) value = 0;
-                            if (m_issixteenbit)
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            else
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-
-                        }
-                    }
-                }
-                else if (e.KeyCode == Keys.Home)
-                {
-                    e.Handled = true;
-                    foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
-                    {
-                        if (IsHexMode)
-                        {
-
-                            int value = 0xFFFF;
-                            if (m_issixteenbit)
-                            {
-                                value = 0xFFFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X4"));
-                            }
-                            else
-                            {
-                                value = 0xFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X2"));
-                            }
-                            if (value > m_MaxValueInTable) m_MaxValueInTable = value;
-
-                        }
-                        else
-                        {
-                            int value = 0xFFFF;
-                            if (m_issixteenbit)
-                            {
-                                value = 0xFFFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            else
-                            {
-                                value = 0xFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            if (value > m_MaxValueInTable) m_MaxValueInTable = value;
-
-                        }
-                    }
-                }
-                else if (e.KeyCode == Keys.End)
-                {
-                    e.Handled = true;
-                    foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
-                    {
-                        if (IsHexMode)
-                        {
-                            int value = 0;
-                            if (m_issixteenbit)
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X4"));
-                            }
-                            else
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X2"));
-                            }
-                        }
-                        else
-                        {
-                            int value = 0;
-                            if (m_issixteenbit)
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            else
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-
-                        }
-                    }
-                }*/
             }
 
         }
@@ -3235,7 +2879,6 @@ namespace VAGSuite
 
         private void atCurrentlySelectedLocationToolStripMenuItem_Click(object sender, EventArgs e)
         {
-           // Clipboard.ContainsData("System.Object");
             DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
             if (cellcollection.Length >= 1)
             {
@@ -3297,7 +2940,6 @@ namespace VAGSuite
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
-//            m_isHexMode = !m_isHexMode;
             if (m_viewtype != ViewType.Hexadecimal) m_viewtype = ViewType.Hexadecimal;
             else m_viewtype = m_previousviewtype;
             ShowTable(m_TableWidth, m_issixteenbit);
@@ -3895,32 +3537,6 @@ namespace VAGSuite
         }
 
 
-        internal void SetSurfaceGraphZoom(double pov_d)
-        {
-            try
-            {
-                m_prohibitgraphchange = true;
-                m_prohibitgraphchange = false;
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine(E.Message);
-            }
-        }
-
-        public void SetSurfaceGraphView(int pov_x, int pov_y, int pov_z, int pan_x, int pan_y, double pov_d)
-        {
-            try
-            {
-                m_prohibitgraphchange = true;
-                m_prohibitgraphchange = false;
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine(E.Message);
-            }
-
-        }
 
         public void SetSurfaceGraphViewEx(float depthx, float depthy, float zoom, float rotation, float elevation)
         {
@@ -3992,8 +3608,6 @@ namespace VAGSuite
                         e.Valid = false;
                         e.ErrorText = hE.Message;
                     }
-                    /*value = 0xFFFF;
-                     e.Value = value.ToString("X4");*/
                 }
                 else
                 {
@@ -4008,11 +3622,6 @@ namespace VAGSuite
                                 Console.WriteLine(gridView1.ActiveEditor.IsModified.ToString());
                                 dvalue = Convert.ToDouble(gridView1.ActiveEditor.EditValue);
                                 value = Convert.ToInt32((dvalue - correction_offset) / correction_factor);
-/*                                if(value < 0)
-                                {
-                                    value ^= 0xffffff;
-                                    value = -value;
-                                }*/
                             }
                             else
                             {
@@ -4118,21 +3727,6 @@ namespace VAGSuite
 
         private void gridView1_ShownEditor(object sender, EventArgs e)
         {
-            /*
-            GridView view = sender as GridView;
-            if (view.FocusedColumn.FieldName == "CityCode" && view.ActiveEditor is LookUpEdit)
-            {
-                Text = view.ActiveEditor.Parent.Name;
-                DevExpress.XtraEditors.LookUpEdit edit;
-                edit = (LookUpEdit)view.ActiveEditor;
-
-                DataTable table = edit.Properties.LookUpData.DataSource as DataTable;
-                clone = new DataView(table);
-                DataRow row = view.GetDataRow(view.FocusedRowHandle);
-                clone.RowFilter = "[CountryCode] = " + row["CountryCode"].ToString();
-                edit.Properties.LookUpData.DataSource = clone;
-            }
-            */
             if (m_viewtype == ViewType.Easy )
             {
                 gridView1.ActiveEditor.EditValue = ConvertToEasyValue((float)Convert.ToDouble(gridView1.ActiveEditor.EditValue)).ToString("F2");
@@ -4167,38 +3761,6 @@ namespace VAGSuite
 
         public void HighlightCell(int tpsindex, int rpmindex)
         {
-            /*
-          //  gridView1.BeginUpdate();
-            try
-            {
-                // controleer of het verandert is
-                DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-                if (cellcollection.Length > 1)
-                {
-                    gridView1.ClearSelection();
-                }
-                else if (cellcollection.Length == 1)
-                {
-                    // normal situation
-                    DevExpress.XtraGrid.Views.Base.GridCell cell = (DevExpress.XtraGrid.Views.Base.GridCell)cellcollection.GetValue(0);
-                    if (cell.RowHandle != (15 - rpmindex) || cell.Column.AbsoluteIndex != tpsindex)
-                    {
-                        gridView1.ClearSelection();
-                        gridView1.SelectCell(15 - rpmindex, gridView1.Columns[tpsindex]);
-                    }
-                }
-                else
-                {
-                    gridView1.SelectCell(15 - rpmindex, gridView1.Columns[tpsindex]);
-                }
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine(E.Message);
-            }
-          //  gridView1.EndUpdate();*/
-
-            //  gridView1.BeginUpdate();
             try
             {
                 int numberofrows = m_map_content.Length / m_TableWidth;
@@ -4206,41 +3768,18 @@ namespace VAGSuite
                 {
                     numberofrows /= 2;
                 }
-
-                // controleer of het verandert is
-                /*                DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-                                if (cellcollection.Length > 1)
-                                {
-                                    gridView1.ClearSelection();
-                                }
-                                else if (cellcollection.Length == 1)
-                                {
-                                    // normal situation
-                                    DevExpress.XtraGrid.Views.Base.GridCell cell = (DevExpress.XtraGrid.Views.Base.GridCell)cellcollection.GetValue(0);
-
-                                    if (cell.RowHandle != ( (numberofrows - 1) - rpmindex) || cell.Column.AbsoluteIndex != tpsindex)
-                                    {
-                                        gridView1.ClearSelection();
-                                        gridView1.SelectCell((numberofrows - 1) - rpmindex, gridView1.Columns[tpsindex]);
-                                    }
-                                }
-                                else
-                                {
-                                    gridView1.SelectCell((numberofrows-1) - rpmindex, gridView1.Columns[tpsindex]);
-                                }*/
                 m_selectedrowhandle = (numberofrows - 1) - rpmindex;
                 m_selectedcolumnindex = tpsindex;
-
+ 
                 if (m_selectedrowhandle > numberofrows) m_selectedrowhandle = numberofrows;
                 if (m_selectedcolumnindex > m_TableWidth) m_selectedcolumnindex = m_TableWidth;
-
+ 
                 gridControl1.Invalidate();
             }
             catch (Exception E)
             {
                 Console.WriteLine(E.Message);
             }
-            //  gridView1.EndUpdate();
         }
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
@@ -4443,10 +3982,6 @@ namespace VAGSuite
                         for (int telx = 0; telx <= max_column - min_column; telx++)
                         {
                             // get values 
-                            double valx1 = 0;
-                            double valx2 = 0;
-                            double valy1 = 0;
-                            double valy2 = 0;
                             Console.WriteLine("max_col/min_col/telx - max_row/min_row/tely: " + max_column + "/" + min_column + "/" + telx + " - " + max_row + "/" + min_row + "/" + tely);
                             double xportion = (xaxisvalues[max_column - min_column - telx] - xaxisvalues[max_column - min_column]) / xaxisdiff;
                             double yportion = (yaxisvalues[tely] - yaxisvalues[max_row - min_row]) / yaxisdiff;
