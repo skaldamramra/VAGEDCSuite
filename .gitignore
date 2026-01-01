@@ -67,7 +67,13 @@ Libs/
 
 ## TODO: If you have NuGet Package Restore enabled, uncomment this
 packages/
+packages.config
+*.nupkg
 nuget.exe
+
+# Test Infrastructure (do NOT ignore - these are part of the project)
+Tests/Tests.csproj
+Tests/packages.config
 
 # Visual C++ cache files
 ipch/
@@ -110,6 +116,7 @@ stylecop.*
 ~$*
 *.dbmdl
 Generated_Code #added for RIA/Silverlight projects
+NUnit.2.6.4
 
 # Backup & report files from converting an old project file to a newer
 # Visual Studio version. Backup files are not needed, because we have git ;-)
