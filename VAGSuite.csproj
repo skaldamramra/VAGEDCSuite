@@ -70,6 +70,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.6.4.0, Culture=neutral, PublicKeyToken=96dd096d9f64dab, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Users\ebircak.HQ\.nuget\packages\nunit\2.6.4\lib\nunit.framework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="MapViewerEventArgs\AxisEditorRequestedEventArgs.cs" />
     <Compile Include="MapViewerEventArgs\ViewTypeChangedEventArgs.cs" />
     <Compile Include="MapViewerEventArgs\AxisLockEventArgs.cs" />
@@ -537,6 +543,14 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="XDFWriter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Tests\DataConversionServiceTests.cs" />
+    <Compile Include="Tests\MapRenderingServiceTests.cs" />
+    <Compile Include="Tests\ChartServiceTests.cs" />
+    <Compile Include="Tests\ClipboardServiceTests.cs" />
+    <Compile Include="Tests\SmoothingServiceTests.cs" />
+    <Compile Include="Tests\MapViewerExIntegrationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="gnome.ico" />

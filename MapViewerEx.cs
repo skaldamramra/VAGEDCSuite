@@ -1046,6 +1046,81 @@ namespace VAGSuite
             _chart3DComponent.ViewChanged += OnChart3DViewChanged;
         }
 
+        /// <summary>
+        /// Uses MapGridComponent to render cell with proper coloring and formatting.
+        /// This method delegates to the component for rendering logic while keeping control in MapViewerEx.
+        /// </summary>
+        private void RenderCellWithComponent(DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e, int cellValue)
+        {
+            // Use MapGridComponent's rendering logic
+            _mapGridComponent.LoadData(
+                m_map_content,
+                m_map_length,
+                CreateMapViewerState());
+            
+            // Apply the component's color calculation
+            Color cellColor = _mapRenderingService.CalculateCellColor(
+                cellValue,
+                m_MaxValueInTable,
+                m_OnlineMode,
+                m_isRedWhite);
+            
+            if (!m_disablecolors)
+            {
+                SolidBrush sb = new SolidBrush(cellColor);
+                e.Graphics.FillRectangle(sb, e.Bounds);
+            }
+        }
+
+        /// <summary>
+        /// Uses Chart3DComponent to refresh the 3D mesh graph.
+        /// </summary>
+        private void RefreshMeshGraphWithComponent()
+        {
+            if (_chart3DComponent != null)
+            {
+                _chart3DComponent.LoadData(CreateMapViewerState());
+                _chart3DComponent.RefreshChart();
+            }
+        }
+
+        /// <summary>
+        /// Uses Chart2DComponent to update the 2D chart slice.
+        /// </summary>
+        private void Update2DChartWithComponent(byte[] data)
+        {
+            if (_chart2DComponent != null && m_TableWidth == 1)
+            {
+                _chart2DComponent.LoadData(data, m_map_length, CreateMapViewerState());
+            }
+        }
+
+        /// <summary>
+        /// Gets cell value from grid using component patterns.
+        /// </summary>
+        private int GetCellValueFromGrid(int rowHandle, int columnIndex)
+        {
+            object cellValue = gridView1.GetRowCellValue(rowHandle, gridView1.Columns[columnIndex]);
+            if (cellValue == null) return 0;
+            
+            if (m_viewtype == ViewType.Hexadecimal)
+            {
+                return Convert.ToInt32(cellValue.ToString(), 16);
+            }
+            else
+            {
+                return Convert.ToInt32(ConvertToDouble(cellValue.ToString()));
+            }
+        }
+
+        /// <summary>
+        /// Sets cell value in grid using component patterns.
+        /// </summary>
+        private void SetCellValueInGrid(int rowHandle, int columnIndex, object value)
+        {
+            gridView1.SetRowCellValue(rowHandle, gridView1.Columns[columnIndex], value);
+        }
+
         private void OnChart3DViewChanged(object sender, SurfaceGraphViewChangedEventArgsEx e)
         {
             CastSurfaceGraphChangedEventEx(e.DepthX, e.DepthY, e.Zoom, e.Rotation, e.Elevation);
