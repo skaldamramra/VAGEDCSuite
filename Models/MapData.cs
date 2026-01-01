@@ -16,6 +16,10 @@ namespace VAGSuite.Models
         public bool IsSixteenBit { get; set; }
         public int TableWidth { get; set; }
         
+        // Additional properties for UI rendering
+        public int MaxValueInTable { get; set; }
+        public byte[] OpenLoop { get; set; }
+        
         public MapData Clone()
         {
             return new MapData
