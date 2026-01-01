@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
+using VAGSuite.MapViewerEventArgs;
+
 namespace VAGSuite
 {
     public class EDC16FileParser : IEDCFileParser
@@ -303,7 +305,7 @@ namespace VAGSuite
                     //int xmax = GetMaxAxisValue(allBytes, sh, MapViewerEx.AxisIdent.X_Axis);
                     //int ymax = GetMaxAxisValue(allBytes, sh, MapViewerEx.AxisIdent.Y_Axis);
                     //Console.WriteLine(xmax.ToString() + " " + ymax.ToString() + " " + sh.Flash_start_address.ToString("X8"));
-                    if (GetMaxAxisValue(allBytes, sh, MapViewerEx.AxisIdent.Y_Axis) < 4000)
+                    if (GetMaxAxisValue(allBytes, sh, AxisIdent.Y_Axis) < 4000)
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Limiters";
@@ -341,10 +343,10 @@ namespace VAGSuite
                 }
             }
         }
-        private int GetMaxAxisValue(byte[] allBytes, SymbolHelper sh, MapViewerEx.AxisIdent axisIdent)
+        private int GetMaxAxisValue(byte[] allBytes, SymbolHelper sh, AxisIdent axisIdent)
         {
             int retval = 0;
-            if (axisIdent == MapViewerEx.AxisIdent.X_Axis)
+            if (axisIdent == AxisIdent.X_Axis)
             {
                 //read x axis values
                 int offset = sh.X_axis_address;
@@ -355,7 +357,7 @@ namespace VAGSuite
                     offset += 2;
                 }
             }
-            else if (axisIdent == MapViewerEx.AxisIdent.Y_Axis)
+            else if (axisIdent == AxisIdent.Y_Axis)
             {
                 //read x axis values
                 int offset = sh.Y_axis_address;

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using DevExpress.XtraBars.Docking;
 using VAGSuite;
+using VAGSuite.MapViewerEventArgs;
 
 namespace VAGSuite.Services
 {
@@ -25,7 +26,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Synchronizes view type changes across all map viewers
         /// </summary>
-        public void OnViewTypeChanged(object sender, MapViewerEx.ViewTypeChangedEventArgs e, DockManager dockManager)
+        public void OnViewTypeChanged(object sender, MapViewerEventArgs.ViewTypeChangedEventArgs e, DockManager dockManager)
         {
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {
@@ -98,7 +99,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Synchronizes surface graph view changes across all map viewers
         /// </summary>
-        public void OnSurfaceGraphViewChangedEx(object sender, MapViewerEx.SurfaceGraphViewChangedEventArgsEx e, DockManager dockManager)
+        public void OnSurfaceGraphViewChangedEx(object sender, MapViewerEventArgs.SurfaceGraphViewChangedEventArgsEx e, DockManager dockManager)
         {
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {
@@ -168,7 +169,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Synchronizes splitter position changes across all map viewers
         /// </summary>
-        public void OnSplitterMoved(object sender, MapViewerEx.SplitterMovedEventArgs e, DockManager dockManager)
+        public void OnSplitterMoved(object sender, MapViewerEventArgs.SplitterMovedEventArgs e, DockManager dockManager)
         {
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {
@@ -238,7 +239,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Synchronizes cell selection changes across all map viewers
         /// </summary>
-        public void OnSelectionChanged(object sender, MapViewerEx.CellSelectionChangedEventArgs e, DockManager dockManager)
+        public void OnSelectionChanged(object sender, MapViewerEventArgs.CellSelectionChangedEventArgs e, DockManager dockManager)
         {
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {
@@ -308,7 +309,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Synchronizes slider position changes across all map viewers
         /// </summary>
-        public void OnSliderMove(object sender, MapViewerEx.SliderMoveEventArgs e, DockManager dockManager)
+        public void OnSliderMove(object sender, MapViewerEventArgs.SliderMoveEventArgs e, DockManager dockManager)
         {
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {
@@ -495,7 +496,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Handles axis lock event and synchronizes across all viewers
         /// </summary>
-        public void OnAxisLock(object sender, MapViewerEx.AxisLockEventArgs e, DockManager dockManager)
+        public void OnAxisLock(object sender, MapViewerEventArgs.AxisLockEventArgs e, DockManager dockManager)
         {
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {

@@ -9,6 +9,7 @@ using System.Net.NetworkInformation;
 using System.Net;
 using DevExpress.Internal;
 using System.Drawing;
+using VAGSuite.MapViewerEventArgs;
 
 namespace VAGSuite
 {
@@ -1486,7 +1487,7 @@ namespace VAGSuite
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Limiters";
                         // if x axis = upto 3000 -> MAP limit, not MAF limit
-                        if (GetMaxAxisValue(allBytes, sh, MapViewerEx.AxisIdent.Y_Axis) < 4000)
+                        if (GetMaxAxisValue(allBytes, sh, AxisIdent.Y_Axis) < 4000)
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Limiters";
@@ -2066,7 +2067,7 @@ namespace VAGSuite
                     else if (sh.X_axis_ID / 256 == 0xC5 && sh.Y_axis_ID / 256 == 0xEC)
                     {
                         //if (!MapContainsNegativeValues(allBytes, sh))
-                        if (GetMaxAxisValue(allBytes, sh, MapViewerEx.AxisIdent.X_Axis) > 3500) // was 5000
+                        if (GetMaxAxisValue(allBytes, sh, AxisIdent.X_Axis) > 3500) // was 5000
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Fuel"; // was Limiters
@@ -2573,7 +2574,7 @@ namespace VAGSuite
                     if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xC1)
                     {
                         // check for valid axis data on temp data
-                        if (IsValidTemperatureAxis(allBytes, sh, MapViewerEx.AxisIdent.Y_Axis))
+                        if (IsValidTemperatureAxis(allBytes, sh, AxisIdent.Y_Axis))
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Limiters";
@@ -2594,7 +2595,7 @@ namespace VAGSuite
                     else if (sh.X_axis_ID / 256 == 0xEA && sh.Y_axis_ID / 256 == 0xC1)
                     {
                         // check for valid axis data on temp data
-                        if (IsValidTemperatureAxis(allBytes, sh, MapViewerEx.AxisIdent.Y_Axis))
+                        if (IsValidTemperatureAxis(allBytes, sh, AxisIdent.Y_Axis))
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Limiters";
@@ -2614,7 +2615,7 @@ namespace VAGSuite
                     }
                     else if ((sh.X_axis_ID / 256 == 0xEA || sh.X_axis_ID / 256 == 0xEB) && sh.Y_axis_ID / 256 == 0xC0)
                     {
-                        if (IsValidTemperatureAxis(allBytes, sh, MapViewerEx.AxisIdent.X_Axis))
+                        if (IsValidTemperatureAxis(allBytes, sh, AxisIdent.X_Axis))
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Limiters";
@@ -5810,7 +5811,7 @@ namespace VAGSuite
                         }
                         else if (sh.X_axis_ID / 256 == 0xC1) // idle RPM
                         {
-                            if (IsValidTemperatureAxis(allBytes, sh, MapViewerEx.AxisIdent.X_Axis))
+                            if (IsValidTemperatureAxis(allBytes, sh, AxisIdent.X_Axis))
                             {
                                 sh.Category = "Detected maps";
                                 sh.Subcategory = "Misc";
@@ -5827,7 +5828,7 @@ namespace VAGSuite
                         }
                         else if (sh.X_axis_ID == 0xEBC4 || sh.X_axis_ID == 0xEBC6)
                         {
-                            if (IsValidVoltageAxis(allBytes, sh, MapViewerEx.AxisIdent.X_Axis))
+                            if (IsValidVoltageAxis(allBytes, sh, AxisIdent.X_Axis))
                             {
                                 sh.Category = "Detected maps";
                                 sh.Subcategory = "Misc";
@@ -6009,10 +6010,10 @@ namespace VAGSuite
             return retval;
         }
 
-        private int GetMaxAxisValue(byte[] allBytes, SymbolHelper sh, MapViewerEx.AxisIdent axisIdent)
+        private int GetMaxAxisValue(byte[] allBytes, SymbolHelper sh, AxisIdent axisIdent)
         {
             int retval = 0;
-            if (axisIdent == MapViewerEx.AxisIdent.X_Axis)
+            if (axisIdent == AxisIdent.X_Axis)
             {
                 //read x axis values
                 int offset = sh.X_axis_address;
@@ -6023,7 +6024,7 @@ namespace VAGSuite
                     offset += 2;
                 }
             }
-            else if (axisIdent == MapViewerEx.AxisIdent.Y_Axis)
+            else if (axisIdent == AxisIdent.Y_Axis)
             {
                 //read x axis values
                 int offset = sh.Y_axis_address;
@@ -6037,10 +6038,10 @@ namespace VAGSuite
             return retval;
         }
 
-        private bool IsValidTemperatureAxis(byte[] allBytes, SymbolHelper sh, MapViewerEx.AxisIdent axisIdent)
+        private bool IsValidTemperatureAxis(byte[] allBytes, SymbolHelper sh, AxisIdent axisIdent)
         {
             bool retval = true;
-            if (axisIdent == MapViewerEx.AxisIdent.X_Axis)
+            if (axisIdent == AxisIdent.X_Axis)
             {
                 //read x axis values
                 int offset = sh.X_axis_address;
@@ -6052,7 +6053,7 @@ namespace VAGSuite
                     offset += 2;
                 }
             }
-            else if (axisIdent == MapViewerEx.AxisIdent.Y_Axis)
+            else if (axisIdent == AxisIdent.Y_Axis)
             {
                 //read x axis values
                 int offset = sh.Y_axis_address;
@@ -6067,10 +6068,10 @@ namespace VAGSuite
             return retval;
         }
 
-        private bool IsValidVoltageAxis(byte[] allBytes, SymbolHelper sh, MapViewerEx.AxisIdent axisIdent)
+        private bool IsValidVoltageAxis(byte[] allBytes, SymbolHelper sh, AxisIdent axisIdent)
         {
             bool retval = true;
-            if (axisIdent == MapViewerEx.AxisIdent.X_Axis)
+            if (axisIdent == AxisIdent.X_Axis)
             {
                 //read x axis values
                 int offset = sh.X_axis_address;
@@ -6082,7 +6083,7 @@ namespace VAGSuite
                     offset += 2;
                 }
             }
-            else if (axisIdent == MapViewerEx.AxisIdent.Y_Axis)
+            else if (axisIdent == AxisIdent.Y_Axis)
             {
                 //read x axis values
                 int offset = sh.Y_axis_address;

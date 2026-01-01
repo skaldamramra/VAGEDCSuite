@@ -616,7 +616,7 @@ namespace VAGSuite
                     }
                     if (sh.X_axis_ID / 256 == 0xE0 && sh.Y_axis_ID / 256 == 0xC2)
                     {
-                        if (IsValidTemperatureAxis(allBytes, sh, MapViewerEx.AxisIdent.Y_Axis))
+                        if (IsValidTemperatureAxis(allBytes, sh, AxisIdent.Y_Axis))
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Limiters";
@@ -657,7 +657,7 @@ namespace VAGSuite
                     if (sh.X_axis_ID / 256 == 0xE0 && sh.Y_axis_ID == 0xC002)
                     {
                         // check for valid axis data on temp data
-                        if (IsValidTemperatureAxis(allBytes, sh, MapViewerEx.AxisIdent.Y_Axis))
+                        if (IsValidTemperatureAxis(allBytes, sh, AxisIdent.Y_Axis))
                         {
                             sh.Category = "Detected maps";
                             sh.Subcategory = "Limiters";
@@ -754,10 +754,10 @@ namespace VAGSuite
 
         }
 
-        private bool IsValidTemperatureAxis(byte[] allBytes, SymbolHelper sh, MapViewerEx.AxisIdent axisIdent)
+        private bool IsValidTemperatureAxis(byte[] allBytes, SymbolHelper sh, AxisIdent axisIdent)
         {
             bool retval = true;
-            if (axisIdent == MapViewerEx.AxisIdent.X_Axis)
+            if (axisIdent == AxisIdent.X_Axis)
             {
                 //read x axis values
                 int offset = sh.X_axis_address;
@@ -769,7 +769,7 @@ namespace VAGSuite
                     offset += 2;
                 }
             }
-            else if (axisIdent == MapViewerEx.AxisIdent.Y_Axis)
+            else if (axisIdent == AxisIdent.Y_Axis)
             {
                 //read x axis values
                 int offset = sh.Y_axis_address;
