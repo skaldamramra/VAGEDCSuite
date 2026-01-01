@@ -13,76 +13,168 @@ namespace VAGSuite.Services
         public DataTable ConvertToDataTable(MapData data, ViewConfiguration config)
         {
             var dataTable = new DataTable();
-            
-            if (data == null || data.Content == null)
+
+            if (data == null || data.Content == null || data.Content.Length == 0)
                 return dataTable;
-                
-            int xvalues = 0;
-            int yvalues = 0;
-            
-            if (config.ViewType == ViewType.Easy)
+
+            int tableWidth = data.TableWidth;
+            if (tableWidth <= 0)
+                tableWidth = 1;
+
+            // Create columns
+            for (int c = 0; c < tableWidth; c++)
             {
-                xvalues = 1;
-                yvalues = data.Length;
+                dataTable.Columns.Add(c.ToString());
+            }
+
+            int numberRows = data.Content.Length / tableWidth;
+            if (data.IsSixteenBit)
+                numberRows /= 2;
+
+            int mapOffset = 0;
+
+            // Populate rows
+            if (data.IsSixteenBit)
+            {
+                for (int i = 0; i < numberRows; i++)
+                {
+                    object[] objarr = new object[tableWidth];
+                    for (int j = 0; j < tableWidth; j++)
+                    {
+                        int b = data.Content[mapOffset++];
+                        b *= 256;
+                        b += data.Content[mapOffset++];
+
+                        if (b > 0xF000)
+                        {
+                            b = 0x10000 - b;
+                            b = -b;
+                        }
+
+                        string formattedValue = FormatValue(b, config.ViewType, true);
+                        objarr[j] = formattedValue;
+                    }
+
+                    if (config.IsUpsideDown)
+                    {
+                        System.Data.DataRow r = dataTable.NewRow();
+                        r.ItemArray = objarr;
+                        dataTable.Rows.InsertAt(r, 0);
+                    }
+                    else
+                    {
+                        dataTable.Rows.Add(objarr);
+                    }
+                }
+
+                // Handle remaining bytes
+                if (mapOffset < data.Content.Length)
+                {
+                    object[] objarr = new object[tableWidth];
+                    int sicnt = 0;
+                    for (int v = mapOffset; v < data.Content.Length - 1; v++)
+                    {
+                        if (mapOffset <= data.Content.Length - 1)
+                        {
+                            int b = data.Content[mapOffset++];
+                            b *= 256;
+                            b += data.Content[mapOffset++];
+
+                            if (b > 0xF000)
+                            {
+                                b = 0x10000 - b;
+                                b = -b;
+                            }
+
+                            string formattedValue = FormatValue(b, config.ViewType, true);
+                            objarr[sicnt] = formattedValue;
+                            sicnt++;
+                        }
+                    }
+
+                    if (config.IsUpsideDown)
+                    {
+                        System.Data.DataRow r = dataTable.NewRow();
+                        r.ItemArray = objarr;
+                        dataTable.Rows.InsertAt(r, 0);
+                    }
+                    else
+                    {
+                        dataTable.Rows.Add(objarr);
+                    }
+                }
             }
             else
             {
-                xvalues = data.TableWidth;
-                if (xvalues > 0)
-                    yvalues = data.Length / xvalues;
-                else
-                    yvalues = data.Length;
-            }
-            
-            for (int i = 0; i < xvalues; i++)
-            {
-                var column = new DataColumn("col" + i.ToString());
-                dataTable.Columns.Add(column);
-            }
-            
-            int cellcount = 0;
-            for (int t = 0; t < yvalues; t++)
-            {
-                DataRow row = dataTable.NewRow();
-                for (int i = 0; i < xvalues; i++)
+                for (int i = 0; i < numberRows; i++)
                 {
-                    if (cellcount < data.Content.Length)
+                    object[] objarr = new object[tableWidth];
+                    for (int j = 0; j < tableWidth; j++)
                     {
-                        int cellvalue = 0;
-                        if (data.IsSixteenBit)
-                        {
-                            if ((cellcount + 1) < data.Content.Length)
-                            {
-                                cellvalue = data.Content[cellcount] * 256 + data.Content[cellcount + 1];
-                            }
-                            else
-                            {
-                                cellvalue = data.Content[cellcount];
-                            }
-                        }
-                        else
-                        {
-                            cellvalue = data.Content[cellcount];
-                        }
-                        
-                        string cellValueString = FormatValue(cellvalue, config.ViewType, data.IsSixteenBit);
-                        row[i] = cellValueString;
+                        int b = data.Content[mapOffset++];
+                        string formattedValue = FormatValue(b, config.ViewType, false);
+                        objarr[j] = formattedValue;
                     }
-                    cellcount++;
+
+                    if (config.IsUpsideDown)
+                    {
+                        System.Data.DataRow r = dataTable.NewRow();
+                        r.ItemArray = objarr;
+                        dataTable.Rows.InsertAt(r, 0);
+                    }
+                    else
+                    {
+                        dataTable.Rows.Add(objarr);
+                    }
                 }
-                dataTable.Rows.Add(row);
+
+                // Handle remaining bytes
+                if (mapOffset < data.Content.Length)
+                {
+                    object[] objarr = new object[tableWidth];
+                    int sicnt = 0;
+                    for (int v = mapOffset; v < data.Content.Length; v++)
+                    {
+                        int b = data.Content[mapOffset++];
+                        string formattedValue = FormatValue(b, config.ViewType, false);
+                        objarr[sicnt] = formattedValue;
+                        sicnt++;
+                    }
+
+                    if (config.IsUpsideDown)
+                    {
+                        System.Data.DataRow r = dataTable.NewRow();
+                        r.ItemArray = objarr;
+                        dataTable.Rows.InsertAt(r, 0);
+                    }
+                    else
+                    {
+                        dataTable.Rows.Add(objarr);
+                    }
+                }
             }
-            
+
             return dataTable;
         }
         
-        public byte[] ConvertFromDataTable(DataTable table, MapData data, ViewConfiguration config)
+        public byte[] ConvertFromDataTable(DataTable table, MapData data, ViewConfiguration config, bool upsidedown = false)
         {
+            if (table == null || table.Rows.Count == 0 || data == null || data.Length == 0)
+                return new byte[0];
+
             var result = new byte[data.Length];
             int cellcount = 0;
-            
-            foreach (DataRow row in table.Rows)
+
+            // Process rows in the appropriate order
+            for (int rowIndex = 0; rowIndex < table.Rows.Count; rowIndex++)
             {
+                int actualRowIndex = rowIndex;
+                if (upsidedown)
+                {
+                    actualRowIndex = table.Rows.Count - 1 - rowIndex;
+                }
+
+                DataRow row = table.Rows[actualRowIndex];
                 foreach (object o in row.ItemArray)
                 {
                     if (o != null && o != DBNull.Value)
@@ -90,29 +182,32 @@ namespace VAGSuite.Services
                         if (cellcount < result.Length)
                         {
                             int value = ParseValue(o.ToString(), config.ViewType);
-                            
+
                             if (data.IsSixteenBit)
                             {
                                 if ((cellcount + 1) < result.Length)
                                 {
+                                    // Store as big-endian (high byte first)
                                     result[cellcount] = (byte)((value >> 8) & 0xFF);
                                     result[cellcount + 1] = (byte)(value & 0xFF);
+                                    cellcount += 2;
                                 }
                                 else
                                 {
                                     result[cellcount] = (byte)(value & 0xFF);
+                                    cellcount++;
                                 }
                             }
                             else
                             {
                                 result[cellcount] = (byte)(value & 0xFF);
+                                cellcount++;
                             }
                         }
                     }
-                    cellcount++;
                 }
             }
-            
+
             return result;
         }
         

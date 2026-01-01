@@ -12,11 +12,11 @@ namespace VAGSuite.Services
         /// Converts byte array to DataTable for grid display
         /// </summary>
         DataTable ConvertToDataTable(MapData data, ViewConfiguration config);
-        
+
         /// <summary>
         /// Converts DataTable back to byte array
         /// </summary>
-        byte[] ConvertFromDataTable(DataTable table, MapData data, ViewConfiguration config);
+        byte[] ConvertFromDataTable(DataTable table, MapData data, ViewConfiguration config, bool upsidedown = false);
         
         /// <summary>
         /// Converts a single value based on view type
