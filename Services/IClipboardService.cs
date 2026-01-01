@@ -16,5 +16,10 @@ namespace VAGSuite.Services
         /// Pastes clipboard data at current location
         /// </summary>
         void PasteAtCurrentLocation(object[] targetCells, ViewType currentViewType);
+        
+        /// <summary>
+        /// Pastes clipboard data at original position (no offset adjustment)
+        /// </summary>
+        void PasteAtOriginalPosition(object[] targetCells, ViewType currentViewType);
     }
 }

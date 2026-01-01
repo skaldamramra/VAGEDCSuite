@@ -23,20 +23,23 @@ namespace VAGSuite.Services
                 
             var sb = new StringBuilder();
             
-            for (int i = 0; i < cells.Length; i++)
+            // Use the same format as MapViewerEx: "viewtype:colindex:rowhandle:value:~"
+            sb.Append(((int)viewType).ToString());
+            
+            for (int i = 0; i < cells.Length; i += 3)
             {
-                if (i > 0)
+                if (i + 2 < cells.Length)
                 {
-                    if (i % 16 != 0)
-                        sb.Append("\t");
-                    else
-                        sb.AppendLine();
-                }
-                
-                if (cells[i] != null)
-                {
-                    string value = cells[i].ToString();
-                    sb.Append(value);
+                    int colIndex = Convert.ToInt32(cells[i]);
+                    int rowHandle = Convert.ToInt32(cells[i + 1]);
+                    object value = cells[i + 2];
+                    
+                    sb.Append(colIndex.ToString());
+                    sb.Append(":");
+                    sb.Append(rowHandle.ToString());
+                    sb.Append(":");
+                    sb.Append(value.ToString());
+                    sb.Append(":~");
                 }
             }
             
@@ -61,6 +64,7 @@ namespace VAGSuite.Services
                     return;
                     
                 string serialized = System.Windows.Forms.Clipboard.GetText();
+                // Match MapViewerEx format: first char is viewtype, then "colindex:rowhandle:value:~"
                 int viewtypeinclipboard = Convert.ToInt32(serialized.Substring(0, 1));
                 ViewType vtclip = (ViewType)viewtypeinclipboard;
                 serialized = serialized.Substring(1);
@@ -82,6 +86,7 @@ namespace VAGSuite.Services
                     
                     if (vals.Length >= 3)
                     {
+                        // Match MapViewerEx format: colindex:rowhandle:value
                         int rowhandle = Convert.ToInt32(vals.GetValue(1));
                         int colindex = Convert.ToInt32(vals.GetValue(0));
                         int ivalue = 0;
@@ -114,9 +119,9 @@ namespace VAGSuite.Services
                             if (targetCells.Length > 2)
                             {
                                 // Store parsed values for UI to use
-                                ((System.Collections.Generic.List<PasteCellInfo>)targetCells[2]).Add(new PasteCellInfo 
-                                { 
-                                    Row = targetRow, 
+                                ((System.Collections.Generic.List<PasteCellInfo>)targetCells[2]).Add(new PasteCellInfo
+                                {
+                                    Row = targetRow,
                                     Column = targetCol,
                                     Value = vtclip == ViewType.Hexadecimal ? ivalue.ToString("X") : dvalue.ToString()
                                 });
@@ -145,6 +150,7 @@ namespace VAGSuite.Services
                     return;
                     
                 string serialized = System.Windows.Forms.Clipboard.GetText();
+                // Match MapViewerEx format: first char is viewtype, then "colindex:rowhandle:value:~"
                 int viewtypeinclipboard = Convert.ToInt32(serialized.Substring(0, 1));
                 ViewType vtclip = (ViewType)viewtypeinclipboard;
                 serialized = serialized.Substring(1);
@@ -161,6 +167,7 @@ namespace VAGSuite.Services
                     
                     if (vals.Length >= 3)
                     {
+                        // Match MapViewerEx format: colindex:rowhandle:value
                         int rowhandle = Convert.ToInt32(vals.GetValue(1));
                         int colindex = Convert.ToInt32(vals.GetValue(0));
                         
@@ -168,9 +175,9 @@ namespace VAGSuite.Services
                         {
                             if (targetCells.Length > 2)
                             {
-                                ((System.Collections.Generic.List<PasteCellInfo>)targetCells[2]).Add(new PasteCellInfo 
-                                { 
-                                    Row = rowhandle, 
+                                ((System.Collections.Generic.List<PasteCellInfo>)targetCells[2]).Add(new PasteCellInfo
+                                {
+                                    Row = rowhandle,
                                     Column = colindex,
                                     Value = vals.GetValue(2).ToString()
                                 });

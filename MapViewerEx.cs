@@ -1996,140 +1996,65 @@ namespace VAGSuite
 
         private void gridView1_CustomDrawCell(object sender, DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e)
         {
-            
+
             try
             {
                 if (e.CellValue != null)
                 {
                     if (e.CellValue != DBNull.Value)
                     {
-                        int b = 0;
-                        int cellvalue = 0;
+                        int cellValue = 0;
                         if (m_viewtype == ViewType.Hexadecimal)
                         {
-                            b = Convert.ToInt32(e.CellValue.ToString(), 16);
-                            cellvalue = b;
+                            cellValue = Convert.ToInt32(e.CellValue.ToString(), 16);
                         }
                         else
                         {
-                            b = Convert.ToInt32(e.CellValue.ToString());
-                            cellvalue = b;
-                        }
-                        b *= 255;
-                        if (m_MaxValueInTable != 0)
-                        {
-                            b /= m_MaxValueInTable;
+                            cellValue = Convert.ToInt32(ConvertToDouble(e.CellValue.ToString()));
                         }
 
-                        // new version
+                        // Use IMapRenderingService for color calculation
+                        Color cellColor = _mapRenderingService.CalculateCellColor(
+                            cellValue,
+                            m_MaxValueInTable,
+                            m_OnlineMode,
+                            m_isRedWhite);
 
-                        b = 0;
-                        double td = 0;
-                        int tempcellvalue = 0;
-                        if (m_viewtype == ViewType.Hexadecimal)
+                        // Apply coloring if not disabled
+                        if (!m_disablecolors)
                         {
-                            b = Convert.ToInt32(e.CellValue.ToString(), 16);
-                            td = b;
-                            if (m_viewtype == ViewType.Easy)
-                            {
-                                td *= correction_factor;
-                                td += correction_offset;
-                            }
-                            tempcellvalue = Convert.ToInt32(td);
-                        }
-                        else
-                        {
-                            b = Convert.ToInt32(ConvertToDouble(e.CellValue.ToString()));
-                            td = b;
-                            if (m_viewtype == ViewType.Easy)
-                            {
-                                td *= correction_factor;
-                                td += correction_offset;
-                            }
-                            tempcellvalue = Convert.ToInt32(td);
-
-                        }
-                        td *= 255;
-                        b = Convert.ToInt32(td);
-                        if (now_realMaxValue != double.MinValue && now_realMaxValue != 0)
-                        {
-                            b /= Convert.ToInt32(now_realMaxValue);
+                            SolidBrush sb = new SolidBrush(cellColor);
+                            e.Graphics.FillRectangle(sb, e.Bounds);
                         }
 
-                        // upto here
-
-
-                        int red = 128;
-                        int green = 128;
-                        int blue = 128;
-                        Color c = Color.White;
-                        if (m_OnlineMode)
-                        {
-                            b /= 2;
-                            red = b;
-                            if (red < 0) red = 0;
-                            if (red > 255) red = 255;
-                            if (b > 255) b = 255;
-                            green = 255 - red;
-                            blue = 255 - red;
-                            c = Color.FromArgb(red, green, blue);
-                            // if (b == 0) c = Color.Transparent;
-
-                        }
-                        else if (!m_isRedWhite)
-                        {
-                            red = b;
-                            if (red < 0) red = 0;
-                            if (red > 255) red = 255;
-                            if (b > 255) b = 255;
-                            blue = 0;
-                            green = 255 - red;
-                            c = Color.FromArgb(red, green, blue);
-                        }
-                        else
-                        {
-                            if (b < 0) b = -b;
-                            if (b > 255) b = 255;
-                            c = Color.FromArgb(b, Color.Red);
-                        }
+                        // Use IDataConversionService for value formatting
+                        string displayText = _dataConversionService.FormatValue(cellValue, m_viewtype, m_issixteenbit);
                         
-                        if (m_viewtype == ViewType.Easy )
+                        // Apply correction factor and offset if needed
+                        if (m_viewtype == ViewType.Easy && (correction_offset != 0 || correction_factor != 1))
                         {
-                            float dispvalue = 0;
-                            dispvalue = (float)cellvalue;
-                            if (correction_offset != 0 || correction_factor != 1)
+                            double correctedValue = _dataConversionService.ApplyCorrection(cellValue, correction_factor, correction_offset);
+                            
+                            if (m_map_name.StartsWith("Injector duration") || m_map_name.StartsWith("Start of injection"))
                             {
-                                dispvalue = (float)((float)cellvalue * (float)correction_factor) + (float)correction_offset;
-                                if (m_viewtype != ViewType.Hexadecimal)
-                                //if (!m_isHexMode)
-                                {
-                                    if (m_map_name.StartsWith("Injector duration") || m_map_name.StartsWith("Start of injection"))
-                                    {
-                                        e.DisplayText = dispvalue.ToString("F1") + "\u00b0";
-                                        /*if (dispvalue < 0)
-                                        {
-                                            Console.WriteLine("Negative value:  " + cellvalue.ToString());
-
-                                        }*/
-                                    }
-                                    else if (m_map_name.StartsWith("N75"))
-                                    {
-                                        e.DisplayText = dispvalue.ToString("F0") + @"%";
-                                    }
-                                    else
-                                    {
-                                        e.DisplayText = dispvalue.ToString("F2");
-                                    }
-                                }
-                                else
-                                {
-                                    //e.DisplayText = dispvalue.ToString();
-                                }
+                                e.DisplayText = correctedValue.ToString("F1") + "\u00b0";
                             }
                             else if (m_map_name.StartsWith("N75"))
                             {
-                                e.DisplayText = dispvalue.ToString("F0") + @"%";
+                                e.DisplayText = correctedValue.ToString("F0") + @"%";
                             }
+                            else
+                            {
+                                e.DisplayText = correctedValue.ToString("F2");
+                            }
+                        }
+                        else if (m_viewtype == ViewType.Easy && m_map_name.StartsWith("N75"))
+                        {
+                            e.DisplayText = displayText + @"%";
+                        }
+                        else
+                        {
+                            e.DisplayText = displayText;
                         }
                         //if (m_map_name == "BFuelCal.Map" || m_map_name == "IgnNormCal.Map" || m_map_name == "TargetAFR" || m_map_name == "FeedbackAFR" || m_map_name == "FeedbackvsTargetAFR")
                         if (X_axis_name.ToLower() == "mg/c" && Y_axis_name.ToLower() == "rpm")
@@ -2174,11 +2099,6 @@ namespace VAGSuite
                                 Console.WriteLine(E.Message);
                             }
 
-                        }
-                        if (!m_disablecolors)
-                        {
-                            SolidBrush sb = new SolidBrush(c);
-                            e.Graphics.FillRectangle(sb, e.Bounds);
                         }
                     }
                 }
@@ -3584,30 +3504,33 @@ namespace VAGSuite
             try
             {
                 DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-                CellHelperCollection chc = new CellHelperCollection();
-                foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
+                
+                // Prepare cells array in format expected by ClipboardService: [colIndex, rowHandle, value, ...]
+                object[] cells = new object[cellcollection.Length * 3];
+                for (int i = 0; i < cellcollection.Length; i++)
                 {
-                    CellHelper ch = new CellHelper();
-                    ch.Rowhandle = gc.RowHandle;
-                    ch.Columnindex = gc.Column.AbsoluteIndex;
+                    DevExpress.XtraGrid.Views.Base.GridCell gc = cellcollection[i];
+                    int colIndex = gc.Column.AbsoluteIndex;
+                    int rowHandle = gc.RowHandle;
                     object o = gridView1.GetRowCellValue(gc.RowHandle, gc.Column);
+                    int value;
+                    
                     if (m_viewtype == ViewType.Hexadecimal)
                     {
-                        ch.Value = Convert.ToInt32(o.ToString(), 16);
+                        value = Convert.ToInt32(o.ToString(), 16);
                     }
                     else
                     {
-                        ch.Value = Convert.ToInt32(o);
+                        value = Convert.ToInt32(o);
                     }
-                    chc.Add(ch);
+                    
+                    cells[i * 3] = colIndex;
+                    cells[i * 3 + 1] = rowHandle;
+                    cells[i * 3 + 2] = value;
                 }
-                string serialized = ((int)m_viewtype).ToString();//string.Empty;
-                foreach (CellHelper ch in chc)
-                {
-                    serialized += ch.Columnindex.ToString() + ":" + ch.Rowhandle.ToString() + ":" + ch.Value.ToString() + ":~";
-                }
-
-                Clipboard.SetText(serialized);
+                
+                // Use the refactored ClipboardService
+                _clipboardService.CopySelection(cells, m_viewtype);
             }
             catch (Exception E)
             {
@@ -3648,70 +3571,21 @@ namespace VAGSuite
                 {
                     int rowhandlefrom = cellcollection[0].RowHandle;
                     int colindexfrom = cellcollection[0].Column.AbsoluteIndex;
-                    int originalrowoffset = -1;
-                    int originalcolumnoffset = -1;
-                    if (Clipboard.ContainsText())
+                    
+                    // Prepare target cells array for ClipboardService
+                    object[] targetCells = new object[3];
+                    targetCells[0] = rowhandlefrom;
+                    targetCells[1] = colindexfrom;
+                    targetCells[2] = new System.Collections.Generic.List<PasteCellInfo>();
+                    
+                    // Use the refactored ClipboardService
+                    _clipboardService.PasteAtCurrentLocation(targetCells, m_viewtype);
+                    
+                    // Apply the paste results
+                    var pasteList = (System.Collections.Generic.List<PasteCellInfo>)targetCells[2];
+                    foreach (var pasteInfo in pasteList)
                     {
-                        string serialized = Clipboard.GetText();
-                        //   Console.WriteLine(serialized);
-                        int viewtypeinclipboard = Convert.ToInt32(serialized.Substring(0, 1));
-                        ViewType vtclip = (ViewType)viewtypeinclipboard;
-                        serialized = serialized.Substring(1);
-                        char[] sep = new char[1];
-                        sep.SetValue('~', 0);
-                        string[] cells = serialized.Split(sep);
-                        foreach (string cell in cells)
-                        {
-                            char[] sep2 = new char[1];
-                            sep2.SetValue(':', 0);
-                            string[] vals = cell.Split(sep2);
-                            if (vals.Length >= 3)
-                            {
-
-                                int rowhandle = Convert.ToInt32(vals.GetValue(1));
-                                int colindex = Convert.ToInt32(vals.GetValue(0));
-                                int ivalue = 0;
-                                double dvalue = 0;
-                                if (vtclip == ViewType.Hexadecimal)
-                                {
-                                    ivalue = Convert.ToInt32(vals.GetValue(2).ToString());
-                                    dvalue = ivalue;
-                                }
-                                else if (vtclip == ViewType.Decimal)
-                                {
-                                    ivalue = Convert.ToInt32(vals.GetValue(2));
-                                    dvalue = ivalue;
-                                }
-                                else if (vtclip == ViewType.Easy )
-                                {
-                                    dvalue = Convert.ToDouble(vals.GetValue(2));
-                                }
-
-                                if (originalrowoffset == -1) originalrowoffset = rowhandle;
-                                if (originalcolumnoffset == -1) originalcolumnoffset = colindex;
-                                if (rowhandle >= 0 && colindex >= 0)
-                                {
-                                    try
-                                    {
-                                        if (vtclip == ViewType.Hexadecimal)
-                                        {
-                                            //gridView1.SetRowCellValue(rowhandle, gridView1.Columns[colindex], ivalue.ToString("X"));
-                                            gridView1.SetRowCellValue(rowhandlefrom + (rowhandle - originalrowoffset), gridView1.Columns[colindexfrom + (colindex - originalcolumnoffset)], ivalue.ToString("X"));
-                                        }
-                                        else
-                                        {
-                                            gridView1.SetRowCellValue(rowhandlefrom + (rowhandle - originalrowoffset), gridView1.Columns[colindexfrom + (colindex - originalcolumnoffset)], dvalue);
-                                        }
-
-                                    }
-                                    catch (Exception E)
-                                    {
-                                        Console.WriteLine(E.Message);
-                                    }
-                                }
-                            }
-
-                        }
+                        gridView1.SetRowCellValue(pasteInfo.Row, gridView1.Columns[pasteInfo.Column], pasteInfo.Value);
                     }
                 }
                 catch (Exception pasteE)
@@ -3723,71 +3597,19 @@ namespace VAGSuite
 
         private void inOrgininalPositionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (Clipboard.ContainsText())
+            // Use the refactored ClipboardService
+            object[] targetCells = new object[3];
+            targetCells[0] = 0;
+            targetCells[1] = 0;
+            targetCells[2] = new System.Collections.Generic.List<PasteCellInfo>();
+            
+            _clipboardService.PasteAtOriginalPosition(targetCells, m_viewtype);
+            
+            // Apply the paste results
+            var pasteList = (System.Collections.Generic.List<PasteCellInfo>)targetCells[2];
+            foreach (var pasteInfo in pasteList)
             {
-                string serialized = Clipboard.GetText();
-                try
-                {
-                    //   Console.WriteLine(serialized);
-                    int viewtypeinclipboard = Convert.ToInt32(serialized.Substring(0, 1));
-                    ViewType vtclip = (ViewType)viewtypeinclipboard;
-                    serialized = serialized.Substring(1);
-
-                    char[] sep = new char[1];
-                    sep.SetValue('~', 0);
-                    string[] cells = serialized.Split(sep);
-                    foreach (string cell in cells)
-                    {
-                        char[] sep2 = new char[1];
-                        sep2.SetValue(':', 0);
-                        string[] vals = cell.Split(sep2);
-                        if (vals.Length >= 3)
-                        {
-                            int rowhandle = Convert.ToInt32(vals.GetValue(1));
-                            int colindex = Convert.ToInt32(vals.GetValue(0));
-                            //int value = Convert.ToInt32(vals.GetValue(2));
-                            int ivalue = 0;
-                            double dvalue = 0;
-                            if (vtclip == ViewType.Hexadecimal)
-                            {
-                                ivalue = Convert.ToInt32(vals.GetValue(2).ToString());
-                                dvalue = ivalue;
-                            }
-                            else if (vtclip == ViewType.Decimal)
-                            {
-                                ivalue = Convert.ToInt32(vals.GetValue(2));
-                                dvalue = ivalue;
-                            }
-                            else if (vtclip == ViewType.Easy)
-                            {
-                                dvalue = Convert.ToDouble(vals.GetValue(2));
-                            }
-                            if (rowhandle >= 0 && colindex >= 0)
-                            {
-                                try
-                                {
-                                    if (vtclip == ViewType.Hexadecimal)
-                                    {
-                                        gridView1.SetRowCellValue(rowhandle, gridView1.Columns[colindex], ivalue.ToString("X"));
-                                    }
-                                    else
-                                    {
-                                        gridView1.SetRowCellValue(rowhandle, gridView1.Columns[colindex], dvalue);
-                                    }
-                                }
-                                catch (Exception E)
-                                {
-                                    Console.WriteLine(E.Message);
-                                }
-                            }
-                        }
-
-                    }
-                }
-                catch (Exception pasteE)
-                {
-                    Console.WriteLine(pasteE.Message);
-                }
+                gridView1.SetRowCellValue(pasteInfo.Row, gridView1.Columns[pasteInfo.Column], pasteInfo.Value);
             }
         }
 
@@ -4838,117 +4660,15 @@ namespace VAGSuite
             DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
             if (cellcollection.Length > 2)
             {
-                // get boundaries for this selection
-                // we need 4 corners 
-                int max_column = 0;
-                int min_column = 0xFFFF;
-                int max_row = 0;
-                int min_row = 0xFFFF;
-                foreach (DevExpress.XtraGrid.Views.Base.GridCell cell in cellcollection)
+                // Use the refactored SmoothingService for proportional smoothing
+                object[] cells = new object[cellcollection.Length];
+                for (int i = 0; i < cellcollection.Length; i++)
                 {
-                    if (cell.Column.AbsoluteIndex > max_column) max_column = cell.Column.AbsoluteIndex;
-                    if (cell.Column.AbsoluteIndex < min_column) min_column = cell.Column.AbsoluteIndex;
-                    if (cell.RowHandle > max_row) max_row = cell.RowHandle;
-                    if (cell.RowHandle < min_row) min_row = cell.RowHandle;
+                    cells[i] = cellcollection[i];
                 }
-                if (max_column == min_column)
-                {
-                    // one column selected only
-                    int top_value = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[max_column]));
-                    int bottom_value = Convert.ToInt32(gridView1.GetRowCellValue(min_row, gridView1.Columns[max_column]));
-                    double diffvalue = (top_value - bottom_value) / (cellcollection.Length - 1);
-                    for (int t = 1; t < cellcollection.Length - 1; t++)
-                    {
-                        double newvalue = bottom_value + (t * diffvalue);
-                        gridView1.SetRowCellValue(min_row + t, gridView1.Columns[max_column], newvalue);
-                    }
-
-                }
-                else if (max_row == min_row)
-                {
-                    // one row selected only
-                    int top_value = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[max_column]));
-                    int bottom_value = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[min_column]));
-                    double diffvalue = (top_value - bottom_value) / (cellcollection.Length - 1);
-                    for (int t = 1; t < cellcollection.Length - 1; t++)
-                    {
-                        double newvalue = bottom_value + (t * diffvalue);
-                        gridView1.SetRowCellValue(min_row, gridView1.Columns[min_column + t], newvalue);
-                    }
-                }
-                else
-                {
-                    // block selected
-                    // interpolation on 4 points!!!
-                    int top_leftvalue = Convert.ToInt32(gridView1.GetRowCellValue(min_row, gridView1.Columns[min_column]));
-                    int top_rightvalue = Convert.ToInt32(gridView1.GetRowCellValue(min_row, gridView1.Columns[max_column]));
-                    int bottom_leftvalue = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[min_column]));
-                    int bottom_rightvalue = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[max_column]));
-
-                    for (int tely = 1; tely < max_row - min_row; tely++)
-                    {
-                        for (int telx = 1; telx < max_column - min_column; telx++)
-                        {
-                            // get values 
-                            double valx1 = 0;
-                            double valx2 = 0;
-                            double valy1 = 0;
-                            double valy2 = 0;
-
-                            if (telx + min_column > 0)
-                            {
-                                valx1 = Convert.ToDouble(gridView1.GetRowCellValue(tely + min_row, gridView1.Columns[telx + min_column - 1]));
-                            }
-                            else
-                            {
-                                valx1 = Convert.ToDouble(gridView1.GetRowCellValue(tely + min_row, gridView1.Columns[min_column]));
-                            }
-                            if ((telx + min_column) < gridView1.Columns.Count - 1)
-                            {
-                                valx2 = Convert.ToDouble(gridView1.GetRowCellValue(tely + min_row, gridView1.Columns[telx + min_column + 1]));
-                            }
-                            else
-                            {
-                                valx2 = Convert.ToDouble(gridView1.GetRowCellValue(tely + min_row, gridView1.Columns[telx + min_column]));
-                            }
-
-                            if (tely + min_row > 0)
-                            {
-                                valy1 = Convert.ToDouble(gridView1.GetRowCellValue(tely + min_row - 1, gridView1.Columns[telx + min_column]));
-                            }
-                            else
-                            {
-                                valy1 = Convert.ToDouble(gridView1.GetRowCellValue(min_row, gridView1.Columns[telx + min_column]));
-                            }
-                            if ((tely + min_row) < gridView1.RowCount - 1)
-                            {
-                                valy2 = Convert.ToDouble(gridView1.GetRowCellValue(tely + min_row + 1, gridView1.Columns[telx + min_column]));
-                            }
-                            else
-                            {
-                                valy2 = Convert.ToDouble(gridView1.GetRowCellValue(tely + min_row, gridView1.Columns[telx + min_column]));
-                            }
-                            //Console.WriteLine("valx1 = " + valx1.ToString() + " valx2 = " + valx2.ToString() + " valy1 = " + valy1.ToString() + " valy2 = " + valy2.ToString());
-                            // x as 
-                            double valuex = (valx2 + valx1) / 2;
-                            double valuey = (valy2 + valy1) / 2;
-                            float newvalue = (float)((valuex + valuey) / 2);
-
-                            gridView1.SetRowCellValue(min_row + tely, gridView1.Columns[min_column + telx], newvalue.ToString("F0"));
-
-                            m_map_content = GetDataFromGridView(m_isUpsideDown);
-
-
-
-                            //double diffvaluex = (top_rightvalue - top_leftvalue) / (max_column - min_column - 1);
-                            //double diffvaluey = (top_rightvalue - top_leftvalue) / (max_column - min_column - 1);
-                        }
-                    }
-
-                }
-//                simpleButton3.Enabled = false;
+                
+                _smoothingService.SmoothProportional(cells, gridView1, x_axisvalues, y_axisvalues);
             }
-
         }
 
         private void smoothSelectionToolProportionalStripMenuItem_Click(object sender, EventArgs e)

@@ -1,4 +1,8 @@
 using System;
+using System.Data;
+using System.Windows.Forms;
+using DevExpress.XtraGrid.Views.Base;
+using DevExpress.XtraGrid.Views.Grid;
 using VAGSuite.Models;
 
 namespace VAGSuite.Services
@@ -15,6 +19,10 @@ namespace VAGSuite.Services
             _conversionService = conversionService;
         }
         
+        /// <summary>
+        /// Smooths selected cells using linear interpolation between first and last value.
+        /// Compatible with MapViewerEx GridCell objects.
+        /// </summary>
         public void SmoothLinear(object[] cells, object gridView)
         {
             if (cells == null || cells.Length < 2)
@@ -26,18 +34,22 @@ namespace VAGSuite.Services
                 return;
             }
             
-            int firstValue = ParseCellValue(cells[0]);
-            int lastValue = ParseCellValue(cells[cells.Length - 1]);
+            int firstValue = ParseCellValue(cells[0], gridView);
+            int lastValue = ParseCellValue(cells[cells.Length - 1], gridView);
             
             double step = (double)(lastValue - firstValue) / (cells.Length - 1);
             
             for (int i = 1; i < cells.Length - 1; i++)
             {
                 int interpolatedValue = firstValue + (int)(step * i);
-                SetCellValue(cells[i], interpolatedValue);
+                SetCellValue(cells[i], interpolatedValue, gridView);
             }
         }
         
+        /// <summary>
+        /// Smooths selected cells proportionally based on axis values.
+        /// Compatible with MapViewerEx GridCell objects.
+        /// </summary>
         public void SmoothProportional(object[] cells, object gridView, int[] xAxis, int[] yAxis)
         {
             if (cells == null || cells.Length == 0)
@@ -51,37 +63,38 @@ namespace VAGSuite.Services
                 int max_row = 0;
                 int min_row = 0xFFFF;
                 
-                // Parse cell positions from the cells array (assuming format: [rowHandle, colIndex, value, ...])
-                for (int i = 0; i < cells.Length; i += 3)
+                // Parse cell positions from GridCell objects (cells are DevExpress.XtraGrid.Views.Base.GridCell)
+                for (int i = 0; i < cells.Length; i++)
                 {
-                    if (i + 1 >= cells.Length) break;
-                    
-                    int rowhandle = Convert.ToInt32(cells[i]);
-                    int colindex = Convert.ToInt32(cells[i + 1]);
-                    
-                    if (colindex > max_column) max_column = colindex;
-                    if (colindex < min_column) min_column = colindex;
-                    if (rowhandle > max_row) max_row = rowhandle;
-                    if (rowhandle < min_row) min_row = rowhandle;
+                    if (cells[i] is GridCell)
+                    {
+                        GridCell gc = (GridCell)cells[i];
+                        int colindex = gc.Column.AbsoluteIndex;
+                        int rowhandle = gc.RowHandle;
+                        
+                        if (colindex > max_column) max_column = colindex;
+                        if (colindex < min_column) min_column = colindex;
+                        if (rowhandle > max_row) max_row = rowhandle;
+                        if (rowhandle < min_row) min_row = rowhandle;
+                    }
                 }
                 
                 if (max_column == min_column)
                 {
                     // One column selected only - smooth along Y axis
-                    int topValue = ParseCellValue(cells[2]); // First cell value
-                    int bottomValue = ParseCellValue(cells[cells.Length - 1]);
+                    int topValue = ParseCellValue(cells[0], gridView);
+                    int bottomValue = ParseCellValue(cells[cells.Length - 1], gridView);
                     
                     double diffvalue = topValue - bottomValue;
-                    double[] yaxisvalues = new double[(cells.Length / 3)];
+                    double[] yaxisvalues = new double[cells.Length];
                     
                     for (int q = 0; q < yaxisvalues.Length; q++)
                     {
-                        int cellIndex = q * 3;
-                        if (cellIndex + 1 < cells.Length)
+                        if (cells[q] is GridCell && yAxis != null)
                         {
-                            int rowHandle = Convert.ToInt32(cells[cellIndex]);
-                            // Get corresponding Y axis value
-                            if (yAxis != null && rowHandle < yAxis.Length)
+                            GridCell gc = (GridCell)cells[q];
+                            int rowHandle = gc.RowHandle;
+                            if (rowHandle < yAxis.Length)
                             {
                                 yaxisvalues[q] = Convert.ToDouble(yAxis[yAxis.Length - min_row - q - 1]);
                             }
@@ -97,32 +110,26 @@ namespace VAGSuite.Services
                             double newvalue = bottomValue + (diffvalue * ((yaxisvalues[0] - yaxisvalues[t]) / yaxisdiff));
                             newvalue = Math.Round(newvalue, 0);
                             
-                            // Set the cell value at position min_row + t
-                            int targetIndex = t * 3;
-                            if (targetIndex < cells.Length)
-                            {
-                                SetCellValue(cells[targetIndex], (int)newvalue);
-                            }
+                            SetCellValue(cells[t], (int)newvalue, gridView);
                         }
                     }
                 }
                 else if (max_row == min_row)
                 {
                     // One row selected only - smooth along X axis
-                    int topValue = ParseCellValue(cells[2]);
-                    int bottomValue = ParseCellValue(cells[1]);
+                    int topValue = ParseCellValue(cells[0], gridView);
+                    int bottomValue = ParseCellValue(cells[cells.Length - 1], gridView);
                     
                     double diffvalue = topValue - bottomValue;
-                    double[] xaxisvalues = new double[(cells.Length / 3)];
+                    double[] xaxisvalues = new double[cells.Length];
                     
                     for (int q = 0; q < xaxisvalues.Length; q++)
                     {
-                        int cellIndex = q * 3;
-                        if (cellIndex + 1 < cells.Length)
+                        if (cells[q] is GridCell && xAxis != null)
                         {
-                            int colIndex = Convert.ToInt32(cells[cellIndex + 1]);
-                            // Get corresponding X axis value
-                            if (xAxis != null && colIndex < xAxis.Length)
+                            GridCell gc = (GridCell)cells[q];
+                            int colIndex = gc.Column.AbsoluteIndex;
+                            if (colIndex < xAxis.Length)
                             {
                                 xaxisvalues[q] = Convert.ToDouble(xAxis[xAxis.Length - min_column - q - 1]);
                             }
@@ -138,22 +145,17 @@ namespace VAGSuite.Services
                             double newvalue = bottomValue + (diffvalue * ((xaxisvalues[0] - xaxisvalues[t]) / xaxisdiff));
                             newvalue = Math.Round(newvalue, 0);
                             
-                            // Set the cell value at position min_column + t
-                            int targetIndex = t * 3;
-                            if (targetIndex < cells.Length)
-                            {
-                                SetCellValue(cells[targetIndex], (int)newvalue);
-                            }
+                            SetCellValue(cells[t], (int)newvalue, gridView);
                         }
                     }
                 }
                 else
                 {
                     // Block selected - 2D interpolation on 4 corners
-                    int topLeftValue = ParseCellValue(cells[0]);
-                    int topRightValue = ParseCellValue(cells[1]);
-                    int bottomLeftValue = ParseCellValue(cells[cells.Length - 2]);
-                    int bottomRightValue = ParseCellValue(cells[cells.Length - 1]);
+                    int topLeftValue = ParseCellValue(cells[0], gridView);
+                    int topRightValue = ParseCellValue(cells[1], gridView);
+                    int bottomLeftValue = ParseCellValue(cells[cells.Length - 2], gridView);
+                    int bottomRightValue = ParseCellValue(cells[cells.Length - 1], gridView);
                     
                     double[] xaxisvalues = new double[max_column - min_column + 1];
                     double[] yaxisvalues = new double[max_row - min_row + 1];
@@ -197,11 +199,18 @@ namespace VAGSuite.Services
                             
                             double newvalue = bottomLeftValue + ((xvaluediff * xportion) + (yvaluediff * yportion));
                             
-                            // Set the cell value at position (min_row + tely, min_column + telx)
-                            int targetIndex = (tely * (max_column - min_column + 1) + telx) * 3;
-                            if (targetIndex < cells.Length)
+                            // Find the cell at (min_row + tely, min_column + telx)
+                            for (int i = 0; i < cells.Length; i++)
                             {
-                                SetCellValue(cells[targetIndex], (int)Math.Round(newvalue));
+                                if (cells[i] is GridCell)
+                                {
+                                    GridCell gc = (GridCell)cells[i];
+                                    if (gc.RowHandle == min_row + tely && gc.Column.AbsoluteIndex == min_column + telx)
+                                    {
+                                        SetCellValue(cells[i], (int)Math.Round(newvalue), gridView);
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
@@ -213,13 +222,22 @@ namespace VAGSuite.Services
             }
         }
         
-        private int ParseCellValue(object cell)
+        private int ParseCellValue(object cell, object gridView)
         {
             if (cell == null)
                 return 0;
                 
             try
             {
+                // Handle GridCell objects from MapViewerEx
+                if (cell is GridCell && gridView is GridView)
+                {
+                    GridCell gc = (GridCell)cell;
+                    GridView gv = (GridView)gridView;
+                    
+                    object value = gv.GetRowCellValue(gc.RowHandle, gc.Column);
+                    return int.Parse(value.ToString());
+                }
                 return int.Parse(cell.ToString());
             }
             catch
@@ -228,19 +246,25 @@ namespace VAGSuite.Services
             }
         }
         
-        private void SetCellValue(object cell, int value)
+        private void SetCellValue(object cell, int value, object gridView)
         {
-            // Placeholder - actual implementation would set the cell value through gridView API
-            // For now, we just update the object if it's mutable
             try
             {
-                if (cell != null && cell is System.Collections.IDictionary)
+                // Handle GridCell objects from MapViewerEx
+                if (cell is GridCell && gridView is GridView)
                 {
-                    // Could store in a dictionary for later retrieval
+                    GridCell gc = (GridCell)cell;
+                    GridView gv = (GridView)gridView;
+                    
+                    // Determine format based on view type - use simple string format for now
+                    string formattedValue = value.ToString();
+                    
+                    gv.SetRowCellValue(gc.RowHandle, gc.Column, formattedValue);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine("SetCellValue: " + ex.Message);
             }
         }
     }
