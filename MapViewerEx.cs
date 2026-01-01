@@ -931,41 +931,6 @@ namespace VAGSuite
             set { y_axisvalues = value; }
         }
 
-        /*public delegate void AxisEditorRequested(object sender, AxisEditorRequestedEventArgs e);
-        public event MapViewerEx.AxisEditorRequested onAxisEditorRequested;
-
-        public delegate void ReadDataFromSRAM(object sender, ReadFromSRAMEventArgs e);
-        public event MapViewerEx.ReadDataFromSRAM onReadFromSRAM;
-        public delegate void WriteDataToSRAM(object sender, WriteToSRAMEventArgs e);
-        public event MapViewerEx.WriteDataToSRAM onWriteToSRAM;
-
-        public delegate void ViewTypeChanged(object sender, ViewTypeChangedEventArgs e);
-        public event MapViewerEx.ViewTypeChanged onViewTypeChanged;
-
-
-        public delegate void GraphSelectionChanged(object sender, GraphSelectionChangedEventArgs e);
-        public event MapViewerEx.GraphSelectionChanged onGraphSelectionChanged;
-
-        public delegate void SurfaceGraphViewChanged(object sender, SurfaceGraphViewChangedEventArgs e);
-        public event MapViewerEx.SurfaceGraphViewChanged onSurfaceGraphViewChanged;
-
-        public delegate void NotifySaveSymbol(object sender, SaveSymbolEventArgs e);
-        public event MapViewerEx.NotifySaveSymbol onSymbolSave;
-
-        public delegate void SplitterMoved(object sender, SplitterMovedEventArgs e);
-        public event MapViewerEx.SplitterMoved onSplitterMoved;
-
-        public delegate void SelectionChanged(object sender, CellSelectionChangedEventArgs e);
-        public event MapViewerEx.SelectionChanged onSelectionChanged;
-
-        public delegate void NotifyAxisLock(object sender, AxisLockEventArgs e);
-        public event MapViewerEx.NotifyAxisLock onAxisLock;
-
-        public delegate void NotifySliderMove(object sender, SliderMoveEventArgs e);
-        public event MapViewerEx.NotifySliderMove onSliderMove;
-        
-        public delegate void ViewerClose(object sender, EventArgs e);
-        public event MapViewerEx.ViewerClose onClose;*/
 
         public MapViewerEx()
         {
