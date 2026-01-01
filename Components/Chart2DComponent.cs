@@ -18,7 +18,7 @@ namespace VAGSuite.Components
 
         private readonly IChartService _chartService;
         
-        private Nevron.Chart.WinForm.NChartControl nChartControl2;
+        private Nevron.Chart.WinForm.NChartControl _externalChartControl;
         
         // State references
         private int _tableWidth;
@@ -44,13 +44,20 @@ namespace VAGSuite.Components
         public Chart2DComponent()
         {
             _chartService = new ChartService();
-            InitializeComponent();
         }
 
         public Chart2DComponent(IChartService chartService)
         {
             _chartService = chartService ?? throw new ArgumentNullException("chartService");
-            InitializeComponent();
+        }
+
+        /// <summary>
+        /// Sets the external NChartControl to use instead of creating a new one.
+        /// This allows the component to share the designer's chart control.
+        /// </summary>
+        public void SetChartControl(Nevron.Chart.WinForm.NChartControl externalChart)
+        {
+            _externalChartControl = externalChart;
         }
 
         #endregion
@@ -72,7 +79,7 @@ namespace VAGSuite.Components
             _correctionFactor = state.Configuration.CorrectionFactor;
             _correctionOffset = state.Configuration.CorrectionOffset;
 
-            ConfigureChart();
+            ConfigureChart(state);
         }
 
         /// <summary>
@@ -142,7 +149,7 @@ namespace VAGSuite.Components
                 }
             }
 
-            UpdateChart(chartdt);
+            RefreshChart();
         }
 
         /// <summary>
@@ -156,32 +163,27 @@ namespace VAGSuite.Components
 
         private void InitializeComponent()
         {
-            // Create chart control
-            nChartControl2 = new Nevron.Chart.WinForm.NChartControl();
-
-            // 
-            // nChartControl2
-            // 
-            nChartControl2.Dock = DockStyle.Fill;
-            nChartControl2.Location = new Point(0, 0);
-            nChartControl2.Name = "nChartControl2";
-            nChartControl2.Size = new Size(400, 200);
-            nChartControl2.TabIndex = 0;
-            nChartControl2.Visible = true;
-
-            this.Controls.Add(nChartControl2);
-            this.Dock = DockStyle.Fill;
-            this.Size = new Size(400, 200);
+            // Don't create a new chart control - use the external one if provided
+            // This component acts as a wrapper around an existing chart control
         }
 
-        private void ConfigureChart()
+        /// <summary>
+        /// Gets the chart control to use (external or null)
+        /// </summary>
+        private Nevron.Chart.WinForm.NChartControl GetChartControl()
         {
-            if (nChartControl2.Charts.Count == 0) return;
+            return _externalChartControl;
+        }
 
-            nChartControl2.Settings.ShapeRenderingMode = ShapeRenderingMode.HighSpeed;
-            nChartControl2.Legends.Clear();
+        private void ConfigureChart(MapViewerState state)
+        {
+            var chartControl = GetChartControl();
+            if (chartControl == null || chartControl.Charts.Count == 0) return;
 
-            NChart chart2d = nChartControl2.Charts[0];
+            chartControl.Settings.ShapeRenderingMode = ShapeRenderingMode.HighSpeed;
+            chartControl.Legends.Clear();
+
+            NChart chart2d = chartControl.Charts[0];
 
             // Configure axis
             NLinearScaleConfigurator linearScale = (NLinearScaleConfigurator)chart2d.Axis(StandardAxis.PrimaryY).ScaleConfigurator;
@@ -228,18 +230,22 @@ namespace VAGSuite.Components
 
             // Apply style sheet
             NStyleSheet styleSheet = NStyleSheet.CreatePredefinedStyleSheet(PredefinedStyleSheet.Nevron);
-            styleSheet.Apply(nChartControl2.Document);
+            styleSheet.Apply(chartControl.Document);
 
             chart2d.BoundsMode = BoundsMode.Stretch;
         }
 
-        private void UpdateChart(DataTable chartdt)
+        /// <summary>
+        /// Refreshes the 2D chart with current data.
+        /// </summary>
+        public void RefreshChart()
         {
             try
             {
-                if (nChartControl2.Charts.Count == 0) return;
+                var chartControl = GetChartControl();
+                if (chartControl == null || chartControl.Charts.Count == 0) return;
 
-                NChart chart = nChartControl2.Charts[0];
+                NChart chart = chartControl.Charts[0];
                 NSmoothLineSeries line = null;
 
                 if (chart.Series.Count == 0)
@@ -253,6 +259,36 @@ namespace VAGSuite.Components
 
                 // Clear existing data points
                 line.ClearDataPoints();
+
+                // Populate data table
+                DataTable chartdt = new DataTable();
+                chartdt.Columns.Add("X", Type.GetType("System.Double"));
+                chartdt.Columns.Add("Y", Type.GetType("System.Double"));
+
+                double valCount = 0;
+                if (_isSixteenBit)
+                {
+                    for (int t = 0; t < _mapContent.Length; t += 2)
+                    {
+                        double yval = valCount;
+                        double value = Convert.ToDouble(_mapContent.GetValue(t)) * 256;
+                        value += Convert.ToDouble(_mapContent.GetValue(t + 1));
+                        if (_yAxisValues.Length > valCount) yval = Convert.ToDouble((int)_yAxisValues.GetValue((int)valCount));
+                        chartdt.Rows.Add(yval, value);
+                        valCount++;
+                    }
+                }
+                else
+                {
+                    for (int t = 0; t < _mapContent.Length; t++)
+                    {
+                        double yval = valCount;
+                        double value = Convert.ToDouble(_mapContent.GetValue(t));
+                        if (_yAxisValues.Length > valCount) yval = Convert.ToDouble((int)_yAxisValues.GetValue((int)valCount));
+                        chartdt.Rows.Add(yval, value);
+                        valCount++;
+                    }
+                }
 
                 // Add new data points
                 foreach (DataRow dr in chartdt.Rows)
@@ -269,11 +305,11 @@ namespace VAGSuite.Components
                     }
                 }
 
-                nChartControl2.Refresh();
+                chartControl.Refresh();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Chart2DComponent: UpdateChart error: " + ex.Message);
+                Console.WriteLine("Chart2DComponent: RefreshChart error: " + ex.Message);
             }
         }
 

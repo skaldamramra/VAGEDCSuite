@@ -427,63 +427,6 @@ namespace VAGSuite
                     _chart3DComponent.LoadData(CreateMapViewerState());
                     _chart3DComponent.RefreshChart();
                 }
-                else
-                {
-                    // Fallback to inline code if component not available
-                    NChart chart = nChartControl1.Charts[0];
-                    NMeshSurfaceSeries surface = null;
-                    NMeshSurfaceSeries surface2 = null;
-                    NMeshSurfaceSeries surface3 = null;
-                    if (chart.Series.Count == 0)
-                    {
-                        surface = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
-                    }
-                    else
-                    {
-                        surface = (NMeshSurfaceSeries)chart.Series[0];
-                        if (chart.Series.Count > 1)
-                        {
-                            surface2 = (NMeshSurfaceSeries)chart.Series[1];
-                            if (chart.Series.Count > 2)
-                            {
-                                surface3 = (NMeshSurfaceSeries)chart.Series[2];
-                            }
-                        }
-                    }
-
-                    FillData(surface);
-                    if (surface2 != null)
-                    {
-                        surface2.Palette.Clear();
-                        surface2.Palette.Add(-255, Color.YellowGreen);
-                        surface2.Palette.Add(255, Color.YellowGreen);
-                        surface2.AutomaticPalette = false;
-                        FillDataOriginal(surface2);
-                        if (!m_OverlayVisible)
-                        {
-                            surface2.Visible = false;
-                        }
-                        else
-                        {
-                            surface2.Visible = true;
-                        }
-
-                    }
-                    if (surface3 != null)
-                    {
-                        surface3.Palette.Clear();
-                        surface3.Palette.Add(-255, Color.BlueViolet);
-                        surface3.Palette.Add(255, Color.BlueViolet);
-                        surface3.AutomaticPalette = false;
-                        FillDataCompare(surface3);
-                        if (!m_OverlayVisible)
-                        {
-                            surface3.Visible = false;
-                        }
-                    }
-
-                    nChartControl1.Refresh();
-                }
             }
             catch (Exception E)
             {
@@ -1053,6 +996,7 @@ namespace VAGSuite
             
             // Wire up the external chart control to the component
             _chart3DComponent.SetChartControl(nChartControl1);
+            _chart2DComponent.SetChartControl(nChartControl2);
             
             // Wire up component events to MapViewerEx handlers
             _chart3DComponent.ViewChanged += OnChart3DViewChanged;
@@ -1104,6 +1048,7 @@ namespace VAGSuite
             if (_chart2DComponent != null && m_TableWidth == 1)
             {
                 _chart2DComponent.LoadData(data, m_map_length, CreateMapViewerState());
+                _chart2DComponent.RefreshChart();
             }
         }
 
@@ -1609,161 +1554,11 @@ namespace VAGSuite
                 trackBarControl1.Properties.Maximum = x_axisvalues.Length - 1;
                 labelControl8.Text = X_axis_name + " values";
                 trackBarControl1.Value = 0;
-                nChartControl1.Settings.ShapeRenderingMode = ShapeRenderingMode.HighSpeed;
-                nChartControl1.Controller.Tools.Add(new NSelectorTool());
-                nChartControl1.Controller.Tools.Add(new NTrackballTool());
-
-                // set a chart title
-                NLabel title = nChartControl1.Labels.AddHeader(m_map_name);
-                title.TextStyle.FontStyle = new NFontStyle("Times New Roman", 18, FontStyle.Italic);
-                title.TextStyle.FillStyle = new NColorFillStyle(Color.FromArgb(68, 90, 108));
-
-                // setup chart
-                Console.WriteLine("Number of charts: " + nChartControl1.Charts.Count.ToString());
-
-
-
-                NChart chart = nChartControl1.Charts[0];
-                nChartControl1.Legends.Clear();
-                chart.Enable3D = true;
-                chart.Width = 60.0f;
-                chart.Depth = 60.0f;
-                //chart.Height = 25.0f;
-                chart.Height = 35.0f;
-                chart.Projection.SetPredefinedProjection(PredefinedProjection.PerspectiveTilted);
-                chart.LightModel.SetPredefinedLightModel(PredefinedLightModel.ShinyTopLeft);
-
-                // oud
-                NStandardScaleConfigurator scaleConfiguratorX = (NStandardScaleConfigurator)chart.Axis(StandardAxis.PrimaryX).ScaleConfigurator;
-                scaleConfiguratorX.MaxTickCount = dt.Rows.Count;
-                scaleConfiguratorX.MajorTickMode = MajorTickMode.AutoMaxCount;
-
-                NScaleTitleStyle titleStyleX = (NScaleTitleStyle)scaleConfiguratorX.Title;
-                titleStyleX.Text = m_y_axis_name;
-                scaleConfiguratorX.AutoLabels = false;
-                scaleConfiguratorX.Labels.Clear();
-
-                for (int t = y_axisvalues.Length - 1; t >= 0; t--)
-                {
-                    string yvalue = ConvertYAxisValue(y_axisvalues.GetValue(t).ToString());
-                    scaleConfiguratorX.Labels.Add(yvalue);
-                }
-            
-                NStandardScaleConfigurator scaleConfiguratorY = (NStandardScaleConfigurator)chart.Axis(StandardAxis.Depth).ScaleConfigurator;
-                scaleConfiguratorY.MajorTickMode = MajorTickMode.AutoMaxCount;
-                scaleConfiguratorY.MaxTickCount = dt.Columns.Count;
-                NScaleTitleStyle titleStyleY = (NScaleTitleStyle)scaleConfiguratorY.Title;
-                titleStyleY.Text = m_x_axis_name;
-                scaleConfiguratorY.Labels.Clear();
-
-                scaleConfiguratorY.AutoLabels = false;
-                for (int t = 0; t < x_axisvalues.Length; t++)
-                {
-                    string xvalue = ConvertXAxisValue(x_axisvalues.GetValue(t).ToString());
-                    scaleConfiguratorY.Labels.Add(xvalue);
-                }
-
-                NStandardScaleConfigurator scaleConfiguratorZ = (NStandardScaleConfigurator)chart.Axis(StandardAxis.PrimaryY).ScaleConfigurator;
-                scaleConfiguratorZ.MajorTickMode = MajorTickMode.AutoMaxCount;
-                NScaleTitleStyle titleStyleZ = (NScaleTitleStyle)scaleConfiguratorZ.Title;
-                titleStyleZ.Text = m_z_axis_name;
-
-                scaleConfiguratorZ.AutoLabels = true;
-
-                NMeshSurfaceSeries surface = null;
-                if (chart.Series.Count == 0)
-                {
-                    surface = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
-                }
-                else
-                {
-                    surface = (NMeshSurfaceSeries)chart.Series[0];
-                }
-
-
-                if (m_map_original_content != null)
-                {
-                    btnToggleOverlay.Visible = true;
-                    NMeshSurfaceSeries surface2 = null;
-                    if (chart.Series.Count == 1)
-                    {
-                        surface2 = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
-                    }
-                    else
-                    {
-                        surface2 = (NMeshSurfaceSeries)chart.Series[1];
-                    }
-                    surface2.PositionValue = 10.0;
-                    surface2.Name = "Surface2";
-                    if (m_issixteenbit)
-                    {
-                        surface2.Data.SetGridSize((m_map_content.Length / 2) / m_TableWidth, m_TableWidth);
-                    }
-                    else
-                    {
-                        surface2.Data.SetGridSize(m_map_content.Length / m_TableWidth, m_TableWidth);
-                    }
-                    surface2.ValueFormatter.FormatSpecifier = "0.00";
-                    surface2.FillMode = SurfaceFillMode.Zone;
-                    surface2.FillStyle.SetTransparencyPercent(50);
-                    surface2.SmoothPalette = true;
-                    surface2.FrameColorMode = SurfaceFrameColorMode.Zone;//Uniform;
-                    surface2.FrameMode = SurfaceFrameMode.MeshContour;
-                    NMeshSurfaceSeries surface3 = null;
-                    if (chart.Series.Count == 2)
-                    {
-                        surface3 = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
-                    }
-                    else
-                    {
-                        surface3 = (NMeshSurfaceSeries)chart.Series[2];
-                    }
-                    surface3.PositionValue = 10.0;
-                    surface3.Name = "Surface3";
-                    if (m_issixteenbit)
-                    {
-                        surface3.Data.SetGridSize((m_map_content.Length / 2) / m_TableWidth, m_TableWidth);
-                    }
-                    else
-                    {
-                        surface3.Data.SetGridSize(m_map_content.Length / m_TableWidth, m_TableWidth);
-                    }
-                    surface3.ValueFormatter.FormatSpecifier = "0.00";
-                    surface3.FillMode = SurfaceFillMode.Zone;
-                    surface3.FillStyle.SetTransparencyPercent(50);
-                    surface3.SmoothPalette = true;
-                    surface3.FrameColorMode = SurfaceFrameColorMode.Zone;
-                    surface3.FrameMode = SurfaceFrameMode.MeshContour;
-                }
-
-                chart.Wall(ChartWallType.Back).Visible = false;
-                chart.Wall(ChartWallType.Left).Visible = false;
-                chart.Wall(ChartWallType.Right).Visible = false;
-                chart.Wall(ChartWallType.Floor).Visible = false;
-
-                surface.Name = "Surface";
-                surface.PositionValue = 10.0;
-
-                if (m_issixteenbit)
-                {
-                    surface.Data.SetGridSize((m_map_content.Length / 2) / m_TableWidth, m_TableWidth);
-                }
-                else
-                {
-                    surface.Data.SetGridSize(m_map_content.Length / m_TableWidth, m_TableWidth);
-                }
-                surface.ValueFormatter.FormatSpecifier = "0.00";
-
-                surface.FillMode = SurfaceFillMode.Zone;
-                surface.SmoothPalette = true;
-                surface.FrameColorMode = SurfaceFrameColorMode.Uniform;
-                surface.FillStyle.SetTransparencyPercent(25);
-                surface.FrameMode = SurfaceFrameMode.MeshContour;
-                
-                // ALSO call the refactored component version for testing
+                // Initialize and configure the 3D chart using the component
                 if (_chart3DComponent != null)
                 {
                     _chart3DComponent.LoadData(CreateMapViewerState());
+                    _chart3DComponent.InitializeChart3D();
                     _chart3DComponent.RefreshChart();
                 }
             }
@@ -1781,41 +1576,13 @@ namespace VAGSuite
                 trackBarControl1.Enabled = false;
                 labelControl8.Text = X_axis_name;
 
-                DataTable chartdt = new DataTable();
-                chartdt.Columns.Add("X", Type.GetType("System.Double"));
-                chartdt.Columns.Add("Y", Type.GetType("System.Double"));
-                double valcount = 0;
-                if (m_issixteenbit)
-                {
-                    for (int t = 0; t < m_map_length; t += 2)
-                    {
-                        double yval = valcount;
-                        double value = Convert.ToDouble(m_map_content.GetValue(t)) * 256;
-                        value += Convert.ToDouble(m_map_content.GetValue(t + 1));
-                        if (y_axisvalues.Length > valcount) yval = Convert.ToDouble((int)y_axisvalues.GetValue((int)valcount));
-                        chartdt.Rows.Add(yval, value);
-                        valcount++;
-                    }
-                }
-                else
-                {
-                    for (int t = 0; t < m_map_length; t++)
-                    {
-                        double yval = valcount;
-                        double value = Convert.ToDouble(m_map_content.GetValue(t));
-                        if (y_axisvalues.Length > valcount) yval = Convert.ToDouble((int)y_axisvalues.GetValue((int)valcount));
-                        chartdt.Rows.Add(yval, value);
-                        valcount++;
-                    }
-                }
-                
-                // ALSO call the refactored component version for testing
+                // Initialize and configure the 2D chart using the component
                 if (_chart2DComponent != null)
                 {
                     _chart2DComponent.LoadData(m_map_content, m_map_length, CreateMapViewerState());
+                    _chart2DComponent.RefreshChart();
                 }
             }
-            Init2dChart();
             m_trackbarBlocked = false;
 
             if (this.m_map_address >= 0xF00000 || (m_isOpenSoftware && m_isRAMViewer))
@@ -1830,63 +1597,7 @@ namespace VAGSuite
             }
         }
 
-        private void Init2dChart()
-        {
-            nChartControl2.Settings.ShapeRenderingMode = ShapeRenderingMode.HighSpeed;
-            nChartControl2.Legends.Clear(); // no legend
-            NChart chart2d = nChartControl2.Charts[0];
-
-            NSmoothLineSeries surface = null;
-            if (chart2d.Series.Count == 0)
-            {
-                surface = (NSmoothLineSeries)chart2d.Series.Add(SeriesType.SmoothLine);
-            }
-            else
-            {
-                surface = (NSmoothLineSeries)chart2d.Series[0];
-            }
-
-            chart2d.BoundsMode = BoundsMode.Stretch;
-            NLinearScaleConfigurator linearScale = (NLinearScaleConfigurator)chart2d.Axis(StandardAxis.PrimaryY).ScaleConfigurator;
-            linearScale.MajorGridStyle.LineStyle.Pattern = LinePattern.Dot;
-            linearScale.MajorGridStyle.SetShowAtWall(ChartWallType.Back, true);
-            NScaleStripStyle stripStyle = new NScaleStripStyle(new NColorFillStyle(Color.Beige), null, true, 0, 0, 1, 1);
-            stripStyle.Interlaced = true;
-            stripStyle.SetShowAtWall(ChartWallType.Back, true);
-            stripStyle.SetShowAtWall(ChartWallType.Left, true);
-            linearScale.StripStyles.Add(stripStyle);
-            NSmoothLineSeries line = null;
-            if (chart2d.Series.Count == 0)
-            {
-                line = (NSmoothLineSeries)chart2d.Series.Add(SeriesType.SmoothLine);
-            }
-            else
-            {
-                line = (NSmoothLineSeries)chart2d.Series[0];
-            }
-            line.Name = m_map_name;
-            line.Legend.Mode = SeriesLegendMode.Series;
-            line.UseXValues = true;
-            line.UseZValues = false;
-            line.DataLabelStyle.Visible = true;
-            line.MarkerStyle.Visible = true;
-            line.MarkerStyle.PointShape = PointShape.Sphere;
-            line.MarkerStyle.AutoDepth = true;
-            line.MarkerStyle.Width = new NLength(1.4f, NRelativeUnit.ParentPercentage);
-            line.MarkerStyle.Height = new NLength(1.4f, NRelativeUnit.ParentPercentage);
-            line.MarkerStyle.Depth = new NLength(1.4f, NRelativeUnit.ParentPercentage);
-            //line.HorizontalAxes = y_axisvalues;
-
-            surface.Name = "Surface";
-            //surface.Legend.Mode = SeriesLegendMode.SeriesLogic;
-            //surface.PositionValue = 10.0;
-            for (int i = 0; i < y_axisvalues.Length; i++)
-            {
-                surface.XValues.Add(y_axisvalues.GetValue(i));
-            }
-            NStyleSheet styleSheet = NStyleSheet.CreatePredefinedStyleSheet(PredefinedStyleSheet.Nevron);
-            styleSheet.Apply(nChartControl2.Document);
-        }
+        // The Init2dChart method is now handled by Chart2DComponent.ConfigureChart
 
         private void SetViewTypeParams(ViewSize vs)
         {
@@ -1895,142 +1606,11 @@ namespace VAGSuite
 
         private void UpdateChartControlSlice(byte[] data)
         {
-
-            DataTable chartdt = new DataTable();
-            chartdt.Columns.Add("X", Type.GetType("System.Double"));
-            chartdt.Columns.Add("Y", Type.GetType("System.Double"));
-            double valcount = 0;
-            int offsetinmap = (int)trackBarControl1.Value;
-
-            try
+            if (_chart2DComponent != null)
             {
-                labelControl9.Text = X_axis_name + " [" + x_axisvalues.GetValue((int)trackBarControl1.Value).ToString() + "]";
-                
+                _chart2DComponent.LoadData(data, m_map_length, CreateMapViewerState());
+                _chart2DComponent.RefreshChart();
             }
-            catch (Exception E)
-            {
-                Console.WriteLine("value: " + (int)trackBarControl1.Value + " " + E.Message);
-            }
-
-            int numberofrows = data.Length / m_TableWidth;
-            if (m_issixteenbit)
-            {
-                numberofrows /= 2;
-                offsetinmap *= 2;
-            }
-
-            if (m_issixteenbit)
-            {
-                for (int t = (numberofrows - 1); t >= 0; t--)
-                {
-                    double yval = valcount;
-                    double value = Convert.ToDouble(data.GetValue(offsetinmap + (t * (m_TableWidth * 2)))) * 256;
-                    value += Convert.ToDouble(data.GetValue(offsetinmap + (t * (m_TableWidth * 2)) + 1));
-                    if (value > 32000)
-                    {
-                        value = 65536 - value;
-                        value = -value;
-                    }
-                    value *= correction_factor;
-                    value += correction_offset;
-                    //value = ConvertForThreeBarSensor(value);
-                    if (y_axisvalues.Length > valcount) yval = Convert.ToDouble((int)y_axisvalues.GetValue((int)valcount));
-                    
-
-                    chartdt.Rows.Add(yval, value);
-                    valcount++;
-                }
-            }
-            else
-            {
-                for (int t = (numberofrows - 1); t >= 0; t--)
-                {
-                    double yval = valcount;
-                    double value = Convert.ToDouble(data.GetValue(offsetinmap + (t * (m_TableWidth))));
-                    value *= correction_factor;
-                    value += correction_offset;
-                    //value = ConvertForThreeBarSensor(value);
-
-                    if (y_axisvalues.Length > valcount) yval = Convert.ToDouble((int)y_axisvalues.GetValue((int)valcount));
-                    
-                    chartdt.Rows.Add(yval, value);
-                    valcount++;
-                }
-            }
-
-            //chartControl1.Series[0].Label.Text = m_map_name;
-            /*chartControl1.Series[0].LegendText = m_map_name;
-            chartControl1.DataSource = chartdt;
-            //chartControl1.Series[0].PointOptions.PointView = PointView.ArgumentAndValues;
-            chartControl1.Invalidate();*/
-
-            NChart chart = nChartControl2.Charts[0];
-            //NSeries series = (NSeries)chart.Series[0];
-            NSmoothLineSeries line = null;
-            if (chart.Series.Count == 0)
-            {
-                line = (NSmoothLineSeries)chart.Series.Add(SeriesType.SmoothLine);
-            }
-            else
-            {
-                line = (NSmoothLineSeries)chart.Series[0];
-            }
-            // set length of axis
-            //NStandardScaleConfigurator scaleConfiguratorX = (NStandardScaleConfigurator)chart.Axis(StandardAxis.PrimaryX).ScaleConfigurator;
-            //scaleConfiguratorX.MajorTickMode = MajorTickMode.AutoMaxCount;
-            //NScaleTitleStyle titleStyleX = (NScaleTitleStyle)scaleConfiguratorX.Title;
-            //titleStyleX.Text = m_y_axis_name;
-            //<GS-08032010> as waarden nog omzetten indien noodzakelijk (MAP etc)
-            //scaleConfiguratorX.AutoLabels = true;
-            //series.HorizontalAxes = y_axisvalues;
-            //scaleConfiguratorX.Labels.Clear();
-            /*for (int t = y_axisvalues.Length - 1; t >= 0; t--)
-            {
-                string yvalue = y_axisvalues.GetValue(t).ToString();
-                if (m_y_axis_name == "MAP" || m_y_axis_name == "Pressure error (bar)")
-                {
-                    try
-                    {
-                        float v = (float)Convert.ToDouble(yvalue);
-                        if (m_viewtype == ViewType.Easy3Bar)
-                        {
-                            v *= 1.2F;
-                        }
-                        else if (m_viewtype == ViewType.Easy35Bar)
-                        {
-                            v *= 1.4F;
-                        }
-                        else if (m_viewtype == ViewType.Easy4Bar)
-                        {
-                            v *= 1.6F;
-                        }
-                        v *= (float)0.01F;
-                        if (m_y_axis_name == "MAP")
-                        {
-                            v -= 1;
-                        }
-                        yvalue = v.ToString("F2");
-                    }
-                    catch (Exception cE)
-                    {
-                        Console.WriteLine(cE.Message);
-                    }
-                }
-                scaleConfiguratorX.Labels.Add(yvalue);
-                Console.WriteLine("Added axis label: " + yvalue);
-
-            }*/
-            line.ClearDataPoints();
-            foreach (DataRow dr in chartdt.Rows)
-            {
-                //<GS-09032010> fill second 2d chart here
-                //series.Values.Add(dr["Y"]);
-                line.AddDataPoint(new NDataPoint(Convert.ToDouble(dr["X"]), Convert.ToDouble(dr["Y"])));
-                //Console.WriteLine("Added value: " + dr["Y"].ToString());
-            }
-            nChartControl2.Refresh();
-
-
         }
 
         private void simpleButton1_Click(object sender, EventArgs e)
@@ -3144,37 +2724,7 @@ namespace VAGSuite
 
         private void timer3_Tick(object sender, EventArgs e)
         {
-            UpdateChartControlSlice(GetDataFromGridView(false));
-
-           /* DataTable chartdt = new DataTable();
-            chartdt.Columns.Add("X", Type.GetType("System.Double"));
-            chartdt.Columns.Add("Y", Type.GetType("System.Double"));
-            double valcount = 0;
-            byte[] content = GetDataFromGridView(false);
-            if (m_issixteenbit)
-            {
-                for (int t = 0; t < content.Length; t += 2)
-                {
-                    double value = Convert.ToDouble(content.GetValue((content.Length - 1) - (t + 1))) * 256;
-                    value += Convert.ToDouble(content.GetValue((content.Length - 1) - (t)));
-                    chartdt.Rows.Add(valcount++, value);
-                }
-            }
-            else
-            {
-                for (int t = 0; t < m_map_length; t++)
-                {
-                    double value = Convert.ToDouble(content.GetValue((content.Length - 1) - t));
-                    chartdt.Rows.Add(valcount++, value);
-                }
-            }
-            chartControl1.DataSource = chartdt;
-            string[] datamembers = new string[1];
-            chartControl1.Series[0].ValueDataMembers.Clear();
-            datamembers.SetValue("Y", 0);
-            chartControl1.Series[0].ValueDataMembers.AddRange(datamembers);
-            chartControl1.Series[0].ArgumentDataMember = "X";
-            chartControl1.Invalidate();*/
+            Update2DChartWithComponent(GetDataFromGridView(false));
             timer3.Enabled = false;
         }
 

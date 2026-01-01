@@ -103,6 +103,88 @@ namespace VAGSuite.Components
         }
 
         /// <summary>
+        /// Initializes the 3D chart with basic settings and series.
+        /// </summary>
+        public void InitializeChart3D()
+        {
+            var chartControl = GetChartControl();
+            if (chartControl == null) return;
+
+            chartControl.Legends.Clear();
+
+            NChart chart = chartControl.Charts[0];
+
+            // Configure for 3D
+            chart.Enable3D = true;
+            chart.Width = 60.0f;
+            chart.Depth = 60.0f;
+            chart.Height = 35.0f;
+            chart.Projection.SetPredefinedProjection(PredefinedProjection.PerspectiveTilted);
+            chart.LightModel.SetPredefinedLightModel(PredefinedLightModel.ShinyTopLeft);
+
+            // Set title
+            NLabel title = chartControl.Labels.AddHeader(_mapName);
+            title.TextStyle.FontStyle = new NFontStyle("Times New Roman", 18, FontStyle.Italic);
+            title.TextStyle.FillStyle = new NColorFillStyle(Color.FromArgb(68, 90, 108));
+
+            // Configure axes
+            ConfigureAxis(chart);
+
+            // Add main surface series
+            NMeshSurfaceSeries surface = null;
+            if (chart.Series.Count == 0)
+            {
+                surface = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
+            }
+            else
+            {
+                surface = (NMeshSurfaceSeries)chart.Series[0];
+            }
+            ConfigureSurface(surface);
+
+            // Add original map overlay if available
+            if (_originalContent != null)
+            {
+                NMeshSurfaceSeries surface2 = null;
+                if (chart.Series.Count == 1)
+                {
+                    surface2 = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
+                }
+                else
+                {
+                    surface2 = (NMeshSurfaceSeries)chart.Series[1];
+                }
+                ConfigureOverlay(surface2, Color.YellowGreen, _originalContent);
+
+                // Add compare overlay if available
+                if (_compareContent != null)
+                {
+                    NMeshSurfaceSeries surface3 = null;
+                    if (chart.Series.Count == 2)
+                    {
+                        surface3 = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
+                    }
+                    else
+                    {
+                        surface3 = (NMeshSurfaceSeries)chart.Series[2];
+                    }
+                    ConfigureOverlay(surface3, Color.BlueViolet, _compareContent);
+                }
+            }
+
+            // Hide walls
+            chart.Wall(ChartWallType.Back).Visible = false;
+            chart.Wall(ChartWallType.Left).Visible = false;
+            chart.Wall(ChartWallType.Right).Visible = false;
+            chart.Wall(ChartWallType.Floor).Visible = false;
+
+            // Configure tools
+            chartControl.Settings.ShapeRenderingMode = ShapeRenderingMode.HighSpeed;
+            chartControl.Controller.Tools.Add(new NSelectorTool());
+            chartControl.Controller.Tools.Add(new NTrackballTool());
+        }
+
+        /// <summary>
         /// Refreshes the chart with current data
         /// </summary>
         public void RefreshChart()
