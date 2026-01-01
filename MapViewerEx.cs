@@ -483,6 +483,14 @@ namespace VAGSuite
 
                 nChartControl1.Refresh();
                 Console.WriteLine("Chartcontrol refreshed");
+                
+                // ALSO call the refactored component version for testing
+                // This allows comparing inline vs refactored implementation
+                if (_chart3DComponent != null)
+                {
+                    _chart3DComponent.LoadData(CreateMapViewerState());
+                    _chart3DComponent.RefreshChart();
+                }
             }
             catch (Exception E)
             {

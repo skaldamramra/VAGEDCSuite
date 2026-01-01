@@ -218,7 +218,7 @@ namespace VAGSuite.Components
                 {
                     surface2 = (NMeshSurfaceSeries)chart.Series[1];
                 }
-                ConfigureOverlay(surface2, Color.YellowGreen);
+                ConfigureOverlay(surface2, Color.YellowGreen, _originalContent);
 
                 // Add compare overlay if available
                 if (_compareContent != null)
@@ -232,7 +232,7 @@ namespace VAGSuite.Components
                     {
                         surface3 = (NMeshSurfaceSeries)chart.Series[2];
                     }
-                    ConfigureOverlay(surface3, Color.BlueViolet);
+                    ConfigureOverlay(surface3, Color.BlueViolet, _compareContent);
                 }
             }
 
@@ -308,18 +308,22 @@ namespace VAGSuite.Components
             surface.FillStyle.SetTransparencyPercent(25);
         }
 
-        private void ConfigureOverlay(NMeshSurfaceSeries surface, Color overlayColor)
+        private void ConfigureOverlay(NMeshSurfaceSeries surface, Color overlayColor, byte[] content)
         {
             surface.PositionValue = 10.0;
             surface.Name = "Overlay";
             
-            if (_isSixteenBit)
+            // Use the provided content array for dimension calculation
+            if (content != null)
             {
-                surface.Data.SetGridSize((_mapContent.Length / 2) / _tableWidth, _tableWidth);
-            }
-            else
-            {
-                surface.Data.SetGridSize(_mapContent.Length / _tableWidth, _tableWidth);
+                if (_isSixteenBit)
+                {
+                    surface.Data.SetGridSize((content.Length / 2) / _tableWidth, _tableWidth);
+                }
+                else
+                {
+                    surface.Data.SetGridSize(content.Length / _tableWidth, _tableWidth);
+                }
             }
 
             surface.ValueFormatter.FormatSpecifier = "0.00";
@@ -414,6 +418,7 @@ namespace VAGSuite.Components
         {
             try
             {
+                // Calculate row count from original content, not map content
                 int rowCount = _isSixteenBit ? (_originalContent.Length / 2) / _tableWidth : _originalContent.Length / _tableWidth;
                 
                 for (int row = 0; row < rowCount; row++)
@@ -421,6 +426,7 @@ namespace VAGSuite.Components
                     for (int col = 0; col < _tableWidth; col++)
                     {
                         double value = GetOriginalValueFromContent(row, col);
+                        // Match original code: flip Y axis by using (rowCount - 1) - row
                         surface.Data.SetValue((rowCount - 1) - row, col, value, (rowCount - 1) - row, col);
                     }
                 }
@@ -439,6 +445,7 @@ namespace VAGSuite.Components
                 
                 for (int row = 0; row < rowCount; row++)
                 {
+                    // Note: Original code iterates col from _tableWidth - 1 down to 0
                     for (int col = _tableWidth - 1; col >= 0; col--)
                     {
                         double value = GetCompareValueFromContent(row, col);
