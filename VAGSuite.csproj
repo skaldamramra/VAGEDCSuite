@@ -127,6 +127,9 @@
     <Compile Include="Services\SmoothingService.cs" />
     <Compile Include="Services\IMapDataService.cs" />
     <Compile Include="Services\MapDataService.cs" />
+    <Compile Include="Components\MapGridComponent.cs" />
+    <Compile Include="Components\Chart3DComponent.cs" />
+    <Compile Include="Components\Chart2DComponent.cs" />
     <Compile Include="Helpers\SymbolQueryHelper.cs" />
     <Compile Include="CompareResults.cs">
       <SubType>UserControl</SubType>

@@ -18,6 +18,7 @@ using System.Globalization;
 using VAGSuite.MapViewerEventArgs;
 using VAGSuite.Models;
 using VAGSuite.Services;
+using VAGSuite.Components;
 
 namespace VAGSuite
 {
@@ -29,6 +30,11 @@ namespace VAGSuite
         private IClipboardService _clipboardService;
         private ISmoothingService _smoothingService;
         private IDataConversionService _dataConversionService;
+        
+        // Phase 5 Components - UI Component instances
+        private MapGridComponent _mapGridComponent;
+        private Chart3DComponent _chart3DComponent;
+        private Chart2DComponent _chart2DComponent;
 
         private bool m_isDifferenceViewer = false;
 
@@ -950,7 +956,7 @@ namespace VAGSuite
             
             chartControl1.Series[0].ValueDataMembers.AddRange(datamembers);
             timer4.Enabled = false;*/
- /*            chartControl1.Series[0].ArgumentDataMember = "X";*/
+             /*            chartControl1.Series[0].ArgumentDataMember = "X";*/
 
             // Initialize Phase 3 Services with default implementations
             _mapRenderingService = new MapRenderingService();
@@ -958,6 +964,91 @@ namespace VAGSuite
             _dataConversionService = new DataConversionService();
             _clipboardService = new ClipboardService(_dataConversionService);
             _smoothingService = new SmoothingService(_dataConversionService);
+            
+            // Initialize Phase 5 Components
+            InitializePhase5Components();
+        }
+        
+        /// <summary>
+        /// Creates a MapViewerState from the current MapViewerEx state
+        /// </summary>
+        private MapViewerState CreateMapViewerState()
+        {
+            return new MapViewerState
+            {
+                Data = new MapData
+                {
+                    Content = m_map_content,
+                    OriginalContent = m_map_original_content,
+                    CompareContent = m_map_compare_content,
+                    Address = m_map_address,
+                    SramAddress = m_map_sramaddress,
+                    Length = m_map_length,
+                    IsSixteenBit = m_issixteenbit,
+                    TableWidth = m_TableWidth,
+                    MaxValueInTable = m_MaxValueInTable,
+                    OpenLoop = open_loop
+                },
+                Metadata = new MapMetadata
+                {
+                    Name = m_map_name,
+                    Description = m_map_descr,
+                    Filename = m_filename,
+                    Category = m_map_cat,
+                    XAxisName = m_x_axis_name,
+                    YAxisName = m_y_axis_name,
+                    ZAxisName = m_z_axis_name,
+                    XAxisUnits = m_xaxisUnits,
+                    YAxisUnits = m_yaxisUnits
+                },
+                Axes = new AxisData
+                {
+                    XAxisValues = x_axisvalues,
+                    YAxisValues = y_axisvalues,
+                    XAxisAddress = x_axisAddress,
+                    YAxisAddress = y_axisAddress
+                },
+                Configuration = new ViewConfiguration
+                {
+                    ViewType = m_viewtype,
+                    ViewSize = m_vs,
+                    IsUpsideDown = m_isUpsideDown,
+                    DisableColors = m_disablecolors,
+                    IsRedWhite = m_isRedWhite,
+                    CorrectionFactor = correction_factor,
+                    CorrectionOffset = correction_offset,
+                    LockMode = toolStripComboBox2.SelectedIndex,
+                    TableVisible = !splitContainer1.Panel1Collapsed,
+                    GraphVisible = !splitContainer1.Panel2Collapsed
+                },
+                IsDirty = m_datasourceMutated,
+                IsCompareMode = _isCompareViewer,
+                IsDifferenceMode = m_isDifferenceViewer,
+                IsRAMViewer = m_isRAMViewer,
+                IsOnlineMode = m_OnlineMode,
+                MaxValueInTable = m_MaxValueInTable,
+                RealMaxValue = m_realMaxValue,
+                RealMinValue = m_realMinValue
+            };
+        }
+        
+        /// <summary>
+        /// Initializes Phase 5 UI components
+        /// </summary>
+        private void InitializePhase5Components()
+        {
+            // Create component instances
+            _mapGridComponent = new MapGridComponent(_dataConversionService, _mapRenderingService);
+            _chart3DComponent = new Chart3DComponent(_chartService);
+            _chart2DComponent = new Chart2DComponent(_chartService);
+            
+            // Wire up component events to MapViewerEx handlers
+            _chart3DComponent.ViewChanged += OnChart3DViewChanged;
+        }
+
+        private void OnChart3DViewChanged(object sender, SurfaceGraphViewChangedEventArgsEx e)
+        {
+            CastSurfaceGraphChangedEventEx(e.DepthX, e.DepthY, e.Zoom, e.Rotation, e.Elevation);
         }
 
         void gridView1_MouseMove(object sender, MouseEventArgs e)
