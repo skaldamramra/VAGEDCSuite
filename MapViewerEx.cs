@@ -16,12 +16,19 @@ using DevExpress.XtraBars.Docking;
 using System.IO;
 using System.Globalization;
 using VAGSuite.MapViewerEventArgs;
+using VAGSuite.Models;
+using VAGSuite.Services;
 
 namespace VAGSuite
 {
     public partial class MapViewerEx : DevExpress.XtraEditors.XtraUserControl //IMapViewer
     {
-
+        // Phase 3 Services - Business Logic (initialized in constructor for backward compatibility)
+        private IMapRenderingService _mapRenderingService;
+        private IChartService _chartService;
+        private IClipboardService _clipboardService;
+        private ISmoothingService _smoothingService;
+        private IDataConversionService _dataConversionService;
 
         private bool m_isDifferenceViewer = false;
 
@@ -978,8 +985,14 @@ namespace VAGSuite
             
             chartControl1.Series[0].ValueDataMembers.AddRange(datamembers);
             timer4.Enabled = false;*/
-/*            chartControl1.Series[0].ArgumentDataMember = "X";*/
+ /*            chartControl1.Series[0].ArgumentDataMember = "X";*/
 
+            // Initialize Phase 3 Services with default implementations
+            _mapRenderingService = new MapRenderingService();
+            _chartService = new ChartService();
+            _dataConversionService = new DataConversionService();
+            _clipboardService = new ClipboardService(_dataConversionService);
+            _smoothingService = new SmoothingService(_dataConversionService);
         }
 
         void gridView1_MouseMove(object sender, MouseEventArgs e)
