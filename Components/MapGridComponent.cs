@@ -202,6 +202,82 @@ namespace VAGSuite.Components
 
         #region Private Methods
 
+        /// <summary>
+        /// Renders the row indicator with Y-axis values
+        /// </summary>
+        public void CustomDrawRowIndicator(object sender, DevExpress.XtraGrid.Views.Grid.RowIndicatorCustomDrawEventArgs e, Font font)
+        {
+            if (e.RowHandle >= 0 && _yAxisValues != null && _yAxisValues.Length > e.RowHandle)
+            {
+                try
+                {
+                    string yvalue;
+                    int index = _isUpsideDown ? (_yAxisValues.Length - 1) - e.RowHandle : e.RowHandle;
+                    int rawY = Convert.ToInt32(_yAxisValues.GetValue(index));
+
+                    if (_viewType == ViewType.Hexadecimal)
+                    {
+                        yvalue = rawY.ToString("X4");
+                    }
+                    else
+                    {
+                        double temp = (double)rawY * _correctionFactor + _correctionOffset;
+                        yvalue = temp.ToString("F1");
+                    }
+
+                    Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
+                    e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
+                    using (var gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
+                    {
+                        e.Graphics.FillRectangle(gb, e.Bounds);
+                    }
+                    e.Graphics.DrawString(yvalue, font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 4, e.Bounds.Y + 1 + (e.Bounds.Height - 12) / 2));
+                    e.Handled = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("MapGridComponent.CustomDrawRowIndicator error: " + ex.Message);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Renders the column header with X-axis values
+        /// </summary>
+        public void CustomDrawColumnHeader(object sender, DevExpress.XtraGrid.Views.Grid.ColumnHeaderCustomDrawEventArgs e, Font font)
+        {
+            if (_xAxisValues != null && e.Column != null && _xAxisValues.Length > e.Column.VisibleIndex)
+            {
+                try
+                {
+                    string xvalue;
+                    int rawX = Convert.ToInt32(_xAxisValues.GetValue(e.Column.VisibleIndex));
+                    if (_viewType == ViewType.Hexadecimal)
+                    {
+                        xvalue = rawX.ToString(rawX <= 255 ? "X2" : "X4");
+                    }
+                    else
+                    {
+                        double temp = (double)rawX * _correctionFactor + _correctionOffset;
+                        xvalue = temp.ToString("F2");
+                    }
+
+                    Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
+                    e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
+                    using (var gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
+                    {
+                        e.Graphics.FillRectangle(gb, e.Bounds);
+                    }
+                    e.Graphics.DrawString(xvalue, font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 3, e.Bounds.Y + 1 + (e.Bounds.Height - 12) / 2));
+                    e.Handled = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("MapGridComponent.CustomDrawColumnHeader error: " + ex.Message);
+                }
+            }
+        }
+
         private void InitializeComponent()
         {
             // Create grid control

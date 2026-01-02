@@ -30,6 +30,9 @@ namespace VAGSuite
         private IClipboardService _clipboardService;
         private ISmoothingService _smoothingService;
         private IDataConversionService _dataConversionService;
+        private IMapOperationService _mapOperationService;
+        private IMapValidationService _mapValidationService;
+        private MapViewerController _controller;
         
         // Phase 5 Components - UI Component instances
         private MapGridComponent _mapGridComponent;
@@ -704,6 +707,9 @@ namespace VAGSuite
             _dataConversionService = new DataConversionService();
             _clipboardService = new ClipboardService(_dataConversionService);
             _smoothingService = new SmoothingService(_dataConversionService);
+            _mapOperationService = new MapOperationService(_dataConversionService);
+            _mapValidationService = new MapValidationService(_dataConversionService);
+            _controller = new MapViewerController(this);
             
             // Initialize Phase 5 Components
             InitializePhase5Components();
@@ -855,7 +861,7 @@ namespace VAGSuite
             }
             else
             {
-                return Convert.ToInt32(ConvertToDouble(cellValue.ToString()));
+                return _dataConversionService.ParseValue(cellValue.ToString(), m_viewtype);
             }
         }
 
@@ -1140,27 +1146,6 @@ namespace VAGSuite
             }
         }
 
-        private double ConvertToDouble(string v)
-        {
-            double d = 0;
-            string newv = string.Empty;
-            foreach (char c in v)
-            {
-                if (c == ',' || c == '.') newv += c;
-                else if (c >= 0x30 && c <= 0x39) newv += c;
-                else if (c == 'A' || c == 'a') newv += c;
-                else if (c == 'B' || c == 'b') newv += c;
-                else if (c == 'C' || c == 'c') newv += c;
-                else if (c == 'D' || c == 'd') newv += c;
-                else if (c == 'E' || c == 'e') newv += c;
-                else if (c == 'F' || c == 'f') newv += c;
-            }
-            if (newv == "") return d;
-            string vs = "";
-            vs = newv.Replace(System.Threading.Thread.CurrentThread.CurrentCulture.NumberFormat.NumberGroupSeparator, System.Threading.Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator);
-            Double.TryParse(vs, out d);
-            return d;
-        }
 
 
 
@@ -1446,22 +1431,14 @@ namespace VAGSuite
             }
         }
 
-        private void StartSingleLineGraphTimer()
-        {
-            timer3.Stop();
-            timer3.Start();
-        }
+        private void StartSingleLineGraphTimer() => DebounceTimer(timer3);
+        private void StartChartUpdateTimer() => DebounceTimer(timer1);
+        private void StartSurfaceChartUpdateTimer() => DebounceTimer(timer2);
 
-        private void StartChartUpdateTimer()
+        private void DebounceTimer(Timer timer)
         {
-            timer1.Stop();
-            timer1.Start();
-        }
-
-        private void StartSurfaceChartUpdateTimer()
-        {
-            timer2.Stop();
-            timer2.Start();
+            timer.Stop();
+            timer.Start();
         }
 
         private void gridView1_KeyDown(object sender, KeyEventArgs e)
@@ -1472,130 +1449,13 @@ namespace VAGSuite
 
         private void gridView1_CustomDrawRowIndicator(object sender, DevExpress.XtraGrid.Views.Grid.RowIndicatorCustomDrawEventArgs e)
         {
-            if (e.RowHandle >= 0)
-            {
-                try
-                {
-                    if (y_axisvalues != null && y_axisvalues.Length > e.RowHandle)
-                    {
-                        string yvalue;
-                        int index = m_isUpsideDown ? (y_axisvalues.Length - 1) - e.RowHandle : e.RowHandle;
-                        int rawY = Convert.ToInt32(y_axisvalues.GetValue(index));
-
-                        if (m_viewtype == ViewType.Hexadecimal)
-                        {
-                            yvalue = rawY.ToString("X4");
-                        }
-                        else
-                        {
-                            yvalue = ConvertYAxisValue(rawY.ToString());
-                        }
-
-                        Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
-                        e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
-                        using (var gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
-                        {
-                            e.Graphics.FillRectangle(gb, e.Bounds);
-                        }
-                        e.Graphics.DrawString(yvalue, this.Font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 4, e.Bounds.Y + 1 + (e.Bounds.Height - m_textheight) / 2));
-                        e.Handled = true;
-                    }
-                }
-                catch (Exception E)
-                {
-                    Console.WriteLine("gridView1_CustomDrawRowIndicator: " + E.Message);
-                }
-            }
-            else
-            {
-                try
-                {
-                    if (!string.IsNullOrEmpty(m_yaxisUnits) || !string.IsNullOrEmpty(m_xaxisUnits))
-                    {
-                        using (Font f = new Font(this.Font.FontFamily, 6))
-                        {
-                            SizeF xsize = e.Graphics.MeasureString(m_xaxisUnits, f);
-                            e.Graphics.DrawString(m_xaxisUnits, f, Brushes.Black, e.Bounds.X + e.Bounds.Width - xsize.Width - 1, e.Bounds.Y);
-                            e.Graphics.DrawString(m_yaxisUnits, f, Brushes.Black, e.Bounds.X + 1, e.Bounds.Y + e.Bounds.Height / 2);
-                            e.Handled = true;
-                        }
-                    }
-                }
-                catch { }
-            }
+            _mapGridComponent.CustomDrawRowIndicator(sender, e, this.Font);
         }
 
-        private string ConvertYAxisValue(string currValue)
-        {
-            string retval = currValue.ToString();
-            if (m_Yaxiscorrectionfactor == 1) return currValue;
-            try
-            {
-                CultureInfo provider = CultureInfo.InvariantCulture;
-                provider = new CultureInfo("nl-NL");
-                float temp = (float)Convert.ToDouble(currValue, provider);
-                temp *= (float)m_Yaxiscorrectionfactor;
-                temp += (float)m_Yaxiscorrectionoffset;
-                retval = temp.ToString("F1");
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine("MapViewer::ConvertYAxisValue: " + E.Message);
-            }
-            return retval;
-        }
-        private string ConvertXAxisValue(string currValue)
-        {
-            string retval = currValue.ToString();
-            if (m_Xaxiscorrectionfactor == 1) return currValue;
-            try
-            {
-                CultureInfo provider = CultureInfo.InvariantCulture;
-                provider = new CultureInfo("nl-NL");
-                float temp = (float)Convert.ToDouble(currValue, provider);
-                temp *= (float)m_Xaxiscorrectionfactor;
-                temp += (float)m_Xaxiscorrectionoffset;
-
-                retval = temp.ToString("F2");
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine("MapViewer::ConvertXAxisValue: " + E.Message);
-            }
-            return retval;
-        }
 
         private void gridView1_CustomDrawColumnHeader(object sender, DevExpress.XtraGrid.Views.Grid.ColumnHeaderCustomDrawEventArgs e)
         {
-            try
-            {
-                if (x_axisvalues != null && e.Column != null && x_axisvalues.Length > e.Column.VisibleIndex)
-                {
-                    string xvalue;
-                    int rawX = Convert.ToInt32(x_axisvalues.GetValue(e.Column.VisibleIndex));
-                    if (m_viewtype == ViewType.Hexadecimal)
-                    {
-                        xvalue = rawX.ToString(m_xformatstringforhex);
-                    }
-                    else
-                    {
-                        xvalue = ConvertXAxisValue(rawX.ToString());
-                    }
-
-                    Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
-                    e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
-                    using (var gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
-                    {
-                        e.Graphics.FillRectangle(gb, e.Bounds);
-                    }
-                    e.Graphics.DrawString(xvalue, this.Font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 3, e.Bounds.Y + 1 + (e.Bounds.Height - m_textheight) / 2));
-                    e.Handled = true;
-                }
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine("gridView1_CustomDrawColumnHeader: " + E.Message);
-            }
+            _mapGridComponent.CustomDrawColumnHeader(sender, e, this.Font);
         }
 
 
@@ -2037,55 +1897,19 @@ namespace VAGSuite
         {
             try
             {
-                double _workvalue = Convert.ToDouble(toolStripTextBox1.Text);
-                DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-                if (cellcollection.Length > 0)
+                double workValue = Convert.ToDouble(toolStripTextBox1.Text);
+                var selectedCells = gridView1.GetSelectedCells();
+                if (selectedCells.Length > 0)
                 {
-                    foreach (DevExpress.XtraGrid.Views.Base.GridCell cell in cellcollection)
-                    {
-                        try
-                        {
-                            object cellVal = gridView1.GetRowCellValue(cell.RowHandle, cell.Column);
-                            if (cellVal == null) continue;
-
-                            int rawValue = _dataConversionService.ParseValue(cellVal.ToString(), m_viewtype);
-                            double workingValue = rawValue;
-
-                            if (m_viewtype == ViewType.Easy)
-                            {
-                                workingValue = _dataConversionService.ApplyCorrection(rawValue, correction_factor, correction_offset);
-                            }
-
-                            switch (toolStripComboBox1.SelectedIndex)
-                            {
-                                case 0: workingValue += _workvalue; break;
-                                case 1: workingValue *= _workvalue; break;
-                                case 2: if (_workvalue != 0) workingValue /= _workvalue; break;
-                                case 3: workingValue = _workvalue; break;
-                            }
-
-                            int finalRawValue;
-                            if (m_viewtype == ViewType.Easy)
-                            {
-                                finalRawValue = (int)Math.Round((workingValue - correction_offset) / (correction_factor != 0 ? correction_factor : 1));
-                            }
-                            else
-                            {
-                                finalRawValue = (int)Math.Round(workingValue);
-                            }
-
-                            // Clamp
-                            int max = m_issixteenbit ? 0xFFFF : 0xFF;
-                            if (finalRawValue > max) finalRawValue = max;
-                            if (finalRawValue < 0) finalRawValue = 0;
-
-                            gridView1.SetRowCellValue(cell.RowHandle, cell.Column, _dataConversionService.FormatValue(finalRawValue, m_viewtype, m_issixteenbit));
-                        }
-                        catch (Exception cE)
-                        {
-                            Console.WriteLine("toolStripButton3_Click cell: " + cE.Message);
-                        }
-                    }
+                    OperationType opType = (OperationType)toolStripComboBox1.SelectedIndex;
+                    _mapOperationService.ApplyOperation(
+                        CreateMapViewerState(),
+                        opType,
+                        workValue,
+                        selectedCells,
+                        (rh, col) => gridView1.GetRowCellValue(rh, col),
+                        (rh, col, val) => gridView1.SetRowCellValue(rh, col, val)
+                    );
                 }
             }
             catch (Exception E)
@@ -2115,130 +1939,43 @@ namespace VAGSuite
 
         private void toolStripButton4_Click(object sender, EventArgs e)
         {
-            if (this.Parent is DevExpress.XtraBars.Docking.DockPanel)
-            {
-                DevExpress.XtraBars.Docking.DockPanel pnl = (DevExpress.XtraBars.Docking.DockPanel)this.Parent;
-                if (pnl.FloatForm == null)
-                {
-                    pnl.FloatSize = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-                    pnl.FloatLocation = new System.Drawing.Point(1, 1);
-                    pnl.MakeFloat();
-                    // alleen grafiek
-                    splitContainer1.Panel1Collapsed = true;
-                    splitContainer1.Panel2Collapsed = false;
-                }
-                else
-                {
-                    pnl.Restore();
+            _controller.HandleDockingAction(this.Parent,
+                () => {
                     splitContainer1.Panel1Collapsed = false;
                     splitContainer1.Panel2Collapsed = false;
-                }
-            }
-            else if (this.Parent is DevExpress.XtraBars.Docking.ControlContainer)
-            {
-                DevExpress.XtraBars.Docking.ControlContainer container = (DevExpress.XtraBars.Docking.ControlContainer)this.Parent;
-                if (container.Panel.FloatForm == null)
-                {
-                    container.Panel.FloatSize = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-                    container.Panel.FloatLocation = new System.Drawing.Point(1, 1);
-                    container.Panel.MakeFloat();
+                },
+                () => {
                     splitContainer1.Panel1Collapsed = true;
                     splitContainer1.Panel2Collapsed = false;
-                }
-                else
-                {
-                    container.Panel.Restore();
-                    splitContainer1.Panel1Collapsed = false;
-                    splitContainer1.Panel2Collapsed = false;
-                }
-                
-            }
+                });
             CastSplitterMovedEvent();
         }
 
         private void toolStripButton5_Click(object sender, EventArgs e)
         {
-            if (this.Parent is DevExpress.XtraBars.Docking.DockPanel)
-            {
-                DevExpress.XtraBars.Docking.DockPanel pnl = (DevExpress.XtraBars.Docking.DockPanel)this.Parent;
-                if (pnl.FloatForm == null)
-                {
-                    pnl.FloatSize = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-                    pnl.FloatLocation = new System.Drawing.Point(1, 1);
-                    pnl.MakeFloat();
-                    // alleen grafiek
-                    splitContainer1.Panel1Collapsed = false;
-                    splitContainer1.Panel2Collapsed = true;
-                }
-                else
-                {
-                    pnl.Restore();
+            _controller.HandleDockingAction(this.Parent,
+                () => {
                     splitContainer1.Panel1Collapsed = false;
                     splitContainer1.Panel2Collapsed = false;
-                }
-            }
-            else if (this.Parent is DevExpress.XtraBars.Docking.ControlContainer)
-            {
-                DevExpress.XtraBars.Docking.ControlContainer container = (DevExpress.XtraBars.Docking.ControlContainer)this.Parent;
-                if (container.Panel.FloatForm == null)
-                {
-                    container.Panel.FloatSize = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-                    container.Panel.FloatLocation = new System.Drawing.Point(1, 1);
-                    container.Panel.MakeFloat();
+                },
+                () => {
                     splitContainer1.Panel1Collapsed = false;
                     splitContainer1.Panel2Collapsed = true;
-                }
-                else
-                {
-                    container.Panel.Restore();
-                    splitContainer1.Panel1Collapsed = false;
-                    splitContainer1.Panel2Collapsed = false;
-                }
-
-            }
+                });
             CastSplitterMovedEvent();
         }
 
         private void toolStripButton6_Click(object sender, EventArgs e)
         {
-            if (this.Parent is DevExpress.XtraBars.Docking.DockPanel)
-            {
-                DevExpress.XtraBars.Docking.DockPanel pnl = (DevExpress.XtraBars.Docking.DockPanel)this.Parent;
-                if (pnl.FloatForm == null)
-                {
-                    pnl.FloatSize = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-                    pnl.FloatLocation = new System.Drawing.Point(1, 1);
-                    pnl.MakeFloat();
-                    // alleen grafiek
+            _controller.HandleDockingAction(this.Parent,
+                () => {
                     splitContainer1.Panel1Collapsed = false;
                     splitContainer1.Panel2Collapsed = false;
-                }
-                else
-                {
-                    pnl.Restore();
+                },
+                () => {
                     splitContainer1.Panel1Collapsed = false;
                     splitContainer1.Panel2Collapsed = false;
-                }
-            }
-            else if (this.Parent is DevExpress.XtraBars.Docking.ControlContainer)
-            {
-                DevExpress.XtraBars.Docking.ControlContainer container = (DevExpress.XtraBars.Docking.ControlContainer)this.Parent;
-                if (container.Panel.FloatForm == null)
-                {
-                    container.Panel.FloatSize = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-                    container.Panel.FloatLocation = new System.Drawing.Point(1, 1);
-                    container.Panel.MakeFloat();
-                    splitContainer1.Panel1Collapsed = false;
-                    splitContainer1.Panel2Collapsed = false;
-                }
-                else
-                {
-                    container.Panel.Restore();
-                    splitContainer1.Panel1Collapsed = false;
-                    splitContainer1.Panel2Collapsed = false;
-                }
-
-            }
+                });
         }
 
         private void toolStripButton7_Click(object sender, EventArgs e)
@@ -2372,27 +2109,8 @@ namespace VAGSuite
 
         private void toolStripComboBox3_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // refresh the mapviewer with the values like selected
             if (m_prohibit_viewchange) return;
-            switch (toolStripComboBox3.SelectedIndex)
-            {
-                case -1:
-                case 0:
-                    m_viewtype = ViewType.Hexadecimal;
-                    break;
-                case 1:
-                    m_viewtype = ViewType.Decimal;
-                    break;
-                case 2:
-                    m_viewtype = ViewType.Easy;
-                    break;
-                case 3:
-                    m_viewtype = ViewType.ASCII;
-                    break;
-                default:
-                    m_viewtype = ViewType.Hexadecimal;
-                    break;
-            }
+            m_viewtype = _controller.GetViewTypeFromIndex(toolStripComboBox3.SelectedIndex);
             ReShowTable();
             CastViewTypeChangedEvent();
         }
@@ -2404,123 +2122,16 @@ namespace VAGSuite
 
         private void gridView1_ValidatingEditor(object sender, DevExpress.XtraEditors.Controls.BaseContainerValidateEditorEventArgs e)
         {
-            if (m_issixteenbit)
+            string errorText;
+            object validatedValue;
+            if (!_mapValidationService.ValidateEditorValue(e.Value, CreateMapViewerState(), out errorText, out validatedValue))
             {
-                if (m_viewtype == ViewType.Hexadecimal)
-                {
-                    try
-                    {
-                        int value = Convert.ToInt32(Convert.ToString(e.Value), 16);
-                        if (value > 0xFFFF)
-                        {
-                            e.Valid = false;
-                            e.ErrorText = "Value not valid...";
-                        }
-                    }
-                    catch (Exception hE)
-                    {
-                        e.Valid = false;
-                        e.ErrorText = hE.Message;
-                    }
-                }
-                else
-                {
-                    double dvalue = Convert.ToDouble(e.Value);
-                    int value = 0;
-                    if (m_viewtype == ViewType.Easy)
-                    {
-                        if (gridView1.ActiveEditor != null)
-                        {
-                            if (gridView1.ActiveEditor.EditValue.ToString() != gridView1.ActiveEditor.OldEditValue.ToString())
-                            {
-                                Console.WriteLine(gridView1.ActiveEditor.IsModified.ToString());
-                                dvalue = Convert.ToDouble(gridView1.ActiveEditor.EditValue);
-                                value = (int)Math.Round((dvalue - correction_offset) / (correction_factor != 0 ? correction_factor : 1));
-                            }
-                            else
-                            {
-                                value = (int)Math.Round(Convert.ToDouble(e.Value));
-                            }
-                        }
-                        else
-                        {
-                            value = Convert.ToInt32(Convert.ToString(e.Value));
-                        }
-                    }
-                    else
-                    {
-                        value = Convert.ToInt32(Convert.ToString(e.Value));
-                    }
-                    if (Math.Abs(value) > 78643)
-                    {
-                        e.Valid = false;
-                        e.ErrorText = "Value not valid...";
-                    }
-                    else
-                    {
-                        e.Value = value;
-                    }
-                }
-
+                e.Valid = false;
+                e.ErrorText = errorText;
             }
             else
             {
-                if (m_viewtype == ViewType.Hexadecimal)
-                {
-                    try
-                    {
-                        int value = Convert.ToInt32(Convert.ToString(e.Value), 16);
-                        if (value > 0xFF)
-                        {
-                            e.Valid = false;
-                            e.ErrorText = "Value not valid...";
-                        }
-                    }
-                    catch(Exception hE)
-                    {
-                        e.Valid = false;
-                        e.ErrorText = hE.Message;
-                    }
-                }
-                else
-                {
-                    double dvalue = Convert.ToDouble(e.Value);
-                    int value = 0;
-                    if (m_viewtype == ViewType.Easy)
-                    {
-                        if (gridView1.ActiveEditor != null)
-                        {
-                            if (gridView1.ActiveEditor.EditValue.ToString() != gridView1.ActiveEditor.OldEditValue.ToString())
-                            {
-                                Console.WriteLine(gridView1.ActiveEditor.IsModified.ToString());
-                                dvalue = Convert.ToDouble(gridView1.ActiveEditor.EditValue);
-                                value = (int)Math.Round((dvalue - correction_offset) / (correction_factor != 0 ? correction_factor : 1));
-                            }
-                            else
-                            {
-                                value = (int)Math.Round(Convert.ToDouble(e.Value));
-                            }
-                        }
-                        else
-                        {
-                            value = Convert.ToInt32(Convert.ToString(e.Value));
-                        }
-                    }
-                    else
-                    {
-                        value = Convert.ToInt32(Convert.ToString(e.Value));
-                    }
-
-                    if (value > 255)
-                    {
-                        e.Valid = false;
-                        e.ErrorText = "Value not valid...";
-                    }
-                    else
-                    {
-                        e.Value = value;
-                    }
-                }
+                e.Value = validatedValue;
             }
         }
 

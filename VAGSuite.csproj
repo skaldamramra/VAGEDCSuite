@@ -131,6 +131,11 @@
     <Compile Include="Services\ClipboardService.cs" />
     <Compile Include="Services\ISmoothingService.cs" />
     <Compile Include="Services\SmoothingService.cs" />
+    <Compile Include="Services\IMapOperationService.cs" />
+    <Compile Include="Services\MapOperationService.cs" />
+    <Compile Include="Services\IMapValidationService.cs" />
+    <Compile Include="Services\MapValidationService.cs" />
+    <Compile Include="Services\MapViewerController.cs" />
     <Compile Include="Services\IMapDataService.cs" />
     <Compile Include="Services\MapDataService.cs" />
     <Compile Include="Components\MapGridComponent.cs" />
