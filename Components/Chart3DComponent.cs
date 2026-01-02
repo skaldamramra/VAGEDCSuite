@@ -50,8 +50,8 @@ namespace VAGSuite.Components
         private bool _isSixteenBit;
         private bool _isLoaded = false;
         private float _rotation = -45f;
-        private float _elevation = 45f;
-        private float _zoom = 1.5f;
+        private float _elevation = 30f;
+        private float _zoom = 1.2f;
         private RenderMode _renderMode = RenderMode.Solid;
         private ViewType _viewType;
         private string _mapName;
@@ -116,6 +116,7 @@ namespace VAGSuite.Components
                 _glControl.MouseDown += OnGLMouseDown;
                 _glControl.MouseMove += OnGLMouseMove;
                 _glControl.MouseWheel += OnGLMouseWheel;
+                _glControl.KeyDown += OnGLKeyDown;
                 _glControl.Dock = DockStyle.Fill;
 
                 // If the control is already loaded or handle created, initialize now
@@ -314,8 +315,12 @@ namespace VAGSuite.Components
             // Unified Rotation: Apply to the entire scene (Mesh + Box + Grids)
             // Elevation clamped to [-89, 89] to prevent gimbal lock
             float clampedElevation = Math.Max(-89f, Math.Min(89f, _elevation));
-            modelview = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(clampedElevation)) *
+            
+            // Pivot around the mesh center
+            modelview = Matrix4.CreateTranslation(-_meshCenter) *
                         Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotation)) *
+                        Matrix4.CreateRotationX(MathHelper.DegreesToRadians(clampedElevation)) *
+                        Matrix4.CreateTranslation(_meshCenter) *
                         modelview;
         }
 
@@ -334,8 +339,8 @@ namespace VAGSuite.Components
         public void ResetView()
         {
             _rotation = -45f;
-            _elevation = 45f;
-            _zoom = 1.5f;
+            _elevation = 30f;
+            _zoom = 1.2f;
             RefreshChart();
         }
 
@@ -1036,6 +1041,18 @@ namespace VAGSuite.Components
             // Strict Zoom Constraint
             _zoom = Math.Max(0.5f, Math.Min(5.0f, _zoom));
             RefreshChart();
+        }
+
+        private void OnGLKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.W)
+            {
+                ToggleRenderMode();
+            }
+            else if (e.KeyCode == Keys.R)
+            {
+                ResetView();
+            }
         }
 
         #endregion
