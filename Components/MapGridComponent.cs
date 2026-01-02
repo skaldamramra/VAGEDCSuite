@@ -352,7 +352,7 @@ namespace VAGSuite.Components
             DataChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private void GridView1_KeyDown(object sender, KeyEventArgs e)
+        public void GridView1_KeyDown(object sender, KeyEventArgs e)
         {
             DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
             if (cellcollection.Length > 0)

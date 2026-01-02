@@ -16,5 +16,10 @@ namespace VAGSuite.Services
         /// Applies proportional smoothing based on axis values
         /// </summary>
         void SmoothProportional(object[] cells, object gridView, int[] xAxis, int[] yAxis);
+
+        /// <summary>
+        /// Applies interpolated smoothing between 4 corners
+        /// </summary>
+        void SmoothInterpolated(object[] cells, object gridView, int[] xAxis, int[] yAxis);
     }
 }

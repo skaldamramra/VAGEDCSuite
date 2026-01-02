@@ -221,6 +221,123 @@ namespace VAGSuite.Services
                 Console.WriteLine("SmoothProportional: " + E.Message);
             }
         }
+
+        /// <summary>
+        /// Smooths selected cells using interpolation between 4 corners.
+        /// Compatible with MapViewerEx GridCell objects.
+        /// </summary>
+        public void SmoothInterpolated(object[] cells, object gridView, int[] xAxis, int[] yAxis)
+        {
+            if (cells == null || cells.Length <= 2) return;
+
+            try
+            {
+                // Get boundaries for this selection
+                int max_column = 0;
+                int min_column = 0xFFFF;
+                int max_row = 0;
+                int min_row = 0xFFFF;
+
+                for (int i = 0; i < cells.Length; i++)
+                {
+                    if (cells[i] is GridCell gc)
+                    {
+                        if (gc.Column.AbsoluteIndex > max_column) max_column = gc.Column.AbsoluteIndex;
+                        if (gc.Column.AbsoluteIndex < min_column) min_column = gc.Column.AbsoluteIndex;
+                        if (gc.RowHandle > max_row) max_row = gc.RowHandle;
+                        if (gc.RowHandle < min_row) min_row = gc.RowHandle;
+                    }
+                }
+
+                if (max_column == min_column)
+                {
+                    // one column selected only
+                    int top_value = ParseCellValue(cells[0], gridView);
+                    int bottom_value = ParseCellValue(cells[cells.Length - 1], gridView);
+                    double diffvalue = (top_value - bottom_value);
+                    double[] yaxisvalues = new double[cells.Length];
+                    for (int q = 0; q < cells.Length; q++)
+                    {
+                        yaxisvalues[q] = Convert.ToDouble(yAxis.GetValue(yAxis.Length - min_row - q - 1));
+                    }
+                    double yaxisdiff = yaxisvalues[0] - yaxisvalues[cells.Length - 1];
+
+                    for (int t = 1; t < cells.Length - 1; t++)
+                    {
+                        double newvalue = bottom_value + (diffvalue * ((yaxisvalues[0] - yaxisvalues[t]) / (yaxisdiff != 0 ? yaxisdiff : 1)));
+                        newvalue = Math.Round(newvalue, 0);
+                        SetCellValue(cells[t], (int)newvalue, gridView);
+                    }
+                }
+                else if (max_row == min_row)
+                {
+                    // one row selected only
+                    int top_value = ParseCellValue(cells[0], gridView);
+                    int bottom_value = ParseCellValue(cells[cells.Length - 1], gridView);
+                    double diffvalue = (top_value - bottom_value);
+                    double[] xaxisvalues = new double[cells.Length];
+                    for (int q = 0; q < cells.Length; q++)
+                    {
+                        xaxisvalues[q] = Convert.ToDouble(xAxis.GetValue(xAxis.Length - min_column - q - 1));
+                    }
+                    double xaxisdiff = xaxisvalues[0] - xaxisvalues[cells.Length - 1];
+                    for (int t = 1; t < cells.Length - 1; t++)
+                    {
+                        double newvalue = bottom_value + (diffvalue * ((xaxisvalues[0] - xaxisvalues[t]) / (xaxisdiff != 0 ? xaxisdiff : 1)));
+                        newvalue = Math.Round(newvalue, 0);
+                        SetCellValue(cells[t], (int)newvalue, gridView);
+                    }
+                }
+                else
+                {
+                    // block selected
+                    int top_leftvalue = ParseCellValue(cells[0], gridView);
+                    int top_rightvalue = ParseCellValue(cells[1], gridView);
+                    int bottom_leftvalue = ParseCellValue(cells[cells.Length - 2], gridView);
+                    int bottom_rightvalue = ParseCellValue(cells[cells.Length - 1], gridView);
+                    double[] xaxisvalues = new double[max_column - min_column + 1];
+                    double[] yaxisvalues = new double[max_row - min_row + 1];
+
+                    for (int q = 0; q <= (max_column - min_column); q++)
+                    {
+                        xaxisvalues[q] = Convert.ToDouble(xAxis.GetValue(xAxis.Length - min_column - q - 1));
+                    }
+                    for (int q = 0; q <= (max_row - min_row); q++)
+                    {
+                        yaxisvalues[q] = Convert.ToDouble(yAxis.GetValue(yAxis.Length - min_row - q - 1));
+                    }
+                    double xaxisdiff = xaxisvalues[0] - xaxisvalues[max_column - min_column];
+                    double yaxisdiff = yaxisvalues[0] - yaxisvalues[max_row - min_row];
+                    int xvaluediff = ((top_rightvalue - top_leftvalue) + (bottom_rightvalue - bottom_leftvalue)) / 2;
+                    int yvaluediff = ((top_leftvalue - bottom_leftvalue) + (top_rightvalue - bottom_rightvalue)) / 2;
+
+                    for (int tely = 0; tely <= max_row - min_row; tely++)
+                    {
+                        for (int telx = 0; telx <= max_column - min_column; telx++)
+                        {
+                            double xportion = (xaxisvalues[max_column - min_column - telx] - xaxisvalues[max_column - min_column]) / (xaxisdiff != 0 ? xaxisdiff : 1);
+                            double yportion = (yaxisvalues[tely] - yaxisvalues[max_row - min_row]) / (yaxisdiff != 0 ? yaxisdiff : 1);
+
+                            float newvalue = (float)(bottom_leftvalue + ((xvaluediff * xportion) + (yvaluediff * yportion)));
+                            
+                            // Find the cell at (min_row + tely, min_column + telx)
+                            for (int i = 0; i < cells.Length; i++)
+                            {
+                                if (cells[i] is GridCell gc && gc.RowHandle == min_row + tely && gc.Column.AbsoluteIndex == min_column + telx)
+                                {
+                                    SetCellValue(cells[i], (int)Math.Round(newvalue), gridView);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception E)
+            {
+                Console.WriteLine("SmoothInterpolated: " + E.Message);
+            }
+        }
         
         private int ParseCellValue(object cell, object gridView)
         {

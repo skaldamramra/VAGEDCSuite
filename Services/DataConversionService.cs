@@ -225,9 +225,7 @@ namespace VAGSuite.Services
                     return value.ToString(CultureInfo.InvariantCulture);
                     
                 case ViewType.Easy:
-                    double val = Convert.ToDouble(value);
-                    val = val / 100;
-                    return val.ToString(CultureInfo.InvariantCulture);
+                    return value.ToString(CultureInfo.InvariantCulture);
                     
                 case ViewType.ASCII:
                     return ((char)value).ToString();
@@ -250,11 +248,10 @@ namespace VAGSuite.Services
                         return int.Parse(value, CultureInfo.InvariantCulture);
                         
                     case ViewType.Easy:
-                        // Legacy MapViewerEx logic: Easy view values are parsed as doubles
-                        // and then cast to int. The multiplication by 100 was a hallucination
-                        // in the previous refactor and is causing the "nuked" mesh.
+                        // Easy view values in the DataTable are raw integers (as strings)
+                        // The scaling is applied only during rendering in CustomDrawCell.
                         double val = double.Parse(value, CultureInfo.InvariantCulture);
-                        return (int)val;
+                        return (int)Math.Round(val);
                         
                     case ViewType.ASCII:
                         if (!string.IsNullOrEmpty(value))

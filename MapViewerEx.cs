@@ -428,17 +428,23 @@ namespace VAGSuite
 
         private void FillData(NMeshSurfaceSeries surface)
         {
-            // Logic moved to Chart3DComponent.LoadData and ChartService
+            DataTable dt = (DataTable)gridControl1.DataSource;
+            if (dt == null) return;
+            _chartService.FillSurfaceData(surface, dt, m_viewtype, correction_factor, correction_offset, _isCompareViewer);
         }
 
         private void FillDataOriginal(NMeshSurfaceSeries surface)
         {
-            // Logic moved to Chart3DComponent.LoadData and ChartService
+            DataTable dt = (DataTable)gridControl1.DataSource;
+            if (dt == null || m_map_original_content == null) return;
+            _chartService.FillOriginalData(surface, dt, m_map_original_content, m_issixteenbit, m_viewtype, correction_factor, correction_offset);
         }
 
         private void FillDataCompare(NMeshSurfaceSeries surface)
         {
-            // Logic moved to Chart3DComponent.LoadData and ChartService
+            DataTable dt = (DataTable)gridControl1.DataSource;
+            if (dt == null || m_map_compare_content == null) return;
+            _chartService.FillCompareData(surface, dt, m_map_compare_content, m_issixteenbit, m_viewtype, correction_factor, correction_offset);
         }
 
         public bool IsRedWhite
@@ -951,253 +957,29 @@ namespace VAGSuite
 
         public void ShowTable(int tablewidth, bool issixteenbits)
         {
-            double m_realValue;
-
-            m_MaxValueInTable = 0;
-            if (m_viewtype == ViewType.Hexadecimal)
-            {
-                int lenvals = m_map_length;
-                if (issixteenbits) lenvals /= 2;
-            }
-            else
-            {
-                int lenvals = m_map_length;
-                if (issixteenbits) lenvals /= 2;
-            }
-
-
             m_TableWidth = tablewidth;
             m_issixteenbit = issixteenbits;
-            DataTable dt = new DataTable();
+
             if (m_map_length != 0 && m_map_name != string.Empty)
             {
+                MapViewerState state = CreateMapViewerState();
+                DataTable dt = _dataConversionService.ConvertToDataTable(state.Data, state.Configuration);
+                
+                // Update MaxValueInTable and Real Min/Max from the data
+                m_MaxValueInTable = 0;
+                m_realMaxValue = double.MinValue;
+                m_realMinValue = double.MaxValue;
 
-                if (tablewidth > 0)
+                foreach (DataRow row in dt.Rows)
                 {
-                    int numberrows = (int)(m_map_length / tablewidth);
-                    if (issixteenbits) numberrows /= 2;
-                    int map_offset = 0;
-                    /* if (numberrows > 0)
-                     {*/
-                    // aantal kolommen = 8
-
-                    dt.Columns.Clear();
-                    for (int c = 0; c < tablewidth; c++)
+                    foreach (var item in row.ItemArray)
                     {
-                        dt.Columns.Add(c.ToString());
-                    }
-
-                    if (issixteenbits)
-                    {
-
-                        for (int i = 0; i < numberrows; i++)
-                        {
-                            //ListViewItem lvi = new ListViewItem();
-                            //lvi.UseItemStyleForSubItems = false;
-                            object[] objarr = new object[tablewidth];
-                            int b;
-                            for (int j = 0; j < tablewidth; j++)
-                            {
-                                b = (byte)m_map_content.GetValue(map_offset++);
-                                b *= 256;
-                                b += (byte)m_map_content.GetValue(map_offset++);
-                                if (b > 0xF000)
-                                {
-                                    b = 0x10000 - b;
-                                    b = -b;
-                                }
-                               
-                                if (b > m_MaxValueInTable) m_MaxValueInTable = b;
-                                m_realValue = b;
-                                m_realValue *= correction_factor;
-                                if (!_isCompareViewer) m_realValue += correction_offset;
-                                if (m_realValue > m_realMaxValue) m_realMaxValue = m_realValue;
-                                if (m_realValue < m_realMinValue) m_realMinValue = m_realValue;
-                                if (m_viewtype == ViewType.Hexadecimal)
-                                {
-                                    objarr.SetValue(b.ToString("X4"), j);
-                                }
-                                else if (m_viewtype == ViewType.ASCII)
-                                {
-                                    //objarr.SetValue(b.ToString("X4"), j);
-                                    // show as ascii characters
-                                    try
-                                    {
-                                        objarr.SetValue(Convert.ToChar(b), j);
-                                    }
-                                    catch (Exception E)
-                                    {
-                                        Console.WriteLine("Failed to convert to ascii: " + E.Message);
-                                        objarr.SetValue(Convert.ToChar(0x20), j);
-                                    }
-                                }
-                                else
-                                {
-                                    objarr.SetValue(b.ToString(), j);
-                                }
-                                //lvi.SubItems.Add(b.ToString("X4"));
-                                //lvi.SubItems[j + 1].BackColor = Color.FromArgb((int)(b / 256), 255 - (int)(b / 256), 0);
-                            }
-                            //listView2.Items.Add(lvi);
-                            if (m_isUpsideDown)
-                            {
-                                System.Data.DataRow r = dt.NewRow();
-                                r.ItemArray = objarr;
-                                dt.Rows.InsertAt(r, 0);
-                            }
-                            else
-                            {
-                                dt.Rows.Add(objarr);
-                            }
-                        }
-                        // en dan het restant nog in een nieuwe rij zetten
-                        if (map_offset < m_map_length)
-                        {
-                            object[] objarr = new object[tablewidth];
-                            int b;
-                            int sicnt = 0;
-                            for (int v = map_offset; v < m_map_length - 1; v++)
-                            {
-                                //b = (byte)m_map_content.GetValue(map_offset++);
-                                if (map_offset <= m_map_content.Length - 1)
-                                {
-                                    b = (byte)m_map_content.GetValue(map_offset++);
-                                    b *= 256;
-                                    b += (byte)m_map_content.GetValue(map_offset++);
-                                    if (b > 0xF000)
-                                    {
-                                        b = 0x10000 - b;
-                                        b = -b;
-                                    }
-                                    if (b > m_MaxValueInTable) m_MaxValueInTable = b;
-                                    m_realValue = b;
-                                    m_realValue *= correction_factor;
-                                    if (!_isCompareViewer) m_realValue += correction_offset;
-                                    if (m_realValue > m_realMaxValue) m_realMaxValue = m_realValue;
-                                    if (m_realValue < m_realMinValue) m_realMinValue = m_realValue;
-                                    if (m_viewtype == ViewType.Hexadecimal)
-                                    {
-                                        objarr.SetValue(b.ToString("X4"), sicnt);
-                                    }
-                                    else if (m_viewtype == ViewType.ASCII)
-                                    {
-                                        //objarr.SetValue(b.ToString("X4"), j);
-                                        // show as ascii characters
-                                        objarr.SetValue(Convert.ToChar(b), sicnt);
-                                    }
-                                    else
-                                    {
-                                        objarr.SetValue(b.ToString(), sicnt);
-                                    }
-                                }
-                                sicnt++;
-                                //lvi.SubItems[lvi.SubItems.Count - 1].BackColor = Color.FromArgb((int)(b / 256), 255 - (int)(b / 256), 0);
-                            }
-                            /*for (int t = 0; t < (tablewidth - 1) - sicnt; t++)
-                            {
-                                lvi.SubItems.Add("");
-                            }*/
-                            //listView2.Items.Add(lvi);
-                            if (m_isUpsideDown)
-                            {
-                                System.Data.DataRow r = dt.NewRow();
-                                r.ItemArray = objarr;
-                                dt.Rows.InsertAt(r, 0);
-                            }
-                            else
-                            {
-
-                                dt.Rows.Add(objarr);
-                            }
-                        }
-
-                    }
-                    else
-                    {
-
-                        for (int i = 0; i < numberrows; i++)
-                        {
-                            object[] objarr = new object[tablewidth];
-                            int b;
-                            for (int j = 0; j < (tablewidth); j++)
-                            {
-                                b = (byte)m_map_content.GetValue(map_offset++);
-                                if (b > m_MaxValueInTable) m_MaxValueInTable = b;
-                                m_realValue = b;
-                                m_realValue *= correction_factor;
-                                if (!_isCompareViewer) m_realValue += correction_offset;
-                                if (m_realValue > m_realMaxValue) m_realMaxValue = m_realValue;
-                                if (m_realValue < m_realMinValue) m_realMinValue = m_realValue;
-                                if (m_viewtype == ViewType.Hexadecimal)
-                                {
-                                    objarr.SetValue(b.ToString("X2"), j);
-                                }
-                                else if (m_viewtype == ViewType.ASCII)
-                                {
-                                    //objarr.SetValue(b.ToString("X4"), j);
-                                    // show as ascii characters
-                                    objarr.SetValue(Convert.ToChar(b), j);
-                                }
-                                else
-                                {
-                                    objarr.SetValue(b.ToString(), j);
-                                }
-                            }
-                            if (m_isUpsideDown)
-                            {
-                                System.Data.DataRow r = dt.NewRow();
-                                r.ItemArray = objarr;
-                                dt.Rows.InsertAt(r, 0);
-                            }
-                            else
-                            {
-
-                                dt.Rows.Add(objarr);
-                            }
-                        }
-                        // en dan het restant nog in een nieuwe rij zetten
-                        if (map_offset < m_map_length)
-                        {
-                            object[] objarr = new object[tablewidth];
-                            byte b;
-                            int sicnt = 0;
-                            for (int v = map_offset; v < m_map_length /*- 1*/; v++)
-                            {
-                                b = (byte)m_map_content.GetValue(map_offset++);
-                                if (b > m_MaxValueInTable) m_MaxValueInTable = b;
-                                m_realValue = b;
-                                m_realValue *= correction_factor;
-                                if (!_isCompareViewer) m_realValue += correction_offset;
-                                if (m_realValue > m_realMaxValue) m_realMaxValue = m_realValue;
-                                if (m_realValue < m_realMinValue) m_realMinValue = m_realValue;
-                                if (m_viewtype == ViewType.Hexadecimal)
-                                {
-                                    objarr.SetValue(b.ToString("X2"), sicnt);
-                                }
-                                else if (m_viewtype == ViewType.ASCII)
-                                {
-                                    //objarr.SetValue(b.ToString("X4"), j);
-                                    // show as ascii characters
-                                    objarr.SetValue(Convert.ToChar(b), sicnt);
-                                }
-                                else
-                                {
-                                    objarr.SetValue(b.ToString(), sicnt);
-                                }
-                                sicnt++;
-                            }
-                            if (m_isUpsideDown)
-                            {
-                                System.Data.DataRow r = dt.NewRow();
-                                r.ItemArray = objarr;
-                                dt.Rows.InsertAt(r, 0);
-                            }
-                            else
-                            {
-
-                                dt.Rows.Add(objarr);
-                            }
-                        }
+                        int val = _dataConversionService.ParseValue(item.ToString(), m_viewtype);
+                        if (val > m_MaxValueInTable) m_MaxValueInTable = val;
+                        
+                        double realVal = _dataConversionService.ApplyCorrection(val, correction_factor, _isCompareViewer ? 0 : correction_offset);
+                        if (realVal > m_realMaxValue) m_realMaxValue = realVal;
+                        if (realVal < m_realMinValue) m_realMinValue = realVal;
                     }
                 }
 
@@ -1211,30 +993,21 @@ namespace VAGSuite
                     }
                 }
 
-
-                // set axis
-                // scale to 3 bar?
+                // set axis indicator width
                 int indicatorwidth = -1;
-                for (int i = 0; i < y_axisvalues.Length; i++)
+                using (Graphics g = gridControl1.CreateGraphics())
                 {
-                    string yval = Convert.ToInt32(y_axisvalues.GetValue(i)).ToString();
-                    if (m_viewtype == ViewType.Hexadecimal)
+                    for (int i = 0; i < y_axisvalues.Length; i++)
                     {
-                        yval = Convert.ToInt32(y_axisvalues.GetValue(i)).ToString("X4");
+                        string yval = _dataConversionService.FormatValue(Convert.ToInt32(y_axisvalues.GetValue(i)), m_viewtype, true);
+                        SizeF size = g.MeasureString(yval, this.Font);
+                        if (size.Width > indicatorwidth) indicatorwidth = (int)size.Width;
+                        m_textheight = (int)size.Height;
                     }
-                    if (m_y_axis_name == "MAP")
-                    {
-                    }
-                    Graphics g = gridControl1.CreateGraphics();
-                    SizeF size = g.MeasureString(yval, this.Font);
-                    if (size.Width > indicatorwidth) indicatorwidth = (int)size.Width;
-                    m_textheight = (int)size.Height;
-                    g.Dispose();
-
                 }
                 if (indicatorwidth > 0)
                 {
-                    gridView1.IndicatorWidth = indicatorwidth + 6; // keep margin
+                    gridView1.IndicatorWidth = indicatorwidth + 6;
                 }
 
                 int maxxval = 0;
@@ -1243,13 +1016,10 @@ namespace VAGSuite
                     int xval = Convert.ToInt32(x_axisvalues.GetValue(i));
                     if (xval > 0xF000)
                     {
-                        //xval ^= 0xFFFF;
                         xval = 0x10000 - xval;
                         xval = -xval;
                         x_axisvalues.SetValue(xval, i);
                     }
-
-
                     if (xval > maxxval) maxxval = xval;
                 }
                 if (maxxval <= 255) m_xformatstringforhex = "X2";
@@ -1407,15 +1177,7 @@ namespace VAGSuite
             {
                 if (e.CellValue == null || e.CellValue == DBNull.Value) return;
 
-                int cellValue = 0;
-                if (m_viewtype == ViewType.Hexadecimal)
-                {
-                    cellValue = Convert.ToInt32(e.CellValue.ToString(), 16);
-                }
-                else
-                {
-                    cellValue = Convert.ToInt32(ConvertToDouble(e.CellValue.ToString()));
-                }
+                int cellValue = _dataConversionService.ParseValue(e.CellValue.ToString(), m_viewtype);
 
                 // Use IMapRenderingService for color calculation
                 Color cellColor = _mapRenderingService.CalculateCellColor(
@@ -1487,8 +1249,10 @@ namespace VAGSuite
                 {
                     if (e.RowHandle == m_selectedrowhandle && e.Column.AbsoluteIndex == m_selectedcolumnindex)
                     {
-                        SolidBrush sbsb = new SolidBrush(Color.Yellow);
-                        e.Graphics.FillRectangle(sbsb, e.Bounds);
+                        using (SolidBrush sbsb = new SolidBrush(Color.Yellow))
+                        {
+                            e.Graphics.FillRectangle(sbsb, e.Bounds);
+                        }
                     }
                 }
             }
@@ -1498,33 +1262,6 @@ namespace VAGSuite
             }
         }
 
-        private int GetOpenLoopValue(int index)
-        {
-            index = (y_axisvalues.Length - 1) - index;
-            //int retval = (int)open_loop[(open_loop.Length - e.RowHandle) - 1];
-            int retval = 0;
-            retval = Convert.ToInt32(open_loop.GetValue(index * 2));
-            retval *= 256;
-            retval += Convert.ToInt32(open_loop.GetValue((index * 2) + 1));
-
-            return retval;
-        }
-
-        private int GetXaxisValue(int index)
-        {
-            int retval = 0;
-            retval = (int)x_axisvalues.GetValue(index);
-            return retval;
-        }
-
-        private int GetYaxisValue(int index)
-        {
-            int retval = 0;
-            retval = (int)y_axisvalues.GetValue(index );
-            /*retval *= 256;
-            retval += (int)y_axisvalues.GetValue((index * 2) + 1);*/
-            return retval;
-        }
 
         private void gridView1_RowUpdated(object sender, DevExpress.XtraGrid.Views.Base.RowObjectEventArgs e)
         {
@@ -1554,8 +1291,8 @@ namespace VAGSuite
 
         private byte[] GetDataFromGridView(bool upsidedown)
         {
-            // Use the refactored DataConversionService
             DataTable gdt = (DataTable)gridControl1.DataSource;
+            if (gdt == null) return m_map_content;
             MapViewerState state = CreateMapViewerState();
             return _dataConversionService.ConvertFromDataTable(gdt, state.Data, state.Configuration, upsidedown);
         }
@@ -1754,78 +1491,62 @@ namespace VAGSuite
 
         private void gridView1_KeyDown(object sender, KeyEventArgs e)
         {
-            // Logic moved to MapGridComponent.GridView1_KeyDown
-            // This handler is kept for backward compatibility if needed,
-            // but the component now handles its own grid events.
+            // Delegate to MapGridComponent for key handling (Add/Subtract/PageUp/PageDown/Home/End)
+            _mapGridComponent.GridView1_KeyDown(sender, e);
         }
 
         private void gridView1_CustomDrawRowIndicator(object sender, DevExpress.XtraGrid.Views.Grid.RowIndicatorCustomDrawEventArgs e)
         {
             if (e.RowHandle >= 0)
             {
-
-                //  e.Painter.DrawCaption(new DevExpress.Utils.Drawing.ObjectInfoArgs(new DevExpress.Utils.Drawing.GraphicsCache(e.Graphics)), "As waarde", this.Font, Brushes.MidnightBlue, e.Bounds, null);
-                // e.Cache.DrawString("As waarde", this.Font, Brushes.MidnightBlue, e.Bounds, new StringFormat());
                 try
                 {
-                    if (y_axisvalues.Length > 0)
+                    if (y_axisvalues != null && y_axisvalues.Length > e.RowHandle)
                     {
-                        if (y_axisvalues.Length > e.RowHandle)
+                        string yvalue;
+                        int index = m_isUpsideDown ? (y_axisvalues.Length - 1) - e.RowHandle : e.RowHandle;
+                        int rawY = Convert.ToInt32(y_axisvalues.GetValue(index));
+
+                        if (m_viewtype == ViewType.Hexadecimal)
                         {
-                            string yvalue = y_axisvalues.GetValue((y_axisvalues.Length - 1) - e.RowHandle).ToString();
-                            if (!m_isUpsideDown)
-                            {
-                                // dan andere waarde nemen
-                                yvalue = y_axisvalues.GetValue(e.RowHandle).ToString();
-                            }
-                            if (m_viewtype == ViewType.Hexadecimal)
-                            {
-                                yvalue = Convert.ToInt32(/*y_axisvalues.GetValue(e.RowHandle)*/y_axisvalues.GetValue((y_axisvalues.Length - 1) - e.RowHandle)).ToString("X4");
-                            }
-                            else
-                            {
-                                yvalue = ConvertYAxisValue(yvalue);
-                            }
-                            //yvalue = (ConvertToDouble(yvalue) * m_Yaxiscorrectionfactor).ToString();
-                            Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
-                            e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
-                            System.Drawing.Drawing2D.LinearGradientBrush gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal);
-                            e.Graphics.FillRectangle(gb, e.Bounds);
-                            e.Graphics.DrawString(yvalue, this.Font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 4, e.Bounds.Y + 1 + (e.Bounds.Height - m_textheight) / 2));
-                            e.Handled = true;
+                            yvalue = rawY.ToString("X4");
                         }
+                        else
+                        {
+                            yvalue = ConvertYAxisValue(rawY.ToString());
+                        }
+
+                        Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
+                        e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
+                        using (var gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
+                        {
+                            e.Graphics.FillRectangle(gb, e.Bounds);
+                        }
+                        e.Graphics.DrawString(yvalue, this.Font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 4, e.Bounds.Y + 1 + (e.Bounds.Height - m_textheight) / 2));
+                        e.Handled = true;
                     }
                 }
                 catch (Exception E)
                 {
-                    Console.WriteLine(E.Message);
+                    Console.WriteLine("gridView1_CustomDrawRowIndicator: " + E.Message);
                 }
             }
             else
             {
                 try
                 {
-                    //<GS-20120801>
-                    if (m_yaxisUnits.Length > 0 || m_xaxisUnits.Length > 0)
+                    if (!string.IsNullOrEmpty(m_yaxisUnits) || !string.IsNullOrEmpty(m_xaxisUnits))
                     {
-                        Font f = new Font(this.Font.FontFamily, 6);
-                        
-                        SizeF xsize = e.Graphics.MeasureString(m_xaxisUnits, f);
-                        SizeF ysize = e.Graphics.MeasureString(m_yaxisUnits, f);
-
-                        e.Graphics.DrawString(m_xaxisUnits, f, Brushes.Black, e.Bounds.X + e.Bounds.Width - xsize.Width - 1, e.Bounds.Y);
-
-                        e.Graphics.DrawString(m_yaxisUnits, f, Brushes.Black, e.Bounds.X + 1, e.Bounds.Y + e.Bounds.Height/2);
-                        
-                        //Console.WriteLine(e.RowHandle.ToString());
-                        //e.Graphics.FillRectangle(Brushes.Red, e.Bounds);
-                        e.Handled = true;
+                        using (Font f = new Font(this.Font.FontFamily, 6))
+                        {
+                            SizeF xsize = e.Graphics.MeasureString(m_xaxisUnits, f);
+                            e.Graphics.DrawString(m_xaxisUnits, f, Brushes.Black, e.Bounds.X + e.Bounds.Width - xsize.Width - 1, e.Bounds.Y);
+                            e.Graphics.DrawString(m_yaxisUnits, f, Brushes.Black, e.Bounds.X + 1, e.Bounds.Y + e.Bounds.Height / 2);
+                            e.Handled = true;
+                        }
                     }
                 }
-                catch (Exception)
-                {
-
-                }
+                catch { }
             }
         }
 
@@ -1873,37 +1594,33 @@ namespace VAGSuite
         {
             try
             {
-                if (x_axisvalues.Length > 0)
+                if (x_axisvalues != null && e.Column != null && x_axisvalues.Length > e.Column.VisibleIndex)
                 {
-                    if (e.Column != null)
+                    string xvalue;
+                    int rawX = Convert.ToInt32(x_axisvalues.GetValue(e.Column.VisibleIndex));
+                    if (m_viewtype == ViewType.Hexadecimal)
                     {
-                        if (x_axisvalues.Length > e.Column.VisibleIndex)
-                        {
-                            string xvalue = x_axisvalues.GetValue(e.Column.VisibleIndex).ToString();
-                            if (m_viewtype == ViewType.Hexadecimal)
-                            {
-                                xvalue = Convert.ToInt32(x_axisvalues.GetValue(e.Column.VisibleIndex)).ToString(m_xformatstringforhex);
-                            }
-                            else
-                            {
-                                xvalue = ConvertXAxisValue(xvalue);
-                            } 
-                            Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
-                            e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
-                            System.Drawing.Drawing2D.LinearGradientBrush gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal);
-                            e.Graphics.FillRectangle(gb, e.Bounds);
-                            //e.Graphics.DrawString(xvalue, this.Font, Brushes.MidnightBlue, r);
-                            e.Graphics.DrawString(xvalue, this.Font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 3, e.Bounds.Y + 1 + (e.Bounds.Height - m_textheight) / 2));
-                            e.Handled = true;
-                        }
+                        xvalue = rawX.ToString(m_xformatstringforhex);
                     }
+                    else
+                    {
+                        xvalue = ConvertXAxisValue(rawX.ToString());
+                    }
+
+                    Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
+                    e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
+                    using (var gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
+                    {
+                        e.Graphics.FillRectangle(gb, e.Bounds);
+                    }
+                    e.Graphics.DrawString(xvalue, this.Font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 3, e.Bounds.Y + 1 + (e.Bounds.Height - m_textheight) / 2));
+                    e.Handled = true;
                 }
             }
             catch (Exception E)
             {
-                Console.WriteLine(E.Message);
+                Console.WriteLine("gridView1_CustomDrawColumnHeader: " + E.Message);
             }
-
         }
 
 
@@ -1950,7 +1667,14 @@ namespace VAGSuite
                     if (_sp_dragging != null)
                     {
                         string yaxisvalue = _sp_dragging.Argument;
-                        int rowhandle = GetRowForAxisValue(yaxisvalue);
+                        int rowhandle = -1;
+                        for (int t = 0; t < y_axisvalues.Length; t++)
+                        {
+                            if (y_axisvalues.GetValue(t).ToString() == yaxisvalue)
+                            {
+                                rowhandle = (y_axisvalues.Length - 1) - t;
+                            }
+                        }
                         if (m_TableWidth == 1)
                         {
                             // single column graph.. 
@@ -2079,39 +1803,6 @@ namespace VAGSuite
             timer4.Enabled = false;
         }
 
-        private int GetRowForAxisValue(string axisvalue)
-        {
-            int retval = -1;
-            for (int t = 0; t < y_axisvalues.Length; t++)
-            {
-                if (y_axisvalues.GetValue(t).ToString() == axisvalue)
-                {
-                    retval = (y_axisvalues.Length - 1) - t;
-                }
-            }
-            return retval;
-        }
-
-        private void SetDataValueInMap(string yaxisvalue, double datavalue)
-        {
-            int rowhandle = GetRowForAxisValue(yaxisvalue);
-            if (m_TableWidth == 1)
-            {
-                // single column graph.. 
-                int numberofrows = m_map_length;
-                if (m_issixteenbit) numberofrows /= 2;
-                rowhandle = (numberofrows -1)- Convert.ToInt32(yaxisvalue);
-            }
-            if (rowhandle != -1)
-            {
-                double newvalue = (datavalue - correction_offset) * (1/correction_factor);
-                if (newvalue >= 0)
-                {
-                    gridView1.SetRowCellValue(rowhandle, gridView1.Columns[(int)trackBarControl1.Value], Math.Round(newvalue));
-                }
-            }
-            
-        }
 
         private void chartControl1_MouseMove(object sender, MouseEventArgs e)
         {
@@ -2259,16 +1950,7 @@ namespace VAGSuite
                     int colIndex = gc.Column.AbsoluteIndex;
                     int rowHandle = gc.RowHandle;
                     object o = gridView1.GetRowCellValue(gc.RowHandle, gc.Column);
-                    int value;
-                    
-                    if (m_viewtype == ViewType.Hexadecimal)
-                    {
-                        value = Convert.ToInt32(o.ToString(), 16);
-                    }
-                    else
-                    {
-                        value = Convert.ToInt32(o);
-                    }
+                    int value = _dataConversionService.ParseValue(o?.ToString() ?? "0", m_viewtype);
                     
                     cells[i * 3] = colIndex;
                     cells[i * 3 + 1] = rowHandle;
@@ -2280,7 +1962,7 @@ namespace VAGSuite
             }
             catch (Exception E)
             {
-                Console.WriteLine(E.Message);
+                Console.WriteLine("CopySelectionToClipboard: " + E.Message);
             }
         }
 
@@ -2330,7 +2012,8 @@ namespace VAGSuite
                     var pasteList = (System.Collections.Generic.List<PasteCellInfo>)targetCells[2];
                     foreach (var pasteInfo in pasteList)
                     {
-                        gridView1.SetRowCellValue(pasteInfo.Row, gridView1.Columns[pasteInfo.Column], pasteInfo.Value);
+                        int val = _dataConversionService.ParseValue(pasteInfo.Value.ToString(), m_viewtype);
+                        gridView1.SetRowCellValue(pasteInfo.Row, gridView1.Columns[pasteInfo.Column], _dataConversionService.FormatValue(val, m_viewtype, m_issixteenbit));
                     }
                 }
                 catch (Exception pasteE)
@@ -2354,7 +2037,8 @@ namespace VAGSuite
             var pasteList = (System.Collections.Generic.List<PasteCellInfo>)targetCells[2];
             foreach (var pasteInfo in pasteList)
             {
-                gridView1.SetRowCellValue(pasteInfo.Row, gridView1.Columns[pasteInfo.Column], pasteInfo.Value);
+                int val = _dataConversionService.ParseValue(pasteInfo.Value.ToString(), m_viewtype);
+                gridView1.SetRowCellValue(pasteInfo.Row, gridView1.Columns[pasteInfo.Column], _dataConversionService.FormatValue(val, m_viewtype, m_issixteenbit));
             }
         }
 
@@ -2383,337 +2067,56 @@ namespace VAGSuite
                 DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
                 if (cellcollection.Length > 0)
                 {
-                    switch (toolStripComboBox1.SelectedIndex)
+                    foreach (DevExpress.XtraGrid.Views.Base.GridCell cell in cellcollection)
                     {
-                        case 0: // addition
-                            foreach (DevExpress.XtraGrid.Views.Base.GridCell cell in cellcollection)
+                        try
+                        {
+                            object cellVal = gridView1.GetRowCellValue(cell.RowHandle, cell.Column);
+                            if (cellVal == null) continue;
+
+                            int rawValue = _dataConversionService.ParseValue(cellVal.ToString(), m_viewtype);
+                            double workingValue = rawValue;
+
+                            if (m_viewtype == ViewType.Easy)
                             {
-                                try
-                                {
-                                    int value = 0;
-                                    if (m_viewtype == ViewType.Hexadecimal)
-                                    {
-                                        value = Convert.ToInt32(gridView1.GetRowCellValue(cell.RowHandle, cell.Column).ToString(), 16);
-                                        value += (int)Math.Round(_workvalue);
-                                        if (m_issixteenbit)
-                                        {
-                                            if (value > 0xFFFF) value = 0xFFFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        else
-                                        {
-                                            if (value > 0xFF) value = 0xFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        if (value > 0xFF)
-                                        {
-                                            gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString("X4"));
-                                        }
-                                        else
-                                        {
-                                            gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString("X2"));
-                                        }
-                                    }
-                                    else if (m_viewtype == ViewType.Decimal)
-                                    {
-                                        value = Convert.ToInt32(gridView1.GetRowCellValue(cell.RowHandle, cell.Column));
-                                        value += (int)Math.Round(_workvalue);
-                                        if (m_issixteenbit)
-                                        {
-                                            if (value > 0xFFFF) value = 0xFFFF;
-                                            //if (value < 0) value = 0;
-                                        }
-                                        else
-                                        {
-                                            if (value > 0xFF) value = 0xFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString());
-                                    }
-                                    else if (m_viewtype == ViewType.Easy)
-                                    {
-                                        double dvalue = Convert.ToDouble(gridView1.GetRowCellValue(cell.RowHandle, cell.Column));
-                                        dvalue *= correction_factor;
-                                        dvalue += correction_offset;
-                                        dvalue += _workvalue;
-                                        dvalue -= correction_offset;
-                                        if (correction_factor != 0)
-                                        {
-                                            dvalue /= correction_factor;
-                                        }
-                                        value = (int)dvalue;
-
-                                        if (m_issixteenbit)
-                                        {
-                                            if (value > 0xFFFF) value = 0xFFFF;
-                                            //if (value < 0) value = 0;
-                                        }
-                                        else
-                                        {
-                                            if (value > 0xFF) value = 0xFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString());
-                                    }
-                                    
-                                }
-                                catch (Exception cE)
-                                {
-                                    Console.WriteLine(cE.Message);
-                                }
+                                workingValue = _dataConversionService.ApplyCorrection(rawValue, correction_factor, correction_offset);
                             }
-                            break;
-                        case 1: // multiply
-                            foreach (DevExpress.XtraGrid.Views.Base.GridCell cell in cellcollection)
+
+                            switch (toolStripComboBox1.SelectedIndex)
                             {
-                                try
-                                {
-                                    int value = 0;
-                                    if (m_viewtype == ViewType.Hexadecimal)
-                                    {
-                                        value = Convert.ToInt32(gridView1.GetRowCellValue(cell.RowHandle, cell.Column).ToString(), 16);
-                                        value *= (int)Math.Round(_workvalue);
-                                        if (m_issixteenbit)
-                                        {
-                                            if (value > 0xFFFF) value = 0xFFFF;
-                                            //if (value < 0) value = 0;
-                                        }
-                                        else
-                                        {
-                                            if (value > 0xFF) value = 0xFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        if (value > 0xFF)
-                                        {
-                                            gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString("X4"));
-                                        }
-                                        else
-                                        {
-                                            gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString("X2"));
-                                        }
-                                    }
-                                    else if (m_viewtype == ViewType.Decimal)
-                                    {
-                                        value = Convert.ToInt32(gridView1.GetRowCellValue(cell.RowHandle, cell.Column));
-                                        value *= (int)Math.Round(_workvalue);
-                                        if (m_issixteenbit)
-                                        {
-                                            if (value > 0xFFFF) value = 0xFFFF;
-                                            //if (value < 0) value = 0;
-                                        }
-                                        else
-                                        {
-                                            if (value > 0xFF) value = 0xFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString());
-                                    }
-                                    
-                                    else if (m_viewtype == ViewType.Easy)
-                                    {
-                                        double dvalue = Convert.ToDouble(gridView1.GetRowCellValue(cell.RowHandle, cell.Column));
-                                        dvalue *= correction_factor;
-                                        dvalue += correction_offset;
-                                        dvalue *= _workvalue;
-                                        dvalue -= correction_offset;
-                                        if (correction_factor != 0)
-                                        {
-                                            dvalue /= correction_factor;
-                                        }
-                                        value = (int)dvalue;
-
-                                        if (m_issixteenbit)
-                                        {
-                                            if (value > 0xFFFF) value = 0xFFFF;
-                                            //if (value < 0) value = 0;
-                                        }
-                                        else
-                                        {
-                                            if (value > 0xFF) value = 0xFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString());
-                                    }
-                                    
-                                }
-                                catch (Exception cE)
-                                {
-                                    Console.WriteLine(cE.Message);
-                                }
-
+                                case 0: workingValue += _workvalue; break;
+                                case 1: workingValue *= _workvalue; break;
+                                case 2: if (_workvalue != 0) workingValue /= _workvalue; break;
+                                case 3: workingValue = _workvalue; break;
                             }
-                            break;
-                        case 2: // divide
-                            foreach (DevExpress.XtraGrid.Views.Base.GridCell cell in cellcollection)
+
+                            int finalRawValue;
+                            if (m_viewtype == ViewType.Easy)
                             {
-                                if (_workvalue == 0) _workvalue = 1;
-                                try
-                                {
-                                    int value = 0;
-                                    if (m_viewtype == ViewType.Hexadecimal)
-                                    {
-                                        value = Convert.ToInt32(gridView1.GetRowCellValue(cell.RowHandle, cell.Column).ToString(), 16);
-                                        if (_workvalue != 0)
-                                        {
-                                            value /= (int)Math.Round(_workvalue);
-                                        }
-                                        if (m_issixteenbit)
-                                        {
-                                            if (value > 0xFFFF) value = 0xFFFF;
-                                            //if (value < 0) value = 0;
-                                        }
-                                        else
-                                        {
-                                            if (value > 0xFF) value = 0xFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        if (value > 0xFF)
-                                        {
-                                            gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString("X4"));
-                                        }
-                                        else
-                                        {
-                                            gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString("X2"));
-                                        }
-                                    }
-                                    else if (m_viewtype == ViewType.Decimal)
-                                    {
-                                        value = Convert.ToInt32(gridView1.GetRowCellValue(cell.RowHandle, cell.Column));
-                                        if (_workvalue != 0)
-                                        {
-                                            value /= (int)Math.Round(_workvalue);
-                                        }
-                                        if (m_issixteenbit)
-                                        {
-                                            if (value > 0xFFFF) value = 0xFFFF;
-                                            //if (value < 0) value = 0;
-                                        }
-                                        else
-                                        {
-                                            if (value > 0xFF) value = 0xFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString());
-                                    }
-                                    
-                                    else if (m_viewtype == ViewType.Easy)
-                                    {
-                                        double dvalue = Convert.ToDouble(gridView1.GetRowCellValue(cell.RowHandle, cell.Column));
-                                        dvalue *= correction_factor;
-                                        dvalue += correction_offset;
-                                        if (_workvalue != 0)
-                                        {
-                                            dvalue /= _workvalue;
-                                        }
-                                        dvalue -= correction_offset;
-                                        if (correction_factor != 0)
-                                        {
-                                            dvalue /= correction_factor;
-                                        }
-                                        value = (int)dvalue;
-
-                                        if (m_issixteenbit)
-                                        {
-                                            if (value > 0xFFFF) value = 0xFFFF;
-                                           // if (value < 0) value = 0;
-                                        }
-                                        else
-                                        {
-                                            if (value > 0xFF) value = 0xFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        gridView1.SetRowCellValue(cell.RowHandle, cell.Column, value.ToString());
-                                    }
-                                    
-                                }
-                                catch (Exception cE)
-                                {
-                                    Console.WriteLine(cE.Message);
-                                }
+                                finalRawValue = (int)Math.Round((workingValue - correction_offset) / (correction_factor != 0 ? correction_factor : 1));
                             }
-                            break;
-                        case 3: // fill
-                            foreach (DevExpress.XtraGrid.Views.Base.GridCell cell in cellcollection)
+                            else
                             {
-                                try
-                                {
-                                    double value = _workvalue;
-                                    if (m_viewtype == ViewType.Hexadecimal)
-                                    {
-                                        if (m_issixteenbit)
-                                        {
-                                            if (value > 0xFFFF) value = 0xFFFF;
-                                           // if (value < 0) value = 0;
-                                        }
-                                        else
-                                        {
-                                            if (value > 0xFF) value = 0xFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        int dvalue = (int)value;
-                                        if (value > 0xFF)
-                                        {
-                                            gridView1.SetRowCellValue(cell.RowHandle, cell.Column, dvalue.ToString("X4"));
-                                        }
-                                        else
-                                        {
-                                            gridView1.SetRowCellValue(cell.RowHandle, cell.Column, dvalue.ToString("X2"));
-                                        }
-                                    }
-                                    else if (m_viewtype == ViewType.Decimal)
-                                    {
-                                        if (m_issixteenbit)
-                                        {
-                                            if (value > 0xFFFF) value = 0xFFFF;
-                                            //if (value < 0) value = 0;
-                                        }
-                                        else
-                                        {
-                                            if (value > 0xFF) value = 0xFF;
-                                            if (value < 0) value = 0;
-                                        }
-                                        int dvalue = (int)value;
-                                        gridView1.SetRowCellValue(cell.RowHandle, cell.Column, dvalue.ToString());
-                                    }
-                                    
-                                    else if (m_viewtype == ViewType.Easy)
-                                    {
-                                        double dvalue = _workvalue;
-                                        dvalue -= correction_offset;
-                                        if (correction_factor != 0)
-                                        {
-                                            dvalue /= correction_factor;
-                                        }
-                                        int decvalue = (int)dvalue;
-                                        if (m_issixteenbit)
-                                        {
-                                            if (decvalue > 0xFFFF) decvalue = 0xFFFF;
-                                          //  if (decvalue < 0) decvalue = 0;
-                                        }
-                                        else
-                                        {
-                                            if (decvalue > 0xFF) decvalue = 0xFF;
-                                            if (decvalue < 0) decvalue = 0;
-                                        }
-                                        gridView1.SetRowCellValue(cell.RowHandle, cell.Column, decvalue.ToString());
-                                    }
-                                    
-
-                                }
-                                catch (Exception cE)
-                                {
-                                    Console.WriteLine(cE.Message);
-                                }
+                                finalRawValue = (int)Math.Round(workingValue);
                             }
-                            break;
-                        default:
-                            break;
+
+                            // Clamp
+                            int max = m_issixteenbit ? 0xFFFF : 0xFF;
+                            if (finalRawValue > max) finalRawValue = max;
+                            if (finalRawValue < 0) finalRawValue = 0;
+
+                            gridView1.SetRowCellValue(cell.RowHandle, cell.Column, _dataConversionService.FormatValue(finalRawValue, m_viewtype, m_issixteenbit));
+                        }
+                        catch (Exception cE)
+                        {
+                            Console.WriteLine("toolStripButton3_Click cell: " + cE.Message);
+                        }
                     }
                 }
             }
             catch (Exception E)
             {
-                Console.WriteLine(E.Message);
+                Console.WriteLine("toolStripButton3_Click: " + E.Message);
             }
         }
 
@@ -2891,7 +2294,14 @@ namespace VAGSuite
             if (_sp_dragging != null)
             {
                 string yaxisvalue = _sp_dragging.Argument;
-                int rowhandle = GetRowForAxisValue(yaxisvalue);
+                int rowhandle = -1;
+                for (int t = 0; t < y_axisvalues.Length; t++)
+                {
+                    if (y_axisvalues.GetValue(t).ToString() == yaxisvalue)
+                    {
+                        rowhandle = (y_axisvalues.Length - 1) - t;
+                    }
+                }
                 if (m_TableWidth == 1)
                 {
                     // single column graph.. 
@@ -3051,11 +2461,11 @@ namespace VAGSuite
                             {
                                 Console.WriteLine(gridView1.ActiveEditor.IsModified.ToString());
                                 dvalue = Convert.ToDouble(gridView1.ActiveEditor.EditValue);
-                                value = Convert.ToInt32((dvalue - correction_offset) / correction_factor);
+                                value = (int)Math.Round((dvalue - correction_offset) / (correction_factor != 0 ? correction_factor : 1));
                             }
                             else
                             {
-                                value = Convert.ToInt32(Convert.ToString(e.Value));
+                                value = (int)Math.Round(Convert.ToDouble(e.Value));
                             }
                         }
                         else
@@ -3110,11 +2520,11 @@ namespace VAGSuite
                             {
                                 Console.WriteLine(gridView1.ActiveEditor.IsModified.ToString());
                                 dvalue = Convert.ToDouble(gridView1.ActiveEditor.EditValue);
-                                value = Convert.ToInt32((dvalue - correction_offset) / correction_factor);
+                                value = (int)Math.Round((dvalue - correction_offset) / (correction_factor != 0 ? correction_factor : 1));
                             }
                             else
                             {
-                                value = Convert.ToInt32(Convert.ToString(e.Value));
+                                value = (int)Math.Round(Convert.ToDouble(e.Value));
                             }
                         }
                         else
@@ -3322,118 +2732,16 @@ namespace VAGSuite
             DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
             if (cellcollection.Length > 2)
             {
-                // get boundaries for this selection
-                // we need 4 corners 
-                int max_column = 0;
-                int min_column = 0xFFFF;
-                int max_row = 0;
-                int min_row = 0xFFFF;
-                foreach (DevExpress.XtraGrid.Views.Base.GridCell cell in cellcollection)
+                object[] cells = new object[cellcollection.Length];
+                for (int i = 0; i < cellcollection.Length; i++)
                 {
-                    if (cell.Column.AbsoluteIndex > max_column) max_column = cell.Column.AbsoluteIndex;
-                    if (cell.Column.AbsoluteIndex < min_column) min_column = cell.Column.AbsoluteIndex;
-                    if (cell.RowHandle > max_row) max_row = cell.RowHandle;
-                    if (cell.RowHandle < min_row) min_row = cell.RowHandle;
+                    cells[i] = cellcollection[i];
                 }
-                if (max_column == min_column)
-                {
-                    // one column selected only
-                    int top_value = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[max_column]));
-                    int bottom_value = Convert.ToInt32(gridView1.GetRowCellValue(min_row, gridView1.Columns[max_column]));
-                    double diffvalue = (top_value - bottom_value);
-                    double[] yaxisvalues = new double[cellcollection.Length];
-                    for (int q = 0; q < cellcollection.Length; q++)
-                    {
-                        yaxisvalues[q] = Convert.ToDouble(y_axisvalues.GetValue(y_axisvalues.Length-min_row-q-1));
-                        //Console.WriteLine(q + "-th value of Y-axis is: " + yaxisvalues[q] + " max_row is (" + max_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(max_row)) + " min_row is (" + min_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(min_row)) + "Length : " + y_axisvalues.Length);
-                    }
-                    double yaxisdiff = yaxisvalues[0] - yaxisvalues[cellcollection.Length - 1];
-                    //Console.WriteLine("Y Axis diff is: " + yaxisdiff);
-
-                    for (int t = 1; t < cellcollection.Length - 1; t++)
-                    {
-                        double newvalue = bottom_value + (diffvalue * ((yaxisvalues[0] - yaxisvalues[t])/yaxisdiff));
-                        newvalue = Math.Round(newvalue, 0);
-                        gridView1.SetRowCellValue(min_row + t, gridView1.Columns[max_column], newvalue);
-                    }
-
-                }
-                else if (max_row == min_row)
-                {
-                    // one row selected only
-                    int top_value = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[max_column]));
-                    int bottom_value = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[min_column]));
-                    double diffvalue = (top_value - bottom_value);
-                    double[] xaxisvalues = new double[cellcollection.Length];
-                    for (int q = 0; q < cellcollection.Length; q++)
-                    {
-                        xaxisvalues[q] = Convert.ToDouble(x_axisvalues.GetValue(x_axisvalues.Length - min_column - q - 1));
-                        //Console.WriteLine(q + "-th value of Y-axis is: " + yaxisvalues[q] + " max_row is (" + max_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(max_row)) + " min_row is (" + min_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(min_row)) + "Length : " + y_axisvalues.Length);
-                    }
-                    double xaxisdiff = xaxisvalues[0] - xaxisvalues[cellcollection.Length - 1];
-                    //Console.WriteLine("Y Axis diff is: " + yaxisdiff);
-                    for (int t = 1; t < cellcollection.Length - 1; t++)
-                    {
-                        double newvalue = bottom_value + (diffvalue * ((xaxisvalues[0] - xaxisvalues[t]) / xaxisdiff));
-                        newvalue = Math.Round(newvalue, 0);
-                        gridView1.SetRowCellValue(min_row, gridView1.Columns[min_column + t], newvalue);
-                    }
-                }
-                else
-                {
-                    // block selected
-                    // interpolation on 4 points!!!
-                    int top_leftvalue = Convert.ToInt32(gridView1.GetRowCellValue(min_row, gridView1.Columns[min_column]));
-                    int top_rightvalue = Convert.ToInt32(gridView1.GetRowCellValue(min_row, gridView1.Columns[max_column]));
-                    int bottom_leftvalue = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[min_column]));
-                    int bottom_rightvalue = Convert.ToInt32(gridView1.GetRowCellValue(max_row, gridView1.Columns[max_column]));
-                    double[] xaxisvalues = new double[max_column - min_column + 1];
-                    double[] yaxisvalues = new double[max_row - min_row + 1];
-
-                    for (int q = 0; q <= (max_column - min_column); q++)
-                    {
-                        xaxisvalues[q] = Convert.ToDouble(x_axisvalues.GetValue(x_axisvalues.Length - min_column - q - 1));
-                        //Console.WriteLine(q + "-th value of X-axis is: " + xaxisvalues[q] + " max_column is (" + max_column + ") " + Convert.ToInt32(y_axisvalues.GetValue(max_column)) + " min_column is (" + min_column + ") " + Convert.ToInt32(y_axisvalues.GetValue(min_column)) + "Length : " + y_axisvalues.Length);
-                    }
-                    for (int q = 0; q <= (max_row - min_row); q++)
-                    {
-                        yaxisvalues[q] = Convert.ToDouble(y_axisvalues.GetValue(y_axisvalues.Length - min_row - q - 1));
-                        //Console.WriteLine(q + "-th value of Y-axis is: " + yaxisvalues[q] + " max_row is (" + max_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(max_row)) + " min_row is (" + min_row + ") " + Convert.ToInt32(y_axisvalues.GetValue(min_row)) + "Length : " + y_axisvalues.Length);
-                    }
-                    double xaxisdiff = xaxisvalues[0] - xaxisvalues[max_column - min_column];
-                    double yaxisdiff = yaxisvalues[0] - yaxisvalues[max_row - min_row];
-                    int xvaluediff = ((top_rightvalue - top_leftvalue) + (bottom_rightvalue - bottom_leftvalue)) / 2;
-                    int yvaluediff = ((top_leftvalue - bottom_leftvalue) + (top_rightvalue - bottom_rightvalue)) / 2;
-                    //Console.WriteLine("X/Y Axis diffs are: " + xaxisdiff + " / " + yaxisdiff);
-                    //Console.WriteLine("X/Y Value diffs are: " + xvaluediff + " / " + yvaluediff);
-
-                    for (int tely = 0; tely <= max_row - min_row; tely++)
-                    {
-                        for (int telx = 0; telx <= max_column - min_column; telx++)
-                        {
-                            // get values 
-                            Console.WriteLine("max_col/min_col/telx - max_row/min_row/tely: " + max_column + "/" + min_column + "/" + telx + " - " + max_row + "/" + min_row + "/" + tely);
-                            double xportion = (xaxisvalues[max_column - min_column - telx] - xaxisvalues[max_column - min_column]) / xaxisdiff;
-                            double yportion = (yaxisvalues[tely] - yaxisvalues[max_row - min_row]) / yaxisdiff;
-
-                            
-                            float newvalue = (float)(bottom_leftvalue + ((xvaluediff * xportion)+(yvaluediff * yportion)));
-
-                            gridView1.SetRowCellValue(min_row + tely, gridView1.Columns[min_column + telx], newvalue.ToString("F0"));
-
-                            m_map_content = GetDataFromGridView(m_isUpsideDown);
-
-
-
-                            //double diffvaluex = (top_rightvalue - top_leftvalue) / (max_column - min_column - 1);
-                            //double diffvaluey = (top_rightvalue - top_leftvalue) / (max_column - min_column - 1);
-                        }
-                    }
-
-                }
-                //                simpleButton3.Enabled = false;
+                _smoothingService.SmoothInterpolated(cells, gridView1, x_axisvalues, y_axisvalues);
+                m_datasourceMutated = true;
+                simpleButton2.Enabled = true;
+                simpleButton3.Enabled = true;
             }
-
         }
 
         private void simpleButton9_Click(object sender, EventArgs e)
@@ -3496,23 +2804,21 @@ namespace VAGSuite
                     try
                     {
                         object ov = gridView1.GetRowCellValue(rh, gridView1.Columns[ch]);
+                        if (ov == null) continue;
 
-
-                        double val = Convert.ToDouble(ov);
-                        val *= correction_factor;
-                        val += correction_offset;
+                        int rawVal = _dataConversionService.ParseValue(ov.ToString(), m_viewtype);
+                        double val = _dataConversionService.ApplyCorrection(rawVal, correction_factor, correction_offset);
+                        
                         double diff = Math.Abs(val - value);
                         if (diff < 0.009)
                         {
                             gridView1.SelectCell(rh, gridView1.Columns[ch]);
                         }
-
                     }
                     catch (Exception E)
                     {
                         Console.WriteLine("Failed to select cell: " + E.Message);
                     }
-
                 }
             }
         }
