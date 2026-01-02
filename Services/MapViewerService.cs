@@ -115,7 +115,14 @@ namespace VAGSuite.Services
                         if (width < 500) width = 500;
                         if (width > 800) width = 800;
                         dockPanel.Width = width;
-                        dockPanel.Controls.Add(tabdet);
+                        // Verified: DevExpress DockPanel requires adding to ControlContainer
+                        if (dockPanel.ControlContainer != null)
+                        {
+                            dockPanel.ControlContainer.Controls.Add(tabdet);
+                            dockPanel.Visibility = DevExpress.XtraBars.Docking.DockVisibility.Visible;
+                            tabdet.Visible = true;
+                            tabdet.BringToFront();
+                        }
                     }
                     else
                     {
@@ -234,7 +241,8 @@ namespace VAGSuite.Services
                                 if (width > 800) width = 800;
                                 dockPanel.Width = width;
                             }
-                            dockPanel.Controls.Add(tabdet);
+                            // Verified: DevExpress DockPanel requires adding to ControlContainer
+                            dockPanel.ControlContainer.Controls.Add(tabdet);
                         }
                     }
                     catch (Exception E)
@@ -350,7 +358,8 @@ namespace VAGSuite.Services
                                 }
                             }
                             if (dockPanel.Width < 400) dockPanel.Width = 400;
-                            dockPanel.Controls.Add(tabdet);
+                            // Verified: DevExpress DockPanel requires adding to ControlContainer
+                            dockPanel.ControlContainer.Controls.Add(tabdet);
                         }
                         else
                         {

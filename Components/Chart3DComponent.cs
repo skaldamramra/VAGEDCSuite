@@ -1,18 +1,17 @@
 using System;
-using Nevron.Chart.WinForm;
 using VAGSuite.MapViewerEventArgs;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using Nevron.Chart;
-using Nevron.GraphicsCore;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
 using VAGSuite.Models;
 using VAGSuite.Services;
 
 namespace VAGSuite.Components
 {
     /// <summary>
-    /// Encapsulates the 3D surface chart for map visualization.
+    /// Encapsulates the 3D surface chart for map visualization using OpenTK.
     /// </summary>
     public class Chart3DComponent : System.Windows.Forms.UserControl
     {
@@ -21,11 +20,24 @@ namespace VAGSuite.Components
         private readonly IChartService _chartService;
         
         // Reference to the external chart control (provided by MapViewerEx designer)
-        private Nevron.Chart.WinForm.NChartControl _externalChartControl;
+        private OpenTK.GLControl _glControl;
         
+        // Modern OpenGL Fields
+        private int _vbo;
+        private int _cbo;
+        private int _ebo;
+        private int _shaderProgram;
+        private int _vertexCount;
+        private bool _buffersInitialized;
+        private bool _firstPaint = true;
+
         // State references
         private int _tableWidth;
         private bool _isSixteenBit;
+        private bool _isLoaded = false;
+        private float _rotation = -45f;
+        private float _elevation = 45f;
+        private float _zoom = 1.5f;
         private ViewType _viewType;
         private string _mapName;
         private string _xAxisName;
@@ -42,6 +54,7 @@ namespace VAGSuite.Components
         private bool _onlineMode;
         private bool _overlayVisible;
         private bool _isUpsideDown;
+        private Point _lastMousePos;
 
         #endregion
 
@@ -65,12 +78,344 @@ namespace VAGSuite.Components
         }
 
         /// <summary>
-        /// Sets the external NChartControl to use instead of creating a new one.
-        /// This allows the component to share the designer's chart control.
+        /// Sets the external GLControl to use instead of creating a new one.
         /// </summary>
-        public void SetChartControl(Nevron.Chart.WinForm.NChartControl externalChart)
+        public void SetChartControl(OpenTK.GLControl externalChart)
         {
-            _externalChartControl = externalChart;
+            Console.WriteLine("Chart3DComponent: SetChartControl called");
+            _glControl = externalChart;
+            if (_glControl != null)
+            {
+                _glControl.Load += OnGLLoad;
+                _glControl.Paint += OnGLPaint;
+                _glControl.Resize += OnGLResize;
+                _glControl.MouseDown += OnGLMouseDown;
+                _glControl.MouseMove += OnGLMouseMove;
+                _glControl.MouseWheel += OnGLMouseWheel;
+                _glControl.Dock = DockStyle.Fill;
+
+                // If the control is already loaded or handle created, initialize now
+                // Verified: OpenTK GLControl requires a handle to call MakeCurrent
+                if (_glControl.IsHandleCreated)
+                {
+                    Console.WriteLine("Chart3DComponent: Handle already created, initializing...");
+                    _isLoaded = true;
+                    InitializeChart3D();
+                    UpdateBuffers(); // Ensure buffers are filled if data was already loaded
+                }
+            }
+        }
+
+        private void OnGLLoad(object sender, EventArgs e)
+        {
+            Console.WriteLine("Chart3DComponent: OnGLLoad fired");
+            if (!_isLoaded)
+            {
+                _isLoaded = true;
+                InitializeChart3D();
+                UpdateBuffers(); // Ensure buffers are filled on first load
+            }
+        }
+
+        private void OnGLPaint(object sender, PaintEventArgs e)
+        {
+            if (_glControl == null) return;
+            if (_mapContent == null)
+            {
+                return;
+            }
+            
+            // Log first paint
+            if (_firstPaint) {
+                Console.WriteLine($"Chart3DComponent: First Paint - BuffersInit: {_buffersInitialized}, VertexCount: {_vertexCount}, Shader: {_shaderProgram}");
+                _firstPaint = false;
+            }
+            
+            if (!_isLoaded) return;
+
+            try
+            {
+                _glControl.MakeCurrent();
+                CheckGLError("MakeCurrent");
+
+                GL.ClearColor(Color.FromArgb(50, 50, 50));
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                CheckGLError("Clear");
+            
+                SetupViewport();
+            
+                // Draw Axes for orientation
+                DrawAxes();
+
+                if (_buffersInitialized && _vertexCount > 0 && _shaderProgram > 0)
+                {
+                    GL.UseProgram(_shaderProgram);
+
+                    // Set Uniforms
+                    int modelViewLoc = GL.GetUniformLocation(_shaderProgram, "uModelView");
+                    int projectionLoc = GL.GetUniformLocation(_shaderProgram, "uProjection");
+                    int posLoc = GL.GetAttribLocation(_shaderProgram, "aPosition");
+                    int colLoc = GL.GetAttribLocation(_shaderProgram, "aColor");
+                    
+                    Matrix4 projection;
+                    Matrix4 modelView;
+                    GetMatrices(out projection, out modelView);
+
+                    GL.UniformMatrix4(modelViewLoc, false, ref modelView);
+                    GL.UniformMatrix4(projectionLoc, false, ref projection);
+
+                    // Bind VBO
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
+                    GL.EnableVertexAttribArray(posLoc);
+                    GL.VertexAttribPointer(posLoc, 3, VertexAttribPointerType.Float, false, 0, 0);
+
+                    // Bind CBO
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, _cbo);
+                    GL.EnableVertexAttribArray(colLoc);
+                    GL.VertexAttribPointer(colLoc, 4, VertexAttribPointerType.Float, false, 0, 0);
+
+                    // Draw
+                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
+                    GL.DrawElements(PrimitiveType.Triangles, _vertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
+
+                    GL.DisableVertexAttribArray(posLoc);
+                    GL.DisableVertexAttribArray(colLoc);
+                    GL.UseProgram(0);
+                }
+            
+                _glControl.SwapBuffers();
+                // Console.WriteLine("Chart3DComponent: SwapBuffers completed");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Chart3DComponent: Paint error: " + ex.Message);
+            }
+        }
+
+        private void CheckGLError(string location)
+        {
+            ErrorCode err = GL.GetError();
+            if (err != ErrorCode.NoError)
+            {
+                Console.WriteLine($"OpenGL Error at {location}: {err}");
+            }
+        }
+
+        private void OnGLResize(object sender, EventArgs e)
+        {
+            if (_glControl == null) return;
+            _glControl.MakeCurrent();
+            GL.Viewport(0, 0, _glControl.Width, _glControl.Height);
+            SetupViewport();
+        }
+
+        private void SetupViewport()
+        {
+            Matrix4 projection;
+            Matrix4 modelview;
+            GetMatrices(out projection, out modelview);
+
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref projection);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadMatrix(ref modelview);
+        }
+
+        private void GetMatrices(out Matrix4 projection, out Matrix4 modelview)
+        {
+            float aspectRatio = (float)_glControl.Width / Math.Max(1, _glControl.Height);
+            projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), aspectRatio, 0.1f, 1000f);
+
+            // Camera distance - normalized to the 10x10x10 volume we scale into
+            float distance = 20f / _zoom;
+            
+            // Look at the center of our 10x10x10 coordinate system
+            Vector3 target = new Vector3(0, 2, 0);
+            Vector3 eye = new Vector3(distance, distance, distance);
+            
+            modelview = Matrix4.LookAt(eye, target, Vector3.UnitY);
+            modelview *= Matrix4.CreateRotationX(MathHelper.DegreesToRadians(_elevation));
+            modelview *= Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotation));
+        }
+
+        private void DrawAxes()
+        {
+            GL.Disable(EnableCap.Lighting); // Axes shouldn't be lit
+            GL.Begin(PrimitiveType.Lines);
+            
+            // X - Red
+            GL.Color3(Color.Red);
+            GL.Vertex3(0, 0, 0);
+            GL.Vertex3(10, 0, 0);
+            
+            // Y - Green (Up)
+            GL.Color3(Color.Green);
+            GL.Vertex3(0, 0, 0);
+            GL.Vertex3(0, 10, 0);
+            
+            // Z - Blue
+            GL.Color3(Color.Blue);
+            GL.Vertex3(0, 0, 0);
+            GL.Vertex3(0, 0, 10);
+            
+            GL.End();
+            GL.Enable(EnableCap.Lighting);
+        }
+
+        private void UpdateBuffers()
+        {
+            if (_mapContent == null) { Console.WriteLine("Chart3DComponent: UpdateBuffers aborted - _mapContent is null"); return; }
+            if (_tableWidth <= 0) { Console.WriteLine("Chart3DComponent: UpdateBuffers aborted - _tableWidth <= 0"); return; }
+            if (_glControl == null) { Console.WriteLine("Chart3DComponent: UpdateBuffers aborted - _glControl is null"); return; }
+            if (!_glControl.IsHandleCreated) { Console.WriteLine("Chart3DComponent: UpdateBuffers aborted - Handle not created"); return; }
+
+            try
+            {
+                _glControl.MakeCurrent();
+
+            int rows = _mapContent.Length / (_isSixteenBit ? 2 : 1) / _tableWidth;
+            int cols = _tableWidth;
+            
+            // Find min/max for auto-scaling
+            float minZ = float.MaxValue;
+            float maxZ = float.MinValue;
+            float[] values = new float[rows * cols];
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    float val = GetZValue(_mapContent, r, c);
+                    values[r * cols + c] = val;
+                    if (val < minZ) minZ = val;
+                    if (val > maxZ) maxZ = val;
+                }
+            }
+
+            float range = Math.Max(1, maxZ - minZ);
+            float scaleX = 15.0f / Math.Max(1, cols);
+            float scaleZ = 15.0f / Math.Max(1, rows);
+            float scaleY = 8.0f / range; // Auto-scale height to fit 8 units
+
+            int totalVertices = rows * cols;
+            Vector3[] vertices = new Vector3[totalVertices];
+            Vector4[] colors = new Vector4[totalVertices];
+
+            for (int i = 0; i < totalVertices; i++)
+            {
+                int r = i / cols;
+                int c = i % cols;
+                float val = values[i];
+                
+                float xPos = (c - (cols - 1) / 2.0f) * scaleX;
+                float zPos = (r - (rows - 1) / 2.0f) * scaleZ;
+                
+                // Standard height calculation: High value = High peak
+                float yPos = (val - minZ) * scaleY;
+                
+                // Only flip if explicitly requested AND it's not a standard map
+                // Based on your feedback, Driver Wish (standard) was being flipped incorrectly
+                if (_isUpsideDown)
+                {
+                    yPos = (maxZ - minZ) * scaleY - yPos;
+                }
+                
+                vertices[i] = new Vector3(xPos, yPos, zPos);
+                // Color should follow the visual height (Red = High, Blue = Low)
+                colors[i] = GetColorForZ(val, minZ, maxZ, _isUpsideDown);
+            }
+
+            int totalIndices = (rows - 1) * (cols - 1) * 6;
+            uint[] indices = new uint[totalIndices];
+            int iIdx = 0;
+            for (int r = 0; r < rows - 1; r++)
+            {
+                for (int c = 0; c < cols - 1; c++)
+                {
+                    uint topLeft = (uint)(r * cols + c);
+                    uint bottomLeft = (uint)((r + 1) * cols + c);
+                    uint topRight = (uint)(r * cols + (c + 1));
+                    uint bottomRight = (uint)((r + 1) * cols + (c + 1));
+
+                    indices[iIdx++] = topLeft;
+                    indices[iIdx++] = bottomLeft;
+                    indices[iIdx++] = topRight;
+
+                    indices[iIdx++] = bottomLeft;
+                    indices[iIdx++] = bottomRight;
+                    indices[iIdx++] = topRight;
+                }
+            }
+
+            _vertexCount = totalIndices;
+            Console.WriteLine($"Chart3DComponent: Buffers Calculated - Vertices: {vertices.Length}, Indices: {indices.Length}");
+
+            if (!_buffersInitialized)
+            {
+                GL.GenBuffers(1, out _vbo);
+                GL.GenBuffers(1, out _cbo);
+                GL.GenBuffers(1, out _ebo);
+                _buffersInitialized = true;
+            }
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * Vector3.SizeInBytes, vertices, BufferUsageHint.StaticDraw);
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _cbo);
+            GL.BufferData(BufferTarget.ArrayBuffer, colors.Length * Vector4.SizeInBytes, colors, BufferUsageHint.StaticDraw);
+
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
+                GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Chart3DComponent: UpdateBuffers failed: " + ex.Message);
+            }
+        }
+
+        private float GetZValue(byte[] content, int r, int c)
+        {
+            int index = (r * _tableWidth + c) * (_isSixteenBit ? 2 : 1);
+            if (index + (_isSixteenBit ? 1 : 0) >= content.Length) return 0;
+
+            if (_isSixteenBit)
+            {
+                // VAG EDC maps are Big-Endian (Motorola)
+                // Explicitly assemble the 16-bit value from two bytes
+                int high = (int)content[index] << 8;
+                int low = (int)content[index + 1];
+                return (float)(high | low);
+            }
+            else
+            {
+                return (float)content[index];
+            }
+        }
+
+        private Vector4 GetColorForZ(float z, float min, float max, bool inverted)
+        {
+            float range = max - min;
+            if (range <= 0) range = 1;
+            float normalized = (z - min) / range;
+            
+            // The heatmap should always represent the visual height
+            // If the mesh is inverted, the color mapping must also invert to keep Red at the peaks
+            if (inverted) normalized = 1.0f - normalized;
+
+            // Heatmap: Blue (0.0) -> Green (0.5) -> Red (1.0)
+            float r = 0, g = 0, b = 0;
+            if (normalized < 0.5f)
+            {
+                float t = normalized * 2.0f; // 0 to 1
+                b = 1.0f - t;
+                g = t;
+            }
+            else
+            {
+                float t = (normalized - 0.5f) * 2.0f; // 0 to 1
+                g = 1.0f - t;
+                r = t;
+            }
+            return new Vector4(r, g, b, 1.0f);
         }
 
         #endregion
@@ -82,6 +427,7 @@ namespace VAGSuite.Components
         /// </summary>
         public void LoadData(MapViewerState state)
         {
+            Console.WriteLine($"Chart3DComponent: LoadData called for map: {state.Metadata.Name}");
             _tableWidth = state.Data.TableWidth;
             _isSixteenBit = state.Data.IsSixteenBit;
             _viewType = state.Configuration.ViewType;
@@ -100,8 +446,10 @@ namespace VAGSuite.Components
             _onlineMode = state.IsOnlineMode;
             _overlayVisible = true;
             _isUpsideDown = state.Configuration.IsUpsideDown; // Load IsUpsideDown from state
+            Console.WriteLine($"Chart3DComponent: LoadData - Map: {state.Metadata.Name}, UpsideDown: {_isUpsideDown}");
 
             ConfigureChart();
+            UpdateBuffers();
         }
 
         /// <summary>
@@ -109,96 +457,100 @@ namespace VAGSuite.Components
         /// </summary>
         public void InitializeChart3D()
         {
-            var chartControl = GetChartControl();
-            if (chartControl == null) return;
-
-            chartControl.Legends.Clear();
-
-            NChart chart = chartControl.Charts[0];
-
-            // Configure for 3D
-            chart.Enable3D = true;
-            chart.Width = 60.0f;
-            chart.Depth = 60.0f;
-            chart.Height = 35.0f;
-            chart.Projection.SetPredefinedProjection(PredefinedProjection.PerspectiveTilted);
-            chart.LightModel.SetPredefinedLightModel(PredefinedLightModel.ShinyTopLeft);
-
-            // Set title
-            NLabel title = chartControl.Labels.AddHeader(_mapName);
-            title.TextStyle.FontStyle = new NFontStyle("Times New Roman", 18, FontStyle.Italic);
-            title.TextStyle.FillStyle = new NColorFillStyle(Color.FromArgb(68, 90, 108));
-
-            // Configure axes
-            ConfigureAxis(chart);
-
-            // Add main surface series
-            NMeshSurfaceSeries surface = null;
-            if (chart.Series.Count == 0)
+            if (_glControl == null)
             {
-                surface = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
-            }
-            else
-            {
-                surface = (NMeshSurfaceSeries)chart.Series[0];
-            }
-            ConfigureSurface(surface);
-
-            // Add original map overlay if available and NOT in Easy view
-            // Easy view scaling makes the original content (unscaled) appear as a ghost mesh at the bottom
-            if (_originalContent != null && _viewType != ViewType.Easy)
-            {
-                NMeshSurfaceSeries surface2 = null;
-                if (chart.Series.Count == 1)
-                {
-                    surface2 = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
-                }
-                else
-                {
-                    surface2 = (NMeshSurfaceSeries)chart.Series[1];
-                }
-                ConfigureOverlay(surface2, Color.YellowGreen, _originalContent);
-
-                // Add compare overlay if available
-                if (_compareContent != null)
-                {
-                    NMeshSurfaceSeries surface3 = null;
-                    if (chart.Series.Count == 2)
-                    {
-                        surface3 = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
-                    }
-                    else
-                    {
-                        surface3 = (NMeshSurfaceSeries)chart.Series[2];
-                    }
-                    ConfigureOverlay(surface3, Color.BlueViolet, _compareContent);
-                }
-            }
-            else
-            {
-                // Clear overlays if in Easy view or no content
-                while (chart.Series.Count > 1)
-                {
-                    chart.Series.RemoveAt(1);
-                }
+                Console.WriteLine("Chart3DComponent: InitializeChart3D aborted - _glControl is null");
+                return;
             }
 
-            // Ensure all series are initialized but hidden if not needed
-            while (chart.Series.Count < 3)
+            if (!_glControl.IsHandleCreated)
             {
-                chart.Series.Add(SeriesType.MeshSurface);
+                Console.WriteLine("Chart3DComponent: InitializeChart3D aborted - Handle not created");
+                return;
             }
 
-            // Hide walls
-            chart.Wall(ChartWallType.Back).Visible = false;
-            chart.Wall(ChartWallType.Left).Visible = false;
-            chart.Wall(ChartWallType.Right).Visible = false;
-            chart.Wall(ChartWallType.Floor).Visible = false;
+            if (_glControl.Context == null)
+            {
+                Console.WriteLine("Chart3DComponent: InitializeChart3D aborted - GLContext is null");
+                return;
+            }
 
-            // Configure tools
-            chartControl.Settings.ShapeRenderingMode = ShapeRenderingMode.HighSpeed;
-            chartControl.Controller.Tools.Add(new NSelectorTool());
-            chartControl.Controller.Tools.Add(new NTrackballTool());
+            Console.WriteLine("Chart3DComponent: Initializing OpenGL state...");
+            try
+            {
+                _glControl.MakeCurrent();
+                CheckGLError("Init:MakeCurrent");
+
+                GL.ClearColor(Color.FromArgb(50, 50, 50));
+                GL.Enable(EnableCap.DepthTest);
+                GL.DepthFunc(DepthFunction.Lequal);
+                
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+                // Disable fixed-function lighting as we use custom shaders
+                GL.Disable(EnableCap.Lighting);
+                
+                CheckGLError("Init:State");
+
+                _shaderProgram = CreateShaderProgram();
+                
+                Console.WriteLine("Chart3DComponent: OpenGL initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Chart3DComponent: Initialization failed: " + ex.Message);
+            }
+        }
+
+        private int CreateShaderProgram()
+        {
+            // Downgraded to GLSL 1.20 for maximum compatibility
+            string vertexShaderSource = @"
+                #version 120
+                attribute vec3 aPosition;
+                attribute vec4 aColor;
+                varying vec4 vColor;
+                uniform mat4 uModelView;
+                uniform mat4 uProjection;
+                void main() {
+                    gl_Position = uProjection * uModelView * vec4(aPosition, 1.0);
+                    vColor = aColor;
+                }";
+
+            string fragmentShaderSource = @"
+                #version 120
+                varying vec4 vColor;
+                void main() {
+                    gl_FragColor = vColor;
+                }";
+
+            int vertexShader = CompileShader(ShaderType.VertexShader, vertexShaderSource);
+            int fragmentShader = CompileShader(ShaderType.FragmentShader, fragmentShaderSource);
+
+            int program = GL.CreateProgram();
+            GL.AttachShader(program, vertexShader);
+            GL.AttachShader(program, fragmentShader);
+            GL.LinkProgram(program);
+
+            GL.DeleteShader(vertexShader);
+            GL.DeleteShader(fragmentShader);
+
+            return program;
+        }
+
+        private int CompileShader(ShaderType type, string source)
+        {
+            int shader = GL.CreateShader(type);
+            GL.ShaderSource(shader, source);
+            GL.CompileShader(shader);
+            GL.GetShader(shader, ShaderParameter.CompileStatus, out int status);
+            if (status == 0)
+            {
+                string log = GL.GetShaderInfoLog(shader);
+                throw new Exception($"Shader compilation failed ({type}): {log}");
+            }
+            return shader;
         }
 
         /// <summary>
@@ -206,7 +558,10 @@ namespace VAGSuite.Components
         /// </summary>
         public void RefreshChart()
         {
-            RefreshMeshGraph();
+            if (_glControl != null)
+            {
+                _glControl.Invalidate();
+            }
         }
 
         /// <summary>
@@ -214,14 +569,10 @@ namespace VAGSuite.Components
         /// </summary>
         public void SetView(float rotation, float elevation, float zoom)
         {
-            var chartControl = GetChartControl();
-            if (chartControl != null && chartControl.Charts.Count > 0)
-            {
-                chartControl.Charts[0].Projection.Rotation = rotation;
-                chartControl.Charts[0].Projection.Elevation = elevation;
-                chartControl.Charts[0].Projection.Zoom = zoom;
-                chartControl.Refresh();
-            }
+            _rotation = rotation;
+            _elevation = elevation;
+            _zoom = zoom;
+            RefreshChart();
         }
 
         /// <summary>
@@ -229,17 +580,9 @@ namespace VAGSuite.Components
         /// </summary>
         public void GetView(out float rotation, out float elevation, out float zoom)
         {
-            rotation = 0;
-            elevation = 0;
-            zoom = 0;
-
-            var chartControl = GetChartControl();
-            if (chartControl != null && chartControl.Charts.Count > 0)
-            {
-                rotation = chartControl.Charts[0].Projection.Rotation;
-                elevation = chartControl.Charts[0].Projection.Elevation;
-                zoom = chartControl.Charts[0].Projection.Zoom;
-            }
+            rotation = _rotation;
+            elevation = _elevation;
+            zoom = _zoom;
         }
 
         /// <summary>
@@ -248,7 +591,30 @@ namespace VAGSuite.Components
         public void SetOverlayVisible(bool visible)
         {
             _overlayVisible = visible;
-            RefreshMeshGraph();
+            RefreshChart();
+        }
+
+        private void OnGLMouseDown(object sender, MouseEventArgs e)
+        {
+            _lastMousePos = e.Location;
+        }
+
+        private void OnGLMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _rotation += (e.X - _lastMousePos.X) * 0.5f;
+                _elevation += (e.Y - _lastMousePos.Y) * 0.5f;
+                _lastMousePos = e.Location;
+                RefreshChart();
+            }
+        }
+
+        private void OnGLMouseWheel(object sender, MouseEventArgs e)
+        {
+            _zoom += e.Delta > 0 ? 0.1f : -0.1f;
+            _zoom = Math.Max(0.1f, Math.Min(10f, _zoom));
+            RefreshChart();
         }
 
         #endregion
@@ -261,456 +627,9 @@ namespace VAGSuite.Components
             // This component acts as a wrapper around an existing chart control
         }
 
-        /// <summary>
-        /// Gets the chart control to use (external or null)
-        /// </summary>
-        private Nevron.Chart.WinForm.NChartControl GetChartControl()
-        {
-            return _externalChartControl;
-        }
-
         private void ConfigureChart()
         {
-            var chartControl = GetChartControl();
-            if (chartControl == null || chartControl.Charts.Count == 0) return;
-
-            NChart chart = chartControl.Charts[0];
-            
-            // Configure for 3D
-            chart.Enable3D = true;
-            chart.Width = 60.0f;
-            chart.Depth = 60.0f;
-            chart.Height = 35.0f;
-            chart.Projection.SetPredefinedProjection(PredefinedProjection.PerspectiveTilted);
-            chart.LightModel.SetPredefinedLightModel(PredefinedLightModel.ShinyTopLeft);
-
-            // Set title
-            NLabel title = chartControl.Labels.AddHeader(_mapName);
-            title.TextStyle.FontStyle = new NFontStyle("Times New Roman", 18, FontStyle.Italic);
-            title.TextStyle.FillStyle = new NColorFillStyle(Color.FromArgb(68, 90, 108));
-
-            // Configure axes
-            ConfigureAxis(chart);
-
-            // Add surface series
-            NMeshSurfaceSeries surface = null;
-            if (chart.Series.Count == 0)
-            {
-                surface = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
-            }
-            else
-            {
-                surface = (NMeshSurfaceSeries)chart.Series[0];
-            }
-
-            ConfigureSurface(surface);
-
-            // Add original map overlay if available and NOT in Easy view
-            if (_originalContent != null && _viewType != ViewType.Easy)
-            {
-                NMeshSurfaceSeries surface2 = null;
-                if (chart.Series.Count == 1)
-                {
-                    surface2 = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
-                }
-                else
-                {
-                    surface2 = (NMeshSurfaceSeries)chart.Series[1];
-                }
-                ConfigureOverlay(surface2, Color.YellowGreen, _originalContent);
-
-                // Add compare overlay if available
-                if (_compareContent != null)
-                {
-                    NMeshSurfaceSeries surface3 = null;
-                    if (chart.Series.Count == 2)
-                    {
-                        surface3 = (NMeshSurfaceSeries)chart.Series.Add(SeriesType.MeshSurface);
-                    }
-                    else
-                    {
-                        surface3 = (NMeshSurfaceSeries)chart.Series[2];
-                    }
-                    ConfigureOverlay(surface3, Color.BlueViolet, _compareContent);
-                }
-            }
-            else
-            {
-                // Clear overlays if in Easy view or no content
-                while (chart.Series.Count > 1)
-                {
-                    chart.Series.RemoveAt(1);
-                }
-            }
-
-            // Hide walls
-            chart.Wall(ChartWallType.Back).Visible = false;
-            chart.Wall(ChartWallType.Left).Visible = false;
-            chart.Wall(ChartWallType.Right).Visible = false;
-            chart.Wall(ChartWallType.Floor).Visible = false;
-
-            // Configure tools
-            chartControl.Settings.ShapeRenderingMode = ShapeRenderingMode.HighSpeed;
-            chartControl.Controller.Tools.Add(new NSelectorTool());
-            chartControl.Controller.Tools.Add(new NTrackballTool());
-        }
-
-        private void ConfigureAxis(NChart chart)
-        {
-            // Configure X axis (X-axis values)
-            NStandardScaleConfigurator scaleConfiguratorX = (NStandardScaleConfigurator)chart.Axis(StandardAxis.PrimaryX).ScaleConfigurator;
-            scaleConfiguratorX.MajorTickMode = MajorTickMode.AutoMaxCount;
-            
-            NScaleTitleStyle titleStyleX = (NScaleTitleStyle)scaleConfiguratorX.Title;
-            titleStyleX.Text = _xAxisName;
-            scaleConfiguratorX.AutoLabels = false;
-
-            for (int t = 0; t < _xAxisValues.Length; t++)
-            {
-                string xvalue = ConvertXAxisValue(_xAxisValues[t].ToString());
-                scaleConfiguratorX.Labels.Add(xvalue);
-            }
-
-            // Configure Y axis (Y-axis values)
-            NStandardScaleConfigurator scaleConfiguratorY = (NStandardScaleConfigurator)chart.Axis(StandardAxis.Depth).ScaleConfigurator;
-            scaleConfiguratorY.MajorTickMode = MajorTickMode.AutoMaxCount;
-            
-            NScaleTitleStyle titleStyleY = (NScaleTitleStyle)scaleConfiguratorY.Title;
-            titleStyleY.Text = _yAxisName;
-            scaleConfiguratorY.AutoLabels = false;
-
-            for (int t = (_isUpsideDown ? 0 : _yAxisValues.Length - 1);
-                 (_isUpsideDown ? t < _yAxisValues.Length : t >= 0);
-                 t += (_isUpsideDown ? 1 : -1))
-            {
-                string yvalue = ConvertYAxisValue(_yAxisValues[t].ToString());
-                scaleConfiguratorY.Labels.Add(yvalue);
-            }
-
-            // Configure Z axis
-            NStandardScaleConfigurator scaleConfiguratorZ = (NStandardScaleConfigurator)chart.Axis(StandardAxis.PrimaryY).ScaleConfigurator;
-            NScaleTitleStyle titleStyleZ = (NScaleTitleStyle)scaleConfiguratorZ.Title;
-            titleStyleZ.Text = _zAxisName;
-        }
-
-        private void ConfigureSurface(NMeshSurfaceSeries surface)
-        {
-            surface.Name = "Surface";
-            surface.PositionValue = 10.0;
-
-            if (_isSixteenBit)
-            {
-                surface.Data.SetGridSize((_mapContent.Length / 2) / _tableWidth, _tableWidth);
-            }
-            else
-            {
-                surface.Data.SetGridSize(_mapContent.Length / _tableWidth, _tableWidth);
-            }
-
-            surface.ValueFormatter.FormatSpecifier = "0.00";
-            surface.FillMode = SurfaceFillMode.Zone;
-            surface.SmoothPalette = true;
-            surface.FrameColorMode = SurfaceFrameColorMode.Uniform;
-            surface.FrameMode = SurfaceFrameMode.MeshContour;
-            surface.FillStyle.SetTransparencyPercent(25);
-        }
-
-        private void ConfigureOverlay(NMeshSurfaceSeries surface, Color overlayColor, byte[] content)
-        {
-            surface.PositionValue = 10.0;
-            surface.Name = "Overlay";
-            
-            // Use the provided content array for dimension calculation
-            if (content != null)
-            {
-                if (_isSixteenBit)
-                {
-                    surface.Data.SetGridSize((content.Length / 2) / _tableWidth, _tableWidth);
-                }
-                else
-                {
-                    surface.Data.SetGridSize(content.Length / _tableWidth, _tableWidth);
-                }
-            }
-
-            surface.ValueFormatter.FormatSpecifier = "0.00";
-            surface.FillMode = SurfaceFillMode.Zone;
-            surface.FillStyle.SetTransparencyPercent(50);
-            surface.SmoothPalette = true;
-            surface.FrameColorMode = SurfaceFrameColorMode.Zone;
-            surface.FrameMode = SurfaceFrameMode.MeshContour;
-
-            // Set palette color
-            surface.Palette.Clear();
-            surface.Palette.Add(-255, overlayColor);
-            surface.Palette.Add(255, overlayColor);
-            surface.AutomaticPalette = false;
-        }
-
-        private void RefreshMeshGraph()
-        {
-            try
-            {
-                var chartControl = GetChartControl();
-                if (chartControl == null || chartControl.Charts.Count == 0) return;
-
-                NChart chart = chartControl.Charts[0];
-                
-                // Get main surface
-                NMeshSurfaceSeries surface = null;
-                if (chart.Series.Count > 0)
-                {
-                    surface = (NMeshSurfaceSeries)chart.Series[0];
-                }
-                else
-                {
-                    return;
-                }
-
-                FillData(surface);
-
-                // Handle overlay surfaces - Use Visibility instead of adding/removing series to prevent crashes
-                bool showOverlays = _overlayVisible && _viewType != ViewType.Easy;
-                
-                if (chart.Series.Count > 1)
-                {
-                    NMeshSurfaceSeries surface2 = (NMeshSurfaceSeries)chart.Series[1];
-                    if (surface2 != null)
-                    {
-                        surface2.Visible = showOverlays && _originalContent != null;
-                        if (surface2.Visible)
-                        {
-                            ConfigureOverlay(surface2, Color.YellowGreen, _originalContent);
-                            FillDataOriginal(surface2);
-                        }
-                    }
-                }
-
-                if (chart.Series.Count > 2)
-                {
-                    NMeshSurfaceSeries surface3 = (NMeshSurfaceSeries)chart.Series[2];
-                    if (surface3 != null)
-                    {
-                        surface3.Visible = showOverlays && _compareContent != null;
-                        if (surface3.Visible)
-                        {
-                            ConfigureOverlay(surface3, Color.BlueViolet, _compareContent);
-                            FillDataCompare(surface3);
-                        }
-                    }
-                }
-
-                // Refresh the chart
-                chartControl.Refresh();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Chart3DComponent: RefreshMeshGraph error: " + ex.Message);
-            }
-        }
-
-        private void FillData(NMeshSurfaceSeries surface)
-        {
-            try
-            {
-                int rowCount = _isSixteenBit ? (_mapContent.Length / 2) / _tableWidth : _mapContent.Length / _tableWidth;
-                
-                for (int row = 0; row < rowCount; row++)
-                {
-                    for (int col = 0; col < _tableWidth; col++)
-                    {
-                        double value = GetValueFromContent(row, col);
-                        // Conditionally flip Y axis if _isUpsideDown is true
-                        int yIndex = _isUpsideDown ? (rowCount - 1) - row : row;
-                        surface.Data.SetValue(yIndex, col, value, yIndex, col);
-                    }
-                }
-
-                // Set palette
-                SetPalette(surface);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Chart3DComponent: FillData error: " + ex.Message);
-            }
-        }
-
-        private void FillDataOriginal(NMeshSurfaceSeries surface)
-        {
-            try
-            {
-                // Calculate row count from original content, not map content
-                int rowCount = _isSixteenBit ? (_originalContent.Length / 2) / _tableWidth : _originalContent.Length / _tableWidth;
-                
-                for (int row = 0; row < rowCount; row++)
-                {
-                    for (int col = 0; col < _tableWidth; col++)
-                    {
-                        double value = GetOriginalValueFromContent(row, col);
-                        int yIndex = _isUpsideDown ? (rowCount - 1) - row : row;
-                        surface.Data.SetValue(yIndex, col, value, yIndex, col);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Chart3DComponent: FillDataOriginal error: " + ex.Message);
-            }
-        }
-
-        private void FillDataCompare(NMeshSurfaceSeries surface)
-        {
-            try
-            {
-                int rowCount = _isSixteenBit ? (_compareContent.Length / 2) / _tableWidth : _compareContent.Length / _tableWidth;
-                
-                for (int row = 0; row < rowCount; row++)
-                {
-                    // Note: Original code iterates col from _tableWidth - 1 down to 0
-                    for (int col = _tableWidth - 1; col >= 0; col--)
-                    {
-                        double value = GetCompareValueFromContent(row, col);
-                        int yIndex = _isUpsideDown ? (rowCount - 1) - row : row;
-                        surface.Data.SetValue(yIndex, col, value, yIndex, col);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Chart3DComponent: FillDataCompare error: " + ex.Message);
-            }
-        }
-
-        private double GetValueFromContent(int row, int col)
-        {
-            int index = (row * _tableWidth + col) * (_isSixteenBit ? 2 : 1);
-            if (index >= _mapContent.Length) return 0;
-
-            double value;
-            if (_isSixteenBit)
-            {
-                value = _mapContent[index] * 256.0 + _mapContent[index + 1];
-                if (value > 32000)
-                {
-                    value = 65536 - value;
-                    value = -value;
-                }
-            }
-            else
-            {
-                value = _mapContent[index];
-            }
-
-            if (_viewType != ViewType.Decimal && _viewType != ViewType.Hexadecimal && _viewType != ViewType.ASCII)
-            {
-                value *= _correctionFactor;
-                if (!_isCompareViewer) value += _correctionOffset;
-            }
-
-            return value;
-        }
-
-        private double GetOriginalValueFromContent(int row, int col)
-        {
-            int index = (row * _tableWidth + col) * (_isSixteenBit ? 2 : 1);
-            if (index >= _originalContent.Length) return 0;
-
-            double value;
-            if (_isSixteenBit)
-            {
-                value = _originalContent[index] * 256.0 + _originalContent[index + 1];
-                if (value > 32000)
-                {
-                    value = 65536 - value;
-                    value = -value;
-                }
-            }
-            else
-            {
-                value = _originalContent[index];
-            }
-
-            if (_viewType != ViewType.Decimal && _viewType != ViewType.Hexadecimal && _viewType != ViewType.ASCII)
-            {
-                value *= _correctionFactor;
-                value += _correctionOffset;
-            }
-
-            return value;
-        }
-
-        private double GetCompareValueFromContent(int row, int col)
-        {
-            int index = (row * _tableWidth + col) * (_isSixteenBit ? 2 : 1);
-            if (index >= _compareContent.Length) return 0;
-
-            double value;
-            if (_isSixteenBit)
-            {
-                value = _compareContent[index] * 256.0 + _compareContent[index + 1];
-                if (value > 32000)
-                {
-                    value = 65536 - value;
-                    value = -value;
-                }
-            }
-            else
-            {
-                value = _compareContent[index];
-            }
-
-            if (_viewType != ViewType.Decimal && _viewType != ViewType.Hexadecimal && _viewType != ViewType.ASCII)
-            {
-                value *= _correctionFactor;
-                value += _correctionOffset;
-            }
-
-            return value;
-        }
-
-        private void SetPalette(NMeshSurfaceSeries surface)
-        {
-            // Calculate min/max values
-            double minValue = double.MaxValue;
-            double maxValue = double.MinValue;
-
-            int rowCount = _isSixteenBit ? (_mapContent.Length / 2) / _tableWidth : _mapContent.Length / _tableWidth;
-            for (int row = 0; row < rowCount; row++)
-            {
-                for (int col = 0; col < _tableWidth; col++)
-                {
-                    double value = GetValueFromContent(row, col);
-                    if (value < minValue) minValue = value;
-                    if (value > maxValue) maxValue = value;
-                }
-            }
-
-            if (minValue == double.MaxValue || maxValue == double.MinValue) return;
-
-            surface.Palette.Clear();
-            double diff = maxValue - minValue;
-
-            if (_onlineMode)
-            {
-                surface.Palette.Add(minValue, Color.Wheat);
-                surface.Palette.Add(minValue + 0.25 * diff, Color.LightBlue);
-                surface.Palette.Add(minValue + 0.50 * diff, Color.SteelBlue);
-                surface.Palette.Add(minValue + 0.75 * diff, Color.Blue);
-                surface.Palette.Add(minValue + diff, Color.DarkBlue);
-            }
-            else
-            {
-                // VAGEDC Dark Skin: Blue→Green→Yellow→Orange→Red gradient
-                surface.Palette.Add(minValue, Color.FromArgb(30, 58, 138));  // Navy Blue
-                surface.Palette.Add(minValue + 0.20 * diff, Color.FromArgb(16, 185, 129));  // Emerald Green
-                surface.Palette.Add(minValue + 0.40 * diff, Color.Yellow);
-                surface.Palette.Add(minValue + 0.60 * diff, Color.Orange);
-                surface.Palette.Add(minValue + 0.80 * diff, Color.OrangeRed);
-                surface.Palette.Add(minValue + diff, Color.Red);
-            }
-
-            surface.PaletteSteps = 5;
-            surface.AutomaticPalette = false;
+            InitializeChart3D();
         }
 
         private string ConvertYAxisValue(string currValue)
@@ -749,64 +668,9 @@ namespace VAGSuite.Components
             }
         }
 
-        private void NChartControl1_MouseWheel(object sender, MouseEventArgs e)
-        {
-            var chartControl = GetChartControl();
-            // Verified: return when no chart exists. (Nevron docs: chartControl.Charts must exist before accessing Charts[0].Projection)
-            if (chartControl == null || chartControl.Charts.Count == 0) return;
-            
-            if (e.Delta > 0)
-            {
-                chartControl.Charts[0].Projection.Zoom += 5;
-            }
-            else
-            {
-                chartControl.Charts[0].Projection.Zoom -= 5;
-            }
-            chartControl.Refresh();
-            RaiseViewChanged();
-        }
-
-        private void NChartControl1_MouseDown(object sender, MouseEventArgs e)
-        {
-            var chartControl = GetChartControl();
-            if (chartControl == null) return;
-            
-            if (e.Button == MouseButtons.Right)
-            {
-                chartControl.Controller.Tools.Clear();
-                NOffsetTool dragTool = new NOffsetTool();
-                chartControl.Controller.Tools.Add(dragTool);
-            }
-        }
-
-        private void NChartControl1_MouseUp(object sender, MouseEventArgs e)
-        {
-            var chartControl = GetChartControl();
-            if (chartControl == null) return;
-            
-            if (e.Button == MouseButtons.Right)
-            {
-                chartControl.Controller.Tools.Clear();
-                NTrackballTool dragTool = new NTrackballTool();
-                chartControl.Controller.Tools.Add(dragTool);
-            }
-
-            RaiseViewChanged();
-        }
-
         private void RaiseViewChanged()
         {
-            var chartControl = GetChartControl();
-            if (chartControl == null || chartControl.Charts.Count == 0) return;
-            
-            ViewChanged?.Invoke(this, new SurfaceGraphViewChangedEventArgsEx(
-                chartControl.Charts[0].Projection.XDepth,
-                chartControl.Charts[0].Projection.YDepth,
-                chartControl.Charts[0].Projection.Zoom,
-                chartControl.Charts[0].Projection.Rotation,
-                chartControl.Charts[0].Projection.Elevation,
-                _mapName));
+            // TODO: Implement view changed event for OpenTK
         }
 
         #endregion

@@ -8,9 +8,6 @@ using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DevExpress.XtraCharts;
 using System.Runtime.InteropServices;
-using Nevron.Chart;
-using Nevron.GraphicsCore;
-using Nevron.Chart.WinForm;
 using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using DevExpress.XtraBars.Docking;
 using System.IO;
@@ -429,26 +426,6 @@ namespace VAGSuite
         double now_realMaxValue = double.MinValue;
         double now_realMinValue = double.MaxValue;
 
-        private void FillData(NMeshSurfaceSeries surface)
-        {
-            DataTable dt = (DataTable)gridControl1.DataSource;
-            if (dt == null) return;
-            _chartService.FillSurfaceData(surface, dt, m_viewtype, correction_factor, correction_offset, _isCompareViewer);
-        }
-
-        private void FillDataOriginal(NMeshSurfaceSeries surface)
-        {
-            DataTable dt = (DataTable)gridControl1.DataSource;
-            if (dt == null || m_map_original_content == null) return;
-            _chartService.FillOriginalData(surface, dt, m_map_original_content, m_issixteenbit, m_viewtype, correction_factor, correction_offset);
-        }
-
-        private void FillDataCompare(NMeshSurfaceSeries surface)
-        {
-            DataTable dt = (DataTable)gridControl1.DataSource;
-            if (dt == null || m_map_compare_content == null) return;
-            _chartService.FillCompareData(surface, dt, m_map_compare_content, m_issixteenbit, m_viewtype, correction_factor, correction_offset);
-        }
 
         public bool IsRedWhite
         {
@@ -690,9 +667,14 @@ namespace VAGSuite
 
         public MapViewerEx()
         {
+            Console.WriteLine("MapViewerEx: Constructor started");
             InitializeComponent();
             toolStripComboBox1.SelectedIndex = 0;
             toolStripComboBox2.SelectedIndex = 0;
+
+            this.Load += (s, e) => {
+                Console.WriteLine("MapViewerEx: Load event fired");
+            };
 
             nChartControl1.MouseWheel += new MouseEventHandler(nChartControl1_MouseWheel);
             nChartControl1.MouseDown += new MouseEventHandler(nChartControl1_MouseDown);
@@ -783,17 +765,38 @@ namespace VAGSuite
         /// </summary>
         private void InitializePhase5Components()
         {
-            // Create component instances
-            _mapGridComponent = new MapGridComponent(_dataConversionService, _mapRenderingService);
-            _chart3DComponent = new Chart3DComponent(_chartService);
-            _chart2DComponent = new Chart2DComponent(_chartService);
-            
-            // Wire up the external chart control to the component
-            _chart3DComponent.SetChartControl(nChartControl1);
-            _chart2DComponent.SetChartControl(nChartControl2);
-            
-            // Wire up component events to MapViewerEx handlers
-            _chart3DComponent.ViewChanged += OnChart3DViewChanged;
+            try
+            {
+                Console.WriteLine("MapViewerEx: Initializing Phase 5 Components...");
+                // Create component instances
+                _mapGridComponent = new MapGridComponent(_dataConversionService, _mapRenderingService);
+                _chart3DComponent = new Chart3DComponent(_chartService);
+                _chart2DComponent = new Chart2DComponent(_chartService);
+                
+                // Wire up the external chart control to the component
+                // Verified: nChartControl1 is now OpenTK.GLControl and nChartControl2 is ZedGraph.ZedGraphControl
+                if (nChartControl1 != null)
+                {
+                    _chart3DComponent.SetChartControl(nChartControl1);
+                    nChartControl1.Dock = DockStyle.Fill;
+                    nChartControl1.Visible = true;
+                    nChartControl1.BringToFront();
+                    Console.WriteLine($"MapViewerEx: nChartControl1 size: {nChartControl1.Width}x{nChartControl1.Height}");
+                }
+                
+                if (nChartControl2 != null)
+                {
+                    _chart2DComponent.SetChartControl(nChartControl2);
+                }
+                
+                // Wire up component events to MapViewerEx handlers
+                _chart3DComponent.ViewChanged += OnChart3DViewChanged;
+                Console.WriteLine("MapViewerEx: Phase 5 Components initialized.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("MapViewerEx: CRITICAL ERROR in InitializePhase5Components: " + ex.Message);
+            }
         }
 
         /// <summary>
@@ -888,17 +891,7 @@ namespace VAGSuite
 
         void nChartControl1_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Right)
-            {
-                nChartControl1.Controller.Tools.Clear();
-                NDragTool dragTool = null;
-                dragTool = new NTrackballTool();
-                nChartControl1.Controller.Tools.Add(dragTool);
-            }
-            //<GS-07062010>
-            CastSurfaceGraphChangedEventEx(nChartControl1.Charts[0].Projection.XDepth, nChartControl1.Charts[0].Projection.YDepth, nChartControl1.Charts[0].Projection.Zoom, nChartControl1.Charts[0].Projection.Rotation, nChartControl1.Charts[0].Projection.Elevation);
-
-
+            m_isDragging = false;
         }
 
         private void CastSurfaceGraphChangedEventEx(float xdepth, float ydepth, float zoom, float rotation, float elevation)
@@ -912,40 +905,48 @@ namespace VAGSuite
             }
         }
 
-
         void nChartControl1_MouseMove(object sender, MouseEventArgs e)
         {
+            if (m_isDragging && _chart3DComponent != null)
+            {
+                float dx = e.X - _mouse_drag_x;
+                float dy = e.Y - _mouse_drag_y;
+
+                float rotation, elevation, zoom;
+                _chart3DComponent.GetView(out rotation, out elevation, out zoom);
+
+                rotation += dx * 0.5f;
+                elevation += dy * 0.5f;
+
+                _chart3DComponent.SetView(rotation, elevation, zoom);
+
+                _mouse_drag_x = e.X;
+                _mouse_drag_y = e.Y;
+            }
         }
 
         void nChartControl1_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Right)
+            if (e.Button == MouseButtons.Left)
             {
-                nChartControl1.Controller.Tools.Clear();
-                NDragTool dragTool = null;
-                dragTool = new NOffsetTool();
-                nChartControl1.Controller.Tools.Add(dragTool);
-                //dragTool.BeginDragMouseCommand.MouseButton = MouseButtons.Right;
-                //dragTool.EndDragMouseCommand.MouseButton = MouseButtons.Right;
+                m_isDragging = true;
+                _mouse_drag_x = e.X;
+                _mouse_drag_y = e.Y;
             }
-
         }
 
         void nChartControl1_MouseWheel(object sender, MouseEventArgs e)
         {
-            // wieltje wordt zoomin/out
-            if (e.Delta > 0)
+            if (_chart3DComponent != null)
             {
-                nChartControl1.Charts[0].Projection.Zoom += 5;
-                nChartControl1.Refresh();
+                float rotation, elevation, zoom;
+                _chart3DComponent.GetView(out rotation, out elevation, out zoom);
+
+                if (e.Delta > 0) zoom *= 1.1f;
+                else zoom /= 1.1f;
+
+                _chart3DComponent.SetView(rotation, elevation, zoom);
             }
-            else
-            {
-                nChartControl1.Charts[0].Projection.Zoom -= 5;
-                nChartControl1.Refresh();
-            }
-            //<GS-07062010>
-            CastSurfaceGraphChangedEventEx(nChartControl1.Charts[0].Projection.XDepth, nChartControl1.Charts[0].Projection.YDepth, nChartControl1.Charts[0].Projection.Zoom, nChartControl1.Charts[0].Projection.Rotation, nChartControl1.Charts[0].Projection.Elevation);
         }
 
 
@@ -1614,8 +1615,11 @@ namespace VAGSuite
             if (xtraTabControl1.SelectedTabPage == xtraTabPage1)
             {
                 // 3d graph
-                Console.WriteLine("RefreshMeshGraph on tabindex changed");
-
+                if (nChartControl1 != null)
+                {
+                    nChartControl1.Visible = true;
+                    nChartControl1.BringToFront();
+                }
                 RefreshMeshGraph();
             }
             else
@@ -1650,31 +1654,18 @@ namespace VAGSuite
 
         private void simpleButton7_Click(object sender, EventArgs e)
         {
-            nChartControl1.Charts[0].Projection.Zoom += 5;
-            nChartControl1.Refresh();
-            CastSurfaceGraphChangedEventEx(nChartControl1.Charts[0].Projection.XDepth, nChartControl1.Charts[0].Projection.YDepth, nChartControl1.Charts[0].Projection.Zoom, nChartControl1.Charts[0].Projection.Rotation, nChartControl1.Charts[0].Projection.Elevation);
-
         }
 
         private void simpleButton6_Click(object sender, EventArgs e)
         {
-            nChartControl1.Charts[0].Projection.Zoom -= 5;
-            nChartControl1.Refresh();
-            CastSurfaceGraphChangedEventEx(nChartControl1.Charts[0].Projection.XDepth, nChartControl1.Charts[0].Projection.YDepth, nChartControl1.Charts[0].Projection.Zoom, nChartControl1.Charts[0].Projection.Rotation, nChartControl1.Charts[0].Projection.Elevation);
         }
 
         private void simpleButton4_Click(object sender, EventArgs e)
         {
-            nChartControl1.Charts[0].Projection.Rotation += 5;
-            nChartControl1.Refresh();
-            CastSurfaceGraphChangedEventEx(nChartControl1.Charts[0].Projection.XDepth, nChartControl1.Charts[0].Projection.YDepth, nChartControl1.Charts[0].Projection.Zoom, nChartControl1.Charts[0].Projection.Rotation, nChartControl1.Charts[0].Projection.Elevation);
         }
 
         private void simpleButton5_Click(object sender, EventArgs e)
         {
-            nChartControl1.Charts[0].Projection.Rotation -= 5;
-            nChartControl1.Refresh();
-            CastSurfaceGraphChangedEventEx(nChartControl1.Charts[0].Projection.XDepth, nChartControl1.Charts[0].Projection.YDepth, nChartControl1.Charts[0].Projection.Zoom, nChartControl1.Charts[0].Projection.Rotation, nChartControl1.Charts[0].Projection.Elevation);
         }
 
         private void gridView1_SelectionChanged(object sender, DevExpress.Data.SelectionChangedEventArgs e)
@@ -2091,20 +2082,10 @@ namespace VAGSuite
 
         public void SetSurfaceGraphViewEx(float depthx, float depthy, float zoom, float rotation, float elevation)
         {
-            try
+            if (_chart3DComponent != null)
             {
-                nChartControl1.Charts[0].Projection.XDepth = depthx;
-                nChartControl1.Charts[0].Projection.YDepth = depthy;
-                nChartControl1.Charts[0].Projection.Zoom = zoom;
-                nChartControl1.Charts[0].Projection.Rotation = rotation;
-                nChartControl1.Charts[0].Projection.Elevation = elevation;
-                nChartControl1.Refresh();
+                _chart3DComponent.SetView(rotation, elevation, zoom);
             }
-            catch (Exception E)
-            {
-                Console.WriteLine("SetSurfaceGraphViewEx:" + E.Message);
-            }
-
         }
 
         private void toolStripComboBox3_SelectedIndexChanged(object sender, EventArgs e)

@@ -52,13 +52,13 @@ namespace VAGSuite
             this.xtraTabControl1 = new DevExpress.XtraTab.XtraTabControl();
             this.xtraTabPage1 = new DevExpress.XtraTab.XtraTabPage();
             this.btnToggleOverlay = new DevExpress.XtraEditors.SimpleButton();
-            this.nChartControl1 = new Nevron.Chart.WinForm.NChartControl();
+            this.nChartControl1 = new OpenTK.GLControl();
             this.simpleButton4 = new DevExpress.XtraEditors.SimpleButton();
             this.simpleButton5 = new DevExpress.XtraEditors.SimpleButton();
             this.simpleButton6 = new DevExpress.XtraEditors.SimpleButton();
             this.simpleButton7 = new DevExpress.XtraEditors.SimpleButton();
             this.xtraTabPage2 = new DevExpress.XtraTab.XtraTabPage();
-            this.nChartControl2 = new Nevron.Chart.WinForm.NChartControl();
+            this.nChartControl2 = new ZedGraph.ZedGraphControl();
             this.labelControl9 = new DevExpress.XtraEditors.LabelControl();
             this.labelControl8 = new DevExpress.XtraEditors.LabelControl();
             this.trackBarControl1 = new DevExpress.XtraEditors.TrackBarControl();
@@ -321,21 +321,17 @@ namespace VAGSuite
             this.btnToggleOverlay.ToolTip = "Toggle graph overlay";
             this.btnToggleOverlay.Visible = false;
             this.btnToggleOverlay.Click += new System.EventHandler(this.btnToggleOverlay_Click);
-            // 
+            //
             // nChartControl1
-            // 
+            //
             this.nChartControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.nChartControl1.AutoRefresh = false;
             this.nChartControl1.BackColor = System.Drawing.SystemColors.Control;
-            this.nChartControl1.InputKeys = new System.Windows.Forms.Keys[0];
             this.nChartControl1.Location = new System.Drawing.Point(0, -1);
             this.nChartControl1.Name = "nChartControl1";
             this.nChartControl1.Size = new System.Drawing.Size(800, 286);
-            this.nChartControl1.State = ((Nevron.Chart.WinForm.NState)(resources.GetObject("nChartControl1.State")));
             this.nChartControl1.TabIndex = 13;
-            this.nChartControl1.Text = "nChartControl1";
             // 
             // simpleButton4
             // 
@@ -390,21 +386,16 @@ namespace VAGSuite
             this.xtraTabPage2.Name = "xtraTabPage2";
             this.xtraTabPage2.Size = new System.Drawing.Size(841, 288);
             this.xtraTabPage2.Text = "2D Graph";
-            // 
+            //
             // nChartControl2
-            // 
+            //
             this.nChartControl2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.nChartControl2.AutoRefresh = false;
-            this.nChartControl2.BackColor = System.Drawing.SystemColors.Control;
-            this.nChartControl2.InputKeys = new System.Windows.Forms.Keys[0];
             this.nChartControl2.Location = new System.Drawing.Point(6, 3);
             this.nChartControl2.Name = "nChartControl2";
             this.nChartControl2.Size = new System.Drawing.Size(826, 192);
-            this.nChartControl2.State = ((Nevron.Chart.WinForm.NState)(resources.GetObject("nChartControl2.State")));
             this.nChartControl2.TabIndex = 5;
-            this.nChartControl2.Text = "nChartControl2";
             // 
             // labelControl9
             // 
@@ -777,8 +768,8 @@ namespace VAGSuite
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private DevExpress.XtraEditors.SimpleButton simpleButton1;
-        private Nevron.Chart.WinForm.NChartControl nChartControl1;
-        private Nevron.Chart.WinForm.NChartControl nChartControl2;
+        private OpenTK.GLControl nChartControl1;
+        private ZedGraph.ZedGraphControl nChartControl2;
         private DevExpress.XtraEditors.SimpleButton btnToggleOverlay;
         private System.Windows.Forms.Timer timer5;
         private DevExpress.XtraEditors.SimpleButton simpleButton8;

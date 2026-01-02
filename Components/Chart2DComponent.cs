@@ -2,8 +2,7 @@ using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using Nevron.Chart;
-using Nevron.GraphicsCore;
+using ZedGraph;
 using VAGSuite.Models;
 using VAGSuite.Services;
 
@@ -18,7 +17,8 @@ namespace VAGSuite.Components
 
         private readonly IChartService _chartService;
         
-        private Nevron.Chart.WinForm.NChartControl _externalChartControl;
+        private ZedGraph.ZedGraphControl _externalChartControl;
+        private ZedGraph.PointPairList _pointList;
         
         // State references
         private int _tableWidth;
@@ -56,9 +56,13 @@ namespace VAGSuite.Components
         /// Sets the external NChartControl to use instead of creating a new one.
         /// This allows the component to share the designer's chart control.
         /// </summary>
-        public void SetChartControl(Nevron.Chart.WinForm.NChartControl externalChart)
+        public void SetChartControl(ZedGraph.ZedGraphControl externalChart)
         {
             _externalChartControl = externalChart;
+            if (_externalChartControl != null)
+            {
+                _pointList = new ZedGraph.PointPairList();
+            }
         }
 
         #endregion
@@ -172,7 +176,7 @@ namespace VAGSuite.Components
         /// <summary>
         /// Gets the chart control to use (external or null)
         /// </summary>
-        private Nevron.Chart.WinForm.NChartControl GetChartControl()
+        private ZedGraph.ZedGraphControl GetChartControl()
         {
             return _externalChartControl;
         }
@@ -180,61 +184,37 @@ namespace VAGSuite.Components
         private void ConfigureChart(MapViewerState state)
         {
             var chartControl = GetChartControl();
-            if (chartControl == null || chartControl.Charts.Count == 0) return;
+            if (chartControl == null) return;
 
-            chartControl.Settings.ShapeRenderingMode = ShapeRenderingMode.HighSpeed;
-            chartControl.Legends.Clear();
+            ZedGraph.GraphPane pane = chartControl.GraphPane;
+            pane.CurveList.Clear();
+            pane.GraphObjList.Clear();
 
-            NChart chart2d = chartControl.Charts[0];
+            // Configure pane
+            pane.Title.Text = _mapName;
+            pane.XAxis.Title.Text = _xAxisName;
+            pane.YAxis.Title.Text = state.Metadata.ZAxisName;
 
-            // Configure axis
-            NLinearScaleConfigurator linearScale = (NLinearScaleConfigurator)chart2d.Axis(StandardAxis.PrimaryY).ScaleConfigurator;
-            linearScale.MajorGridStyle.LineStyle.Pattern = LinePattern.Dot;
-            linearScale.MajorGridStyle.SetShowAtWall(ChartWallType.Back, true);
+            // Styling
+            pane.Fill = new ZedGraph.Fill(Color.White);
+            pane.Chart.Fill = new ZedGraph.Fill(Color.White);
+            pane.XAxis.MajorGrid.IsVisible = true;
+            pane.YAxis.MajorGrid.IsVisible = true;
+            pane.XAxis.MajorGrid.DashOff = 0;
+            pane.YAxis.MajorGrid.DashOff = 0;
 
-            NScaleStripStyle stripStyle = new NScaleStripStyle(new NColorFillStyle(Color.Beige), null, true, 0, 0, 1, 1);
-            stripStyle.Interlaced = true;
-            stripStyle.SetShowAtWall(ChartWallType.Back, true);
-            stripStyle.SetShowAtWall(ChartWallType.Left, true);
-            linearScale.StripStyles.Add(stripStyle);
+            // Create point list and curve
+            _pointList = new ZedGraph.PointPairList();
+            ZedGraph.LineItem curve = pane.AddCurve(_mapName, _pointList, Color.Blue, ZedGraph.SymbolType.Circle);
 
-            // Add line series
-            NSmoothLineSeries line = null;
-            if (chart2d.Series.Count == 0)
-            {
-                line = (NSmoothLineSeries)chart2d.Series.Add(SeriesType.SmoothLine);
-            }
-            else
-            {
-                line = (NSmoothLineSeries)chart2d.Series[0];
-            }
+            // Configure curve (Verified: IsSmooth=true for ZedGraph 5.1.7)
+            curve.Line.IsSmooth = true;
+            curve.Line.SmoothTension = 0.5f;
+            curve.Line.Width = 2.0f;
+            curve.Symbol.Size = 7.0f;
+            curve.Symbol.Fill = new ZedGraph.Fill(Color.Blue);
 
-            line.Name = _mapName;
-            line.Legend.Mode = SeriesLegendMode.Series;
-            line.UseXValues = true;
-            line.UseZValues = false;
-            line.DataLabelStyle.Visible = true;
-            line.MarkerStyle.Visible = true;
-            line.MarkerStyle.PointShape = PointShape.Sphere;
-            line.MarkerStyle.AutoDepth = true;
-            line.MarkerStyle.Width = new NLength(1.4f, NRelativeUnit.ParentPercentage);
-            line.MarkerStyle.Height = new NLength(1.4f, NRelativeUnit.ParentPercentage);
-            line.MarkerStyle.Depth = new NLength(1.4f, NRelativeUnit.ParentPercentage);
-
-            // Set X values from axis
-            if (_yAxisValues != null)
-            {
-                for (int i = 0; i < _yAxisValues.Length; i++)
-                {
-                    line.XValues.Add(_yAxisValues[i]);
-                }
-            }
-
-            // Apply style sheet
-            NStyleSheet styleSheet = NStyleSheet.CreatePredefinedStyleSheet(PredefinedStyleSheet.Nevron);
-            styleSheet.Apply(chartControl.Document);
-
-            chart2d.BoundsMode = BoundsMode.Stretch;
+            chartControl.AxisChange();
         }
 
         /// <summary>
@@ -253,27 +233,10 @@ namespace VAGSuite.Components
             try
             {
                 var chartControl = GetChartControl();
-                if (chartControl == null || chartControl.Charts.Count == 0) return;
-
-                NChart chart = chartControl.Charts[0];
-                NSmoothLineSeries line = null;
-
-                if (chart.Series.Count == 0)
-                {
-                    line = (NSmoothLineSeries)chart.Series.Add(SeriesType.SmoothLine);
-                }
-                else
-                {
-                    line = (NSmoothLineSeries)chart.Series[0];
-                }
+                if (chartControl == null || _pointList == null) return;
 
                 // Clear existing data points
-                line.ClearDataPoints();
-
-                // Populate data table
-                DataTable chartdt = new DataTable();
-                chartdt.Columns.Add("X", Type.GetType("System.Double"));
-                chartdt.Columns.Add("Y", Type.GetType("System.Double"));
+                _pointList.Clear();
 
                 double valCount = 0;
                 int numberOfRows = _mapContent.Length;
@@ -283,11 +246,8 @@ namespace VAGSuite.Components
                 {
                     for (int t = 0; t < numberOfRows; t++)
                     {
-                        // The data in _mapContent is already correctly ordered by MapViewerEx (handling IsUpsideDown).
-                        // Applying a second reversal here causes mirroring.
                         int actualRow = t;
-
-                        double yval = valCount;
+                        double xval = valCount;
                         int offset = actualRow * 2;
                         double value = Convert.ToDouble(_mapContent.GetValue(offset)) * 256;
                         value += Convert.ToDouble(_mapContent.GetValue(offset + 1));
@@ -298,10 +258,13 @@ namespace VAGSuite.Components
                             value = -value;
                         }
 
-                        if (_yAxisValues != null && _yAxisValues.Length > valCount)
-                            yval = Convert.ToDouble(_yAxisValues[(int)valCount]);
+                        value *= _correctionFactor;
+                        value += _correctionOffset;
 
-                        chartdt.Rows.Add(yval, value);
+                        if (_yAxisValues != null && _yAxisValues.Length > valCount)
+                            xval = Convert.ToDouble(_yAxisValues[(int)valCount]);
+
+                        _pointList.Add(xval, value);
                         valCount++;
                     }
                 }
@@ -309,37 +272,23 @@ namespace VAGSuite.Components
                 {
                     for (int t = 0; t < numberOfRows; t++)
                     {
-                        // The data in _mapContent is already correctly ordered by MapViewerEx (handling IsUpsideDown).
-                        // Applying a second reversal here causes mirroring.
                         int actualRow = t;
-
-                        double yval = valCount;
+                        double xval = valCount;
                         double value = Convert.ToDouble(_mapContent.GetValue(actualRow));
 
-                        if (_yAxisValues != null && _yAxisValues.Length > valCount)
-                            yval = Convert.ToDouble(_yAxisValues[(int)valCount]);
+                        value *= _correctionFactor;
+                        value += _correctionOffset;
 
-                        chartdt.Rows.Add(yval, value);
+                        if (_yAxisValues != null && _yAxisValues.Length > valCount)
+                            xval = Convert.ToDouble(_yAxisValues[(int)valCount]);
+
+                        _pointList.Add(xval, value);
                         valCount++;
                     }
                 }
 
-                // Add new data points
-                foreach (DataRow dr in chartdt.Rows)
-                {
-                    try
-                    {
-                        double xValue = Convert.ToDouble(dr["X"]);
-                        double yValue = Convert.ToDouble(dr["Y"]);
-                        line.AddDataPoint(new NDataPoint(xValue, yValue));
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Chart2DComponent: Error adding data point: " + ex.Message);
-                    }
-                }
-
-                chartControl.Refresh();
+                chartControl.AxisChange();
+                chartControl.Invalidate();
             }
             catch (Exception ex)
             {
