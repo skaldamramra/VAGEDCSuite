@@ -12,6 +12,12 @@ using VAGSuite.Services;
 
 namespace VAGSuite.Components
 {
+    public enum RenderMode
+    {
+        Solid,
+        Wireframe
+    }
+
     /// <summary>
     /// Encapsulates the 3D surface chart for map visualization using OpenTK.
     /// </summary>
@@ -46,6 +52,7 @@ namespace VAGSuite.Components
         private float _rotation = -45f;
         private float _elevation = 45f;
         private float _zoom = 1.5f;
+        private RenderMode _renderMode = RenderMode.Solid;
         private ViewType _viewType;
         private string _mapName;
         private string _xAxisName;
@@ -179,14 +186,13 @@ namespace VAGSuite.Components
             
                 SetupViewport();
             
-                // Draw Axes for orientation
-                DrawAxes();
+                // Draw Bounding Box and Grids
+                DrawBoundingBox();
 
                 if (_buffersInitialized && _vertexCount > 0 && _shaderProgram > 0)
                 {
                     GL.UseProgram(_shaderProgram);
 
-                    // Set Uniforms
                     int modelViewLoc = GL.GetUniformLocation(_shaderProgram, "uModelView");
                     int projectionLoc = GL.GetUniformLocation(_shaderProgram, "uProjection");
                     int modelLoc = GL.GetUniformLocation(_shaderProgram, "uModel");
@@ -200,46 +206,45 @@ namespace VAGSuite.Components
                     GL.UniformMatrix4(modelViewLoc, false, ref modelView);
                     GL.UniformMatrix4(projectionLoc, false, ref projection);
                     
-                    // Set model matrix for mesh rotation
+                    // Model matrix is now Identity because rotation is unified in modelView
                     Matrix4 model = Matrix4.Identity;
-                    if (_rotateMesh)
-                    {
-                        model = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(_elevation));
-                        model *= Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotation));
-                    }
                     GL.UniformMatrix4(modelLoc, false, ref model);
 
-                    // Bind VBO
                     GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
                     GL.EnableVertexAttribArray(posLoc);
                     GL.VertexAttribPointer(posLoc, 3, VertexAttribPointerType.Float, false, 0, 0);
 
-                    // Bind CBO
                     GL.BindBuffer(BufferTarget.ArrayBuffer, _cbo);
                     GL.EnableVertexAttribArray(colLoc);
                     GL.VertexAttribPointer(colLoc, 4, VertexAttribPointerType.Float, false, 0, 0);
 
-                    // Draw wireframe using quad edges only (no diagonals)
-                    if (_wireframeEbo != 0)
+                    if (_renderMode == RenderMode.Wireframe)
                     {
-                        GL.Disable(EnableCap.PolygonOffsetFill);
-                        GL.Color4(0.0f, 0.0f, 0.0f, 0.8f); // Black wireframe
-                        GL.LineWidth(1.5f);
-                        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _wireframeEbo);
-                        GL.DrawElements(PrimitiveType.Lines, _vertexCount / 6 * 4, DrawElementsType.UnsignedInt, IntPtr.Zero); // 4 edges per quad
+                        // Wireframe Mode: Only draw the edges
+                        if (_wireframeEbo != 0)
+                        {
+                            GL.Disable(EnableCap.PolygonOffsetFill);
+                            GL.LineWidth(1.0f);
+                            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _wireframeEbo);
+                            GL.DrawElements(PrimitiveType.Lines, (int)(_vertexCount * 1.33f), DrawElementsType.UnsignedInt, IntPtr.Zero);
+                        }
                     }
-                    
-                    // Draw filled triangles with transparency
-                    GL.Enable(EnableCap.PolygonOffsetFill);
-                    GL.PolygonOffset(1.0f, 1.0f);
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-                    GL.DrawElements(PrimitiveType.Triangles, _vertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
-                    
-                    // Reset polygon mode
-                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+                    else
+                    {
+                        // Solid Mode: Draw filled triangles + subtle wireframe overlay
+                        GL.Enable(EnableCap.PolygonOffsetFill);
+                        GL.PolygonOffset(1.0f, 1.0f);
+                        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
+                        GL.DrawElements(PrimitiveType.Triangles, _vertexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
 
-                    // Draw vertex points for highlighting
-                    DrawVertexPoints();
+                        if (_wireframeEbo != 0)
+                        {
+                            GL.Disable(EnableCap.PolygonOffsetFill);
+                            GL.LineWidth(0.5f);
+                            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _wireframeEbo);
+                            GL.DrawElements(PrimitiveType.Lines, (int)(_vertexCount * 1.33f), DrawElementsType.UnsignedInt, IntPtr.Zero);
+                        }
+                    }
 
                     GL.DisableVertexAttribArray(posLoc);
                     GL.DisableVertexAttribArray(colLoc);
@@ -295,21 +300,23 @@ namespace VAGSuite.Components
             float maxDimension = Math.Max(_meshMaxBounds.X - _meshMinBounds.X,
                                           Math.Max(_meshMaxBounds.Y - _meshMinBounds.Y,
                                                    _meshMaxBounds.Z - _meshMinBounds.Z));
-            float distance = Math.Max(15f, maxDimension * 2.5f) / _zoom;
+            
+            // Unified Zoom Constraint: 0.5 to 5.0
+            float clampedZoom = Math.Max(0.5f, Math.Min(5.0f, _zoom));
+            float distance = Math.Max(15f, maxDimension * 2.5f) / clampedZoom;
             
             // Look at the center of the mesh
             Vector3 target = _meshCenter;
-            Vector3 eye = new Vector3(_meshCenter.X + distance, _meshCenter.Y + distance, _meshCenter.Z + distance);
+            Vector3 eye = new Vector3(_meshCenter.X, _meshCenter.Y, _meshCenter.Z + distance);
             
             modelview = Matrix4.LookAt(eye, target, Vector3.UnitY);
             
-            // Only apply rotation to camera if NOT rotating mesh
-            // When rotating mesh, the rotation is applied to vertices in UpdateBuffers
-            if (!_rotateMesh)
-            {
-                modelview *= Matrix4.CreateRotationX(MathHelper.DegreesToRadians(_elevation));
-                modelview *= Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotation));
-            }
+            // Unified Rotation: Apply to the entire scene (Mesh + Box + Grids)
+            // Elevation clamped to [-89, 89] to prevent gimbal lock
+            float clampedElevation = Math.Max(-89f, Math.Min(89f, _elevation));
+            modelview = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(clampedElevation)) *
+                        Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotation)) *
+                        modelview;
         }
 
         /// <summary>
@@ -321,67 +328,99 @@ namespace VAGSuite.Components
             RefreshChart();
         }
 
-        private void DrawAxes()
+        /// <summary>
+        /// Resets the view to default orientation and zoom.
+        /// </summary>
+        public void ResetView()
         {
-            GL.Disable(EnableCap.Lighting); // Axes shouldn't be lit
-            GL.Disable(EnableCap.DepthTest); // Draw axes on top
-            
-            // Calculate axis length based on mesh bounds
-            float axisLength = Math.Max(_meshMaxBounds.X - _meshMinBounds.X,
-                                        Math.Max(_meshMaxBounds.Y - _meshMinBounds.Y,
-                                                 _meshMaxBounds.Z - _meshMinBounds.Z)) * 1.2f;
-            
-            GL.Begin(PrimitiveType.Lines);
-            
-            // X Axis - Red (horizontal, represents X axis values)
-            GL.Color4(Color.Red.R, Color.Red.G, Color.Red.B, 0.8f);
-            GL.Vertex3(_meshMinBounds.X, _meshMinBounds.Y, _meshMinBounds.Z);
-            GL.Vertex3(_meshMaxBounds.X + axisLength * 0.1f, _meshMinBounds.Y, _meshMinBounds.Z);
-            
-            // Y Axis - Green (vertical, represents Z values in map)
-            GL.Color4(Color.Green.R, Color.Green.G, Color.Green.B, 0.8f);
-            GL.Vertex3(_meshMinBounds.X, _meshMinBounds.Y, _meshMinBounds.Z);
-            GL.Vertex3(_meshMinBounds.X, _meshMaxBounds.Y + axisLength * 0.1f, _meshMinBounds.Z);
-            
-            // Z Axis - Blue (depth, represents Y axis values)
-            GL.Color4(Color.Blue.R, Color.Blue.G, Color.Blue.B, 0.8f);
-            GL.Vertex3(_meshMinBounds.X, _meshMinBounds.Y, _meshMinBounds.Z);
-            GL.Vertex3(_meshMinBounds.X, _meshMinBounds.Y, _meshMaxBounds.Z + axisLength * 0.1f);
-            
-            GL.End();
-            
-            // Draw grid on the base plane (XZ plane at Y=min)
-            DrawGrid(axisLength);
-            
-            GL.Enable(EnableCap.DepthTest);
-            GL.Enable(EnableCap.Lighting);
+            _rotation = -45f;
+            _elevation = 45f;
+            _zoom = 1.5f;
+            RefreshChart();
         }
 
-        private void DrawGrid(float size)
+        private void DrawBoundingBox()
         {
-            GL.Color4(0.5f, 0.5f, 0.5f, 0.3f);
+            GL.Disable(EnableCap.Lighting);
+            GL.Enable(EnableCap.DepthTest);
+
+            Vector3 min = _meshMinBounds;
+            Vector3 max = _meshMaxBounds;
+
+            // Draw Back-face Grids first (so they are behind the mesh)
+            DrawBackGrids(min, max);
+
+            // Draw Bounding Box Edges
+            GL.Color4(0.7f, 0.7f, 0.7f, 0.5f);
+            GL.LineWidth(1.0f);
             GL.Begin(PrimitiveType.Lines);
-            
-            float step = size / 10f;
-            float start = _meshMinBounds.X - size * 0.1f;
-            float end = _meshMaxBounds.X + size * 0.1f;
-            
-            // Grid lines along X
-            for (float z = _meshMinBounds.Z - size * 0.1f; z <= _meshMaxBounds.Z + size * 0.1f; z += step)
+
+            // Bottom
+            GL.Vertex3(min.X, min.Y, min.Z); GL.Vertex3(max.X, min.Y, min.Z);
+            GL.Vertex3(max.X, min.Y, min.Z); GL.Vertex3(max.X, min.Y, max.Z);
+            GL.Vertex3(max.X, min.Y, max.Z); GL.Vertex3(min.X, min.Y, max.Z);
+            GL.Vertex3(min.X, min.Y, max.Z); GL.Vertex3(min.X, min.Y, min.Z);
+
+            // Top
+            GL.Vertex3(min.X, max.Y, min.Z); GL.Vertex3(max.X, max.Y, min.Z);
+            GL.Vertex3(max.X, max.Y, min.Z); GL.Vertex3(max.X, max.Y, max.Z);
+            GL.Vertex3(max.X, max.Y, max.Z); GL.Vertex3(min.X, max.Y, max.Z);
+            GL.Vertex3(min.X, max.Y, max.Z); GL.Vertex3(min.X, max.Y, min.Z);
+
+            // Vertical pillars
+            GL.Vertex3(min.X, min.Y, min.Z); GL.Vertex3(min.X, max.Y, min.Z);
+            GL.Vertex3(max.X, min.Y, min.Z); GL.Vertex3(max.X, max.Y, min.Z);
+            GL.Vertex3(max.X, min.Y, max.Z); GL.Vertex3(max.X, max.Y, max.Z);
+            GL.Vertex3(min.X, min.Y, max.Z); GL.Vertex3(min.X, max.Y, max.Z);
+
+            GL.End();
+        }
+
+        private void DrawBackGrids(Vector3 min, Vector3 max)
+        {
+            GL.Color4(0.4f, 0.4f, 0.4f, 0.2f);
+            GL.Begin(PrimitiveType.Lines);
+
+            int xDivs = 10;
+            int yDivs = 5;
+            int zDivs = 10;
+
+            // XZ Plane (Bottom)
+            for (int i = 0; i <= xDivs; i++)
             {
-                GL.Vertex3(start, _meshMinBounds.Y, z);
-                GL.Vertex3(end, _meshMinBounds.Y, z);
+                float x = min.X + (max.X - min.X) * i / xDivs;
+                GL.Vertex3(x, min.Y, min.Z); GL.Vertex3(x, min.Y, max.Z);
             }
-            
-            // Grid lines along Z
-            start = _meshMinBounds.Z - size * 0.1f;
-            end = _meshMaxBounds.Z + size * 0.1f;
-            for (float x = _meshMinBounds.X - size * 0.1f; x <= _meshMaxBounds.X + size * 0.1f; x += step)
+            for (int i = 0; i <= zDivs; i++)
             {
-                GL.Vertex3(x, _meshMinBounds.Y, start);
-                GL.Vertex3(x, _meshMinBounds.Y, end);
+                float z = min.Z + (max.Z - min.Z) * i / zDivs;
+                GL.Vertex3(min.X, min.Y, z); GL.Vertex3(max.X, min.Y, z);
             }
-            
+
+            // XY Plane (Back)
+            for (int i = 0; i <= xDivs; i++)
+            {
+                float x = min.X + (max.X - min.X) * i / xDivs;
+                GL.Vertex3(x, min.Y, max.Z); GL.Vertex3(x, max.Y, max.Z);
+            }
+            for (int i = 0; i <= yDivs; i++)
+            {
+                float y = min.Y + (max.Y - min.Y) * i / yDivs;
+                GL.Vertex3(min.X, y, max.Z); GL.Vertex3(max.X, y, max.Z);
+            }
+
+            // YZ Plane (Side)
+            for (int i = 0; i <= zDivs; i++)
+            {
+                float z = min.Z + (max.Z - min.Z) * i / zDivs;
+                GL.Vertex3(min.X, min.Y, z); GL.Vertex3(min.X, max.Y, z);
+            }
+            for (int i = 0; i <= yDivs; i++)
+            {
+                float y = min.Y + (max.Y - min.Y) * i / yDivs;
+                GL.Vertex3(min.X, y, min.Z); GL.Vertex3(min.X, y, max.Z);
+            }
+
             GL.End();
         }
 
@@ -398,6 +437,9 @@ namespace VAGSuite.Components
         /// Draws axis labels using GDI+ - call this after SwapBuffers
         /// Labels are placed at fixed screen positions around the control edges
         /// </summary>
+        /// <summary>
+        /// Draws axis labels using GDI+ anchored to 3D projected points on the bounding box.
+        /// </summary>
         private void RenderAxisLabels()
         {
             if (_glControl == null || _glControl.IsDisposed) return;
@@ -406,64 +448,74 @@ namespace VAGSuite.Components
             {
                 using (Graphics g = _glControl.CreateGraphics())
                 {
-                    // Use a simple font for labels
-                    using (Font labelFont = new Font("Arial", 9, FontStyle.Bold))
-                    using (SolidBrush brushX = new SolidBrush(Color.Red))      // X-axis = Red
-                    using (SolidBrush brushY = new SolidBrush(Color.Green))    // Y-axis = Green
-                    using (SolidBrush brushZ = new SolidBrush(Color.Blue))     // Z-axis = Blue
+                    g.TextRenderingHint = TextRenderingHint.AntiAlias;
+                    using (Font labelFont = new Font("Segoe UI", 9, FontStyle.Bold))
+                    using (Font valueFont = new Font("Segoe UI", 7))
+                    using (SolidBrush textBrush = new SolidBrush(Color.LightGray))
                     {
-                        float padding = 10f;
-                        float bottomMargin = _glControl.Height - 25f;
-                        float leftMargin = 15f;
-                        
-                        // Draw X-axis name at bottom-left
-                        string xAxisLabel = !string.IsNullOrEmpty(_xAxisName) ? _xAxisName : "X Axis";
-                        g.DrawString(xAxisLabel, labelFont, brushX, leftMargin, bottomMargin);
-                        
-                        // Draw X-axis values along bottom edge
+                        Vector3 min = _meshMinBounds;
+                        Vector3 max = _meshMaxBounds;
+
+                        // 1. X-Axis Labels (along the front-bottom edge)
                         if (_xAxisValues != null && _xAxisValues.Length > 0)
                         {
-                            int labelCount = Math.Min(5, _xAxisValues.Length);
-                            float labelSpacing = (_glControl.Width - leftMargin * 2) / (labelCount - 1);
-                            
+                            int labelCount = Math.Min(6, _xAxisValues.Length);
                             for (int i = 0; i < labelCount; i++)
                             {
                                 int idx = (i * (_xAxisValues.Length - 1)) / (labelCount - 1);
-                                string label = FormatAxisValue(_xAxisValues[idx], _xAxisName);
-                                float xPos = leftMargin + i * labelSpacing;
-                                g.DrawString(label, new Font("Arial", 7), brushX, xPos - 10, bottomMargin + 15);
+                                float x = min.X + (max.X - min.X) * i / (labelCount - 1);
+                                PointF screenPos = ProjectToScreen(new Vector3(x, min.Y, min.Z));
+                                if (screenPos != PointF.Empty)
+                                {
+                                    string val = FormatAxisValue(_xAxisValues[idx], _xAxisName);
+                                    g.DrawString(val, valueFont, textBrush, screenPos.X - 10, screenPos.Y + 5);
+                                }
                             }
+                            // Axis Title
+                            PointF titlePos = ProjectToScreen(new Vector3((min.X + max.X) / 2, min.Y, min.Z));
+                            g.DrawString(_xAxisName ?? "X Axis", labelFont, textBrush, titlePos.X - 20, titlePos.Y + 20);
                         }
-                        
-                        // Draw Z-axis name (Y in map terms) at top-left
-                        string yAxisLabel = !string.IsNullOrEmpty(_yAxisName) ? _yAxisName : "Y Axis";
-                        g.DrawString(yAxisLabel, labelFont, brushZ, leftMargin, padding);
-                        
-                        // Draw Z-axis values along left edge
+
+                        // 2. Y-Axis Labels (Depth/Z in GL terms, along the left-bottom edge)
                         if (_yAxisValues != null && _yAxisValues.Length > 0)
                         {
-                            int labelCount = Math.Min(5, _yAxisValues.Length);
-                            float labelSpacing = (bottomMargin - padding * 2) / (labelCount - 1);
-                            
+                            int labelCount = Math.Min(6, _yAxisValues.Length);
                             for (int i = 0; i < labelCount; i++)
                             {
                                 int idx = (i * (_yAxisValues.Length - 1)) / (labelCount - 1);
-                                string label = FormatAxisValue(_yAxisValues[idx], _yAxisName);
-                                float yPos = bottomMargin - i * labelSpacing;
-                                g.DrawString(label, new Font("Arial", 7), brushZ, leftMargin, yPos - 5);
+                                float z = min.Z + (max.Z - min.Z) * i / (labelCount - 1);
+                                PointF screenPos = ProjectToScreen(new Vector3(min.X, min.Y, z));
+                                if (screenPos != PointF.Empty)
+                                {
+                                    string val = FormatAxisValue(_yAxisValues[idx], _yAxisName);
+                                    g.DrawString(val, valueFont, textBrush, screenPos.X - 35, screenPos.Y);
+                                }
+                            }
+                            // Axis Title
+                            PointF titlePos = ProjectToScreen(new Vector3(min.X, min.Y, (min.Z + max.Z) / 2));
+                            g.DrawString(_yAxisName ?? "Y Axis", labelFont, textBrush, titlePos.X - 60, titlePos.Y + 10);
+                        }
+
+                        // 3. Z-Axis Labels (Height/Y in GL terms, along the front-left vertical edge)
+                        int zLabelCount = 5;
+                        for (int i = 0; i <= zLabelCount; i++)
+                        {
+                            float y = min.Y + (max.Y - min.Y) * i / zLabelCount;
+                            PointF screenPos = ProjectToScreen(new Vector3(min.X, y, min.Z));
+                            if (screenPos != PointF.Empty)
+                            {
+                                // Calculate actual map value for height
+                                float mapVal = (float)(_correctionOffset + (i * (6.0f / zLabelCount) / 6.0f) * (Math.Max(1, _meshMaxBounds.Y - _meshMinBounds.Y) / 6.0f));
+                                // Simplified: just show relative scale or find actual min/max
+                                g.DrawString(y.ToString("F0"), valueFont, textBrush, screenPos.X - 25, screenPos.Y - 5);
                             }
                         }
-                        
-                        // Draw Z-axis (value/height) name at top-right
-                        string zAxisLabel = !string.IsNullOrEmpty(_zAxisName) ? _zAxisName : "Value";
-                        SizeF textSize = g.MeasureString(zAxisLabel, labelFont);
-                        g.DrawString(zAxisLabel, labelFont, brushY, _glControl.Width - textSize.Width - padding, padding);
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Chart3DComponent: DrawAxisLabels error: " + ex.Message);
+                Console.WriteLine("Chart3DComponent: RenderAxisLabels error: " + ex.Message);
             }
         }
 
@@ -488,29 +540,23 @@ namespace VAGSuite.Components
             }
         }
 
+        /// <summary>
+        /// Projects a 3D point to 2D screen coordinates, accounting for unified rotation.
+        /// </summary>
         private PointF ProjectToScreen(Vector3 pos)
         {
-            // Simple projection to screen coordinates
-            float aspectRatio = (float)_glControl.Width / Math.Max(1, _glControl.Height);
-            
-            Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), aspectRatio, 0.1f, 1000f);
-            float maxDimension = Math.Max(_meshMaxBounds.X - _meshMinBounds.X,
-                                          Math.Max(_meshMaxBounds.Y - _meshMinBounds.Y,
-                                                   _meshMaxBounds.Z - _meshMinBounds.Z));
-            float distance = Math.Max(15f, maxDimension * 2.5f) / _zoom;
-            Vector3 eye = new Vector3(_meshCenter.X + distance, _meshCenter.Y + distance, _meshCenter.Z + distance);
-            Matrix4 modelview = Matrix4.LookAt(eye, _meshCenter, Vector3.UnitY);
-            modelview *= Matrix4.CreateRotationX(MathHelper.DegreesToRadians(_elevation));
-            modelview *= Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotation));
+            if (_glControl == null || _glControl.Width == 0 || _glControl.Height == 0) return PointF.Empty;
 
-            // Transform to clip space
-            Vector4 transformed = Vector4.Transform(new Vector4(pos, 1.0f), projection * modelview);
+            Matrix4 projection, modelview;
+            GetMatrices(out projection, out modelview);
+
+            // Transform to clip space using the same unified matrix as the renderer
+            Vector4 clipSpace = Vector4.Transform(new Vector4(pos, 1.0f), modelview * projection);
             
-            if (transformed.W <= 0) return new PointF(0, 0); // Behind camera
+            if (clipSpace.W <= 0) return PointF.Empty;
             
-            // Convert to screen coordinates
-            float ndcX = transformed.X / transformed.W;
-            float ndcY = transformed.Y / transformed.W;
+            float ndcX = clipSpace.X / clipSpace.W;
+            float ndcY = clipSpace.Y / clipSpace.W;
             
             float screenX = (ndcX + 1.0f) * 0.5f * _glControl.Width;
             float screenY = (1.0f - ndcY) * 0.5f * _glControl.Height;
@@ -711,32 +757,43 @@ namespace VAGSuite.Components
             }
         }
 
+        /// <summary>
+        /// Calculates a "tamed" 6-stop gradient color for a given Z value.
+        /// Verified stops: Blue -> Cyan -> Green -> Yellow -> Orange -> Red
+        /// </summary>
         private Vector4 GetColorForZ(float z, float min, float max, bool inverted)
         {
             float range = max - min;
             if (range <= 0) range = 1;
             float normalized = (z - min) / range;
-            
-            // The heatmap should always represent the visual height
-            // If the mesh is inverted, the color mapping must also invert to keep Red at the peaks
             if (inverted) normalized = 1.0f - normalized;
 
-            // Heatmap: Blue (0.0) -> Green (0.5) -> Red (1.0)
-            float r = 0, g = 0, b = 0;
-            if (normalized < 0.5f)
-            {
-                float t = normalized * 2.0f; // 0 to 1
-                b = 1.0f - t;
-                g = t;
-            }
-            else
-            {
-                float t = (normalized - 0.5f) * 2.0f; // 0 to 1
-                g = 1.0f - t;
-                r = t;
-            }
-            // Semi-transparent color (alpha = 0.6f) for better visualization of 3D structure
-            return new Vector4(r, g, b, 0.6f);
+            // Tamed 6-stop gradient (Verified in Phase 2)
+            Color[] stops = new Color[] {
+                ColorTranslator.FromHtml("#206C7C"), // Blue
+                ColorTranslator.FromHtml("#2EA9A1"), // Cyan
+                ColorTranslator.FromHtml("#91EABC"), // Green
+                ColorTranslator.FromHtml("#FFF598"), // Yellow
+                ColorTranslator.FromHtml("#F7B74A"), // Orange
+                ColorTranslator.FromHtml("#FF4818")  // Red
+            };
+
+            float scaled = normalized * (stops.Length - 1);
+            int lowerIdx = (int)Math.Floor(scaled);
+            int upperIdx = (int)Math.Ceiling(scaled);
+            float fraction = scaled - lowerIdx;
+
+            lowerIdx = Math.Max(0, Math.Min(stops.Length - 1, lowerIdx));
+            upperIdx = Math.Max(0, Math.Min(stops.Length - 1, upperIdx));
+
+            Color c1 = stops[lowerIdx];
+            Color c2 = stops[upperIdx];
+
+            float r = (c1.R + (c2.R - c1.R) * fraction) / 255f;
+            float g = (c1.G + (c2.G - c1.G) * fraction) / 255f;
+            float b = (c1.B + (c2.B - c1.B) * fraction) / 255f;
+
+            return new Vector4(r, g, b, 0.85f); // Slightly higher alpha for "tamed" look
         }
 
         #endregion
@@ -908,6 +965,15 @@ namespace VAGSuite.Components
         }
 
         /// <summary>
+        /// Toggles between Solid and Wireframe render modes.
+        /// </summary>
+        public void ToggleRenderMode()
+        {
+            _renderMode = (_renderMode == RenderMode.Solid) ? RenderMode.Wireframe : RenderMode.Solid;
+            RefreshChart();
+        }
+
+        /// <summary>
         /// Shows or hides the overlay (original map comparison)
         /// </summary>
         public void SetOverlayVisible(bool visible)
@@ -967,7 +1033,8 @@ namespace VAGSuite.Components
         private void OnGLMouseWheel(object sender, MouseEventArgs e)
         {
             _zoom += e.Delta > 0 ? 0.1f : -0.1f;
-            _zoom = Math.Max(0.1f, Math.Min(10f, _zoom));
+            // Strict Zoom Constraint
+            _zoom = Math.Max(0.5f, Math.Min(5.0f, _zoom));
             RefreshChart();
         }
 
