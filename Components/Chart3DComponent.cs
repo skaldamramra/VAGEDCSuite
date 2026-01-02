@@ -144,8 +144,9 @@ namespace VAGSuite.Components
             }
             ConfigureSurface(surface);
 
-            // Add original map overlay if available
-            if (_originalContent != null)
+            // Add original map overlay if available and NOT in Easy view
+            // Easy view scaling makes the original content (unscaled) appear as a ghost mesh at the bottom
+            if (_originalContent != null && _viewType != ViewType.Easy)
             {
                 NMeshSurfaceSeries surface2 = null;
                 if (chart.Series.Count == 1)
@@ -172,6 +173,20 @@ namespace VAGSuite.Components
                     }
                     ConfigureOverlay(surface3, Color.BlueViolet, _compareContent);
                 }
+            }
+            else
+            {
+                // Clear overlays if in Easy view or no content
+                while (chart.Series.Count > 1)
+                {
+                    chart.Series.RemoveAt(1);
+                }
+            }
+
+            // Ensure all series are initialized but hidden if not needed
+            while (chart.Series.Count < 3)
+            {
+                chart.Series.Add(SeriesType.MeshSurface);
             }
 
             // Hide walls
@@ -290,8 +305,8 @@ namespace VAGSuite.Components
 
             ConfigureSurface(surface);
 
-            // Add original map overlay if available
-            if (_originalContent != null)
+            // Add original map overlay if available and NOT in Easy view
+            if (_originalContent != null && _viewType != ViewType.Easy)
             {
                 NMeshSurfaceSeries surface2 = null;
                 if (chart.Series.Count == 1)
@@ -319,6 +334,14 @@ namespace VAGSuite.Components
                     ConfigureOverlay(surface3, Color.BlueViolet, _compareContent);
                 }
             }
+            else
+            {
+                // Clear overlays if in Easy view or no content
+                while (chart.Series.Count > 1)
+                {
+                    chart.Series.RemoveAt(1);
+                }
+            }
 
             // Hide walls
             chart.Wall(ChartWallType.Back).Visible = false;
@@ -330,8 +353,6 @@ namespace VAGSuite.Components
             chartControl.Settings.ShapeRenderingMode = ShapeRenderingMode.HighSpeed;
             chartControl.Controller.Tools.Add(new NSelectorTool());
             chartControl.Controller.Tools.Add(new NTrackballTool());
-
-            RefreshMeshGraph();
         }
 
         private void ConfigureAxis(NChart chart)
@@ -448,22 +469,32 @@ namespace VAGSuite.Components
 
                 FillData(surface);
 
-                // Handle overlay surfaces
-                if (_overlayVisible && _originalContent != null)
+                // Handle overlay surfaces - Use Visibility instead of adding/removing series to prevent crashes
+                bool showOverlays = _overlayVisible && _viewType != ViewType.Easy;
+                
+                if (chart.Series.Count > 1)
                 {
                     NMeshSurfaceSeries surface2 = (NMeshSurfaceSeries)chart.Series[1];
                     if (surface2 != null)
                     {
-                        surface2.Visible = true;
-                        FillDataOriginal(surface2);
-                    }
-
-                    if (_compareContent != null && chart.Series.Count > 2)
-                    {
-                        NMeshSurfaceSeries surface3 = (NMeshSurfaceSeries)chart.Series[2];
-                        if (surface3 != null)
+                        surface2.Visible = showOverlays && _originalContent != null;
+                        if (surface2.Visible)
                         {
-                            surface3.Visible = true;
+                            ConfigureOverlay(surface2, Color.YellowGreen, _originalContent);
+                            FillDataOriginal(surface2);
+                        }
+                    }
+                }
+
+                if (chart.Series.Count > 2)
+                {
+                    NMeshSurfaceSeries surface3 = (NMeshSurfaceSeries)chart.Series[2];
+                    if (surface3 != null)
+                    {
+                        surface3.Visible = showOverlays && _compareContent != null;
+                        if (surface3.Visible)
+                        {
+                            ConfigureOverlay(surface3, Color.BlueViolet, _compareContent);
                             FillDataCompare(surface3);
                         }
                     }

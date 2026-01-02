@@ -16,7 +16,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Formats cell display text with units
         /// </summary>
-        string FormatCellDisplayText(int value, ViewConfiguration config, MapMetadata metadata);
+        string FormatCellDisplayText(int value, ViewConfiguration config, MapMetadata metadata, bool isSixteenBit);
         
         /// <summary>
         /// Determines if cell should show open-loop indicator

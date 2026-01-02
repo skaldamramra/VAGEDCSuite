@@ -138,7 +138,7 @@ namespace VAGSuite.Tests
             var metadata = new MapMetadata { ZAxisName = "Seconds" };
             
             // Act
-            var result = _service.FormatCellDisplayText(1500, config, metadata);
+            var result = _service.FormatCellDisplayText(1500, config, metadata, true);
             
             // Assert
             Assert.AreEqual("15", result); // 1500 / 100 = 15
@@ -152,7 +152,7 @@ namespace VAGSuite.Tests
             var metadata = new MapMetadata { ZAxisName = "Degrees" };
             
             // Act
-            var result = _service.FormatCellDisplayText(128, config, metadata);
+            var result = _service.FormatCellDisplayText(128, config, metadata, false);
             
             // Assert
             Assert.AreEqual("0", result); // 128 - 128 = 0
@@ -165,7 +165,7 @@ namespace VAGSuite.Tests
             var config = new ViewConfiguration();
             
             // Act
-            var result = _service.FormatCellDisplayText(100, config, null);
+            var result = _service.FormatCellDisplayText(100, config, null, false);
             
             // Assert
             Assert.AreEqual("100", result);

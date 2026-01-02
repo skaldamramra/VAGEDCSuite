@@ -151,10 +151,11 @@ namespace VAGSuite.Components
         /// <summary>
         /// Gets data from the grid as byte array
         /// </summary>
-        public byte[] GetData()
+        public byte[] GetData(MapData data, ViewConfiguration config)
         {
-            byte[] retval = new byte[0]; // Placeholder - actual implementation needed
-            return retval;
+            DataTable dt = (DataTable)gridControl1.DataSource;
+            if (dt == null) return data.Content;
+            return _conversionService.ConvertFromDataTable(dt, data, config, config.IsUpsideDown);
         }
 
         /// <summary>

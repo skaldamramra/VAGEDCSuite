@@ -78,25 +78,36 @@ namespace VAGSuite.Services
             return Color.FromArgb(red, green, blue);
         }
         
-        public string FormatCellDisplayText(int value, ViewConfiguration config, MapMetadata metadata)
+        public string FormatCellDisplayText(int value, ViewConfiguration config, MapMetadata metadata, bool isSixteenBit)
         {
-            string cellValueString = value.ToString();
-            
-            if (metadata != null && !string.IsNullOrEmpty(metadata.ZAxisName))
+            if (config.ViewType != ViewType.Easy)
             {
-                if (metadata.ZAxisName == "Seconds")
+                // Use standard formatting for non-Easy views
+                if (config.ViewType == ViewType.Hexadecimal)
                 {
-                    double seconds = (double)value / 100;
-                    cellValueString = seconds.ToString("F2");
+                    return isSixteenBit ? value.ToString("X4") : value.ToString("X2");
                 }
-                else if (metadata.ZAxisName == "Degrees")
-                {
-                    double degrees = (double)value - 128;
-                    cellValueString = degrees.ToString();
-                }
+                return value.ToString();
             }
-            
-            return cellValueString;
+
+            // Easy View Logic with Correction Factor/Offset
+            double correctedValue = value * config.CorrectionFactor + config.CorrectionOffset;
+            string mapName = metadata?.Name ?? string.Empty;
+
+            if (mapName.StartsWith("Injector duration") || mapName.StartsWith("Start of injection"))
+            {
+                return correctedValue.ToString("F1") + "\u00b0";
+            }
+            else if (mapName.StartsWith("N75"))
+            {
+                return correctedValue.ToString("F0") + @"%";
+            }
+            else if (config.CorrectionFactor != 1.0 || config.CorrectionOffset != 0.0)
+            {
+                return correctedValue.ToString("F2");
+            }
+
+            return value.ToString();
         }
         
         public bool ShouldShowOpenLoopIndicator(int rowIndex, int colIndex, byte[] openLoop, int[] xAxis, int[] yAxis, string xAxisName, string yAxisName)

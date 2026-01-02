@@ -276,5 +276,32 @@ namespace VAGSuite.Services
             double result = rawValue * factor + offset;
             return result;
         }
+
+        public void CalculateStatistics(DataTable dt, ViewType viewType, double factor, double offset, bool isCompare, out int maxVal, out double realMin, out double realMax)
+        {
+            maxVal = 0;
+            realMin = double.MaxValue;
+            realMax = double.MinValue;
+
+            if (dt == null) return;
+
+            foreach (DataRow row in dt.Rows)
+            {
+                foreach (var item in row.ItemArray)
+                {
+                    if (item == null || item == DBNull.Value) continue;
+
+                    int val = ParseValue(item.ToString(), viewType);
+                    if (val > maxVal) maxVal = val;
+
+                    double realVal = ApplyCorrection(val, factor, isCompare ? 0 : offset);
+                    if (realVal > realMax) realMax = realVal;
+                    if (realVal < realMin) realMin = realVal;
+                }
+            }
+
+            if (realMin == double.MaxValue) realMin = 0;
+            if (realMax == double.MinValue) realMax = 0;
+        }
     }
 }

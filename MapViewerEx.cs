@@ -965,23 +965,16 @@ namespace VAGSuite
                 MapViewerState state = CreateMapViewerState();
                 DataTable dt = _dataConversionService.ConvertToDataTable(state.Data, state.Configuration);
                 
-                // Update MaxValueInTable and Real Min/Max from the data
-                m_MaxValueInTable = 0;
-                m_realMaxValue = double.MinValue;
-                m_realMinValue = double.MaxValue;
-
-                foreach (DataRow row in dt.Rows)
-                {
-                    foreach (var item in row.ItemArray)
-                    {
-                        int val = _dataConversionService.ParseValue(item.ToString(), m_viewtype);
-                        if (val > m_MaxValueInTable) m_MaxValueInTable = val;
-                        
-                        double realVal = _dataConversionService.ApplyCorrection(val, correction_factor, _isCompareViewer ? 0 : correction_offset);
-                        if (realVal > m_realMaxValue) m_realMaxValue = realVal;
-                        if (realVal < m_realMinValue) m_realMinValue = realVal;
-                    }
-                }
+                // Use the refactored service to calculate statistics
+                _dataConversionService.CalculateStatistics(
+                    dt,
+                    m_viewtype,
+                    correction_factor,
+                    correction_offset,
+                    _isCompareViewer,
+                    out m_MaxValueInTable,
+                    out m_realMinValue,
+                    out m_realMaxValue);
 
                 gridControl1.DataSource = dt;
 
@@ -1195,35 +1188,12 @@ namespace VAGSuite
                     }
                 }
 
-                // Use IDataConversionService for value formatting
-                string displayText = _dataConversionService.FormatValue(cellValue, m_viewtype, m_issixteenbit);
-
-                // Apply correction factor and offset if needed
-                if (m_viewtype == ViewType.Easy && (correction_offset != 0 || correction_factor != 1))
-                {
-                    double correctedValue = _dataConversionService.ApplyCorrection(cellValue, correction_factor, correction_offset);
-
-                    if (m_map_name.StartsWith("Injector duration") || m_map_name.StartsWith("Start of injection"))
-                    {
-                        e.DisplayText = correctedValue.ToString("F1") + "\u00b0";
-                    }
-                    else if (m_map_name.StartsWith("N75"))
-                    {
-                        e.DisplayText = correctedValue.ToString("F0") + @"%";
-                    }
-                    else
-                    {
-                        e.DisplayText = correctedValue.ToString("F2");
-                    }
-                }
-                else if (m_viewtype == ViewType.Easy && m_map_name.StartsWith("N75"))
-                {
-                    e.DisplayText = displayText + @"%";
-                }
-                else
-                {
-                    e.DisplayText = displayText;
-                }
+                // Use IMapRenderingService for unified value formatting and unit handling
+                e.DisplayText = _mapRenderingService.FormatCellDisplayText(
+                    cellValue,
+                    CreateMapViewerState().Configuration,
+                    CreateMapViewerState().Metadata,
+                    m_issixteenbit);
 
                 // Open Loop Indicator logic refactored to service
                 if (_mapRenderingService.ShouldShowOpenLoopIndicator(e.RowHandle, e.Column.AbsoluteIndex, open_loop, x_axisvalues, y_axisvalues, m_xaxisUnits, m_yaxisUnits))
@@ -1453,6 +1423,11 @@ namespace VAGSuite
             simpleButton3.Enabled = true; // Enable the undo button when data is mutated
             // Update m_map_content with the latest data from the grid
             m_map_content = GetDataFromGridView(m_isUpsideDown);
+            
+            // Ensure components are updated with the new content
+            if (_chart3DComponent != null) _chart3DComponent.LoadData(CreateMapViewerState());
+            if (_chart2DComponent != null) _chart2DComponent.LoadData(m_map_content, m_map_length, CreateMapViewerState());
+
             if (nChartControl1.Visible)
             {
                 StartSurfaceChartUpdateTimer();
@@ -1747,9 +1722,8 @@ namespace VAGSuite
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-            RefreshMeshGraph();
-
             timer2.Enabled = false;
+            RefreshMeshGraph();
         }
 
         public void SetSelectedTabPageIndex(int tabpageindex)

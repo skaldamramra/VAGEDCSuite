@@ -32,5 +32,10 @@ namespace VAGSuite.Services
         /// Applies correction factor and offset
         /// </summary>
         double ApplyCorrection(int rawValue, double factor, double offset);
+
+        /// <summary>
+        /// Calculates statistics (Max, RealMin, RealMax) from a DataTable
+        /// </summary>
+        void CalculateStatistics(DataTable dt, ViewType viewType, double factor, double offset, bool isCompare, out int maxVal, out double realMin, out double realMax);
     }
 }
