@@ -30,6 +30,7 @@ namespace VAGSuite.Components
         private int[] _yAxisValues;
         private double _correctionFactor;
         private double _correctionOffset;
+        private bool _isUpsideDown;
 
         #endregion
 
@@ -78,6 +79,7 @@ namespace VAGSuite.Components
             _yAxisValues = state.Axes.YAxisValues;
             _correctionFactor = state.Configuration.CorrectionFactor;
             _correctionOffset = state.Configuration.CorrectionOffset;
+            _isUpsideDown = state.Configuration.IsUpsideDown;
 
             ConfigureChart(state);
         }
@@ -240,6 +242,14 @@ namespace VAGSuite.Components
         /// </summary>
         public void RefreshChart()
         {
+            RefreshChart(null);
+        }
+
+        /// <summary>
+        /// Refreshes the 2D chart with current data.
+        /// </summary>
+        public void RefreshChart(MapViewerState state)
+        {
             try
             {
                 var chartControl = GetChartControl();
@@ -266,25 +276,49 @@ namespace VAGSuite.Components
                 chartdt.Columns.Add("Y", Type.GetType("System.Double"));
 
                 double valCount = 0;
+                int numberOfRows = _mapContent.Length;
+                if (_isSixteenBit) numberOfRows /= 2;
+
                 if (_isSixteenBit)
                 {
-                    for (int t = 0; t < _mapContent.Length; t += 2)
+                    for (int t = 0; t < numberOfRows; t++)
                     {
+                        // The data in _mapContent is already correctly ordered by MapViewerEx (handling IsUpsideDown).
+                        // Applying a second reversal here causes mirroring.
+                        int actualRow = t;
+
                         double yval = valCount;
-                        double value = Convert.ToDouble(_mapContent.GetValue(t)) * 256;
-                        value += Convert.ToDouble(_mapContent.GetValue(t + 1));
-                        if (_yAxisValues.Length > valCount) yval = Convert.ToDouble((int)_yAxisValues.GetValue((int)valCount));
+                        int offset = actualRow * 2;
+                        double value = Convert.ToDouble(_mapContent.GetValue(offset)) * 256;
+                        value += Convert.ToDouble(_mapContent.GetValue(offset + 1));
+
+                        if (value > 32000)
+                        {
+                            value = 65536 - value;
+                            value = -value;
+                        }
+
+                        if (_yAxisValues != null && _yAxisValues.Length > valCount)
+                            yval = Convert.ToDouble(_yAxisValues[(int)valCount]);
+
                         chartdt.Rows.Add(yval, value);
                         valCount++;
                     }
                 }
                 else
                 {
-                    for (int t = 0; t < _mapContent.Length; t++)
+                    for (int t = 0; t < numberOfRows; t++)
                     {
+                        // The data in _mapContent is already correctly ordered by MapViewerEx (handling IsUpsideDown).
+                        // Applying a second reversal here causes mirroring.
+                        int actualRow = t;
+
                         double yval = valCount;
-                        double value = Convert.ToDouble(_mapContent.GetValue(t));
-                        if (_yAxisValues.Length > valCount) yval = Convert.ToDouble((int)_yAxisValues.GetValue((int)valCount));
+                        double value = Convert.ToDouble(_mapContent.GetValue(actualRow));
+
+                        if (_yAxisValues != null && _yAxisValues.Length > valCount)
+                            yval = Convert.ToDouble(_yAxisValues[(int)valCount]);
+
                         chartdt.Rows.Add(yval, value);
                         valCount++;
                     }

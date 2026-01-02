@@ -250,8 +250,10 @@ namespace VAGSuite.Services
                         return int.Parse(value, CultureInfo.InvariantCulture);
                         
                     case ViewType.Easy:
+                        // Legacy MapViewerEx logic: Easy view values are parsed as doubles
+                        // and then cast to int. The multiplication by 100 was a hallucination
+                        // in the previous refactor and is causing the "nuked" mesh.
                         double val = double.Parse(value, CultureInfo.InvariantCulture);
-                        val = val * 100;
                         return (int)val;
                         
                     case ViewType.ASCII:

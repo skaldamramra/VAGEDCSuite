@@ -233,6 +233,7 @@ namespace VAGSuite.Components
             gridView1.CustomDrawCell += GridView1_CustomDrawCell;
             gridView1.SelectionChanged += GridView1_SelectionChanged;
             gridView1.CellValueChanged += GridView1_CellValueChanged;
+            gridView1.KeyDown += GridView1_KeyDown;
 
             this.Controls.Add(gridControl1);
             this.Dock = DockStyle.Fill;
@@ -349,6 +350,75 @@ namespace VAGSuite.Components
         private void OnDataChanged()
         {
             DataChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void GridView1_KeyDown(object sender, KeyEventArgs e)
+        {
+            DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
+            if (cellcollection.Length > 0)
+            {
+                int increment = 0;
+                if (e.KeyCode == Keys.Add) increment = 1;
+                else if (e.KeyCode == Keys.Subtract) increment = -1;
+                else if (e.KeyCode == Keys.PageUp) increment = _viewType == ViewType.Hexadecimal ? 0x10 : 10;
+                else if (e.KeyCode == Keys.PageDown) increment = _viewType == ViewType.Hexadecimal ? -0x10 : -10;
+                else if (e.KeyCode == Keys.Home)
+                {
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                    foreach (var gc in cellcollection)
+                    {
+                        int val = _isSixteenBit ? 0xFFFF : 0xFF;
+                        gridView1.SetRowCellValue(gc.RowHandle, gc.Column, _viewType == ViewType.Hexadecimal ? val.ToString(_isSixteenBit ? "X4" : "X2") : val.ToString());
+                    }
+                    return;
+                }
+                else if (e.KeyCode == Keys.End)
+                {
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                    foreach (var gc in cellcollection)
+                    {
+                        gridView1.SetRowCellValue(gc.RowHandle, gc.Column, _viewType == ViewType.Hexadecimal ? (_isSixteenBit ? "0000" : "00") : "0");
+                    }
+                    return;
+                }
+
+                if (increment != 0)
+                {
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                    foreach (var gc in cellcollection)
+                    {
+                        int value = 0;
+                        object cellVal = gridView1.GetRowCellValue(gc.RowHandle, gc.Column);
+                        if (cellVal == null) continue;
+
+                        if (_viewType == ViewType.Hexadecimal)
+                            value = Convert.ToInt32(cellVal.ToString(), 16);
+                        else
+                            value = Convert.ToInt32(cellVal.ToString());
+
+                        value += increment;
+
+                        if (!_isSixteenBit)
+                        {
+                            if (value > 0xFF) value = 0xFF;
+                            if (value < 0) value = 0;
+                        }
+                        else
+                        {
+                            if (value > 0xFFFF) value = 0xFFFF;
+                            // 16-bit can be signed in some contexts but legacy code mostly clamped at 0 or allowed wrap
+                        }
+
+                        if (_viewType == ViewType.Hexadecimal)
+                            gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString(_isSixteenBit ? "X4" : "X2"));
+                        else
+                            gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
+                    }
+                }
+            }
         }
 
         #endregion

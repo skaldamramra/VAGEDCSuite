@@ -99,23 +99,32 @@ namespace VAGSuite.Services
             return cellValueString;
         }
         
-        public bool ShouldShowOpenLoopIndicator(int rowIndex, int colIndex, byte[] openLoop, int[] xAxis, int[] yAxis)
+        public bool ShouldShowOpenLoopIndicator(int rowIndex, int colIndex, byte[] openLoop, int[] xAxis, int[] yAxis, string xAxisName, string yAxisName)
         {
-            if (openLoop == null || openLoop.Length < 2)
-                return false;
-                
-            if (xAxis == null || yAxis == null)
-                return false;
-                
-            int xValue = xAxis[colIndex];
-            int yValue = yAxis[rowIndex];
-            
-            for (int i = 0; i < openLoop.Length - 1; i += 2)
+            if (openLoop == null || openLoop.Length == 0) return false;
+            if (xAxis == null || yAxis == null) return false;
+            if (xAxisName.ToLower() != "mg/c" || yAxisName.ToLower() != "rpm") return false;
+
+            try
             {
-                if (openLoop[i] == xValue && openLoop[i + 1] == yValue)
-                    return true;
+                if (colIndex >= 0 && colIndex < xAxis.Length && rowIndex >= 0 && rowIndex < yAxis.Length)
+                {
+                    int airmassvalue = xAxis[colIndex];
+                    
+                    // Logic from MapViewerEx.GetOpenLoopValue
+                    int index = (yAxis.Length - 1) - rowIndex;
+                    if (index * 2 + 1 < openLoop.Length)
+                    {
+                        int mapopenloop = (int)openLoop[index * 2] * 256 + (int)openLoop[index * 2 + 1];
+                        return mapopenloop > airmassvalue;
+                    }
+                }
             }
-            
+            catch
+            {
+                // Fallback to false on any error
+            }
+
             return false;
         }
     }

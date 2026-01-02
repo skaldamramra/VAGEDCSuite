@@ -21,6 +21,6 @@ namespace VAGSuite.Services
         /// <summary>
         /// Determines if cell should show open-loop indicator
         /// </summary>
-        bool ShouldShowOpenLoopIndicator(int rowIndex, int colIndex, byte[] openLoop, int[] xAxis, int[] yAxis);
+        bool ShouldShowOpenLoopIndicator(int rowIndex, int colIndex, byte[] openLoop, int[] xAxis, int[] yAxis, string xAxisName, string yAxisName);
     }
 }

@@ -428,186 +428,17 @@ namespace VAGSuite
 
         private void FillData(NMeshSurfaceSeries surface)
         {
-            try
-            {
-                DataTable dt = (DataTable)gridControl1.DataSource;
-                int rowcount = 0;
-                now_realMaxValue = double.MinValue;
-                now_realMinValue = double.MaxValue;
-                //surface.Data.Clear();
-                foreach (DataRow dr in dt.Rows)
-                {
-                    for (int t = 0; t < dt.Columns.Count; t++)
-                    {
-                        double value = 0;
-                        if (m_viewtype == ViewType.Easy || m_viewtype == ViewType.Decimal)
-                        {
-                            value = Convert.ToInt32(dr[t]);
-                        }
-                        else if (m_viewtype == ViewType.Hexadecimal)
-                        {
-                            value = Convert.ToInt32(dr[t].ToString(), 16);
-
-                        }
-                        if (m_viewtype != ViewType.Decimal && m_viewtype != ViewType.Hexadecimal && m_viewtype != ViewType.ASCII)
-                        {
-                            value *= correction_factor;
-                            if (!_isCompareViewer) value += correction_offset;
-                        }
-                        surface.Data.SetValue(rowcount, t, value, /*y_axisvalues.GetValue(rowcount)*/ rowcount, /*x_axisvalues.GetValue(t)*/ t);
-                        if (value > now_realMaxValue) now_realMaxValue = value;
-                        if (value < now_realMinValue) now_realMinValue = value;
-                    }
-                    rowcount++;
-                }
-                if (now_realMaxValue != double.MinValue)
-                {
-                    surface.Palette.Clear();
-                    double diff = now_realMaxValue - now_realMinValue;
-                    if (m_OnlineMode)
-                    {
-                        surface.Palette.Add(now_realMinValue, Color.Wheat);
-                        surface.Palette.Add(now_realMinValue + 0.25 * diff, Color.LightBlue);
-                        surface.Palette.Add(now_realMinValue + 0.50 * diff, Color.SteelBlue);
-                        surface.Palette.Add(now_realMinValue + 0.75 * diff, Color.Blue);
-                        surface.Palette.Add(now_realMinValue + diff, Color.DarkBlue);
-
-                    }
-                    else
-                    {
-                        // VAGEDC Dark Skin: Blue→Green→Yellow→Orange→Red gradient for better low-value visibility
-                        surface.Palette.Add(now_realMinValue, Color.FromArgb(30, 58, 138));  // Navy Blue (#1E3A8A) for low values
-                        surface.Palette.Add(now_realMinValue + 0.20 * diff, Color.FromArgb(16, 185, 129));  // Emerald Green (#10B981)
-                        surface.Palette.Add(now_realMinValue + 0.40 * diff, Color.Yellow);
-                        surface.Palette.Add(now_realMinValue + 0.60 * diff, Color.Orange);
-                        surface.Palette.Add(now_realMinValue + 0.80 * diff, Color.OrangeRed);
-                        surface.Palette.Add(now_realMinValue + diff, Color.Red);
-                    }
-                    surface.PaletteSteps = 5;  // Increased from 4 to 5 for smoother gradient
-                    surface.AutomaticPalette = false;
-                }
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine("FillData: " + E.Message);
-            }
+            // Logic moved to Chart3DComponent.LoadData and ChartService
         }
 
         private void FillDataOriginal(NMeshSurfaceSeries surface)
         {
-            try
-            {
-                DataTable dt = (DataTable)gridControl1.DataSource;
-                int rowcount = dt.Rows.Count;
-                int colcount = dt.Columns.Count;
-                for (int row = 0; row < rowcount; row++)
-                {
-                    for (int col = 0; col < colcount; col++)
-                    {
-                        try
-                        {
-                            if (m_issixteenbit)
-                            {
-                                int indexinmap = ((row * colcount) + col) * 2;
-                                Int32 ivalue = Convert.ToInt32(m_map_original_content[indexinmap]) * 256;
-                                ivalue += Convert.ToInt32(m_map_original_content[indexinmap + 1]);
-
-                                {
-                                    if (ivalue > 32000)
-                                    {
-                                        ivalue = 65536 - ivalue;
-                                        ivalue = -ivalue;
-                                    }
-
-                                    double value = ivalue;
-                                    if (m_viewtype != ViewType.Decimal && m_viewtype != ViewType.Hexadecimal && m_viewtype != ViewType.ASCII)
-                                    {
-                                        value *= correction_factor;
-                                        value += correction_offset; // bij origineel wel doen
-                                    }
-                                    surface.Data.SetValue((rowcount - 1) - row, col, value, (rowcount - 1) - row, col);
-                                }
-                                //Console.WriteLine(surface.Name + ": " + row.ToString() + " " + col.ToString() + " value: " + value.ToString());
-                            }
-                            else
-                            {
-
-                                int indexinmap = ((row * colcount) + col);
-                                Int32 ivalue = Convert.ToInt32(m_map_original_content[indexinmap]);
-                                {
-                                    double value = ivalue;
-                                    if (m_viewtype != ViewType.Decimal && m_viewtype != ViewType.Hexadecimal && m_viewtype != ViewType.ASCII)
-                                    {
-                                        value *= correction_factor;
-                                        value += correction_offset;
-                                    }
-                                    surface.Data.SetValue((rowcount - 1) - row, col, value, (rowcount - 1) - row, col);
-                                }
-                                //Console.WriteLine(surface.Name + ": " + row.ToString() + " " + col.ToString() + " value: " + value.ToString());
-
-                            }
-                        }
-                        catch (Exception E)
-                        {
-                            Console.WriteLine("Failed to fill data for original map: " + E.Message);
-                        }
-                    }
-                }
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine("FilleDataOriginal: " + E.Message);
-            }
+            // Logic moved to Chart3DComponent.LoadData and ChartService
         }
 
         private void FillDataCompare(NMeshSurfaceSeries surface)
         {
-            DataTable dt = (DataTable)gridControl1.DataSource;
-            int rowcount = dt.Rows.Count;
-            int colcount = dt.Columns.Count;
-            for (int row = 0; row < rowcount; row++)
-            {
-                for (int col = colcount - 1; col >= 0; col--)
-                {
-                    if (m_issixteenbit)
-                    {
-                        int indexinmap = ((row * colcount) + col) * 2;
-                        Int32 ivalue = Convert.ToInt32(m_map_compare_content[indexinmap]) * 256;
-                        ivalue += Convert.ToInt32(m_map_compare_content[indexinmap + 1]);
-                        {
-                            if (ivalue > 32000)
-                            {
-                                ivalue = 65536 - ivalue;
-                                ivalue = -ivalue;
-                            }
-                            double value = ivalue;
-                            if (m_viewtype != ViewType.Decimal && m_viewtype != ViewType.Hexadecimal && m_viewtype != ViewType.ASCII)
-                            {
-                                value *= correction_factor;
-                                value += correction_offset;
-                            }
-                            surface.Data.SetValue((rowcount - 1) - row, col, value, (rowcount - 1) - row, col);
-                        }
-                        //Console.WriteLine(surface.Name + ": " + row.ToString() + " " + col.ToString() + " value: " + value.ToString());
-
-                    }
-                    else
-                    {
-
-                        int indexinmap = ((row * colcount) + col);
-                        Int32 ivalue = Convert.ToInt32(m_map_compare_content[indexinmap]);
-                        {
-                            double value = ivalue;
-                            if (m_viewtype != ViewType.Decimal && m_viewtype != ViewType.Hexadecimal && m_viewtype != ViewType.ASCII)
-                            {
-                                value *= correction_factor;
-                                value += correction_offset;
-                            }
-                            surface.Data.SetValue((rowcount - 1) - row, col, value, (rowcount - 1) - row, col);
-                        }
-                    }
-                }
-            }
+            // Logic moved to Chart3DComponent.LoadData and ChartService
         }
 
         public bool IsRedWhite
@@ -998,8 +829,9 @@ namespace VAGSuite
         {
             if (_chart2DComponent != null && m_TableWidth == 1)
             {
-                _chart2DComponent.LoadData(data, m_map_length, CreateMapViewerState());
-                _chart2DComponent.RefreshChart();
+                MapViewerState state = CreateMapViewerState();
+                _chart2DComponent.LoadData(data, m_map_length, state);
+                _chart2DComponent.RefreshChart(state);
             }
         }
 
@@ -1457,8 +1289,9 @@ namespace VAGSuite
                 // Initialize and configure the 2D chart using the component
                 if (_chart2DComponent != null)
                 {
-                    _chart2DComponent.LoadData(m_map_content, m_map_length, CreateMapViewerState());
-                    _chart2DComponent.RefreshChart();
+                    MapViewerState state = CreateMapViewerState();
+                    _chart2DComponent.LoadData(m_map_content, m_map_length, state);
+                    _chart2DComponent.RefreshChart(state);
                 }
             }
             m_trackbarBlocked = false;
@@ -1486,8 +1319,9 @@ namespace VAGSuite
         {
             if (_chart2DComponent != null)
             {
-                _chart2DComponent.LoadData(data, m_map_length, CreateMapViewerState());
-                _chart2DComponent.RefreshChart();
+                MapViewerState state = CreateMapViewerState();
+                _chart2DComponent.LoadData(data, m_map_length, state);
+                _chart2DComponent.RefreshChart(state);
             }
         }
 
@@ -1569,110 +1403,84 @@ namespace VAGSuite
 
         private void gridView1_CustomDrawCell(object sender, DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e)
         {
-
             try
             {
-                if (e.CellValue != null)
+                if (e.CellValue == null || e.CellValue == DBNull.Value) return;
+
+                int cellValue = 0;
+                if (m_viewtype == ViewType.Hexadecimal)
                 {
-                    if (e.CellValue != DBNull.Value)
+                    cellValue = Convert.ToInt32(e.CellValue.ToString(), 16);
+                }
+                else
+                {
+                    cellValue = Convert.ToInt32(ConvertToDouble(e.CellValue.ToString()));
+                }
+
+                // Use IMapRenderingService for color calculation
+                Color cellColor = _mapRenderingService.CalculateCellColor(
+                    cellValue,
+                    m_MaxValueInTable,
+                    m_OnlineMode,
+                    m_isRedWhite);
+
+                // Apply coloring if not disabled
+                if (!m_disablecolors)
+                {
+                    using (SolidBrush sb = new SolidBrush(cellColor))
                     {
-                        int cellValue = 0;
-                        if (m_viewtype == ViewType.Hexadecimal)
-                        {
-                            cellValue = Convert.ToInt32(e.CellValue.ToString(), 16);
-                        }
-                        else
-                        {
-                            cellValue = Convert.ToInt32(ConvertToDouble(e.CellValue.ToString()));
-                        }
+                        e.Graphics.FillRectangle(sb, e.Bounds);
+                    }
+                }
 
-                        // Use IMapRenderingService for color calculation
-                        Color cellColor = _mapRenderingService.CalculateCellColor(
-                            cellValue,
-                            m_MaxValueInTable,
-                            m_OnlineMode,
-                            m_isRedWhite);
+                // Use IDataConversionService for value formatting
+                string displayText = _dataConversionService.FormatValue(cellValue, m_viewtype, m_issixteenbit);
 
-                        // Apply coloring if not disabled
-                        if (!m_disablecolors)
-                        {
-                            SolidBrush sb = new SolidBrush(cellColor);
-                            e.Graphics.FillRectangle(sb, e.Bounds);
-                        }
+                // Apply correction factor and offset if needed
+                if (m_viewtype == ViewType.Easy && (correction_offset != 0 || correction_factor != 1))
+                {
+                    double correctedValue = _dataConversionService.ApplyCorrection(cellValue, correction_factor, correction_offset);
 
-                        // Use IDataConversionService for value formatting
-                        string displayText = _dataConversionService.FormatValue(cellValue, m_viewtype, m_issixteenbit);
-                        
-                        // Apply correction factor and offset if needed
-                        if (m_viewtype == ViewType.Easy && (correction_offset != 0 || correction_factor != 1))
-                        {
-                            double correctedValue = _dataConversionService.ApplyCorrection(cellValue, correction_factor, correction_offset);
-                            
-                            if (m_map_name.StartsWith("Injector duration") || m_map_name.StartsWith("Start of injection"))
-                            {
-                                e.DisplayText = correctedValue.ToString("F1") + "\u00b0";
-                            }
-                            else if (m_map_name.StartsWith("N75"))
-                            {
-                                e.DisplayText = correctedValue.ToString("F0") + @"%";
-                            }
-                            else
-                            {
-                                e.DisplayText = correctedValue.ToString("F2");
-                            }
-                        }
-                        else if (m_viewtype == ViewType.Easy && m_map_name.StartsWith("N75"))
-                        {
-                            e.DisplayText = displayText + @"%";
-                        }
-                        else
-                        {
-                            e.DisplayText = displayText;
-                        }
-                        //if (m_map_name == "BFuelCal.Map" || m_map_name == "IgnNormCal.Map" || m_map_name == "TargetAFR" || m_map_name == "FeedbackAFR" || m_map_name == "FeedbackvsTargetAFR")
-                        if (X_axis_name.ToLower() == "mg/c" && Y_axis_name.ToLower() == "rpm")
-                        {
-                            
-                            try
-                            {
-                                if (open_loop != null)
-                                {
-                                    int airmassvalue = GetXaxisValue(e.Column.AbsoluteIndex);
-                                    int rpmvalue = GetYaxisValue(e.RowHandle);
-                                    if (open_loop.Length > 0)
-                                    {
-                                        int mapopenloop = GetOpenLoopValue(e.RowHandle);
-                                        if (mapopenloop > airmassvalue)
-                                        {
-                                            if (m_StandardFill == 0)
-                                            {
+                    if (m_map_name.StartsWith("Injector duration") || m_map_name.StartsWith("Start of injection"))
+                    {
+                        e.DisplayText = correctedValue.ToString("F1") + "\u00b0";
+                    }
+                    else if (m_map_name.StartsWith("N75"))
+                    {
+                        e.DisplayText = correctedValue.ToString("F0") + @"%";
+                    }
+                    else
+                    {
+                        e.DisplayText = correctedValue.ToString("F2");
+                    }
+                }
+                else if (m_viewtype == ViewType.Easy && m_map_name.StartsWith("N75"))
+                {
+                    e.DisplayText = displayText + @"%";
+                }
+                else
+                {
+                    e.DisplayText = displayText;
+                }
 
-                                            }
-                                            else if (m_StandardFill == 1)
-                                            {
-                                                Pen p = new Pen(Brushes.Black, 2);
-                                                e.Graphics.DrawRectangle(p, e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
-                                                p.Dispose();
-                                            }
-                                            else
-                                            {
-                                                Point[] pnts = new Point[4];
-                                                pnts.SetValue(new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y), 0);
-                                                pnts.SetValue(new Point(e.Bounds.X + e.Bounds.Width - (e.Bounds.Height / 2), e.Bounds.Y), 1);
-                                                pnts.SetValue(new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y + (e.Bounds.Height / 2)), 2);
-                                                pnts.SetValue(new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y), 3);
-                                                e.Graphics.FillPolygon(Brushes.SeaGreen, pnts, System.Drawing.Drawing2D.FillMode.Winding);
-                                            }             
-                                        }
-                                    }
-                                }
-                            }
-                            catch (Exception E)
-                            {
-                                Console.WriteLine(E.Message);
-                            }
-
+                // Open Loop Indicator logic refactored to service
+                if (_mapRenderingService.ShouldShowOpenLoopIndicator(e.RowHandle, e.Column.AbsoluteIndex, open_loop, x_axisvalues, y_axisvalues, m_xaxisUnits, m_yaxisUnits))
+                {
+                    if (m_StandardFill == 1)
+                    {
+                        using (Pen p = new Pen(Brushes.Black, 2))
+                        {
+                            e.Graphics.DrawRectangle(p, e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
                         }
+                    }
+                    else if (m_StandardFill > 1)
+                    {
+                        Point[] pnts = new Point[4];
+                        pnts[0] = new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y);
+                        pnts[1] = new Point(e.Bounds.X + e.Bounds.Width - (e.Bounds.Height / 2), e.Bounds.Y);
+                        pnts[2] = new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y + (e.Bounds.Height / 2));
+                        pnts[3] = new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y);
+                        e.Graphics.FillPolygon(Brushes.SeaGreen, pnts, System.Drawing.Drawing2D.FillMode.Winding);
                     }
                 }
                 if (m_selectedrowhandle >= 0 && m_selectedcolumnindex >= 0)
@@ -1746,141 +1554,11 @@ namespace VAGSuite
 
         private byte[] GetDataFromGridView(bool upsidedown)
         {
-            byte[] retval = new byte[m_map_length];
+            // Use the refactored DataConversionService
             DataTable gdt = (DataTable)gridControl1.DataSource;
-            int cellcount = 0;
-            if (upsidedown)
-            {
-                for (int t = gdt.Rows.Count - 1; t >= 0; t -- )
-                {
-                    foreach (object o in gdt.Rows[t].ItemArray)
-                    {
-                        if (o != null)
-                        {
-                            if (o != DBNull.Value)
-                            {
-                                if (cellcount < retval.Length)
-                                {
-                                    if (m_issixteenbit)
-                                    {
-                                        // twee waarde toevoegen
-                                        Int32 cellvalue = 0;
-                                        string bstr1 = "0";
-                                        string bstr2 = "0";
-                                        //if (m_isHexMode)
-                                        if (m_viewtype == ViewType.Hexadecimal)
-                                        {
-                                            cellvalue = Convert.ToInt32(o.ToString(), 16);
-                                        }
-                                        else
-                                        {
-                                            cellvalue = Convert.ToInt32(o.ToString());
-                                        }
-                                        bstr1 = cellvalue.ToString("X8").Substring(4, 2);
-                                        bstr2 = cellvalue.ToString("X8").Substring(6, 2);
-                                        retval.SetValue(Convert.ToByte(bstr1, 16), cellcount++);
-                                        retval.SetValue(Convert.ToByte(bstr2, 16), cellcount++);
-                                    }
-                                    else
-                                    {
-                                        //if (m_isHexMode)
-                                        if (m_viewtype == ViewType.Hexadecimal)
-                                        {
-                                            //double v = Convert.ToDouble(o);
-                                            int iv = Convert.ToInt32(o.ToString(), 16);//(int)Math.Floor(v);
-                                            retval.SetValue(Convert.ToByte(iv), cellcount++);
-                                        }
-                                        else
-                                        {
-                                            double v = Convert.ToDouble(o);
-                                            retval.SetValue(Convert.ToByte((int)Math.Floor(v)), cellcount++);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-            else
-            {
-
-                foreach (DataRow dr in gdt.Rows)
-                {
-                    foreach (object o in dr.ItemArray)
-                    {
-                        if (o != null)
-                        {
-                            if (o != DBNull.Value)
-                            {
-                                if (cellcount < retval.Length)
-                                {
-                                    if (m_issixteenbit)
-                                    {
-                                        // twee waarde toevoegen
-                                        Int32 cellvalue = 0;
-                                        string bstr1 = "0";
-                                        string bstr2 = "0";
-                                        //if (m_isHexMode)
-                                        if (m_viewtype == ViewType.Hexadecimal)
-                                        {
-                                            cellvalue = Convert.ToInt32(o.ToString(), 16);
-                                        }
-                                        else
-                                        {
-                                            cellvalue = Convert.ToInt32(o.ToString());
-                                        }
-                                        bstr1 = cellvalue.ToString("X8").Substring(4, 2);
-                                        bstr2 = cellvalue.ToString("X8").Substring(6, 2);
-                                        retval.SetValue(Convert.ToByte(bstr1, 16), cellcount++);
-                                        retval.SetValue(Convert.ToByte(bstr2, 16), cellcount++); 
-                                    }
-                                    else
-                                    {
-//                                        if (m_isHexMode)
-                                        if (m_viewtype == ViewType.Hexadecimal)
-                                        {
-                                            
-                                            //double v = Convert.ToDouble(o);
-                                            try
-                                            {
-                                                int iv = Convert.ToInt32(o.ToString(), 16);
-                                                //int iv = (int)Math.Floor(v);
-                                                retval.SetValue(Convert.ToByte(iv.ToString()), cellcount++);
-                                            }
-                                            catch (Exception cE)
-                                            {
-                                                Console.WriteLine(cE.Message);
-                                            }
-
-                                        }
-                                        else
-                                        {
-                                            
-                                            try
-                                            {
-                                                double v = Convert.ToDouble(o);
-                                                if (v >= 0)
-                                                {
-                                                    retval.SetValue(Convert.ToByte((int)Math.Floor(v)), cellcount++);
-                                                }
-                                            }
-                                            catch (Exception sE)
-                                            {
-                                                Console.WriteLine(sE.Message);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return retval;
+            MapViewerState state = CreateMapViewerState();
+            return _dataConversionService.ConvertFromDataTable(gdt, state.Data, state.Configuration, upsidedown);
         }
-
         private void CastSliderMoveEvent()
         {
             if (onSliderMove != null)
@@ -2076,257 +1754,9 @@ namespace VAGSuite
 
         private void gridView1_KeyDown(object sender, KeyEventArgs e)
         {
-            
-            DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-            if (cellcollection.Length > 0)
-            {
-                if (e.KeyCode == Keys.Add)
-                {
-                    e.Handled = true;
-                    e.SuppressKeyPress = true;
-                    foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
-                    {
-                        if(m_viewtype == ViewType.Hexadecimal)
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString(), 16);
-                            value++;
-                            if (value > m_MaxValueInTable) m_MaxValueInTable = value;
-                            if (m_issixteenbit)
-                            {
-                                if (value > 0xFFFF) value = 0xFFFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X4"));
-                            }
-                            else
-                            {
-                                if (value > 0xFF) value = 0xFF;
-                                
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X2"));
-                            }
-                        }
-                        else
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString());
-                            value++;
-                            if (value > m_MaxValueInTable) m_MaxValueInTable = value;
-                            if (m_issixteenbit)
-                            {
-                                if (value > 0xFFFF) value = 0xFFFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            else
-                            {
-                                if (value > 0xFF) value = 0xFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-
-                        }
-                    }
-                }
-                else if (e.KeyCode == Keys.Subtract)
-                {
-                    e.Handled = true;
-                    e.SuppressKeyPress = true;
-                    foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
-                    {
-                        if (m_viewtype == ViewType.Hexadecimal)
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString(), 16);
-                            value--;
-                            if (!m_issixteenbit)
-                            {
-                                if (value < 0) value = 0;
-                            }
-                            if (m_issixteenbit)
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X4"));
-                            }
-                            else
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X2"));
-                            }
-                        }
-                        else
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString());
-                            value--;
-                            if (!m_issixteenbit)
-                            {
-                                if (value < 0) value = 0;
-                            }
-                            if (m_issixteenbit)
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            else
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-
-                        }
-                    }
-                }
-                else if (e.KeyCode == Keys.PageUp)
-                {
-                    e.Handled = true;
-                    e.SuppressKeyPress = true;
-                    foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
-                    {
-                        if (m_viewtype == ViewType.Hexadecimal)
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString(), 16);
-                            value += 0x10;
-                            if (value > m_MaxValueInTable) m_MaxValueInTable = value;
-                            if (m_issixteenbit)
-                            {
-                                if (value > 0xFFFF) value = 0xFFFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X4"));
-                            }
-                            else
-                            {
-
-                                if (value > 0xFF) value = 0xFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X2"));
-                            }
-                        }
-                        else
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString());
-                            value+=10;
-                            if (value > m_MaxValueInTable) m_MaxValueInTable = value;
-                            if (m_issixteenbit)
-                            {
-                                if (value > 0xFFFF) value = 0xFFFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            else
-                            {
-                                if (value > 0xFF) value = 0xFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-
-                        }
-                    }
-                }
-                else if (e.KeyCode == Keys.PageDown)
-                {
-                    e.Handled = true;
-                    e.SuppressKeyPress = true;
-                    foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
-                    {
-                        if (m_viewtype == ViewType.Hexadecimal)
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString(), 16);
-                            value-=0x10;
-                            if (!m_issixteenbit)
-                            {
-                                if (value < 0) value = 0;
-                            }
-                            if (m_issixteenbit)
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X4"));
-                            }
-                            else
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X2"));
-                            }
-                        }
-                        else
-                        {
-                            int value = Convert.ToInt32(gridView1.GetRowCellValue(gc.RowHandle, gc.Column).ToString());
-                            value-=10;
-                            if (!m_issixteenbit)
-                            {
-                                if (value < 0) value = 0;
-                            }
-                            if (m_issixteenbit)
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            else
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-
-                        }
-                    }
-                }
-                else if (e.KeyCode == Keys.Home)
-                {
-                    e.Handled = true;
-                    e.SuppressKeyPress = true;
-                    foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
-                    {
-                        if (m_viewtype == ViewType.Hexadecimal)
-                        {
-
-                            int value = 0xFFFF;
-                            if (m_issixteenbit)
-                            {
-                                value = 0xFFFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X4"));
-                            }
-                            else
-                            {
-                                value = 0xFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X2"));
-                            }
-                            if (value > m_MaxValueInTable) m_MaxValueInTable = value;
-
-                        }
-                        else
-                        {
-                            int value = 0xFFFF;
-                            if (m_issixteenbit)
-                            {
-                                value = 0xFFFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            else
-                            {
-
-                                value = 0xFF;
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            if (value > m_MaxValueInTable) m_MaxValueInTable = value;
-
-                        }
-                    }
-                }
-                else if (e.KeyCode == Keys.End)
-                {
-                    e.Handled = true;
-                    e.SuppressKeyPress = true;
-                    foreach (DevExpress.XtraGrid.Views.Base.GridCell gc in cellcollection)
-                    {
-                        if (m_viewtype == ViewType.Hexadecimal)
-                        {
-                            int value = 0;
-                            if (m_issixteenbit)
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X4"));
-                            }
-                            else
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString("X2"));
-                            }
-                        }
-                        else
-                        {
-                            int value = 0;
-                            if (m_issixteenbit)
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-                            else
-                            {
-                                gridView1.SetRowCellValue(gc.RowHandle, gc.Column, value.ToString());
-                            }
-
-                        }
-                    }
-                }
-
-            }
+            // Logic moved to MapGridComponent.GridView1_KeyDown
+            // This handler is kept for backward compatibility if needed,
+            // but the component now handles its own grid events.
         }
 
         private void gridView1_CustomDrawRowIndicator(object sender, DevExpress.XtraGrid.Views.Grid.RowIndicatorCustomDrawEventArgs e)
@@ -2568,13 +1998,13 @@ namespace VAGSuite
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            UpdateChartControlSlice(GetDataFromGridView(false));
+            UpdateChartControlSlice(m_map_content);
             timer1.Enabled = false;
         }
 
         private void timer3_Tick(object sender, EventArgs e)
         {
-            Update2DChartWithComponent(GetDataFromGridView(false));
+            Update2DChartWithComponent(m_map_content);
             timer3.Enabled = false;
         }
 

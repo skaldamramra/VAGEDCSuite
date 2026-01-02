@@ -179,7 +179,7 @@ namespace VAGSuite.Tests
             int[] yAxis = { 10, 20, 30 };
             
             // Act
-            var result = _service.ShouldShowOpenLoopIndicator(0, 0, null, xAxis, yAxis);
+            var result = _service.ShouldShowOpenLoopIndicator(0, 0, null, xAxis, yAxis, "mg/c", "rpm");
             
             // Assert
             Assert.IsFalse(result);
@@ -192,7 +192,7 @@ namespace VAGSuite.Tests
             byte[] openLoop = { 1, 2, 3, 4 };
             
             // Act
-            var result = _service.ShouldShowOpenLoopIndicator(0, 0, openLoop, null, null);
+            var result = _service.ShouldShowOpenLoopIndicator(0, 0, openLoop, null, null, "mg/c", "rpm");
             
             // Assert
             Assert.IsFalse(result);
@@ -207,7 +207,7 @@ namespace VAGSuite.Tests
             int[] yAxis = { 10, 20, 30 };
             
             // Act - row 0 (yAxis[2]=30), col 0 (xAxis[2]=3) should match openLoop[2]=3, openLoop[3]=4
-            var result = _service.ShouldShowOpenLoopIndicator(1, 0, openLoop, xAxis, yAxis);
+            var result = _service.ShouldShowOpenLoopIndicator(1, 0, openLoop, xAxis, yAxis, "mg/c", "rpm");
             
             // Assert - row 1 means yAxis[1]=20, col 0 means xAxis[0]=1
             // This should match openLoop[0]=1, openLoop[1]=2
@@ -223,7 +223,7 @@ namespace VAGSuite.Tests
             int[] yAxis = { 10, 20, 30 };
             
             // Act - row 0 (yAxis[2]=30), col 0 (xAxis[2]=3) should NOT match
-            var result = _service.ShouldShowOpenLoopIndicator(1, 0, openLoop, xAxis, yAxis);
+            var result = _service.ShouldShowOpenLoopIndicator(1, 0, openLoop, xAxis, yAxis, "mg/c", "rpm");
             
             // Assert
             Assert.IsFalse(result);
