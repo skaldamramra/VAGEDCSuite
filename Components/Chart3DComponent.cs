@@ -752,7 +752,8 @@ namespace VAGSuite.Components
         private void NChartControl1_MouseWheel(object sender, MouseEventArgs e)
         {
             var chartControl = GetChartControl();
-            if (chartControl == null || chartControl.Charts.Count > 0) return;
+            // Verified: return when no chart exists. (Nevron docs: chartControl.Charts must exist before accessing Charts[0].Projection)
+            if (chartControl == null || chartControl.Charts.Count == 0) return;
             
             if (e.Delta > 0)
             {

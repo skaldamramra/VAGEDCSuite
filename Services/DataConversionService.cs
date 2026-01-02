@@ -67,29 +67,37 @@ namespace VAGSuite.Services
                     }
                 }
 
-                // Handle remaining bytes
+                // Handle remaining bytes - deterministic trailing byte handling
                 if (mapOffset < data.Content.Length)
                 {
                     object[] objarr = new object[tableWidth];
                     int sicnt = 0;
-                    for (int v = mapOffset; v < data.Content.Length - 1; v++)
+                    
+                    // Process pairs first
+                    while (mapOffset + 1 < data.Content.Length)
                     {
-                        if (mapOffset <= data.Content.Length - 1)
+                        int b = data.Content[mapOffset++];
+                        b *= 256;
+                        b += data.Content[mapOffset++];
+
+                        if (b > 0xF000)
                         {
-                            int b = data.Content[mapOffset++];
-                            b *= 256;
-                            b += data.Content[mapOffset++];
-
-                            if (b > 0xF000)
-                            {
-                                b = 0x10000 - b;
-                                b = -b;
-                            }
-
-                            string formattedValue = FormatValue(b, config.ViewType, true);
-                            objarr[sicnt] = formattedValue;
-                            sicnt++;
+                            b = 0x10000 - b;
+                            b = -b;
                         }
+
+                        string formattedValue = FormatValue(b, config.ViewType, true);
+                        objarr[sicnt] = formattedValue;
+                        sicnt++;
+                    }
+                    
+                    // Handle single trailing byte (if any)
+                    if (mapOffset < data.Content.Length)
+                    {
+                        int low = data.Content[mapOffset++];
+                        string formattedValue = FormatValue(low, config.ViewType, true);
+                        objarr[sicnt] = formattedValue;
+                        sicnt++;
                     }
 
                     if (config.IsUpsideDown)
@@ -128,12 +136,13 @@ namespace VAGSuite.Services
                     }
                 }
 
-                // Handle remaining bytes
+                // Handle remaining bytes - deterministic handling
                 if (mapOffset < data.Content.Length)
                 {
                     object[] objarr = new object[tableWidth];
                     int sicnt = 0;
-                    for (int v = mapOffset; v < data.Content.Length; v++)
+                    
+                    while (mapOffset < data.Content.Length)
                     {
                         int b = data.Content[mapOffset++];
                         string formattedValue = FormatValue(b, config.ViewType, false);
