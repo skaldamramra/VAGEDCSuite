@@ -44,6 +44,8 @@ namespace VAGSuite.Components
         private Vector3 _meshMinBounds;
         private Vector3 _meshMaxBounds;
         private Vector3 _meshCenter;
+        private float _dataMinZ;
+        private float _dataMaxZ;
 
         // State references
         private int _tableWidth;
@@ -461,60 +463,96 @@ namespace VAGSuite.Components
                         Vector3 min = _meshMinBounds;
                         Vector3 max = _meshMaxBounds;
 
-                        // 1. X-Axis Labels (along the front-bottom edge)
+                        // Determine which edges are closest to the viewer to anchor labels
+                        // We check the 4 bottom corners to find the "front" ones
+                        Vector3[] corners = new Vector3[] {
+                            new Vector3(min.X, min.Y, min.Z),
+                            new Vector3(max.X, min.Y, min.Z),
+                            new Vector3(max.X, min.Y, max.Z),
+                            new Vector3(min.X, min.Y, max.Z)
+                        };
+
+                        Matrix4 proj, mv;
+                        GetMatrices(out proj, out mv);
+                        int bestCornerIdx = 0;
+                        float maxDepth = float.MinValue;
+
+                        for(int i=0; i<4; i++) {
+                            Vector4 viewPos = Vector4.Transform(new Vector4(corners[i], 1.0f), mv);
+                            // In OpenTK's default coordinate system after LookAt,
+                            // more positive Z is closer to the camera.
+                            // To find the corner NEAREST to the viewer, we look for the largest Z.
+                            if(viewPos.Z > maxDepth) {
+                                maxDepth = viewPos.Z;
+                                bestCornerIdx = i;
+                            }
+                        }
+
+                        // Anchor points based on the closest corner
+                        Vector3 anchor = corners[bestCornerIdx];
+                        Vector3 xDir = (bestCornerIdx == 0 || bestCornerIdx == 3) ? Vector3.UnitX : -Vector3.UnitX;
+                        Vector3 yDir = (bestCornerIdx == 0 || bestCornerIdx == 1) ? Vector3.UnitZ : -Vector3.UnitZ;
+
+                        // 1. X-Axis Labels (Throttle Position)
                         if (_xAxisValues != null && _xAxisValues.Length > 0)
                         {
                             int labelCount = Math.Min(6, _xAxisValues.Length);
                             for (int i = 0; i < labelCount; i++)
                             {
                                 int idx = (i * (_xAxisValues.Length - 1)) / (labelCount - 1);
-                                float x = min.X + (max.X - min.X) * i / (labelCount - 1);
-                                PointF screenPos = ProjectToScreen(new Vector3(x, min.Y, min.Z));
+                                float t = (float)i / (labelCount - 1);
+                                Vector3 pos = new Vector3(min.X + (max.X - min.X) * t, min.Y, anchor.Z);
+                                PointF screenPos = ProjectToScreen(pos);
                                 if (screenPos != PointF.Empty)
                                 {
                                     string val = FormatAxisValue(_xAxisValues[idx], _xAxisName);
                                     g.DrawString(val, valueFont, textBrush, screenPos.X - 10, screenPos.Y + 5);
                                 }
                             }
-                            // Axis Title
-                            PointF titlePos = ProjectToScreen(new Vector3((min.X + max.X) / 2, min.Y, min.Z));
-                            g.DrawString(_xAxisName ?? "X Axis", labelFont, textBrush, titlePos.X - 20, titlePos.Y + 20);
+                            PointF titlePos = ProjectToScreen(new Vector3((min.X + max.X) / 2, min.Y, anchor.Z));
+                            g.DrawString(_xAxisName ?? "Throttle position", labelFont, textBrush, titlePos.X - 40, titlePos.Y + 20);
                         }
 
-                        // 2. Y-Axis Labels (Depth/Z in GL terms, along the left-bottom edge)
+                        // 2. Y-Axis Labels (Engine Speed)
                         if (_yAxisValues != null && _yAxisValues.Length > 0)
                         {
                             int labelCount = Math.Min(6, _yAxisValues.Length);
                             for (int i = 0; i < labelCount; i++)
                             {
                                 int idx = (i * (_yAxisValues.Length - 1)) / (labelCount - 1);
-                                float z = min.Z + (max.Z - min.Z) * i / (labelCount - 1);
-                                PointF screenPos = ProjectToScreen(new Vector3(min.X, min.Y, z));
+                                float t = (float)i / (labelCount - 1);
+                                Vector3 pos = new Vector3(anchor.X, min.Y, min.Z + (max.Z - min.Z) * t);
+                                PointF screenPos = ProjectToScreen(pos);
                                 if (screenPos != PointF.Empty)
                                 {
                                     string val = FormatAxisValue(_yAxisValues[idx], _yAxisName);
                                     g.DrawString(val, valueFont, textBrush, screenPos.X - 35, screenPos.Y);
                                 }
                             }
-                            // Axis Title
-                            PointF titlePos = ProjectToScreen(new Vector3(min.X, min.Y, (min.Z + max.Z) / 2));
-                            g.DrawString(_yAxisName ?? "Y Axis", labelFont, textBrush, titlePos.X - 60, titlePos.Y + 10);
+                            PointF titlePos = ProjectToScreen(new Vector3(anchor.X, min.Y, (min.Z + max.Z) / 2));
+                            g.DrawString(_yAxisName ?? "Engine speed (rpm)", labelFont, textBrush, titlePos.X - 60, titlePos.Y + 15);
                         }
 
-                        // 3. Z-Axis Labels (Height/Y in GL terms, along the front-left vertical edge)
+                        // 3. Z-Axis Labels (Requested IQ - Vertical)
                         int zLabelCount = 5;
                         for (int i = 0; i <= zLabelCount; i++)
                         {
-                            float y = min.Y + (max.Y - min.Y) * i / zLabelCount;
-                            PointF screenPos = ProjectToScreen(new Vector3(min.X, y, min.Z));
+                            float t = (float)i / zLabelCount;
+                            float y = min.Y + (max.Y - min.Y) * t;
+                            PointF screenPos = ProjectToScreen(new Vector3(anchor.X, y, anchor.Z));
                             if (screenPos != PointF.Empty)
                             {
                                 // Calculate actual map value for height
-                                float mapVal = (float)(_correctionOffset + (i * (6.0f / zLabelCount) / 6.0f) * (Math.Max(1, _meshMaxBounds.Y - _meshMinBounds.Y) / 6.0f));
-                                // Simplified: just show relative scale or find actual min/max
-                                g.DrawString(y.ToString("F0"), valueFont, textBrush, screenPos.X - 25, screenPos.Y - 5);
+                                float range = Math.Max(1, _meshMaxBounds.Y - _meshMinBounds.Y);
+                                float normalizedY = (y - min.Y) / range;
+                                float actualVal = _dataMinZ + (_dataMaxZ - _dataMinZ) * normalizedY;
+                                
+                                string val = FormatAxisValue((int)actualVal, _zAxisName);
+                                g.DrawString(val, valueFont, textBrush, screenPos.X - 25, screenPos.Y - 5);
                             }
                         }
+                        PointF zTitlePos = ProjectToScreen(new Vector3(anchor.X, max.Y + 0.5f, anchor.Z));
+                        g.DrawString(_zAxisName ?? "Requested IQ (mg)", labelFont, textBrush, zTitlePos.X - 40, zTitlePos.Y - 20);
                     }
                 }
             }
@@ -526,23 +564,16 @@ namespace VAGSuite.Components
 
         private string FormatAxisValue(int value, string axisName)
         {
-            // Apply correction factor if available
-            double corrected = value * _correctionFactor + _correctionOffset;
+            // The value passed here is the raw axis value from the map
+            // We should format it directly as it appears in the table
             
-            // Format based on axis type
             if (axisName != null && axisName.ToLower().Contains("rpm"))
             {
-                return $"{corrected / 1000:F0}k";
+                if (value > 1000) return $"{value / 1000.0:F1}k";
+                return value.ToString();
             }
-            else if (axisName != null && axisName.ToLower().Contains("pressure") ||
-                     axisName != null && axisName.ToLower().Contains("boost"))
-            {
-                return $"{corrected:F1}";
-            }
-            else
-            {
-                return $"{corrected:F0}";
-            }
+            
+            return value.ToString();
         }
 
         /// <summary>
@@ -609,6 +640,8 @@ namespace VAGSuite.Components
             }
 
             float range = Math.Max(1, maxZ - minZ);
+            _dataMinZ = minZ;
+            _dataMaxZ = maxZ;
             float scaleX = 10.0f / Math.Max(1, cols);
             float scaleZ = 10.0f / Math.Max(1, rows);
             float scaleY = 6.0f / range; // Auto-scale height to fit 6 units
@@ -627,13 +660,14 @@ namespace VAGSuite.Components
                 int c = i % cols;
                 float val = values[i];
                 
+                // Align 0,0 with lower-left (standard table orientation)
                 float xPos = (c - (cols - 1) / 2.0f) * scaleX;
                 float zPos = (r - (rows - 1) / 2.0f) * scaleZ;
                 
                 // Standard height calculation: High value = High peak
                 float yPos = (val - minZ) * scaleY;
                 
-                // Only flip if explicitly requested AND it's not a standard map
+                // Honor the IsUpsideDown flag from the map configuration
                 if (_isUpsideDown)
                 {
                     yPos = (maxZ - minZ) * scaleY - yPos;
