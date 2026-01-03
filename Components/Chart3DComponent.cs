@@ -1067,7 +1067,9 @@ namespace VAGSuite.Components
                 // Explicitly assemble the 16-bit value from two bytes
                 int high = (int)content[index] << 8;
                 int low = (int)content[index + 1];
-                return (float)(high | low);
+                // Cast to short to ensure sign extension for negative values (e.g. 0xFFEA -> -22)
+                // Verified: VAG EDC maps use signed 16-bit Big-Endian for duration/timing offsets.
+                return (float)(short)(high | low);
             }
             else
             {
