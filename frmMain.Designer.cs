@@ -137,6 +137,7 @@
         private DevExpress.XtraBars.BarButtonItem btnShowProjectLogbook;
         private DevExpress.XtraBars.BarButtonItem btnProduceLatestBinary;
         private DevExpress.XtraBars.BarStaticItem barFilenameText;
+        private DevExpress.XtraBars.BarButtonItem btnToggleMapDescriptions;
         private DevExpress.XtraBars.BarButtonItem btnCreateBackup;
         private DevExpress.XtraBars.BarButtonItem btnLookupPartnumber;
         private DevExpress.XtraBars.BarButtonItem btnDriverWish;

@@ -102,6 +102,26 @@ namespace VAGSuite
 
             // Add all buttons to ribbon
             AddButtonsToRibbon();
+            InitializeMapDescriptionToggle();
+        }
+
+        /// <summary>
+        /// Initializes the map description toggle button
+        /// </summary>
+        private void InitializeMapDescriptionToggle()
+        {
+            this.btnToggleMapDescriptions = new DevExpress.XtraBars.BarButtonItem();
+            this.btnToggleMapDescriptions.Caption = "Map Descriptions";
+            this.btnToggleMapDescriptions.Id = 101;
+            this.btnToggleMapDescriptions.Name = "btnToggleMapDescriptions";
+            this.btnToggleMapDescriptions.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnToggleMapDescriptions_ItemClick);
+            
+            // Initial state: Bright (Enabled)
+            this.btnToggleMapDescriptions.ItemAppearance.Normal.ForeColor = VAGSuite.Theming.VAGEDCColorPalette.TextPrimaryDark;
+            this.btnToggleMapDescriptions.ItemAppearance.Normal.Options.UseForeColor = true;
+
+            this.ribbonControl1.Items.Add(this.btnToggleMapDescriptions);
+            this.ribbonStatusBar1.ItemLinks.Add(this.btnToggleMapDescriptions);
         }
 
         /// <summary>

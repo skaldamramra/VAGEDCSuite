@@ -119,6 +119,7 @@ namespace VAGSuite
     {
         private AppSettings m_appSettings;
         private System.Windows.Forms.Timer hoverTimer;
+        private bool m_mapDescriptionsEnabled = true;
         private int lastHoverRowHandle = -1;
         private DevExpress.Utils.ToolTipController gridToolTipController;
         private msiupdater m_msiUpdater;
@@ -159,7 +160,7 @@ namespace VAGSuite
         private void InitializeHoverTimer()
         {
             hoverTimer = new System.Windows.Forms.Timer();
-            hoverTimer.Interval = 3000; // 3 seconds
+            hoverTimer.Interval = 300; // 300ms
             hoverTimer.Tick += HoverTimer_Tick;
 
             gridToolTipController = new DevExpress.Utils.ToolTipController();
@@ -171,7 +172,7 @@ namespace VAGSuite
         private void HoverTimer_Tick(object sender, EventArgs e)
         {
             hoverTimer.Stop();
-            if (lastHoverRowHandle >= 0)
+            if (m_mapDescriptionsEnabled && lastHoverRowHandle >= 0)
             {
                 SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow(lastHoverRowHandle);
                 if (sh != null)
@@ -3395,6 +3396,23 @@ namespace VAGSuite
             }
         }
 
+        private void btnToggleMapDescriptions_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            m_mapDescriptionsEnabled = !m_mapDescriptionsEnabled;
+
+            if (m_mapDescriptionsEnabled)
+            {
+                // Bright when enabled
+                btnToggleMapDescriptions.ItemAppearance.Normal.ForeColor = VAGSuite.Theming.VAGEDCColorPalette.TextPrimaryDark;
+            }
+            else
+            {
+                // Dark when disabled
+                btnToggleMapDescriptions.ItemAppearance.Normal.ForeColor = VAGSuite.Theming.VAGEDCColorPalette.Gray500;
+            }
+            btnToggleMapDescriptions.ItemAppearance.Normal.Options.UseForeColor = true;
+        }
+
         /// <summary>
         /// Handles axis save requests from MapViewerService
         /// </summary>
@@ -3412,6 +3430,5 @@ namespace VAGSuite
                 SaveAxisDataIncludingSyncOption(e.AxisAddress, e.Data.Length, e.Data, e.Filename, true, note);
             }
         }
-
     }
 }
