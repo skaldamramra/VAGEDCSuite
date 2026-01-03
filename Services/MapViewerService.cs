@@ -5,6 +5,7 @@ using System.IO;
 using System.Windows.Forms;
 using DevExpress.XtraBars.Docking;
 using VAGSuite.Helpers;
+using VAGSuite.Services;
 
 namespace VAGSuite.Services
 {
@@ -104,7 +105,8 @@ namespace VAGSuite.Services
                         tabdet.ShowTable(columns, true);
                         tabdet.Dock = DockStyle.Fill;
 
-                        // Event handlers will be attached by the caller
+                        // Subscribe to axis editor event - FIX: was missing after refactor
+                        tabdet.onAxisEditorRequested += tabdet_onAxisEditorRequested;
                         dockPanel.Text = "Symbol: " + tabdet.Map_name + " [" + Path.GetFileName(currentFile) + "]";
                         
                         int width = 500;
@@ -216,6 +218,9 @@ namespace VAGSuite.Services
                             tabdet.IsUpsideDown = _appSettings.ShowTablesUpsideDown;
                             tabdet.ShowTable(columns, true);
                             tabdet.Dock = DockStyle.Fill;
+
+                            // Subscribe to axis editor event - FIX: was missing after refactor
+                            tabdet.onAxisEditorRequested += tabdet_onAxisEditorRequested;
 
                             dockPanel.Text = "Symbol: " + symbolName + " [" + Path.GetFileName(filename) + "]";
                             dockPanel.DockTo(_dockManager, DockingStyle.Right, 1);
@@ -348,6 +353,10 @@ namespace VAGSuite.Services
                             tabdet.IsUpsideDown = _appSettings.ShowTablesUpsideDown;
                             tabdet.ShowTable(columns, true);
                             tabdet.Dock = DockStyle.Fill;
+
+                            // Subscribe to axis editor event - FIX: was missing after refactor
+                            tabdet.onAxisEditorRequested += tabdet_onAxisEditorRequested;
+
                             dockPanel.Text = "Symbol difference: " + sh.Varname + " [" + Path.GetFileName(filename) + "]";
 
                             if (_appSettings.AutoSizeNewWindows)
@@ -425,6 +434,10 @@ namespace VAGSuite.Services
                     dockPanel.Text = "Axis: (Y) " + tabdet.Map_name + " [" + Path.GetFileName(currentFile) + "]";
                 }
 
+                // Subscribe to save event - FIX: was missing after refactor
+                tabdet.onSave += tabdet_onSave;
+                tabdet.onClose += tabdet_onClose;
+
                 tabdet.Dock = DockStyle.Fill;
                 dockPanel.Controls.Add(tabdet);
             }
@@ -434,6 +447,67 @@ namespace VAGSuite.Services
             }
             _dockManager.EndUpdate();
             Application.DoEvents();
+        }
+
+        /// <summary>
+        /// Event handler for axis editor save
+        /// </summary>
+        private void tabdet_onSave(object sender, EventArgs e)
+        {
+            if (sender is ctrlAxisEditor)
+            {
+                ctrlAxisEditor editor = (ctrlAxisEditor)sender;
+                // recalculate the values back and store it in the file at the correct location
+                float[] newvalues = editor.GetData();
+                int[] iValues = new int[newvalues.Length];
+                // calculate back to integer values
+                for (int i = 0; i < newvalues.Length; i++)
+                {
+                    int iValue = Convert.ToInt32(Convert.ToDouble(newvalues.GetValue(i)) / editor.CorrectionFactor);
+                    iValues.SetValue(iValue, i);
+                }
+                byte[] barr = new byte[iValues.Length * 2];
+                int bCount = 0;
+                for (int i = 0; i < iValues.Length; i++)
+                {
+                    int iVal = (int)iValues.GetValue(i);
+                    byte b1 = (byte)((iVal & 0x00FF00) / 256);
+                    byte b2 = (byte)(iVal & 0x0000FF);
+                    barr[bCount++] = b1;
+                    barr[bCount++] = b2;
+                }
+                
+                // Use the existing pattern from frmMain.cs - delegate to frmMain via event or use FileOperationsManager directly
+                // For now, we'll raise an event that frmMain can handle
+                OnAxisSaveRequested?.Invoke(this, new AxisSaveRequestedEventArgs
+                {
+                    AxisAddress = editor.AxisAddress,
+                    Data = barr,
+                    Filename = editor.FileName
+                });
+            }
+        }
+
+        /// <summary>
+        /// Event handler for axis editor close
+        /// </summary>
+        private void tabdet_onClose(object sender, EventArgs e)
+        {
+            if (sender is ctrlAxisEditor)
+            {
+                ctrlAxisEditor editor = (ctrlAxisEditor)sender;
+                string dockpanelname = "Axis: (X) " + editor.Map_name + " [" + Path.GetFileName(editor.FileName) + "]";
+                string dockpanelname2 = "Axis: (Y) " + editor.Map_name + " [" + Path.GetFileName(editor.FileName) + "]";
+                
+                foreach (DockPanel dp in _dockManager.Panels)
+                {
+                    if (dp.Text == dockpanelname || dp.Text == dockpanelname2)
+                    {
+                        _dockManager.RemovePanel(dp);
+                        break;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -733,5 +807,40 @@ namespace VAGSuite.Services
             XAxis,
             YAxis
         }
+
+        /// <summary>
+        /// Event handler for axis editor requests from MapViewerEx
+        /// </summary>
+        private void tabdet_onAxisEditorRequested(object sender, MapViewerEventArgs.AxisEditorRequestedEventArgs e)
+        {
+            // start axis editor
+            foreach (SymbolHelper sh in Tools.Instance.m_symbols)
+            {
+                if (sh.Varname == e.Mapname)
+                {
+                    if (e.Axisident == AxisIdent.X_Axis)
+                        StartAxisViewer(sh, Axis.XAxis, Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
+                    else if (e.Axisident == AxisIdent.Y_Axis)
+                        StartAxisViewer(sh, Axis.YAxis, Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
+
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Event raised when axis data needs to be saved
+        /// </summary>
+        public event EventHandler<AxisSaveRequestedEventArgs> OnAxisSaveRequested;
+    }
+
+    /// <summary>
+    /// Event arguments for axis save request
+    /// </summary>
+    public class AxisSaveRequestedEventArgs : EventArgs
+    {
+        public int AxisAddress { get; set; }
+        public byte[] Data { get; set; }
+        public string Filename { get; set; }
     }
 }

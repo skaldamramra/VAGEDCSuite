@@ -160,11 +160,15 @@ namespace VAGSuite
             _fileOperationsManager = new FileOperationsManager(m_appSettings);
             _checksumService = new ChecksumService(m_appSettings);
             _mapViewerCoordinator = new MapViewerCoordinator(dockManager1, m_appSettings);
+            // Subscribe to axis editor event from coordinator
+            _mapViewerCoordinator.OnAxisEditorRequested += MapCoordinator_OnAxisEditorRequested;
             _importExportService = new ImportExportService(m_appSettings);
             _fileComparisonService = new FileComparisonService(m_appSettings);
             _viewSyncService = new ViewSynchronizationService(m_appSettings);
             _transactionService = new TransactionService(m_appSettings);
             _mapViewerService = new MapViewerService(dockManager1, m_appSettings);
+            // Subscribe to axis save event from MapViewerService
+            _mapViewerService.OnAxisSaveRequested += MapViewerService_OnAxisSaveRequested;
             _projectService = new ProjectService(m_appSettings);
             _exportService = new ExportService(m_appSettings);
             _quickAccessService = new QuickAccessService(_mapViewerService);
@@ -3323,6 +3327,37 @@ namespace VAGSuite
         private void btnVCDSDiagIQOffset_ItemClick(object sender, ItemClickEventArgs e)
         {
             _quickAccessService.OpenVCDSDiagnosticIQOffset();
+        }
+
+        /// <summary>
+        /// Handles axis editor requests from MapViewerCoordinator
+        /// </summary>
+        private void MapCoordinator_OnAxisEditorRequested(object sender, Services.AxisEditorRequestEventArgs e)
+        {
+            if (e.Symbol != null)
+            {
+                _mapViewerService.StartAxisViewer(e.Symbol,
+                    e.AxisToShow == Services.MapViewerCoordinator.Axis.XAxis ? MapViewerService.Axis.XAxis : MapViewerService.Axis.YAxis,
+                    e.Filename, e.Symbols);
+            }
+        }
+
+        /// <summary>
+        /// Handles axis save requests from MapViewerService
+        /// </summary>
+        private void MapViewerService_OnAxisSaveRequested(object sender, Services.AxisSaveRequestedEventArgs e)
+        {
+            if (e != null && e.Data != null)
+            {
+                string note = string.Empty;
+                if (m_appSettings.RequestProjectNotes && Tools.Instance.m_CurrentWorkingProject != "")
+                {
+                    frmChangeNote changenote = new frmChangeNote();
+                    changenote.ShowDialog();
+                    note = changenote.Note;
+                }
+                SaveAxisDataIncludingSyncOption(e.AxisAddress, e.Data.Length, e.Data, e.Filename, true, note);
+            }
         }
 
     }

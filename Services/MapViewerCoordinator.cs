@@ -5,6 +5,7 @@ using System.IO;
 using System.Windows.Forms;
 using DevExpress.XtraBars.Docking;
 using VAGSuite.Helpers;
+using VAGSuite.MapViewerEventArgs;
 
 namespace VAGSuite.Services
 {
@@ -58,6 +59,9 @@ namespace VAGSuite.Services
                 MapViewerEx viewer = CreateMapViewer(parameters);
                 dockPanel = CreateDockPanel(parameters, viewer);
                 
+                // Subscribe to axis editor event - FIX: was missing after refactor
+                viewer.onAxisEditorRequested += tabdet_onAxisEditorRequested;
+
                 dockPanel.Controls.Add(viewer);
                 viewer.Visible = true;
             }
@@ -369,5 +373,67 @@ namespace VAGSuite.Services
                 }
             }
         }
+
+        /// <summary>
+        /// Event handler for axis editor requests from MapViewerEx
+        /// </summary>
+        private void tabdet_onAxisEditorRequested(object sender, AxisEditorRequestedEventArgs e)
+        {
+            // start axis editor
+            foreach (SymbolHelper sh in Tools.Instance.m_symbols)
+            {
+                if (sh.Varname == e.Mapname)
+                {
+                    if (e.Axisident == AxisIdent.X_Axis)
+                        StartAxisViewer(sh, Axis.XAxis);
+                    else if (e.Axisident == AxisIdent.Y_Axis)
+                        StartAxisViewer(sh, Axis.YAxis);
+
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Starts an axis viewer for editing axis values
+        /// </summary>
+        private void StartAxisViewer(SymbolHelper symbol, Axis axisToShow)
+        {
+            // This method delegates to MapViewerService.StartAxisViewer
+            // The service instance is not available here, so we use the event-based approach
+            // or the caller should handle this. For now, we'll throw an event that can be handled externally.
+            OnAxisEditorRequested?.Invoke(this, new AxisEditorRequestEventArgs
+            {
+                Symbol = symbol,
+                AxisToShow = axisToShow,
+                Filename = Tools.Instance.m_currentfile,
+                Symbols = Tools.Instance.m_symbols
+            });
+        }
+
+        /// <summary>
+        /// Event raised when axis editor is requested
+        /// </summary>
+        public event EventHandler<AxisEditorRequestEventArgs> OnAxisEditorRequested;
+
+        /// <summary>
+        /// Enum for axis type
+        /// </summary>
+        public enum Axis
+        {
+            XAxis,
+            YAxis
+        }
+    }
+
+    /// <summary>
+    /// Event arguments for axis editor request
+    /// </summary>
+    public class AxisEditorRequestEventArgs : EventArgs
+    {
+        public SymbolHelper Symbol { get; set; }
+        public MapViewerCoordinator.Axis AxisToShow { get; set; }
+        public string Filename { get; set; }
+        public SymbolCollection Symbols { get; set; }
     }
 }

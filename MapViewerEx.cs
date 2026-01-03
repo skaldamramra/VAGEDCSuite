@@ -1005,7 +1005,7 @@ namespace VAGSuite
                     }
                 }
 
-                // set axis indicator width
+                // set axis indicator width for Y-axis labels
                 int indicatorwidth = -1;
                 using (Graphics g = gridControl1.CreateGraphics())
                 {
@@ -1022,8 +1022,8 @@ namespace VAGSuite
                     gridView1.IndicatorWidth = indicatorwidth + 6;
                 }
 
-                int maxxval = 0;
-                for (int i = 0; i < x_axisvalues.Length; i++)
+                // Apply X-axis labels to column headers
+                for (int i = 0; i < x_axisvalues.Length && i < gridView1.Columns.Count; i++)
                 {
                     int xval = Convert.ToInt32(x_axisvalues.GetValue(i));
                     if (xval > 0xF000)
@@ -1032,9 +1032,20 @@ namespace VAGSuite
                         xval = -xval;
                         x_axisvalues.SetValue(xval, i);
                     }
-                    if (xval > maxxval) maxxval = xval;
+                    
+                    string xlabel;
+                    if (m_viewtype == ViewType.Hexadecimal)
+                    {
+                        xlabel = xval.ToString(xval <= 255 ? "X2" : "X4");
+                    }
+                    else
+                    {
+                        double temp = (double)xval * m_Xaxiscorrectionfactor + m_Xaxiscorrectionoffset;
+                        xlabel = temp.ToString("F2");
+                    }
+                    gridView1.Columns[i].Caption = xlabel;
                 }
-                if (maxxval <= 255) m_xformatstringforhex = "X2";
+                if (x_axisvalues.Length > 0 && x_axisvalues[0] <= 255) m_xformatstringforhex = "X2";
             }
 
             if (m_TableWidth > 1)
@@ -1462,7 +1473,39 @@ namespace VAGSuite
 
         private void gridView1_CustomDrawRowIndicator(object sender, DevExpress.XtraGrid.Views.Grid.RowIndicatorCustomDrawEventArgs e)
         {
-            _mapGridComponent.CustomDrawRowIndicator(sender, e, this.Font);
+            // Draw Y-axis labels directly using MapViewerEx's y_axisvalues
+            if (e.RowHandle >= 0 && y_axisvalues != null && y_axisvalues.Length > e.RowHandle)
+            {
+                try
+                {
+                    string yvalue;
+                    int index = m_isUpsideDown ? (y_axisvalues.Length - 1) - e.RowHandle : e.RowHandle;
+                    int rawY = Convert.ToInt32(y_axisvalues.GetValue(index));
+
+                    if (m_viewtype == ViewType.Hexadecimal)
+                    {
+                        yvalue = rawY.ToString("X4");
+                    }
+                    else
+                    {
+                        double temp = (double)rawY * m_Yaxiscorrectionfactor + m_Yaxiscorrectionoffset;
+                        yvalue = temp.ToString("F1");
+                    }
+
+                    Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
+                    e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
+                    using (var gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
+                    {
+                        e.Graphics.FillRectangle(gb, e.Bounds);
+                    }
+                    e.Graphics.DrawString(yvalue, this.Font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 4, e.Bounds.Y + 1 + (e.Bounds.Height - 12) / 2));
+                    e.Handled = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("MapViewerEx.CustomDrawRowIndicator error: " + ex.Message);
+                }
+            }
         }
 
 
