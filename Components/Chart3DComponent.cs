@@ -64,6 +64,8 @@ namespace VAGSuite.Components
         private string _xAxisName;
         private string _yAxisName;
         private string _zAxisName;
+        private string _xAxisUnits;
+        private string _yAxisUnits;
         private byte[] _mapContent;
         private byte[] _originalContent;
         private byte[] _compareContent;
@@ -76,6 +78,8 @@ namespace VAGSuite.Components
         private bool _overlayVisible;
         private bool _isUpsideDown;
         private Point _lastMousePos;
+        private Point _currentMousePos;
+        private int _hoveredVertexIndex = -1;
 
         // Rotation mode: true = rotate mesh, false = rotate camera
         private bool _rotateMesh = true;
@@ -233,14 +237,14 @@ namespace VAGSuite.Components
                         if (_wireframeEbo != 0)
                         {
                             GL.Disable(EnableCap.PolygonOffsetFill);
-                            GL.LineWidth(1.0f);
+                            GL.LineWidth(1.5f); // Increased for better visibility
                             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _wireframeEbo);
                             GL.DrawElements(PrimitiveType.Lines, (int)(_vertexCount * 1.33f), DrawElementsType.UnsignedInt, IntPtr.Zero);
                         }
                     }
                     else
                     {
-                        // Solid Mode: Draw filled triangles + subtle wireframe overlay
+                        // Solid Mode: Draw filled triangles + high-contrast wireframe overlay
                         GL.Enable(EnableCap.PolygonOffsetFill);
                         GL.PolygonOffset(1.0f, 1.0f);
                         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
@@ -249,9 +253,17 @@ namespace VAGSuite.Components
                         if (_wireframeEbo != 0)
                         {
                             GL.Disable(EnableCap.PolygonOffsetFill);
-                            GL.LineWidth(0.5f);
+                            GL.LineWidth(1.0f); // Increased from 0.5f
+                            
+                            // Use a fixed dark color for better contrast against the colored mesh
+                            int wireframeColLoc = GL.GetAttribLocation(_shaderProgram, "aColor");
+                            GL.DisableVertexAttribArray(wireframeColLoc);
+                            GL.VertexAttrib4(wireframeColLoc, 0.1f, 0.1f, 0.1f, 0.6f); // Dark gray/black edges
+                            
                             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _wireframeEbo);
                             GL.DrawElements(PrimitiveType.Lines, (int)(_vertexCount * 1.33f), DrawElementsType.UnsignedInt, IntPtr.Zero);
+                            
+                            GL.EnableVertexAttribArray(wireframeColLoc); // Restore for other drawing
                         }
                     }
 
@@ -262,8 +274,12 @@ namespace VAGSuite.Components
             
                 _glControl.SwapBuffers();
                 
-                // Draw axis labels using GDI+ after swap
+                // Update hover state before rendering labels
+                UpdateHoverState();
+
+                // Draw axis labels and tooltips using GDI+ after swap
                 RenderAxisLabels();
+                RenderHoverTooltip();
             }
             catch (Exception ex)
             {
@@ -507,10 +523,11 @@ namespace VAGSuite.Components
             {
                 using (Graphics g = _glControl.CreateGraphics())
                 {
-                    g.TextRenderingHint = TextRenderingHint.AntiAlias;
-                    using (Font labelFont = new Font("Segoe UI", 9, FontStyle.Bold))
-                    using (Font valueFont = new Font("Segoe UI", 7))
-                    using (SolidBrush textBrush = new SolidBrush(Color.LightGray))
+                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                    using (Font labelFont = new Font("Segoe UI", 10, FontStyle.Bold)) // Slightly larger
+                    using (Font valueFont = new Font("Segoe UI", 8, FontStyle.Bold)) // Larger and Bold
+                    using (SolidBrush textBrush = new SolidBrush(Color.White)) // High contrast White
+                    using (SolidBrush shadowBrush = new SolidBrush(Color.FromArgb(150, 0, 0, 0)))
                     {
                         Vector3 min = _meshMinBounds;
                         Vector3 max = _meshMaxBounds;
@@ -558,10 +575,13 @@ namespace VAGSuite.Components
                                 if (screenPos != PointF.Empty)
                                 {
                                     string val = FormatAxisValue(_xAxisValues[idx], _xAxisName);
+                                    // Draw shadow for better visibility
+                                    g.DrawString(val, valueFont, shadowBrush, screenPos.X - 9, screenPos.Y + 6);
                                     g.DrawString(val, valueFont, textBrush, screenPos.X - 10, screenPos.Y + 5);
                                 }
                             }
                             PointF titlePos = ProjectToScreen(new Vector3((min.X + max.X) / 2, anchor.Y, min.Z));
+                            g.DrawString(_xAxisName ?? "Throttle position", labelFont, shadowBrush, titlePos.X - 39, titlePos.Y + 21);
                             g.DrawString(_xAxisName ?? "Throttle position", labelFont, textBrush, titlePos.X - 40, titlePos.Y + 20);
                         }
 
@@ -578,10 +598,12 @@ namespace VAGSuite.Components
                                 if (screenPos != PointF.Empty)
                                 {
                                     string val = FormatAxisValue(_yAxisValues[idx], _yAxisName);
+                                    g.DrawString(val, valueFont, shadowBrush, screenPos.X - 34, screenPos.Y + 1);
                                     g.DrawString(val, valueFont, textBrush, screenPos.X - 35, screenPos.Y);
                                 }
                             }
                             PointF titlePos = ProjectToScreen(new Vector3(anchor.X, (min.Y + max.Y) / 2, min.Z));
+                            g.DrawString(_yAxisName ?? "Engine speed (rpm)", labelFont, shadowBrush, titlePos.X - 59, titlePos.Y + 16);
                             g.DrawString(_yAxisName ?? "Engine speed (rpm)", labelFont, textBrush, titlePos.X - 60, titlePos.Y + 15);
                         }
 
@@ -601,10 +623,12 @@ namespace VAGSuite.Components
                                 
                                 // Use FormatZAxisValue to format based on current view type
                                 string val = FormatZAxisValue(actualVal);
+                                g.DrawString(val, valueFont, shadowBrush, screenPos.X - 24, screenPos.Y - 4);
                                 g.DrawString(val, valueFont, textBrush, screenPos.X - 25, screenPos.Y - 5);
                             }
                         }
                         PointF zTitlePos = ProjectToScreen(new Vector3(anchor.X, anchor.Y, max.Z + 0.5f));
+                        g.DrawString(_zAxisName ?? "Requested IQ (mg)", labelFont, shadowBrush, zTitlePos.X - 39, zTitlePos.Y - 19);
                         g.DrawString(_zAxisName ?? "Requested IQ (mg)", labelFont, textBrush, zTitlePos.X - 40, zTitlePos.Y - 20);
                     }
                 }
@@ -689,6 +713,129 @@ namespace VAGSuite.Components
             float screenY = (1.0f - ndcY) * 0.5f * _glControl.Height;
             
             return new PointF(screenX, screenY);
+        }
+
+        private void UpdateHoverState()
+        {
+            if (_glControl == null || _mapContent == null || _tableWidth <= 0) return;
+
+            int rows = _mapContent.Length / (_isSixteenBit ? 2 : 1) / _tableWidth;
+            int cols = _tableWidth;
+            int totalVertices = rows * cols;
+
+            float minDistance = 15.0f; // Hover threshold in pixels
+            int bestIdx = -1;
+
+            // We need to project vertices to find the one under the mouse
+            // This is done by iterating through the grid.
+            // Since we know the grid structure, we could optimize, but for typical map sizes (e.g. 16x16)
+            // iterating all vertices is very fast.
+            
+            float scaleX = 10.0f / Math.Max(1, cols);
+            float scaleY = 10.0f / Math.Max(1, rows);
+            float range = Math.Max(1, _dataMaxZ - _dataMinZ);
+            float scaleZ = 6.0f / range;
+
+            for (int i = 0; i < totalVertices; i++)
+            {
+                int r = i / cols;
+                int c = i % cols;
+                float val = GetZValue(_mapContent, r, c);
+                
+                float xPos = (c - (cols - 1) / 2.0f) * scaleX;
+                float yPos = (r - (rows - 1) / 2.0f) * scaleY;
+                float zPos = (val - _dataMinZ) * scaleZ;
+                if (_isUpsideDown) zPos = (range * scaleZ) - zPos;
+
+                PointF screenPos = ProjectToScreen(new Vector3(xPos, yPos, zPos));
+                if (screenPos != PointF.Empty)
+                {
+                    float dx = screenPos.X - _currentMousePos.X;
+                    float dy = screenPos.Y - _currentMousePos.Y;
+                    float dist = (float)Math.Sqrt(dx * dx + dy * dy);
+                    if (dist < minDistance)
+                    {
+                        minDistance = dist;
+                        bestIdx = i;
+                    }
+                }
+            }
+
+            if (_hoveredVertexIndex != bestIdx)
+            {
+                _hoveredVertexIndex = bestIdx;
+                RefreshChart();
+            }
+        }
+
+        private void RenderHoverTooltip()
+        {
+            if (_hoveredVertexIndex == -1 || _glControl == null || _mapContent == null) return;
+
+            int cols = _tableWidth;
+            int r = _hoveredVertexIndex / cols;
+            int c = _hoveredVertexIndex % cols;
+
+            float val = GetZValue(_mapContent, r, c);
+            int xVal = (_xAxisValues != null && c < _xAxisValues.Length) ? _xAxisValues[c] : c;
+            int yVal = (_yAxisValues != null && r < _yAxisValues.Length) ? _yAxisValues[r] : r;
+
+            string xStr = FormatAxisValue(xVal, _xAxisName);
+            string yStr = FormatAxisValue(yVal, _yAxisName);
+            string zStr = FormatZAxisValue(val);
+
+            string xLabel = _xAxisName ?? "X";
+            string yLabel = _yAxisName ?? "Y";
+            string zLabel = _zAxisName ?? "Z";
+
+            if (!string.IsNullOrEmpty(_xAxisUnits)) xStr += " " + _xAxisUnits;
+            if (!string.IsNullOrEmpty(_yAxisUnits)) yStr += " " + _yAxisUnits;
+
+            string tooltip = $"{xLabel}: {xStr}\n{yLabel}: {yStr}\n{zLabel}: {zStr}";
+
+            using (Graphics g = _glControl.CreateGraphics())
+            {
+                g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                using (Font font = new Font("Segoe UI", 9, FontStyle.Bold))
+                {
+                    SizeF size = g.MeasureString(tooltip, font);
+                    float padding = 5;
+                    RectangleF rect = new RectangleF(_currentMousePos.X + 15, _currentMousePos.Y - size.Height - 15, size.Width + padding * 2, size.Height + padding * 2);
+
+                    // Draw background
+                    using (SolidBrush backBrush = new SolidBrush(Color.FromArgb(220, 40, 40, 40)))
+                    using (Pen borderPen = new Pen(Color.White, 1))
+                    {
+                        g.FillRectangle(backBrush, rect);
+                        g.DrawRectangle(borderPen, rect.X, rect.Y, rect.Width, rect.Height);
+                    }
+
+                    // Draw text
+                    using (SolidBrush textBrush = new SolidBrush(Color.White))
+                    {
+                        g.DrawString(tooltip, font, textBrush, rect.X + padding, rect.Y + padding);
+                    }
+
+                    // Draw a small circle at the vertex
+                    // We need the screen position of the vertex again
+                    float scaleX = 10.0f / Math.Max(1, cols);
+                    int rows = _mapContent.Length / (_isSixteenBit ? 2 : 1) / _tableWidth;
+                    float scaleY = 10.0f / Math.Max(1, rows);
+                    float range = Math.Max(1, _dataMaxZ - _dataMinZ);
+                    float scaleZ = 6.0f / range;
+                    float xPos = (c - (cols - 1) / 2.0f) * scaleX;
+                    float yPos = (r - (rows - 1) / 2.0f) * scaleY;
+                    float zPos = (val - _dataMinZ) * scaleZ;
+                    if (_isUpsideDown) zPos = (range * scaleZ) - zPos;
+
+                    PointF vScreen = ProjectToScreen(new Vector3(xPos, yPos, zPos));
+                    if (vScreen != PointF.Empty)
+                    {
+                        g.DrawEllipse(Pens.White, vScreen.X - 4, vScreen.Y - 4, 8, 8);
+                        g.FillEllipse(Brushes.Black, vScreen.X - 2, vScreen.Y - 2, 4, 4);
+                    }
+                }
+            }
         }
 
         private void DrawVertexPoints()
@@ -947,6 +1094,8 @@ namespace VAGSuite.Components
             _xAxisName = state.Metadata.XAxisName;
             _yAxisName = state.Metadata.YAxisName;
             _zAxisName = state.Metadata.ZAxisName;
+            _xAxisUnits = state.Metadata.XAxisUnits;
+            _yAxisUnits = state.Metadata.YAxisUnits;
             _mapContent = state.Data.Content;
             _originalContent = state.Data.OriginalContent;
             _compareContent = state.Data.CompareContent;
@@ -1134,6 +1283,8 @@ namespace VAGSuite.Components
 
         private void OnGLMouseMove(object sender, MouseEventArgs e)
         {
+            _currentMousePos = e.Location;
+
             if (e.Button == MouseButtons.Left)
             {
                 // Update rotation angles - this now rotates the view responsively
@@ -1156,6 +1307,11 @@ namespace VAGSuite.Components
                 _lastMousePos = e.Location;
                 
                 // Use throttled rendering for responsive but controlled updates
+                RequestRender();
+            }
+            else
+            {
+                // Just moving the mouse - check for hover
                 RequestRender();
             }
         }
