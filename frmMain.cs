@@ -118,6 +118,9 @@ namespace VAGSuite
     public partial class frmMain : DevExpress.XtraEditors.XtraForm
     {
         private AppSettings m_appSettings;
+        private System.Windows.Forms.Timer hoverTimer;
+        private int lastHoverRowHandle = -1;
+        private DevExpress.Utils.ToolTipController gridToolTipController;
         private msiupdater m_msiUpdater;
         public DelegateStartReleaseNotePanel m_DelegateStartReleaseNotePanel;
         private frmSplash splash;
@@ -150,6 +153,37 @@ namespace VAGSuite
             InitializeComponent();
 
             m_DelegateStartReleaseNotePanel = new DelegateStartReleaseNotePanel(this.StartReleaseNotesViewer);
+            InitializeHoverTimer();
+        }
+
+        private void InitializeHoverTimer()
+        {
+            hoverTimer = new System.Windows.Forms.Timer();
+            hoverTimer.Interval = 3000; // 3 seconds
+            hoverTimer.Tick += HoverTimer_Tick;
+
+            gridToolTipController = new DevExpress.Utils.ToolTipController();
+            gridToolTipController.AutoPopDelay = 10000;
+            gridToolTipController.InitialDelay = 500;
+            gridControl1.ToolTipController = gridToolTipController;
+        }
+
+        private void HoverTimer_Tick(object sender, EventArgs e)
+        {
+            hoverTimer.Stop();
+            if (lastHoverRowHandle >= 0)
+            {
+                SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow(lastHoverRowHandle);
+                if (sh != null)
+                {
+                    string description = VAGSuite.Services.MapDescriptionService.Instance.GetDescription(sh.Varname);
+                    if (!string.IsNullOrEmpty(description))
+                    {
+                        // Use the overload that takes a string and a point
+                        gridToolTipController.ShowHint(description, sh.Varname, System.Windows.Forms.Cursor.Position);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -167,6 +201,9 @@ namespace VAGSuite
             _viewSyncService = new ViewSynchronizationService(m_appSettings);
             _transactionService = new TransactionService(m_appSettings);
             _mapViewerService = new MapViewerService(dockManager1, m_appSettings);
+            
+            // Wire the MouseMove event for tooltips
+            gridControl1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.gridControl1_MouseMove);
             // Subscribe to axis save event from MapViewerService
             _mapViewerService.OnAxisSaveRequested += MapViewerService_OnAxisSaveRequested;
             _projectService = new ProjectService(m_appSettings);
@@ -2391,6 +2428,22 @@ namespace VAGSuite
         private void gridControl1_MouseMove(object sender, MouseEventArgs e)
         {
             gvhi = gridViewSymbols.CalcHitInfo(new Point(e.X, e.Y));
+            if (gvhi.InRowCell)
+            {
+                if (gvhi.RowHandle != lastHoverRowHandle)
+                {
+                    lastHoverRowHandle = gvhi.RowHandle;
+                    hoverTimer.Stop();
+                    hoverTimer.Start();
+                    gridToolTipController.HideHint();
+                }
+            }
+            else
+            {
+                lastHoverRowHandle = -1;
+                hoverTimer.Stop();
+                gridToolTipController.HideHint();
+            }
         }
 
         private bool CheckAllTablesAvailable()

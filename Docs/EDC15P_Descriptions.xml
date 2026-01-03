@@ -1,0 +1,85 @@
+<MapDescriptions>
+  <Map Key="Driver wish">
+    <Title>Driver Wish (Wunschmenge)</Title>
+    <Description>The Driver Wish map is the primary interface between the driver and the engine management system. It translates the accelerator pedal position (0-100%) and current engine speed (RPM) into a requested torque or Injected Quantity (IQ). This map defines the 'character' of the vehicle's response to throttle inputs. In EDC15P systems, this request is passed through various filters and limiters before becoming the actual injection command. It is the first step in the 'Mengenberechnung' (Quantity Calculation) chain described by Bosch.</Description>
+    <UseCase>Used to define how the car feels during daily driving and wide-open throttle (WOT) conditions. It allows the tuner to request more fuel than the factory calibration originally intended.</UseCase>
+    <TuningAdvice>Increase values in the high-pedal (70-100%) and high-RPM areas to request more power. Avoid increasing low-pedal areas to maintain smooth drivability in traffic. Ensure the requested IQ does not exceed the physical limits of the injectors or the safety limiters like the Torque Limiter.</TuningAdvice>
+  </Map>
+
+  <Map Key="Torque limiter">
+    <Title>Torque Limiter (Drehmomentbegrenzung)</Title>
+    <Description>The Torque Limiter is a safety-critical map that acts as a hard ceiling for the maximum fuel injection allowed at any given RPM and atmospheric pressure. Its primary function is to protect the mechanical components of the drivetrain from excessive stress. Bosch logic uses this map to ensure that the engine does not produce more torque than the clutch, dual-mass flywheel (DMF), and gearbox can safely handle. It also accounts for atmospheric pressure to protect the turbocharger from over-speeding at high altitudes where the air is thinner.</Description>
+    <UseCase>This is typically the first limiter a tuner must modify to allow the engine to produce more power. Without increasing this, any increases in the Driver Wish map will be ignored by the ECU.</UseCase>
+    <TuningAdvice>Increase the values to allow for higher torque, but do so with extreme caution. Avoid large increases below 2500 RPM to prevent 'clutch slip' or 'DMF shudder,' which can lead to premature hardware failure. Always maintain a downward slope at very high RPMs to provide a natural safety rev-limit.</TuningAdvice>
+  </Map>
+
+  <Map Key="Smoke limiter">
+    <Title>Smoke Limiter (Rauchbegrenzung)</Title>
+    <Description>The Smoke Limiter ensures that the engine maintains a proper Air-Fuel Ratio (AFR) to prevent the production of black smoke (soot). It limits the Injected Quantity (IQ) based on the actual air mass (MAF) or boost pressure (MAP) entering the cylinders. If the driver requests more fuel than there is air to burn it completely, this map steps in to reduce the injection. This is essential for meeting emission standards and keeping the exhaust gas temperatures (EGT) within safe limits. Bosch refers to this as the 'Rauchkennfeld'.</Description>
+    <UseCase>Essential when increasing power to ensure the car remains 'smoke-free'. It is also adjusted when switching from MAF-based to MAP-based fueling (MAF-less tuning).</UseCase>
+    <TuningAdvice>Adjust this map to maintain an AFR of approximately 17:1 or 18:1 for a clean burn. If the car produces black smoke under acceleration, the values in this map are likely too high for the available air mass. Always coordinate changes here with increases in the Boost Target map.</TuningAdvice>
+  </Map>
+
+  <Map Key="Boost target">
+    <Title>Boost Target Map (Ladedrucksollwert)</Title>
+    <Description>This map defines the desired turbocharger boost pressure (in mbar) for a given engine speed and fuel injection quantity. The ECU uses this as the 'setpoint' for the boost control loop. By requesting higher pressure, the tuner provides more oxygen to the engine, allowing for more fuel to be burned efficiently without smoke. The Bosch 'Ladedruckregelung' logic compares this target against the actual pressure measured by the MAP sensor and adjusts the N75 duty cycle accordingly.</Description>
+    <UseCase>Modified whenever more power is desired. Higher boost allows for higher fuel limits in the Smoke Limiter map.</UseCase>
+    <TuningAdvice>Increase boost pressure gradually and stay within the 'compressor map' limits of the specific turbocharger installed. For factory GT1749V turbos, stay below 2500mbar (absolute) to avoid over-speeding the turbine. Ensure that the requested boost can be physically achieved by the hardware at the requested RPM.</TuningAdvice>
+  </Map>
+
+  <Map Key="N75 duty cycle">
+    <Title>N75 Duty Cycle (Ladedrucksteller)</Title>
+    <Description>The N75 map controls the pulse-width modulation (PWM) signal sent to the vacuum solenoid that moves the Variable Nozzle Turbine (VNT) vanes. These vanes change the geometry of the turbocharger to speed up or slow down the turbine wheel. This map provides the 'pre-control' or 'feed-forward' values, allowing the ECU to position the vanes close to where they need to be before the PID controller fine-tunes the position. Proper calibration is vital for stable boost pressure and quick turbo spool-up.</Description>
+    <UseCase>Adjusted to fix boost control issues such as 'boost spikes' (overshoot) or 'boost lag' (slow spool). It is also necessary when upgrading to a larger turbocharger with different vane characteristics.</UseCase>
+    <TuningAdvice>If you experience a boost spike, increase the duty cycle values (open the vanes more) in the area where the spike occurs. If the boost is slow to build, decrease the values (close the vanes more) to catch the exhaust gas more aggressively. Small changes (1-3%) are usually sufficient.</TuningAdvice>
+  </Map>
+
+  <Map Key="Start of injection">
+    <Title>Start of Injection (SOI / Förderbeginn)</Title>
+    <Description>The SOI map determines the exact moment the injectors begin spraying fuel into the combustion chamber, measured in degrees before Top Dead Center (BTDC). Timing is critical because it dictates how much time the fuel has to mix with air and burn. As engine speed increases, the time available for combustion decreases, requiring the injection to start earlier (advance). Bosch logic uses multiple SOI maps selected based on engine coolant temperature to ensure reliable starting and efficient operation across all thermal conditions.</Description>
+    <UseCase>Advanced timing is often required when injecting larger quantities of fuel to ensure the combustion ends at the optimal point for torque production. It also helps in reducing exhaust gas temperatures (EGT).</UseCase>
+    <TuningAdvice>Advance timing carefully. Too much advance increases peak cylinder pressure significantly, which can damage head gaskets or pistons. Generally, do not exceed 28-30 degrees BTDC on PD engines without significant hardware reinforcement. Always monitor engine 'clatter' as an indicator of excessive advance.</TuningAdvice>
+  </Map>
+
+  <Map Key="Injector duration">
+    <Title>Injector Duration (Förderdauer)</Title>
+    <Description>The Duration map defines how long (in crankshaft degrees) the injector must remain open to deliver a specific quantity of fuel (IQ) at a given engine speed. This is a calibration map that describes the physical flow characteristics of the fuel injectors. In PD (Pumpe Düse) engines, the injection pressure is generated by the camshaft, so the duration must account for the varying pressure available at different RPMs. Bosch refers to this as the 'Förderdauerberechnung'.</Description>
+    <UseCase>This map is primarily modified when the physical fuel injectors are replaced with larger ones (e.g., Firad +50% or +100% nozzles). It 're-scales' the ECU's understanding of fuel flow.</UseCase>
+    <TuningAdvice>This is not a 'power' map. It should only be changed to match the hardware. If you have stock injectors, do not touch this map. If you have larger nozzles, you must decrease the duration values because the larger holes flow more fuel in the same amount of time.</TuningAdvice>
+  </Map>
+
+  <Map Key="BIP">
+    <Title>BIP (Begin of Injection Period)</Title>
+    <Description>BIP stands for 'Begin of Injection Period' and is a specialized calibration map for PD injectors. It accounts for the electrical and mechanical delay between the ECU sending a signal to the injector solenoid and the actual start of the needle movement. The ECU monitors the 'BIP signal' (a voltage spike) to detect exactly when the solenoid closes. This map provides the expected values for this delay, allowing the ECU to compensate for variations in battery voltage and fuel temperature.</Description>
+    <UseCase>Adjusted when the engine has difficulty idling smoothly or when very large injectors are installed that have different solenoid response times.</UseCase>
+    <TuningAdvice>Most tuners leave this map stock. Only modify it if you are an expert dealing with high-end performance injectors and have logs showing significant BIP deviation. Incorrect values here will cause the ECU to miscalculate the actual SOI and Duration, leading to poor engine performance.</TuningAdvice>
+  </Map>
+
+  <Map Key="SVBL">
+    <Title>SVBL (Single Value Boost Limiter)</Title>
+    <Description>The SVBL is the final 'safety net' in the boost control system. Unlike the Boost Limit Map, which is a 3D table, the SVBL is a single constant value. If the actual boost pressure exceeds this value for more than a few seconds, the ECU immediately cuts fuel and enters 'Limp Mode' to protect the turbocharger and engine from catastrophic failure. It is the absolute maximum pressure the ECU will tolerate before taking emergency action.</Description>
+    <UseCase>Must be increased whenever the Boost Target map is tuned to a level near or above the factory SVBL setting.</UseCase>
+    <TuningAdvice>Set the SVBL approximately 50-100mbar higher than the highest value in your Boost Target map. This provides enough 'headroom' for small, temporary boost spikes without triggering Limp Mode, while still providing protection against a stuck VNT mechanism or a failed N75 valve.</TuningAdvice>
+  </Map>
+
+  <Map Key="EGR">
+    <Title>EGR Map (Abgasrückführung)</Title>
+    <Description>The Exhaust Gas Recirculation (EGR) map controls the amount of exhaust gas that is fed back into the intake manifold. This process lowers the combustion temperature, which significantly reduces the production of Nitrogen Oxides (NOx). The map is indexed by engine speed and injected quantity. At idle and light loads, the EGR valve is open; at high loads and high RPMs, it is closed to allow for maximum fresh air and power. Bosch logic uses the MAF sensor to verify that the correct amount of air is being displaced by exhaust gas.</Description>
+    <UseCase>Frequently modified by tuners to 'delete' or 'disable' the EGR system. This prevents oily carbon deposits from clogging the intake manifold and improves throttle response.</UseCase>
+    <TuningAdvice>To disable the EGR, set all values in the map to the maximum possible air mass (usually 850 or 1000 mg/stroke). This tells the ECU that it always wants maximum fresh air, effectively keeping the EGR valve closed at all times. Note that this may be illegal for road use in some jurisdictions.</TuningAdvice>
+  </Map>
+
+  <Map Key="PID">
+    <Title>PID Boost Controller (Proportional-Integral-Derivative)</Title>
+    <Description>The PID maps (P, I, and D) are the mathematical parameters used by the ECU to fine-tune the boost pressure. While the N75 map provides a 'guess' at the vane position, the PID controller looks at the error (the difference between Target Boost and Actual Boost) and makes rapid corrections. 'P' (Proportional) reacts to the current error, 'I' (Integral) reacts to the accumulation of past errors to ensure the target is eventually met, and 'D' (Derivative) reacts to the speed at which the error is changing to prevent overshooting.</Description>
+    <UseCase>Modified when the boost control is unstable despite a well-tuned N75 map. This is common with very large hybrid turbochargers that have much more inertia than stock units.</UseCase>
+    <TuningAdvice>Tuning PID is complex. If the boost oscillates (waves up and down), you may need to reduce the 'P' or 'I' gains. If the boost never quite reaches the target, you may need to increase the 'I' gain. Most tuners should focus on the N75 map first, as it is much easier to calibrate and often solves 90% of boost control issues.</TuningAdvice>
+  </Map>
+
+  <Map Key="Linearization">
+    <Title>Sensor Linearization Map</Title>
+    <Description>Linearization maps are the 'translation tables' the ECU uses to understand raw electrical signals from sensors. For example, a MAP sensor sends a voltage between 0V and 5V. The Linearization map tells the ECU that 1V equals 500mbar and 4V equals 3000mbar. These maps are fundamental to the ECU's ability to perceive the physical world. There are linearization maps for the MAF sensor, MAP sensor, and various temperature sensors (Coolant, Fuel, Intake Air).</Description>
+    <UseCase>Modified when hardware sensors are upgraded. A common upgrade is replacing the stock 3-bar MAP sensor with a 4-bar sensor to allow the ECU to 'see' boost pressures above 2000mbar (relative).</UseCase>
+    <TuningAdvice>Only change these if you have changed the physical sensor. You must use the specific calibration data provided by the sensor manufacturer (e.g., Bosch or VDO). Entering incorrect values here will cause the ECU to have a completely false understanding of engine conditions, which can lead to immediate engine damage.</TuningAdvice>
+  </Map>
+</MapDescriptions>
