@@ -39,16 +39,22 @@
             this.labelControl1.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.labelControl1.Location = new System.Drawing.Point(12, 12);
             this.labelControl1.Name = "labelControl1";
-            this.labelControl1.Size = new System.Drawing.Size(568, 13);
+            this.labelControl1.Size = new System.Drawing.Size(1000, 13);
             this.labelControl1.TabIndex = 0;
-            // 
+            //
             // frmSplash
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackgroundImageLayoutStore = System.Windows.Forms.ImageLayout.Tile;
-            this.BackgroundImageStore = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImageStore")));
-            this.ClientSize = new System.Drawing.Size(592, 366);
+            this.BackgroundImageLayoutStore = System.Windows.Forms.ImageLayout.Zoom;
+            using (System.IO.Stream stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("VAGSuite.splash_new.png"))
+            {
+                if (stream != null)
+                {
+                    this.BackgroundImageStore = System.Drawing.Image.FromStream(stream);
+                }
+            }
+            this.ClientSize = new System.Drawing.Size(1024, 925);
             this.ControlBox = false;
             this.Controls.Add(this.labelControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
