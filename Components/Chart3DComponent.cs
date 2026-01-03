@@ -948,8 +948,12 @@ namespace VAGSuite.Components
                 // Standard height calculation: High value = High peak
                 float zPos = (val - minZ) * scaleZ;
                 
-                // Honor the IsUpsideDown flag from the map configuration
-                if (_isUpsideDown)
+                // Skeptical Engineer Fix: The 3D mesh should always represent physical reality.
+                // High physical value = High peak.
+                // If the correction factor is negative (e.g. SOI, N75), high raw values are low physical values.
+                // In that case, we MUST flip the Z-axis height calculation so that the physical peak is at the top.
+                // We ignore the global _isUpsideDown flag here because that is intended for the Table/Grid row ordering.
+                if (_correctionFactor < 0)
                 {
                     zPos = (maxZ - minZ) * scaleZ - zPos;
                 }
