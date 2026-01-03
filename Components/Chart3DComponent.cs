@@ -52,8 +52,10 @@ namespace VAGSuite.Components
         private int _tableWidth;
         private bool _isSixteenBit;
         private bool _isLoaded = false;
-        private float _rotation = -45f;
-        private float _elevation = 30f;
+        // Default view orientation: slightly isometric view (~25° elevation from top)
+        // Rotation: Z-axis (horizontal spin), Elevation: X-axis limited to ±60°
+        private float _rotation = 0f;
+        private float _elevation = 10f; // Slightly isometric default view
         private float _zoom = 1.2f;
         private RenderMode _renderMode = RenderMode.Solid;
         private ViewType _viewType;
@@ -311,19 +313,29 @@ namespace VAGSuite.Components
             
             // Look at the center of the mesh
             Vector3 target = _meshCenter;
-            // Position camera behind and above the mesh (looking down the -Y axis, with Z as up)
-            Vector3 eye = new Vector3(_meshCenter.X, _meshCenter.Y - distance, _meshCenter.Z + distance * 0.5f);
             
-            // Use Z-axis as "up" since Z is now height
+            // For isometric view: position camera at an angle from above
+            // Camera positioned along -Y axis, elevated based on default view
+            float elevationRad = MathHelper.DegreesToRadians(_elevation);
+            Vector3 eye = new Vector3(
+                _meshCenter.X,
+                _meshCenter.Y - distance * (float)Math.Cos(elevationRad),
+                _meshCenter.Z + distance * (float)Math.Sin(elevationRad)
+            );
+            
+            // Use Z-axis as "up" since Z is height (X/Y plane is horizontal)
             modelview = Matrix4.LookAt(eye, target, Vector3.UnitZ);
             
             // Unified Rotation: Apply to the entire scene (Mesh + Box + Grids)
-            // Elevation clamped to [-89, 89] to prevent gimbal lock
-            float clampedElevation = Math.Max(-89f, Math.Min(89f, _elevation));
+            // Z-axis rotation: horizontal spin around the mesh
+            // X-axis rotation: limited elevation (±60°) for viewing angle
             
-            // Pivot around the mesh center
+            // Clamp elevation to prevent extreme flipping
+            float clampedElevation = Math.Max(-30f, Math.Min(30f, _elevation));
+            
+            // Pivot around the mesh center - Z rotation first, then X for elevation
             modelview = Matrix4.CreateTranslation(-_meshCenter) *
-                        Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotation)) *
+                        Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(_rotation)) *
                         Matrix4.CreateRotationX(MathHelper.DegreesToRadians(clampedElevation)) *
                         Matrix4.CreateTranslation(_meshCenter) *
                         modelview;
@@ -339,12 +351,14 @@ namespace VAGSuite.Components
         }
 
         /// <summary>
-        /// Resets the view to default orientation and zoom.
+        /// Resets the view to default orientation: slightly isometric (~25° elevation).
+        /// Z-axis rotation: 360° horizontal spin.
+        /// X-axis elevation: limited to ±60° to prevent extreme flipping.
         /// </summary>
         public void ResetView()
         {
-            _rotation = -45f;
-            _elevation = 30f;
+            _rotation = 0f;
+            _elevation = 25f; // Slightly isometric view
             _zoom = 1.2f;
             RefreshChart();
         }
@@ -1022,23 +1036,34 @@ namespace VAGSuite.Components
         }
 
         /// <summary>
-        /// Sets the view rotation, elevation, and zoom
+        /// Sets the view rotation, elevation, and zoom.
+        /// Z-axis rotation: 360° horizontal spin.
+        /// X-axis elevation: limited to ±60° to prevent extreme flipping.
         /// </summary>
         public void SetView(float rotation, float elevation, float zoom)
         {
-            _rotation = rotation;
-            _elevation = elevation;
-            _zoom = zoom;
+            // Clamp rotation to 360° range (0-360 degrees)
+            _rotation = rotation % 360f;
+            if (_rotation < 0) _rotation += 360f;
+            
+            // Clamp elevation to ±60° to prevent extreme flipping
+            _elevation = Math.Max(-60f, Math.Min(60f, elevation));
+            
+            // Zoom constraints remain unchanged
+            _zoom = Math.Max(0.5f, Math.Min(5.0f, zoom));
+            
             RefreshChart();
         }
 
         /// <summary>
-        /// Gets the current view parameters
+        /// Gets the current view parameters.
+        /// Z-axis rotation: 360° horizontal spin.
+        /// X-axis elevation: limited to ±60°.
         /// </summary>
         public void GetView(out float rotation, out float elevation, out float zoom)
         {
             rotation = _rotation;
-            elevation = _elevation;
+            elevation = _elevation; // Returns actual elevation (clamped to ±60°)
             zoom = _zoom;
         }
 
@@ -1074,11 +1099,17 @@ namespace VAGSuite.Components
                 float deltaX = (e.X - _lastMousePos.X) * 0.5f;
                 float deltaY = (e.Y - _lastMousePos.Y) * 0.5f;
                 
+                // Z-axis rotation: horizontal spin around the mesh
                 _rotation += deltaX;
-                _elevation += deltaY;
                 
-                // Clamp elevation to prevent gimbal lock issues
-                _elevation = Math.Max(-89f, Math.Min(89f, _elevation));
+                // Clamp rotation to 360° range (0-360 degrees)
+                _rotation = _rotation % 360f;
+                if (_rotation < 0) _rotation += 360f;
+                
+                // X-axis elevation: limited to ±60° to prevent extreme flipping
+                // This allows viewing from different angles while avoiding confusion
+                _elevation += deltaY;
+                _elevation = Math.Max(-60f, Math.Min(60f, _elevation));
                 
                 _lastMousePos = e.Location;
                 
