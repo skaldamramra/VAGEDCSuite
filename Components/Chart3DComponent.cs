@@ -901,6 +901,10 @@ namespace VAGSuite.Components
             int rows = _mapContent.Length / (_isSixteenBit ? 2 : 1) / _tableWidth;
             int cols = _tableWidth;
             
+            // Handle single-column maps by extruding them into a 3D ribbon
+            bool isRibbon = (cols == 1);
+            int renderCols = isRibbon ? 2 : cols;
+
             // Find min/max for auto-scaling
             float minZ = float.MaxValue;
             float maxZ = float.MinValue;
@@ -919,11 +923,11 @@ namespace VAGSuite.Components
             float range = Math.Max(1, maxZ - minZ);
             _dataMinZ = minZ;
             _dataMaxZ = maxZ;
-            float scaleX = 10.0f / Math.Max(1, cols);  // X-axis: columns (left-right)
-            float scaleY = 10.0f / Math.Max(1, rows);  // Y-axis: rows (bottom-top/near-far)
-            float scaleZ = 6.0f / range;               // Z-axis: values (height)
+            float scaleX = 10.0f / Math.Max(1, renderCols);  // X-axis: columns (left-right)
+            float scaleY = 10.0f / Math.Max(1, rows);        // Y-axis: rows (bottom-top/near-far)
+            float scaleZ = 6.0f / range;                     // Z-axis: values (height)
 
-            int totalVertices = rows * cols;
+            int totalVertices = rows * renderCols;
             Vector3[] vertices = new Vector3[totalVertices];
             Vector4[] colors = new Vector4[totalVertices];
 
@@ -931,63 +935,51 @@ namespace VAGSuite.Components
             _meshMinBounds = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
             _meshMaxBounds = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 
-            for (int i = 0; i < totalVertices; i++)
+            for (int r = 0; r < rows; r++)
             {
-                int r = i / cols;  // Row index (corresponds to Y-axis in table)
-                int c = i % cols;  // Column index (corresponds to X-axis in table)
-                float val = values[i];
-                
-                // Map table coordinates to 3D space to match table orientation:
-                // - Table columns (X-axis values) → 3D X-axis (left-right)
-                // - Table rows (Y-axis values) → 3D Y-axis (bottom-top/near-far)
-                // - Table cell values (Z-axis values) → 3D Z-axis (height)
-                
-                float xPos = (c - (cols - 1) / 2.0f) * scaleX;  // Columns → X (left-right)
-                float yPos = (r - (rows - 1) / 2.0f) * scaleY;  // Rows → Y (near-far)
-                
-                // Standard height calculation: High value = High peak
-                float zPos = (val - minZ) * scaleZ;
-                
-                // Skeptical Engineer Fix: The 3D mesh should always represent physical reality.
-                // High physical value = High peak.
-                // If the correction factor is negative (e.g. SOI, N75), high raw values are low physical values.
-                // In that case, we MUST flip the Z-axis height calculation so that the physical peak is at the top.
-                // We ignore the global _isUpsideDown flag here because that is intended for the Table/Grid row ordering.
-                if (_correctionFactor < 0)
+                for (int c = 0; c < renderCols; c++)
                 {
-                    zPos = (maxZ - minZ) * scaleZ - zPos;
+                    int vIdx = r * renderCols + c;
+                    // For ribbons, both columns use the same data value
+                    float val = isRibbon ? values[r] : values[r * cols + c];
+                    
+                    float xPos = (c - (renderCols - 1) / 2.0f) * scaleX;
+                    float yPos = (r - (rows - 1) / 2.0f) * scaleY;
+                    
+                    float zPos = (val - minZ) * scaleZ;
+                    if (_correctionFactor < 0)
+                    {
+                        zPos = (maxZ - minZ) * scaleZ - zPos;
+                    }
+                    
+                    vertices[vIdx] = new Vector3(xPos, yPos, zPos);
+                    
+                    // Update bounds
+                    if (xPos < _meshMinBounds.X) _meshMinBounds.X = xPos;
+                    if (yPos < _meshMinBounds.Y) _meshMinBounds.Y = yPos;
+                    if (zPos < _meshMinBounds.Z) _meshMinBounds.Z = zPos;
+                    if (xPos > _meshMaxBounds.X) _meshMaxBounds.X = xPos;
+                    if (yPos > _meshMaxBounds.Y) _meshMaxBounds.Y = yPos;
+                    if (zPos > _meshMaxBounds.Z) _meshMaxBounds.Z = zPos;
+                    
+                    colors[vIdx] = GetColorForZ(val, minZ, maxZ, _correctionFactor < 0);
                 }
-                
-                vertices[i] = new Vector3(xPos, yPos, zPos);
-                
-                // Update bounds
-                if (xPos < _meshMinBounds.X) _meshMinBounds.X = xPos;
-                if (yPos < _meshMinBounds.Y) _meshMinBounds.Y = yPos;
-                if (zPos < _meshMinBounds.Z) _meshMinBounds.Z = zPos;
-                if (xPos > _meshMaxBounds.X) _meshMaxBounds.X = xPos;
-                if (yPos > _meshMaxBounds.Y) _meshMaxBounds.Y = yPos;
-                if (zPos > _meshMaxBounds.Z) _meshMaxBounds.Z = zPos;
-                
-                // Color should follow the physical height (Red = High, Blue = Low)
-                // We use the same logic as the Z-axis height: if correction factor is negative,
-                // the raw data inversion must be accounted for in the color gradient.
-                colors[i] = GetColorForZ(val, minZ, maxZ, _correctionFactor < 0);
             }
 
             // Calculate mesh center for camera targeting
             _meshCenter = (_meshMinBounds + _meshMaxBounds) / 2f;
 
-            int totalIndices = (rows - 1) * (cols - 1) * 6;
+            int totalIndices = (rows - 1) * (renderCols - 1) * 6;
             uint[] indices = new uint[totalIndices];
             int iIdx = 0;
             for (int r = 0; r < rows - 1; r++)
             {
-                for (int c = 0; c < cols - 1; c++)
+                for (int c = 0; c < renderCols - 1; c++)
                 {
-                    uint topLeft = (uint)(r * cols + c);
-                    uint bottomLeft = (uint)((r + 1) * cols + c);
-                    uint topRight = (uint)(r * cols + (c + 1));
-                    uint bottomRight = (uint)((r + 1) * cols + (c + 1));
+                    uint topLeft = (uint)(r * renderCols + c);
+                    uint bottomLeft = (uint)((r + 1) * renderCols + c);
+                    uint topRight = (uint)(r * renderCols + (c + 1));
+                    uint bottomRight = (uint)((r + 1) * renderCols + (c + 1));
 
                     indices[iIdx++] = topLeft;
                     indices[iIdx++] = bottomLeft;
