@@ -1086,15 +1086,15 @@ namespace VAGSuite.Components
             float normalized = (z - min) / range;
             if (inverted) normalized = 1.0f - normalized;
 
-            // Pastel 6-stop gradient optimized for dark mode (Verified in Phase 2)
-            // Sequence: Pastel Dark Blue -> Dark Green -> Light Green -> Yellow -> Orange -> Red
+            // Muted 6-stop gradient optimized for Image 1 palette
+            // Sequence: Muted Blue -> Muted Green -> Light Green -> Yellow -> Orange -> Red
             Color[] stops = new Color[] {
-                ColorTranslator.FromHtml("#5B8FF9"), // Pastel Dark Blue
-                ColorTranslator.FromHtml("#61DDAA"), // Dark Green
-                ColorTranslator.FromHtml("#91CC75"), // Light Green
-                ColorTranslator.FromHtml("#FAC858"), // Yellow
-                ColorTranslator.FromHtml("#FC8452"), // Orange
-                ColorTranslator.FromHtml("#EE6666")  // Red
+                Color.FromArgb(55, 65, 81),   // Muted Gray-Blue
+                Color.FromArgb(52, 211, 153),  // Muted Green
+                Color.FromArgb(110, 231, 183), // Light Muted Green
+                Color.FromArgb(252, 211, 77),  // Muted Yellow
+                Color.FromArgb(251, 146, 60),  // Muted Orange
+                Color.FromArgb(248, 113, 113)  // Muted Red
             };
 
             float scaled = normalized * (stops.Length - 1);

@@ -200,8 +200,8 @@ namespace VAGSuite.Components
             pane.XAxis.Title.Text = _xAxisName;
             pane.YAxis.Title.Text = state.Metadata.ZAxisName;
 
-            // Modern Dark Styling (Verified in Phase 2 to match Chart3DComponent)
-            Color darkBg = Color.FromArgb(40, 40, 40);
+            // Modern Dark Styling (Updated to match Image 1 palette)
+            Color darkBg = Color.FromArgb(18, 18, 18); // Gray900
             Color offWhite = Color.FromArgb(224, 224, 224);
             Color gridColor = Color.FromArgb(100, 100, 100); // Subtle gray
             Color pastelBlue = ColorTranslator.FromHtml("#5B8FF9"); // From 3D gradient
@@ -245,8 +245,8 @@ namespace VAGSuite.Components
             curve.Line.SmoothTension = 0.5f;
             curve.Line.Width = 1.5f; // Slimmer line as requested
             
-            // Gradient Symbol Styling (Verified in Phase 2)
-            // Sequence: Pastel Dark Blue -> Dark Green -> Light Green -> Yellow -> Orange -> Red
+            // Gradient Symbol Styling (Updated to muted Image 1 palette)
+            // Sequence: Muted Blue -> Muted Green -> Light Green -> Yellow -> Orange -> Red
             Color[] gradientStops = new Color[] {
                 ColorTranslator.FromHtml("#5B8FF9"),
                 ColorTranslator.FromHtml("#61DDAA"),

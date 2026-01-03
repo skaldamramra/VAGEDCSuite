@@ -1,5 +1,8 @@
 using System;
 using System.Drawing;
+using System.Drawing.Text;
+using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
@@ -15,7 +18,9 @@ namespace VAGSuite.Theming
         private static VAGEDCThemeManager _instance;
         private VAGEDCTheme _currentTheme;
         private bool _isCustomThemeActive = false;
-        
+        private PrivateFontCollection _fontCollection = new PrivateFontCollection();
+        private FontFamily _sourceSansProFamily;
+
         public static VAGEDCThemeManager Instance
         {
             get
@@ -28,7 +33,52 @@ namespace VAGSuite.Theming
         
         private VAGEDCThemeManager()
         {
-            _currentTheme = VAGEDCTheme.CreateDarkTheme();
+            LoadCustomFonts();
+            _currentTheme = VAGEDCTheme.CreateDarkTheme(
+                GetCustomFont(12f, FontStyle.Bold),
+                GetCustomFont(12f, FontStyle.Regular)
+            );
+        }
+
+        private void LoadCustomFonts()
+        {
+            try
+            {
+                string fontPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Theming", "SourceSansPro");
+                if (Directory.Exists(fontPath))
+                {
+                    string[] fontFiles = Directory.GetFiles(fontPath, "*.ttf");
+                    foreach (string fontFile in fontFiles)
+                    {
+                        _fontCollection.AddFontFile(fontFile);
+                    }
+
+                    if (_fontCollection.Families.Length > 0)
+                    {
+                        foreach (var family in _fontCollection.Families)
+                        {
+                            if (family.Name.Contains("Source Sans Pro"))
+                            {
+                                _sourceSansProFamily = family;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("VAGEDCThemeManager: Error loading custom fonts: " + ex.Message);
+            }
+        }
+
+        public Font GetCustomFont(float size, FontStyle style)
+        {
+            if (_sourceSansProFamily != null)
+            {
+                return new Font(_sourceSansProFamily, size, style);
+            }
+            return new Font("Segoe UI", size, style);
         }
         
         public VAGEDCTheme CurrentTheme => _currentTheme;
@@ -39,7 +89,10 @@ namespace VAGSuite.Theming
         /// </summary>
         public void ActivateVAGEDCDark(Form mainForm)
         {
-            _currentTheme = VAGEDCTheme.CreateDarkTheme();
+            _currentTheme = VAGEDCTheme.CreateDarkTheme(
+                GetCustomFont(12f, FontStyle.Bold),
+                GetCustomFont(12f, FontStyle.Regular)
+            );
             _isCustomThemeActive = true;
             ApplyThemeToForm(mainForm);
         }
@@ -142,6 +195,11 @@ namespace VAGSuite.Theming
             // Apply to form itself
             form.BackColor = _currentTheme.WindowBackground;
             form.ForeColor = _currentTheme.TextPrimary;
+            form.Font = GetCustomFont(9f, FontStyle.Regular);
+
+            // Apply global DevExpress font
+            Font customFont = GetCustomFont(9f, FontStyle.Regular);
+            DevExpress.Utils.AppearanceObject.DefaultFont = customFont;
             
             // Apply to all controls recursively
             ApplyThemeToControl(form);
@@ -230,11 +288,43 @@ namespace VAGSuite.Theming
         /// <summary>
         /// Applies theme to DevExpress RibbonControl
         /// </summary>
+        private void ApplyThemeToController(DevExpress.XtraBars.BarAndDockingController controller)
+        {
+            Font customFont = GetCustomFont(9f, FontStyle.Regular);
+            
+            // Apply to Bars (Menus)
+            controller.AppearancesBar.Bar.Font = customFont;
+            controller.AppearancesBar.ItemsFont = customFont;
+            
+            // Apply to Ribbon
+            controller.AppearancesRibbon.Item.Font = customFont;
+            controller.AppearancesRibbon.PageGroupCaption.Font = customFont;
+            controller.AppearancesRibbon.PageHeader.Font = customFont;
+        }
+
         private void ApplyThemeToRibbon(RibbonControl ribbon)
         {
-            // Note: DevExpress controls use their skin system
-            // We can only override some appearance properties
-            // The base skin should be set to a dark one (e.g., "Office 2007 Black")
+            Font customFont = GetCustomFont(9f, FontStyle.Regular);
+            
+            // Use reflection to set appearances to avoid compile-time errors with version-specific property names
+            string[] appearanceNames = { "AppearancePageHeader", "AppearancePageGroupCaption", "AppearanceItem", "AppearanceMenuCaption" };
+            foreach (string name in appearanceNames)
+            {
+                try
+                {
+                    PropertyInfo prop = ribbon.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+                    if (prop != null)
+                    {
+                        object appearance = prop.GetValue(ribbon, null);
+                        if (appearance != null)
+                        {
+                            PropertyInfo fontProp = appearance.GetType().GetProperty("Font", BindingFlags.Instance | BindingFlags.Public);
+                            fontProp?.SetValue(appearance, customFont, null);
+                        }
+                    }
+                }
+                catch { }
+            }
         }
         
         /// <summary>

@@ -56,7 +56,7 @@ namespace VAGSuite.Theming
         /// <summary>
         /// Creates the VAGEDC Dark theme
         /// </summary>
-        public static VAGEDCTheme CreateDarkTheme()
+        public static VAGEDCTheme CreateDarkTheme(Font headerFont = null, Font cellFont = null)
         {
             return new VAGEDCTheme
             {
@@ -88,9 +88,9 @@ namespace VAGSuite.Theming
                 GridBorder = VAGEDCColorPalette.Gray600,
                 GridHeaderBackground = VAGEDCColorPalette.Gray800,  // Changed from Gray700 to Gray800 for darker headers
                 GridHeaderText = VAGEDCColorPalette.TextPrimaryDark,
-                GridHoverRow = Color.FromArgb(128, 45, 55, 72),  // Gray700 at 50% opacity (#2D3748)
-                GridHeaderFont = new Font("Segoe UI", 12f, FontStyle.Bold),  // Semibold 12px for headers
-                GridCellFont = new Font("Segoe UI", 12f, FontStyle.Regular),  // Regular 12px for cells
+                GridHoverRow = Color.FromArgb(128, 64, 64, 64),  // Gray600 at 50% opacity (Muted hover)
+                GridHeaderFont = headerFont ?? new Font("Segoe UI", 12f, FontStyle.Bold),
+                GridCellFont = cellFont ?? new Font("Segoe UI", 12f, FontStyle.Regular),
                 
                 // Toolbar/StatusBar
                 ToolbarBackground = VAGEDCColorPalette.Gray800,
