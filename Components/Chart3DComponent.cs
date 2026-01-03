@@ -373,9 +373,11 @@ namespace VAGSuite.Components
             // X-axis rotation: limited elevation (±60°) for viewing angle
             
             // Clamp elevation to prevent extreme flipping
-            float clampedElevation = Math.Max(-30f, Math.Min(30f, _elevation));
+            float clampedElevation = Math.Max(-60f, Math.Min(60f, _elevation));
             
             // Pivot around the mesh center - Z rotation first, then X for elevation
+            // Verified: This unified transformation must be included in GetMatrices
+            // so that ProjectToScreen (hit-testing) stays in sync with rendering.
             modelview = Matrix4.CreateTranslation(-_meshCenter) *
                         Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(_rotation)) *
                         Matrix4.CreateRotationX(MathHelper.DegreesToRadians(clampedElevation)) *
@@ -744,31 +746,37 @@ namespace VAGSuite.Components
 
             int rows = _mapContent.Length / (_isSixteenBit ? 2 : 1) / _tableWidth;
             int cols = _tableWidth;
-            int totalVertices = rows * cols;
+            
+            // Handle single-column maps by extruding them into a 3D ribbon (Sync with UpdateBuffers)
+            bool isRibbon = (cols == 1);
+            int renderCols = isRibbon ? 2 : cols;
+            int totalVertices = rows * renderCols;
 
             float minDistance = 15.0f; // Hover threshold in pixels
             int bestIdx = -1;
 
-            // We need to project vertices to find the one under the mouse
-            // This is done by iterating through the grid.
-            // Since we know the grid structure, we could optimize, but for typical map sizes (e.g. 16x16)
-            // iterating all vertices is very fast.
-            
-            float scaleX = 10.0f / Math.Max(1, cols);
+            float scaleX = 10.0f / Math.Max(1, renderCols);
             float scaleY = 10.0f / Math.Max(1, rows);
             float range = Math.Max(1, _dataMaxZ - _dataMinZ);
             float scaleZ = 6.0f / range;
 
             for (int i = 0; i < totalVertices; i++)
             {
-                int r = i / cols;
-                int c = i % cols;
-                float val = GetZValue(_mapContent, r, c);
+                int r = i / renderCols;
+                int c = i % renderCols;
                 
-                float xPos = (c - (cols - 1) / 2.0f) * scaleX;
+                // For ribbons, both columns use the same data value (Sync with UpdateBuffers)
+                float val = isRibbon ? GetZValue(_mapContent, r, 0) : GetZValue(_mapContent, r, c);
+                
+                float xPos = (c - (renderCols - 1) / 2.0f) * scaleX;
                 float yPos = (r - (rows - 1) / 2.0f) * scaleY;
+                
                 float zPos = (val - _dataMinZ) * scaleZ;
-                if (_isUpsideDown) zPos = (range * scaleZ) - zPos;
+                // Sync Z-inversion logic with UpdateBuffers (uses _correctionFactor < 0)
+                if (_correctionFactor < 0)
+                {
+                    zPos = (range * scaleZ) - zPos;
+                }
 
                 PointF screenPos = ProjectToScreen(new Vector3(xPos, yPos, zPos));
                 if (screenPos != PointF.Empty)
@@ -792,13 +800,16 @@ namespace VAGSuite.Components
                 // Cache the screen position for tooltip rendering
                 if (bestIdx >= 0)
                 {
-                    int r = bestIdx / cols;
-                    int c = bestIdx % cols;
-                    float val = GetZValue(_mapContent, r, c);
-                    float xPos = (c - (cols - 1) / 2.0f) * scaleX;
+                    int r = bestIdx / renderCols;
+                    int c = bestIdx % renderCols;
+                    float val = isRibbon ? GetZValue(_mapContent, r, 0) : GetZValue(_mapContent, r, c);
+                    float xPos = (c - (renderCols - 1) / 2.0f) * scaleX;
                     float yPos = (r - (rows - 1) / 2.0f) * scaleY;
                     float zPos = (val - _dataMinZ) * scaleZ;
-                    if (_isUpsideDown) zPos = (range * scaleZ) - zPos;
+                    if (_correctionFactor < 0)
+                    {
+                        zPos = (range * scaleZ) - zPos;
+                    }
                     _cachedHoverScreenPos = ProjectToScreen(new Vector3(xPos, yPos, zPos));
                 }
                 else
@@ -1388,12 +1399,16 @@ namespace VAGSuite.Components
 
             int rows = _mapContent.Length / (_isSixteenBit ? 2 : 1) / _tableWidth;
             int cols = _tableWidth;
-            int totalVertices = rows * cols;
+            
+            // Handle single-column maps by extruding them into a 3D ribbon (Sync with UpdateBuffers)
+            bool isRibbon = (cols == 1);
+            int renderCols = isRibbon ? 2 : cols;
+            int totalVertices = rows * renderCols;
 
             float minDistance = 15.0f;
             int bestIdx = -1;
 
-            float scaleX = 10.0f / Math.Max(1, cols);
+            float scaleX = 10.0f / Math.Max(1, renderCols);
             float scaleY = 10.0f / Math.Max(1, rows);
             float range = Math.Max(1, _dataMaxZ - _dataMinZ);
             float scaleZ = 6.0f / range;
@@ -1402,14 +1417,21 @@ namespace VAGSuite.Components
             // to determine if the 'bestIdx' would be different from '_hoveredVertexIndex'
             for (int i = 0; i < totalVertices; i++)
             {
-                int r = i / cols;
-                int c = i % cols;
-                float val = GetZValue(_mapContent, r, c);
+                int r = i / renderCols;
+                int c = i % renderCols;
                 
-                float xPos = (c - (cols - 1) / 2.0f) * scaleX;
+                // For ribbons, both columns use the same data value (Sync with UpdateBuffers)
+                float val = isRibbon ? GetZValue(_mapContent, r, 0) : GetZValue(_mapContent, r, c);
+                
+                float xPos = (c - (renderCols - 1) / 2.0f) * scaleX;
                 float yPos = (r - (rows - 1) / 2.0f) * scaleY;
+                
                 float zPos = (val - _dataMinZ) * scaleZ;
-                if (_isUpsideDown) zPos = (range * scaleZ) - zPos;
+                // Sync Z-inversion logic with UpdateBuffers (uses _correctionFactor < 0)
+                if (_correctionFactor < 0)
+                {
+                    zPos = (range * scaleZ) - zPos;
+                }
 
                 PointF screenPos = ProjectToScreen(new Vector3(xPos, yPos, zPos));
                 if (screenPos != PointF.Empty)
