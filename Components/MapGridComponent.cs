@@ -262,13 +262,10 @@ namespace VAGSuite.Components
                         xvalue = temp.ToString("F2");
                     }
 
-                    Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
-                    e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
-                    using (var gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
-                    {
-                        e.Graphics.FillRectangle(gb, e.Bounds);
-                    }
-                    e.Graphics.DrawString(xvalue, font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 3, e.Bounds.Y + 1 + (e.Bounds.Height - 12) / 2));
+                    // Use theme appearance for background and text
+                    e.Appearance.FillRectangle(e.Cache, e.Bounds);
+                    e.Graphics.DrawRectangle(e.Cache.GetPen(e.Appearance.BorderColor), e.Bounds);
+                    e.Graphics.DrawString(xvalue, font, e.Cache.GetSolidBrush(e.Appearance.ForeColor), new PointF(e.Bounds.X + 3, e.Bounds.Y + 1 + (e.Bounds.Height - 12) / 2));
                     e.Handled = true;
                 }
                 catch (Exception ex)

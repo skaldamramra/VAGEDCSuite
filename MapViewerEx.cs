@@ -681,7 +681,6 @@ namespace VAGSuite
             nChartControl1.MouseUp += new MouseEventHandler(nChartControl1_MouseUp);
 
             gridView1.MouseMove += new MouseEventHandler(gridView1_MouseMove);
-            
 
             // Initialize Phase 3 Services with default implementations
             _mapRenderingService = new MapRenderingService();
@@ -1012,14 +1011,16 @@ namespace VAGSuite
                     for (int i = 0; i < y_axisvalues.Length; i++)
                     {
                         string yval = _dataConversionService.FormatValue(Convert.ToInt32(y_axisvalues.GetValue(i)), m_viewtype, true);
-                        SizeF size = g.MeasureString(yval, this.Font);
+                        // Add a small buffer for the dot and padding
+                        SizeF size = g.MeasureString(yval + ". ", this.Font);
                         if (size.Width > indicatorwidth) indicatorwidth = (int)size.Width;
                         m_textheight = (int)size.Height;
                     }
                 }
                 if (indicatorwidth > 0)
                 {
-                    gridView1.IndicatorWidth = indicatorwidth + 6;
+                    // Ensure minimum width for units display in top-left
+                    gridView1.IndicatorWidth = Math.Max(indicatorwidth + 10, 45);
                 }
 
                 // Apply X-axis labels to column headers
@@ -1473,10 +1474,46 @@ namespace VAGSuite
 
         private void gridView1_CustomDrawRowIndicator(object sender, DevExpress.XtraGrid.Views.Grid.RowIndicatorCustomDrawEventArgs e)
         {
-            // Draw Y-axis labels directly using MapViewerEx's y_axisvalues
-            if (e.RowHandle >= 0 && y_axisvalues != null && y_axisvalues.Length > e.RowHandle)
+            try
             {
-                try
+                // Check if this is the top-left indicator button (header)
+                if (e.RowHandle == DevExpress.XtraGrid.GridControl.InvalidRowHandle)
+                {
+                    e.Appearance.FillRectangle(e.Cache, e.Bounds);
+                    e.Graphics.DrawRectangle(e.Cache.GetPen(e.Appearance.BorderColor), e.Bounds);
+
+                    // Draw diagonal line using theme border color
+                    e.Graphics.DrawLine(e.Cache.GetPen(e.Appearance.BorderColor), e.Bounds.Left, e.Bounds.Top, e.Bounds.Right, e.Bounds.Bottom);
+
+                    // Use a smaller font for units
+                    using (Font unitFont = new Font(this.Font.FontFamily, 6.5f))
+                    {
+                        Brush textBrush = e.Cache.GetSolidBrush(e.Appearance.ForeColor);
+                        
+                        // X-axis unit (Top Right)
+                        if (!string.IsNullOrEmpty(m_xaxisUnits))
+                        {
+                            using (StringFormat sfX = new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Near })
+                            {
+                                e.Cache.DrawString(m_xaxisUnits, unitFont, textBrush, new Rectangle(e.Bounds.X, e.Bounds.Y + 2, e.Bounds.Width - 2, e.Bounds.Height - 2), sfX);
+                            }
+                        }
+
+                        // Y-axis unit (Bottom Left)
+                        if (!string.IsNullOrEmpty(m_yaxisUnits))
+                        {
+                            using (StringFormat sfY = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far })
+                            {
+                                e.Cache.DrawString(m_yaxisUnits, unitFont, textBrush, new Rectangle(e.Bounds.X + 2, e.Bounds.Y, e.Bounds.Width - 2, e.Bounds.Height - 2), sfY);
+                            }
+                        }
+                    }
+                    e.Handled = true;
+                    return;
+                }
+
+                // Draw Y-axis labels directly using MapViewerEx's y_axisvalues
+                if (e.RowHandle >= 0 && y_axisvalues != null && y_axisvalues.Length > e.RowHandle)
                 {
                     string yvalue;
                     int index = m_isUpsideDown ? (y_axisvalues.Length - 1) - e.RowHandle : e.RowHandle;
@@ -1492,25 +1529,22 @@ namespace VAGSuite
                         yvalue = temp.ToString("F1");
                     }
 
-                    Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
-                    e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
-                    using (var gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
-                    {
-                        e.Graphics.FillRectangle(gb, e.Bounds);
-                    }
-                    e.Graphics.DrawString(yvalue, this.Font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 4, e.Bounds.Y + 1 + (e.Bounds.Height - 12) / 2));
+                    // Use theme appearance for background and text
+                    e.Appearance.FillRectangle(e.Cache, e.Bounds);
+                    e.Graphics.DrawRectangle(e.Cache.GetPen(e.Appearance.BorderColor), e.Bounds);
+                    e.Graphics.DrawString(yvalue, this.Font, e.Cache.GetSolidBrush(e.Appearance.ForeColor), new PointF(e.Bounds.X + 4, e.Bounds.Y + 1 + (e.Bounds.Height - 12) / 2));
                     e.Handled = true;
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("MapViewerEx.CustomDrawRowIndicator error: " + ex.Message);
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("MapViewerEx.CustomDrawRowIndicator error: " + ex.Message);
             }
         }
 
-
         private void gridView1_CustomDrawColumnHeader(object sender, DevExpress.XtraGrid.Views.Grid.ColumnHeaderCustomDrawEventArgs e)
         {
+            // Ensure we use the component's drawing logic which contains the themed colors
             _mapGridComponent.CustomDrawColumnHeader(sender, e, this.Font);
         }
 
