@@ -292,4 +292,571 @@
     <UseCase>Maintains idle stability and drivability when the air conditioning is active.</UseCase>
     <TuningAdvice>Usually left stock. If you have installed a non-standard AC compressor or have significantly lightened the flywheel, you may need to adjust these values to maintain a smooth idle.</TuningAdvice>
   </Map>
+
+  <Map Key="MAF linearization">
+    <Title>MAF Sensor Linearization (arwLMLIN_KL)</Title>
+    <Description>This characteristic line defines the relationship between the voltage signal from the Hot Film Air Mass (HFM) sensor and the actual air mass flow in mg/h. It is the primary scaling table for the MAF sensor.</Description>
+    <UseCase>Used when replacing the stock MAF sensor with a different model (e.g., upgrading to a larger housing or a different sensor generation) to ensure the ECU correctly calculates the incoming air mass.</UseCase>
+    <TuningAdvice>Do not modify unless the physical sensor or its housing has been changed. Incorrect scaling will lead to inaccurate smoke limiting and poor drivability.</TuningAdvice>
+  </Map>
+
+  <Map Key="MAP linearization">
+    <Title>MAP Sensor Linearization (ldwPLIN_KL)</Title>
+    <Description>This line scales the voltage output of the Manifold Absolute Pressure (MAP) sensor into physical pressure units (mbar). It typically defines the 0V and 5V (or 0.5V to 4.5V) limits of the sensor.</Description>
+    <UseCase>Essential when upgrading from a standard 2.5-bar or 3-bar sensor to a 4-bar sensor to support higher boost levels. Without updating this, the ECU will under-report boost, leading to overboost and potential turbo failure.</UseCase>
+    <TuningAdvice>Ensure the values match the datasheet of the installed sensor. Common 4-bar sensors (e.g., Bosch 0281002576) require specific scaling to report pressure accurately.</TuningAdvice>
+  </Map>
+
+  <Map Key="Water temperature sensor linearization">
+    <Title>Coolant Temperature Sensor Linearization (anwWTF_KL)</Title>
+    <Description>Converts the raw voltage/resistance from the Engine Coolant Temperature (ECT) sensor into degrees Celsius. This sensor influences almost every ECU calculation, including start IQ, glow plugs, and fan control.</Description>
+    <UseCase>Used if a non-standard temperature sensor is fitted or to verify sensor accuracy across the operating range.</UseCase>
+    <TuningAdvice>Generally should not be touched. If the engine is reporting incorrect temperatures despite a new sensor, verify the wiring and pull-up resistor logic before adjusting this table.</TuningAdvice>
+  </Map>
+
+  <Map Key="Intake manifold temp sensor linearization (anwSTF_KL)">
+    <Title>Intake Manifold Temperature Linearization (anwSTF_KL)</Title>
+    <Description>Scales the intake air temperature sensor. This value is used for air density calculations and boost pressure corrections (ldwTVTLKL).</Description>
+    <UseCase>Calibration for custom intake setups or different sensor types.</UseCase>
+    <TuningAdvice>Accurate intake temp readings are vital for safety limiters. Ensure this matches the physical sensor characteristics.</TuningAdvice>
+  </Map>
+
+  <Map Key="Speed dependent - IQ limit in case of error (mrwBEM_KL)">
+    <Title>Emergency IQ Limit (mrwBEM_KL)</Title>
+    <Description>This characteristic line defines the maximum allowed injection quantity (IQ) when a critical sensor error is detected (e.g., MAF or MAP failure). It acts as a "limp home" safety limit.</Description>
+    <UseCase>Adjusted to provide slightly more power in limp mode or to further restrict the engine if a specific hardware failure is high-risk.</UseCase>
+    <TuningAdvice>Keep these values conservative to protect the engine during a fault condition.</TuningAdvice>
+  </Map>
+
+  <Map Key="VCDS Diagnostic IQ Limit (1-10)">
+    <Title>Diagnostic IQ Display Limit</Title>
+    <Description>This single value defines the maximum injection quantity that can be displayed via diagnostic protocols (K-Line/VCDS). It does not limit the actual injection, only the reported value.</Description>
+    <UseCase>Increased when tuning for high power (e.g., >70mg) so that the actual injected quantity can be monitored in VCDS logs without being clipped at the stock limit.</UseCase>
+    <TuningAdvice>Set this slightly higher than your maximum requested IQ in the Torque Limiter.</TuningAdvice>
+  </Map>
+
+  <Map Key="BIP - Basic voltage linearization map (zmwBPGndKL)">
+    <Title>BIP Voltage Compensation (zmwBPGndKL)</Title>
+    <Description>This characteristic line compensates for the electrical latency of the PD injector solenoid based on the vehicle's battery voltage. At lower voltages, the solenoid takes longer to reach the 'pull-in' current required to move the injector needle.</Description>
+    <UseCase>Calibration for high-performance injectors or when dealing with electrical system variations. It ensures the ECU's timing remains precise even during voltage drops.</UseCase>
+    <TuningAdvice>Usually left stock. If upgrading to injectors with significantly different solenoid characteristics, this map must be recalibrated to prevent timing drift.</TuningAdvice>
+  </Map>
+
+  <Map Key="BIP - Fuel temperature correction curve (zmwBPKorKL)">
+    <Title>BIP Fuel Temperature Correction (zmwBPKorKL)</Title>
+    <Description>Adjusts the expected BIP (Begin of Injection Period) signal based on fuel temperature. Changes in fuel temperature affect the viscosity and density of the fuel, which in turn alters the mechanical response time of the injector needle.</Description>
+    <UseCase>Ensures consistent injection timing across the full operating temperature range of the fuel system.</UseCase>
+    <TuningAdvice>Do not modify unless you have precise test-bench data for your specific injectors. Incorrect values will lead to 'timing jitter' and unstable idle as the fuel warms up.</TuningAdvice>
+  </Map>
+
+  <Map Key="Selector for start of injection map (fnwSWGK_KL)">
+    <Title>SOI Map Selector (fnwSWGK_KL)</Title>
+    <Description>This selector line determines which of the multiple Start of Injection (SOI) maps the ECU uses at any given moment. The selection is primarily driven by engine coolant temperature, allowing the ECU to switch from 'cold start' timing to 'warm' timing.</Description>
+    <UseCase>Used to identify which SOI maps are active during specific temperature windows. Tuners use this to ensure they are modifying the correct map for the current engine state.</UseCase>
+    <TuningAdvice>Essential for verifying that your timing changes will actually be applied. If you modify SOI Map 9 but the selector is pointing to Map 8 at operating temperature, your changes will have no effect.</TuningAdvice>
+  </Map>
+
+  <Map Key="Fuel volume correction map (zmwMKOR_KF)">
+    <Title>Fuel Volume Correction (zmwMKOR_KF)</Title>
+    <Description>A fine-tuning map that applies a correction factor to the injected quantity based on engine speed and temperature. It accounts for the thermal expansion of diesel fuel and the mechanical tolerances of the high-pressure pump system.</Description>
+    <UseCase>Used to achieve perfect fueling accuracy across all RPM ranges. It can be used to 'trim' the fueling if the engine is consistently running slightly rich or lean compared to the requested IQ.</UseCase>
+    <TuningAdvice>Only modify if you have verified the actual fuel flow via high-precision logging or a dyno. Small adjustments (1-2%) can help smooth out the torque curve.</TuningAdvice>
+  </Map>
+
+  <Map Key="CVT Transmission drag torque limitation (mrwSchmxKF)">
+    <Title>CVT Drag Torque Limit (mrwSchmxKF)</Title>
+    <Description>This map limits the engine's drag torque (negative torque) during deceleration or shifting in vehicles equipped with a CVT (Continuously Variable Transmission). It protects the CVT belt and pulleys from the high mechanical stresses caused by rapid changes in engine speed.</Description>
+    <UseCase>Critical for maintaining CVT longevity in tuned vehicles. It ensures that the engine does not 'pull' too hard against the transmission during lift-off.</UseCase>
+    <TuningAdvice>Generally should be left stock. If the CVT is slipping during deceleration after a power increase, these limits may need to be tightened (reduced torque allowed).</TuningAdvice>
+  </Map>
+
+  <Map Key="Motor mount control duty cycle (mlwTW_KF)">
+    <Title>Active Motor Mount Control (mlwTW_KF)</Title>
+    <Description>Controls the pulse-width modulation (PWM) signal sent to active (switchable) engine mounts. The ECU adjusts the stiffness of the mounts based on engine speed and coolant temperature to minimize the transmission of vibrations to the vehicle chassis, especially at idle.</Description>
+    <UseCase>Used to restore factory-like refinement if the engine has become more 'vibrant' due to tuning or if aftermarket mounts are installed.</UseCase>
+    <TuningAdvice>Tuners often leave this stock. However, if you experience excessive cabin vibration at specific RPMs, adjusting the duty cycle can help 'tune out' the resonance.</TuningAdvice>
+  </Map>
+
+  <Map Key="Acceleration limitation map (mrwBdn_KF)">
+    <Title>Acceleration Gradient Limit (mrwBdn_KF)</Title>
+    <Description>This map defines the maximum permissible rate of change for engine speed (dn/dt). It acts as a dynamic limiter that prevents the engine from accelerating too rapidly in a way that would cause drivetrain 'bucking' or exceed the physical limits of the transmission components.</Description>
+    <UseCase>Used to smooth out the power delivery in low gears or to protect fragile drivetrain components (like CVT belts) from sudden torque spikes.</UseCase>
+    <TuningAdvice>Increasing these values will make the engine feel more 'raw' and responsive, but at the cost of increased drivetrain stress. Decrease these values if the car feels jerky during rapid acceleration.</TuningAdvice>
+  </Map>
+
+  <Map Key="Deactivation of drag torque limitation (mrwRSch_KL)">
+    <Title>Drag Torque Deactivation (mrwRSch_KL)</Title>
+    <Description>A characteristic line that defines the threshold (usually based on vehicle speed or engine temperature) at which the drag torque limitation logic is deactivated. This allows the engine to return to normal braking behavior once the risk to the transmission is low.</Description>
+    <UseCase>Fine-tuning the transition between protected shifting and normal engine braking.</UseCase>
+    <TuningAdvice>Usually left stock. Only adjust if the transition feels unnatural or if the protection is staying active for too long.</TuningAdvice>
+  </Map>
+
+  <Map Key="Altitude dependent speed correction (mrwBATM_KF)">
+    <Title>Altitude Speed Correction (mrwBATM_KF)</Title>
+    <Description>This map adjusts the engine speed limits or targets based on the current atmospheric pressure. Its primary purpose is to protect the turbocharger from over-speeding at high altitudes, where the air is thinner and the turbine must spin faster to maintain boost.</Description>
+    <UseCase>Ensures turbocharger longevity during mountain driving or in high-altitude regions.</UseCase>
+    <TuningAdvice>Do not increase these values unless you have verified the turbocharger's maximum safe RPM at low air densities. Reducing these values can provide an extra safety margin for high-boost setups.</TuningAdvice>
+  </Map>
+
+  <Map Key="Altitude dependent - SOI Pressure selector (fnwSWAD_KL)">
+    <Title>SOI Altitude Selector (fnwSWAD_KL)</Title>
+    <Description>A characteristic line that selects the appropriate Start of Injection (SOI) correction or base map based on atmospheric pressure. It ensures that the injection timing is optimized for the lower oxygen content and different combustion characteristics found at high altitudes.</Description>
+    <UseCase>Maintains engine efficiency and prevents excessive smoke when driving in elevated environments.</UseCase>
+    <TuningAdvice>Usually left stock. If the engine feels sluggish or produces excessive smoke only at high altitudes, small timing advances may be calibrated here.</TuningAdvice>
+  </Map>
+
+  <Map Key="Altitude dependent - Smoke turbo boost pos ramp (mrwTSADpKL)">
+    <Title>Altitude Smoke Ramp - Positive (mrwTSADpKL)</Title>
+    <Description>Defines the maximum rate of increase (positive ramp) for the smoke limiter's fueling allowance as atmospheric pressure changes. It smooths the transition of the smoke limiter logic during rapid altitude changes to prevent sudden bursts of soot.</Description>
+    <UseCase>Fine-tuning the 'cleanliness' of the exhaust during mountain climbs.</UseCase>
+    <TuningAdvice>Lowering these values will make the smoke limiter more conservative during altitude transitions, reducing soot at the cost of slightly slower response.</TuningAdvice>
+  </Map>
+
+  <Map Key="Altitude dependent - Smoke turbo boost neg ramp (mrwTSADnKL)">
+    <Title>Altitude Smoke Ramp - Negative (mrwTSADnKL)</Title>
+    <Description>Controls the rate of decrease (negative ramp) for fueling limits when atmospheric pressure drops. This ensures that the engine does not continue to inject 'sea level' quantities of fuel when the available air mass has decreased due to altitude.</Description>
+    <UseCase>Protects the engine from running too rich and producing excessive EGTs at high altitudes.</UseCase>
+    <TuningAdvice>Ensure these values allow for a rapid enough reduction in fuel to protect the engine if you are driving into significantly thinner air.</TuningAdvice>
+  </Map>
+
+  <Map Key="Engine temp dependent - Starter motor disengage (mrwSTNB_KL)">
+    <Title>Starter Disengagement Threshold (mrwSTNB_KL)</Title>
+    <Description>This characteristic line defines the engine speed (RPM) at which the ECU determines the engine has successfully started and signals the starter motor to disengage. The threshold is higher at lower temperatures to ensure the engine has enough momentum to sustain combustion against high internal friction.</Description>
+    <UseCase>Modified if the starter motor disengages too early (causing the engine to stall) or too late (causing a grinding noise) after a performance build or in extreme climates.</UseCase>
+    <TuningAdvice>Usually left stock. If you have installed a high-torque starter or a lightened flywheel, you may need to adjust these RPM thresholds to ensure reliable starting.</TuningAdvice>
+  </Map>
+
+  <Map Key="Engine temp dependent - Starter motor after-time (mrwSTNO_KL)">
+    <Title>Starter Phase After-Time (mrwSTNO_KL)</Title>
+    <Description>Defines a temperature-dependent duration (in seconds) after the engine has reached the disengagement speed during which the ECU maintains 'Start IQ' logic. This ensures a smooth transition from cranking to idling by preventing a sudden drop in fueling.</Description>
+    <UseCase>Used to fix 'stumble' issues that occur immediately after the engine fires but before it settles into a stable idle.</UseCase>
+    <TuningAdvice>Small increases can help stabilize the engine if it feels weak immediately after starting. Avoid large increases as it will lead to unnecessary fuel consumption and potential smoke.</TuningAdvice>
+  </Map>
+
+  <Map Key="Engine temperature-dependent idle start speed (mrwLLW_KL)">
+    <Title>Initial Idle Speed Offset (mrwLLW_KL)</Title>
+    <Description>Sets the target idle speed immediately following a successful start, based on coolant temperature. A higher initial idle helps the engine reach operating temperature faster and ensures stable oil pressure during the first few seconds of operation.</Description>
+    <UseCase>Adjusted to improve cold-start refinement or to provide a more aggressive 'fast idle' for track cars that need rapid warm-up.</UseCase>
+    <TuningAdvice>Ensure the transition from this speed to the steady-state idle (Target Idle Speed Map) is smooth. Setting this too high can cause excessive wear on a cold engine.</TuningAdvice>
+  </Map>
+
+  <Map Key="Glowplug control - Indicator glow period (gswGAZ_KL)">
+    <Title>Glow Plug Lamp Duration (gswGAZ_KL)</Title>
+    <Description>This characteristic line defines how long the glow plug indicator lamp (the 'coil' symbol) remains illuminated on the dashboard relative to the coolant temperature. Note that the actual heating of the glow plugs often continues after the lamp goes out (after-glow).</Description>
+    <UseCase>Modified to give the driver a more accurate indication of when the engine is ready to be cranked in cold weather.</UseCase>
+    <TuningAdvice>If you have upgraded to faster-heating ceramic glow plugs, you can reduce these times. For standard plugs in very cold climates, increasing the lamp time ensures the driver waits long enough for sufficient heat build-up.</TuningAdvice>
+  </Map>
+
+  <Map Key="EGR shutdown threshold - upper (arwMEAB1KL)">
+    <Title>EGR Shutdown Threshold - Upper (arwMEAB1KL)</Title>
+    <Description>This characteristic line defines the upper injection quantity (IQ) threshold above which the EGR system is automatically deactivated. At high loads, the engine requires maximum fresh air for power and to keep exhaust gas temperatures (EGT) low, so the ECU closes the EGR valve.</Description>
+    <UseCase>Used to ensure the EGR does not interfere with full-load performance or to turn off the EGR earlier in the load range for improved throttle response.</UseCase>
+    <TuningAdvice>Lowering these values will cause the EGR to shut off at lower loads. This is often done as part of a partial EGR delete to keep the intake cleaner while maintaining some emissions benefits at light cruise.</TuningAdvice>
+  </Map>
+
+  <Map Key="EGR shutdown threshold - lower (arwMEAB0KL)">
+    <Title>EGR Shutdown Threshold - Lower (arwMEAB0KL)</Title>
+    <Description>Defines the injection quantity threshold for reactivating the EGR system after it has been shut down. This creates a hysteresis loop with the upper threshold (arwMEAB1KL) to prevent the EGR valve from rapidly 'cycling' or oscillating at a specific load point.</Description>
+    <UseCase>Fine-tuning the stability of the EGR system during load transitions.</UseCase>
+    <TuningAdvice>Always ensure these values are lower than the corresponding values in the upper threshold map to maintain a stable hysteresis window.</TuningAdvice>
+  </Map>
+
+  <Map Key="Air mass calculation air temp/pressure (arwLMBKOKF)">
+    <Title>Air Mass Correction - Temp/Pressure (arwLMBKOKF)</Title>
+    <Description>This map corrects the calculated air mass based on intake air temperature and atmospheric pressure. Since air density changes with temperature and altitude, this correction is vital for the ECU to accurately determine the actual oxygen content available for combustion, especially in 'MAF-less' (MAP-based) fueling modes.</Description>
+    <UseCase>Ensures consistent fueling and smoke control across different environmental conditions and boost levels.</UseCase>
+    <TuningAdvice>Critical for high-boost applications. If you are running boost levels far beyond stock, ensure this map is calibrated to account for the higher intake temperatures often seen at the limit of the turbocharger's efficiency.</TuningAdvice>
+  </Map>
+
+  <Map Key="EGR Air linearization map (arwLMBLIKL)">
+    <Title>EGR Air Mass Linearization (arwLMBLIKL)</Title>
+    <Description>This characteristic line linearizes the air mass signal specifically for the EGR feedback control loop. It translates raw sensor data into a format that the EGR PID controller can use to accurately maintain the requested EGR setpoint.</Description>
+    <UseCase>Calibration map for the EGR feedback system.</UseCase>
+    <TuningAdvice>Do not modify unless you have changed the MAF sensor to a different type with different flow characteristics. Incorrect linearization will cause the EGR system to oscillate or fail to reach its target.</TuningAdvice>
+  </Map>
+
+  <Map Key="Map - time for delayed shutdown (arwTi_abKL)">
+    <Title>EGR Delayed Shutdown Timer (arwTi_abKL)</Title>
+    <Description>Defines a temperature-dependent delay time before the EGR system is completely shut down after a trigger condition (such as prolonged idling) is met. This prevents the EGR from staying active indefinitely when the vehicle is stationary, which can lead to intake clogging.</Description>
+    <UseCase>Adjusted to change how long the EGR remains active during idle.</UseCase>
+    <TuningAdvice>Reducing these times can help keep the intake manifold cleaner by shutting off the EGR sooner when the car is not moving.</TuningAdvice>
+  </Map>
+
+  <Map Key="Injector dynamic advance selector map (fnwSWDY_KL)">
+    <Title>Dynamic Advance Selector (fnwSWDY_KL)</Title>
+    <Description>This characteristic line determines the activation or weighting of dynamic injection advance during rapid load changes (transients). It ensures that the injection timing is advanced quickly enough to support sudden increases in torque request, preventing 'timing lag' during acceleration.</Description>
+    <UseCase>Used to sharpen the engine's response during rapid throttle applications.</UseCase>
+    <TuningAdvice>Usually left stock. If the engine feels 'flat' during the first half-second of a WOT pull despite aggressive SOI maps, small adjustments here can trigger the advance logic more effectively.</TuningAdvice>
+  </Map>
+
+  <Map Key="Twisted camshaft torsion correction (zmwNWkoKL)">
+    <Title>Camshaft Torsion Correction (zmwNWkoKL)</Title>
+    <Description>Compensates for the physical twisting (torsion) of the camshaft under high load. In PD engines, the injection pressure is generated by the cam lobes; at high RPM and high IQ, the mechanical stress causes the cam to deflect slightly. This map corrects the solenoid timing to ensure the actual injection occurs at the intended crankshaft angle.</Description>
+    <UseCase>Critical for maintaining timing accuracy in high-power builds where injection pressures are significantly higher than stock.</UseCase>
+    <TuningAdvice>Do not modify unless you have performed high-resolution crank/cam angle logging and identified a consistent timing drift under load. Incorrect values will lead to 'jittery' timing and potential mechanical stress.</TuningAdvice>
+  </Map>
+
+  <Map Key="Selector for injector duration">
+    <Title>Duration Map Selector</Title>
+    <Description>This characteristic line selects which of the multiple Injector Duration maps is active based on the current Start of Injection (SOI). Since the cam lobe profile changes the available injection pressure over the timing window, the ECU must switch duration calibrations to maintain fueling accuracy.</Description>
+    <UseCase>Used to identify which duration maps (e.g., Duration 0 through 5) are active at specific timing advance levels. Tuners use this to ensure they are modifying the correct duration table for their SOI targets.</UseCase>
+    <TuningAdvice>Essential for verifying that your duration changes will actually be applied. If you are running 25 degrees of advance but the selector is pointing to a duration map calibrated for 15 degrees, your fueling will be inaccurate.</TuningAdvice>
+  </Map>
+
+  <Map Key="Injection advance at start map (fnwSWSTxKR)">
+    <Title>Start Phase Injection Advance (fnwSWSTxKR)</Title>
+    <Description>Defines the injection advance (SOI) specifically during the engine cranking and initial start phase. It is indexed by engine speed and coolant temperature to ensure optimal cylinder pressure for reliable ignition during cold and hot starts.</Description>
+    <UseCase>Modified to improve starting reliability, especially in engines with modified compression ratios or non-standard injectors.</UseCase>
+    <TuningAdvice>Small increases in advance can help cold starting in extreme conditions. Avoid excessive advance during cranking as it can cause 'kickback' against the starter motor.</TuningAdvice>
+  </Map>
+
+  <Map Key="PID map - P amplification (ldwPRfakKL)">
+    <Title>Boost PID - Proportional Gain (ldwPRfakKL)</Title>
+    <Description>This characteristic line defines the Proportional (P) gain of the boost PID controller relative to engine speed. The P-term reacts immediately to the current boost error (Target vs. Actual). Higher gain makes the controller more aggressive but can lead to instability.</Description>
+    <UseCase>Adjusted when the boost pressure is slow to react to target changes or when the boost oscillates rapidly around the target.</UseCase>
+    <TuningAdvice>If boost is 'lazy', increase P-gain slightly. If boost oscillates (hunts), decrease P-gain. Always tune the N75 pre-control map first before touching PID gains.</TuningAdvice>
+  </Map>
+
+  <Map Key="PID map - I amplification (ldwIRfakKL)">
+    <Title>Boost PID - Integral Gain (ldwIRfakKL)</Title>
+    <Description>Defines the Integral (I) gain of the boost controller. The I-term accounts for the accumulation of past errors over time, ensuring that the boost pressure eventually reaches the exact target even if there is a steady-state offset.</Description>
+    <UseCase>Used to eliminate 'steady-state error' where the boost pressure stays consistently below or above the target by a small amount.</UseCase>
+    <TuningAdvice>Increase I-gain if the boost never quite reaches the target. Decrease it if the boost 'overshoots' and takes a long time to settle back down.</TuningAdvice>
+  </Map>
+
+  <Map Key="PID map - D amplification (ldwDRfakKL)">
+    <Title>Boost PID - Derivative Gain (ldwDRfakKL)</Title>
+    <Description>Defines the Derivative (D) gain of the boost controller. The D-term reacts to the rate of change of the boost error, acting as a 'brake' to prevent the pressure from rising too quickly and overshooting the target.</Description>
+    <UseCase>Critical for controlling 'boost spikes' during rapid spool-up or gear changes.</UseCase>
+    <TuningAdvice>Increase D-gain to dampen boost spikes. Too much D-gain can make the boost control feel 'sluggish' or cause high-frequency jitter in the N75 duty cycle.</TuningAdvice>
+  </Map>
+
+  <Map Key="Boost actuator upper limit curve (ldwDRmaxKL)">
+    <Title>N75 Actuator Upper Limit (ldwDRmaxKL)</Title>
+    <Description>This characteristic line defines the maximum allowed duty cycle for the N75 solenoid across the RPM range. It acts as a hard ceiling for the PID controller, preventing the VNT vanes from being held in an extreme position that could cause mechanical binding or excessive exhaust backpressure.</Description>
+    <UseCase>Modified when installing an aftermarket actuator or a turbocharger with different vane travel limits.</UseCase>
+    <TuningAdvice>Ensure this limit is set high enough to allow full boost but low enough to prevent the actuator from 'bottoming out' or causing the turbo to choke the engine at high RPM.</TuningAdvice>
+  </Map>
+
+  <Map Key="PID map - DT1 memory factor (ldwDR_gfKL)">
+    <Title>Boost PID - D-Term Damping (ldwDR_gfKL)</Title>
+    <Description>This characteristic line defines the 'memory' or damping factor for the Derivative (D) component of the PID controller. It smooths out the D-term calculation to prevent erratic vane movement caused by sensor noise or rapid pressure fluctuations.</Description>
+    <UseCase>Fine-tuning the smoothness of the boost control loop, especially in high-vibration environments or with sensitive MAP sensors.</UseCase>
+    <TuningAdvice>Usually left stock. If the N75 duty cycle logs show high-frequency 'noise' despite stable boost, increasing this damping factor can help smooth the actuator signal.</TuningAdvice>
+  </Map>
+
+  <Map Key="Radiator after-run pump time (kuwNLGRDKF)">
+    <Title>Auxiliary Water Pump After-Run (kuwNLGRDKF)</Title>
+    <Description>This map controls the operation time of the auxiliary electric coolant pump after the engine is turned off. It is indexed by engine coolant temperature and ambient temperature. Its purpose is to maintain coolant circulation to prevent 'hot spots' and localized boiling in the cylinder head after high-load operation.</Description>
+    <UseCase>Ensures long-term reliability of the cylinder head and head gasket by managing heat soak after the engine stops.</UseCase>
+    <TuningAdvice>Usually left stock. In high-performance builds or vehicles used for towing, increasing these times can help protect the engine from thermal stress after a hard run.</TuningAdvice>
+  </Map>
+
+  <Map Key="Generator load torque loss map (mrwDFMD_KF)">
+    <Title>Alternator Torque Compensation (mrwDFMD_KF)</Title>
+    <Description>Estimates the mechanical torque (in Nm) required to drive the alternator based on the electrical load (DF signal) and engine speed. The ECU uses this value to proactively adjust the injection quantity, ensuring that the idle speed remains stable when heavy electrical consumers (like seat heaters or window defrosters) are switched on.</Description>
+    <UseCase>Maintains idle refinement and prevents the engine from 'dipping' or stumbling under electrical load.</UseCase>
+    <TuningAdvice>Generally should not be touched. If you have installed a significantly higher-output alternator, this map may need adjustment to maintain perfect idle stability.</TuningAdvice>
+  </Map>
+
+  <Map Key="Oil level threshold map (mrwOELNiKF)">
+    <Title>Dynamic Oil Level Thresholds (mrwOELNiKF)</Title>
+    <Description>Defines the thresholds for the electronic oil level sensor to trigger a 'Low Oil' warning on the dashboard. The map accounts for engine speed and temperature, as oil level readings vary significantly depending on how much oil is currently circulating through the engine and its thermal expansion.</Description>
+    <UseCase>Prevents false 'Low Oil' warnings during high-RPM driving or in extreme temperatures.</UseCase>
+    <TuningAdvice>Do not modify. This is a critical safety monitoring map. If you are receiving false warnings, check the physical sensor and oil grade before considering software changes.</TuningAdvice>
+  </Map>
+
+  <Map Key="Engine Oil thermal load map (siwOEL_tKF)">
+    <Title>Oil Thermal Aging Map (siwOEL_tKF)</Title>
+    <Description>This map is part of the Bosch 'Wartungsintervallverlängerung' (WIV) or Flexible Service Interval logic. It calculates the thermal stress placed on the engine oil based on engine speed and load. The ECU integrates this 'thermal load' over time to determine the optimal point for the next oil change service.</Description>
+    <UseCase>Used by the ECU to calculate the remaining life of the engine oil.</UseCase>
+    <TuningAdvice>Tuners often leave this stock. However, if the engine is consistently run at much higher loads than factory (e.g., a track car), the ECU will naturally shorten the service interval based on the logic in this map.</TuningAdvice>
+  </Map>
+
+  <Map Key="Overboost debouncing limit (zmwVETSuKF)">
+    <Title>Overboost Debouncing Timer (zmwVETSuKF)</Title>
+    <Description>This map defines the time delay (in milliseconds) that an overboost condition must persist before the ECU triggers a protection intervention or limp mode. It acts as a 'filter' to prevent temporary boost spikes during rapid gear changes or initial spool-up from causing nuisance power cuts.</Description>
+    <UseCase>Adjusted on high-performance setups with aggressive turbochargers that may have slight, harmless overshoot during transients.</UseCase>
+    <TuningAdvice>Increase this value slightly if you are experiencing limp mode during gear changes despite a well-tuned N75 map. Do not set it too high, as it also delays protection in the event of a genuine boost control failure (e.g., a popped vacuum line).</TuningAdvice>
+  </Map>
+
+  <Map Key="Map - Minimum IQ control upper threshold (zmwMEmi1KL)">
+    <Title>Smooth Running Controller - Upper IQ Limit (zmwMEmi1KL)</Title>
+    <Description>This characteristic line defines the upper injection quantity threshold for the Smooth Running Controller (LRR). The LRR balances cylinder-to-cylinder variations to ensure a smooth idle. Above this IQ threshold, the ECU stops attempting to balance the cylinders as the engine is no longer in a steady-state idle condition.</Description>
+    <UseCase>Ensures the cylinder balancing logic does not interfere with normal driving or low-load cruising.</UseCase>
+    <TuningAdvice>Usually left stock. If you have installed very large injectors that require a higher idle IQ, you may need to increase this threshold to keep the balancing logic active at the new idle point.</TuningAdvice>
+  </Map>
+
+  <Map Key="Map - Minimum IQ control lower threshold (zmwMEmi0KL)">
+    <Title>Smooth Running Controller - Lower IQ Limit (zmwMEmi0KL)</Title>
+    <Description>Defines the lower injection quantity threshold for the cylinder balancing logic. If the requested IQ drops below this value (e.g., during overrun), the balancing logic is deactivated to prevent unnecessary solenoid adjustments.</Description>
+    <UseCase>Fine-tuning the activation window of the Smooth Running Controller.</UseCase>
+    <TuningAdvice>Always ensure this value is lower than the upper threshold (zmwMEmi1KL) to maintain a stable operating window for the controller.</TuningAdvice>
+  </Map>
+
+  <Map Key="Map - Boundary acceleration limited quantity (mrwBdnN_KL)">
+    <Title>Acceleration-Limited IQ Boundary (mrwBdnN_KL)</Title>
+    <Description>This characteristic line defines the maximum allowable injection quantity when the engine is at its acceleration limit (dn/dt). It works in conjunction with the Acceleration Limitation Map to prevent the ECU from requesting excessive fuel during rapid RPM rises, which could lead to drivetrain oscillations or mechanical failure.</Description>
+    <UseCase>Protects the drivetrain during rapid acceleration in low gears.</UseCase>
+    <TuningAdvice>Increasing this value will allow for more power during rapid RPM rises, but at the cost of increased drivetrain stress. Set this to match the torque capacity of your transmission and axles.</TuningAdvice>
+  </Map>
+
+  <Map Key="Boost intake manifold vacuum detection (mrwLDFU_KL)">
+    <Title>Intake Vacuum Detection Threshold (mrwLDFU_KL)</Title>
+    <Description>In a turbocharged diesel engine, the intake manifold should rarely be under significant vacuum. This characteristic line defines the pressure threshold below which the ECU detects a 'vacuum' condition. This usually indicates a severely restricted air intake (e.g., a clogged filter) or a turbocharger failure.</Description>
+    <UseCase>Diagnostic monitoring of the air intake system integrity.</UseCase>
+    <TuningAdvice>Do not modify. This is a critical diagnostic threshold that helps identify hardware failures before they cause engine damage.</TuningAdvice>
+  </Map>
+
+  <Map Key="Hydraulic fan speed normalization (kuwHyLFTKF)">
+    <Title>Hydraulic Fan Speed Normalization (kuwHyLFTKF)</Title>
+    <Description>This map normalizes the speed request for hydraulic cooling fans. Since hydraulic fans are driven by an engine-mounted pump, their potential speed varies with engine RPM. This map ensures that the actual fan speed remains consistent with the ECU's cooling request regardless of how fast the engine is spinning.</Description>
+    <UseCase>Calibration for vehicles equipped with hydraulic cooling systems (common in heavy-duty or specialized VAG applications).</UseCase>
+    <TuningAdvice>Usually left stock. If the cooling performance is inconsistent across the RPM range, this map may need adjustment to account for pump efficiency.</TuningAdvice>
+  </Map>
+
+  <Map Key="Water critical temperature basic map (kuwWTFkrKF)">
+    <Title>Critical Coolant Temperature Thresholds (kuwWTFkrKF)</Title>
+    <Description>Defines the 'critical' temperature limits for the engine coolant based on engine speed and load. When the coolant temperature exceeds these thresholds, the ECU enters an emergency cooling mode, triggering maximum fan speed and potentially reducing fuel injection (IQ) to prevent catastrophic overheating.</Description>
+    <UseCase>Primary safety monitoring for the engine's thermal state.</UseCase>
+    <TuningAdvice>Do not increase these values. These are hard safety limits designed to protect the engine block and head from warping or cracking due to extreme heat.</TuningAdvice>
+  </Map>
+
+  <Map Key="Electric fan speed characterization (kuwElLFTKL)">
+    <Title>Electric Fan PWM Characterization (kuwElLFTKL)</Title>
+    <Description>This characteristic line defines the relationship between the ECU's internal cooling request (0-100%) and the actual pulse-width modulation (PWM) duty cycle sent to the electric fan controller. It ensures that the fan motor reacts linearly to the ECU's demands.</Description>
+    <UseCase>Used when replacing the stock cooling fans with aftermarket units that have different PWM response characteristics.</UseCase>
+    <TuningAdvice>Adjust this if your aftermarket fans are not spinning at the expected speed for a given ECU request. Ensure the 100% request actually results in maximum fan speed.</TuningAdvice>
+  </Map>
+
+  <Map Key="Cooling fan speed correction curve (kuwANKORKL)">
+    <Title>Fan Speed Vehicle Speed Correction (kuwANKORKL)</Title>
+    <Description>Applies a correction factor to the cooling fan speed request based on the vehicle's forward speed. At higher speeds, the 'ram air' effect provides significant natural cooling, allowing the ECU to reduce the fan's electrical load without compromising engine temperatures.</Description>
+    <UseCase>Energy management and noise reduction during high-speed cruising.</UseCase>
+    <TuningAdvice>Usually left stock. If the engine tends to run hot only at high speeds, you may need to reduce the correction factor to keep the fans more active.</TuningAdvice>
+  </Map>
+
+  <Map Key="Gear-dependent torque limiters (mrwM_EBGxKL)">
+    <Title>Gear-Dependent Torque/Quantity Limits (mrwM_EBGxKL)</Title>
+    <Description>A series of characteristic lines (one for each gear) that define the maximum allowable torque or injection quantity. These are primarily used to protect the transmission and drivetrain components from excessive stress, particularly in lower gears where the torque multiplication is highest.</Description>
+    <UseCase>Limiting torque in 1st and 2nd gear to prevent gearbox failure or excessive wheel spin.</UseCase>
+    <TuningAdvice>When increasing power, these limits must be raised proportionally. However, be cautious with 1st and 2nd gear limits to avoid stripping gears or damaging the differential.</TuningAdvice>
+  </Map>
+
+  <Map Key="CVT-specific torque limit (mrwM_ECVTKL)">
+    <Title>CVT Transmission Torque Limit (mrwM_ECVTKL)</Title>
+    <Description>This characteristic line is specific to vehicles equipped with a Continuously Variable Transmission (CVT). It defines the maximum engine torque allowed to ensure the CVT belt does not slip and the variator pulleys are not overloaded.</Description>
+    <UseCase>Drivetrain protection for CVT-equipped VAG models (e.g., early Multitronic systems).</UseCase>
+    <TuningAdvice>Exercise extreme caution. CVT transmissions are very sensitive to torque increases. Exceeding the factory limits often leads to rapid belt wear or total transmission failure.</TuningAdvice>
+  </Map>
+
+  <Map Key="Automated manual transmission limit (mrwM_EASGKL)">
+    <Title>ASG/Automated Manual Torque Limit (mrwM_EASGKL)</Title>
+    <Description>Defines the torque limits for Automated Manual Transmissions (ASG). This map is used by the ECU to coordinate torque reduction during automated gear shifts, ensuring smooth clutch transitions and protecting the internal shift actuators.</Description>
+    <UseCase>Calibration of shift comfort and speed for ASG-equipped vehicles.</UseCase>
+    <TuningAdvice>If shifts feel 'jerky' after a tune, this map may need adjustment to allow for a smoother torque ramp-down and ramp-up during the shift phase.</TuningAdvice>
+  </Map>
+
+  <Map Key="General transmission protection limit (mrwM_EGETKL)">
+    <Title>TCU Requested Torque Limit (mrwM_EGETKL)</Title>
+    <Description>A global torque limit requested by the Transmission Control Unit (TCU) via the CAN bus. This map defines how the ECU should respond to these external requests, typically used during gear changes or when the TCU detects a transmission over-temperature condition.</Description>
+    <UseCase>Integration between the Engine ECU and Transmission ECU for drivetrain longevity.</UseCase>
+    <TuningAdvice>Do not disable. This is the primary communication channel for the transmission to protect itself. If the TCU requests a limit, there is usually a valid mechanical reason.</TuningAdvice>
+  </Map>
+
+  <Map Key="Torque gradient limit (mrwM_EGRKL)">
+    <Title>Torque Gradient Limit (mrwM_EGRKL)</Title>
+    <Description>This characteristic line limits the maximum rate of change (gradient) for the engine torque. It prevents the engine from increasing or decreasing torque too rapidly, which protects the dual-mass flywheel, gearbox, and engine mounts from sudden mechanical shocks.</Description>
+    <UseCase>Smoothing out the 'tip-in' and 'tip-out' behavior of the engine.</UseCase>
+    <TuningAdvice>Increasing these values will make the engine feel more responsive and 'snappy,' but at the cost of increased drivetrain wear and potential 'jerky' behavior during rapid throttle changes.</TuningAdvice>
+  </Map>
+
+  <Map Key="Pedal value filter constant (mrwPWG_FIL)">
+    <Title>Accelerator Pedal Signal Filter (mrwPWG_FIL)</Title>
+    <Description>Defines the filtering intensity for the raw signal coming from the accelerator pedal sensor (PWG). It removes electrical noise and minor driver foot tremors to provide a clean, stable torque request to the ECU's calculation chain.</Description>
+    <UseCase>Signal conditioning for the driver's primary input.</UseCase>
+    <TuningAdvice>Usually left stock. Excessive filtering will cause a noticeable delay in throttle response, while too little filtering can lead to an unstable idle or 'twitchy' part-load behavior.</TuningAdvice>
+  </Map>
+
+  <Map Key="Anti-jerk damping gain (mrwM_EARD_K)">
+    <Title>Anti-Jerk (ARD) Damping Intensity (mrwM_EARD_K)</Title>
+    <Description>This map controls the gain or 'strength' of the Active Ruckeldämpfer (ARD) system. The ARD detects drivetrain oscillations (bucking) and applies rapid, micro-adjustments to the injection quantity to counteract and cancel out these vibrations.</Description>
+    <UseCase>Eliminating drivetrain 'shudder' or 'bucking' during low-speed maneuvers or rapid gear changes.</UseCase>
+    <TuningAdvice>If the car feels like it's 'bouncing' after a heavy tune or clutch upgrade, this gain may need to be increased. However, setting it too high can cause the ECU to fight itself, leading to a loss of smoothness.</TuningAdvice>
+  </Map>
+
+  <Map Key="Transient smoothing map (mrwM_ESMOO)">
+    <Title>Transient Load Smoothing (mrwM_ESMOO)</Title>
+    <Description>A map used to manage the transition between different engine load states. It smooths the injection quantity delivery during the critical phase where the engine moves from a steady-state (like cruising) to a transient-state (like accelerating).</Description>
+    <UseCase>Refining drivability and preventing 'stumbling' during part-load transitions.</UseCase>
+    <TuningAdvice>Adjust this if the engine feels hesitant or 'flat' for a split second when you first touch the throttle. It helps bridge the gap between the driver's request and the turbocharger's response.</TuningAdvice>
+  </Map>
+
+  <Map Key="Start-off speed threshold (mrwSTNABKL)">
+    <Title>Start-Off RPM Threshold (mrwSTNABKL)</Title>
+    <Description>This characteristic line defines the engine speed (RPM) at which the ECU determines the engine has successfully fired and is now running under its own power. Once this threshold is crossed, the ECU exits the 'Start' phase and begins normal torque calculation.</Description>
+    <UseCase>Fixing 'start-stall' issues where the ECU stops injecting start fuel before the engine has enough momentum to idle.</UseCase>
+    <TuningAdvice>Usually left stock. If the engine fires but immediately dies during cold starts, increasing this threshold slightly can keep the Start IQ active for a few more RPMs to stabilize the combustion.</TuningAdvice>
+  </Map>
+
+  <Map Key="Starter motor cut-off time (mrwST_OFZ)">
+    <Title>Maximum Cranking Duration (mrwST_OFZ)</Title>
+    <Description>Defines the maximum time the ECU will allow the engine to crank without reaching the start-off speed. If this time limit is exceeded, the ECU will stop injecting fuel to protect the starter motor from overheating and the battery from excessive discharge.</Description>
+    <UseCase>Safety limit for the electrical starting system.</UseCase>
+    <TuningAdvice>Do not decrease this value in cold climates, as the engine may need longer cranking times to start. Increasing it can be useful if the engine is known to be a 'slow starter' due to hardware modifications.</TuningAdvice>
+  </Map>
+
+  <Map Key="Start quantity release delay (mrwSTMFRKL)">
+    <Title>Start IQ Injection Delay (mrwSTMFRKL)</Title>
+    <Description>A temperature-dependent delay that pauses fuel injection for a short period after the starter begins turning the engine. This delay allows the mechanical components to begin moving and oil pressure to start rising before the first combustion event occurs.</Description>
+    <UseCase>Improving engine longevity by ensuring lubrication begins before the engine is subjected to combustion loads.</UseCase>
+    <TuningAdvice>Usually left stock. Reducing this delay can result in a 'faster' perceived start, but at the cost of increased wear on a cold engine.</TuningAdvice>
+  </Map>
+
+  <Map Key="Boost-based cranking detection (mrwST_dPL)">
+    <Title>Crank Sensor Diagnostic Threshold (mrwST_dPL)</Title>
+    <Description>This diagnostic value monitors the change in boost pressure (MAP) while the engine is supposedly stationary (0 RPM). If the pressure fluctuates significantly, it implies the engine is actually turning but the crankshaft sensor is failing to report RPM.</Description>
+    <UseCase>Diagnostic monitoring of the engine speed sensor integrity during the start phase.</UseCase>
+    <TuningAdvice>Do not modify. This is a critical safety check that prevents the ECU from attempting to run the engine with a corrupted or missing RPM signal.</TuningAdvice>
+  </Map>
+
+  <Map Key="EGR shutdown threshold - lower (arwMEAB0KL)">
+    <Title>EGR Reactivation Threshold (arwMEAB0KL)</Title>
+    <Description>Defines the injection quantity (IQ) threshold for reactivating the EGR system after it has been shut down due to high load. This works in conjunction with the upper threshold (arwMEAB1KL) to create a hysteresis loop, preventing the EGR valve from rapidly cycling on and off at a specific load point.</Description>
+    <UseCase>Ensuring EGR system stability during load transitions.</UseCase>
+    <TuningAdvice>Always keep these values lower than the corresponding values in the upper threshold map. If you have lowered the shutdown threshold for a partial EGR delete, you must lower this reactivation threshold proportionally.</TuningAdvice>
+  </Map>
+
+  <Map Key="Airmass backup values map (arwLMVGWKF)">
+    <Title>Air Mass Plausibility & Backup (arwLMVGWKF)</Title>
+    <Description>This map defines the expected air mass values for any given engine speed and boost pressure. The ECU uses this to verify the health of the MAF sensor. If the actual MAF reading deviates too far from these values, the ECU flags a fault and uses this map as a 'backup' to estimate air mass for smoke limiting.</Description>
+    <UseCase>Diagnostic monitoring and 'MAF-less' fallback logic.</UseCase>
+    <TuningAdvice>If you have significantly modified the engine's breathing (e.g., big-valve head or performance camshafts), you may need to update this map to prevent false MAF sensor codes.</TuningAdvice>
+  </Map>
+
+  <Map Key="Air mass calculation air temp/pressure (arwLMBKOKF)">
+    <Title>Air Mass Environmental Correction (arwLMBKOKF)</Title>
+    <Description>Applies a correction factor to the air mass calculation based on intake air temperature and atmospheric pressure. This ensures that the ECU's internal model of air density remains accurate, which is critical for precise smoke limiting and EGR control in varying climates.</Description>
+    <UseCase>Maintaining fueling accuracy across different altitudes and weather conditions.</UseCase>
+    <TuningAdvice>Usually left stock. For extreme high-boost applications where intake temperatures are significantly higher than factory levels, this map may need calibration to ensure the smoke limiter remains effective.</TuningAdvice>
+  </Map>
+
+  <Map Key="Map - time for delayed shutdown (arwTi_abKL)">
+    <Title>EGR Idle Shutdown Timer (arwTi_abKL)</Title>
+    <Description>Defines a temperature-dependent delay time. If the engine idles for longer than this duration, the ECU automatically closes the EGR valve. This is a protective measure to prevent the intake manifold and EGR valve from becoming clogged with carbon deposits during prolonged stationary periods.</Description>
+    <UseCase>Intake system protection during extended idling.</UseCase>
+    <TuningAdvice>Reducing these times is a common 'stealth' modification to keep the intake cleaner without completely disabling the EGR system for emissions testing.</TuningAdvice>
+  </Map>
+
+  <Map Key="Injector dynamic advance selector map (fnwSWDY_KL)">
+    <Title>Dynamic Injection Advance Selector (fnwSWDY_KL)</Title>
+    <Description>This characteristic line determines the weighting or activation of dynamic injection advance during rapid load changes (transients). It ensures that the Start of Injection (SOI) is advanced quickly enough to support sudden increases in torque request, preventing 'timing lag' that could lead to poor combustion during acceleration.</Description>
+    <UseCase>Sharpening the engine's response during rapid throttle applications.</UseCase>
+    <TuningAdvice>Usually left stock. If the engine feels 'flat' during the first half-second of a pull despite aggressive SOI maps, small adjustments here can trigger the advance logic more effectively.</TuningAdvice>
+  </Map>
+
+  <Map Key="Injection advance at start map (fnwSWSTxKR)">
+    <Title>Start Phase Injection Advance (fnwSWSTxKR)</Title>
+    <Description>Defines the injection advance (SOI) specifically during the engine cranking and initial start phase. It is indexed by engine speed and coolant temperature to ensure optimal cylinder pressure for reliable ignition during both cold and hot starts.</Description>
+    <UseCase>Improving starting reliability, especially in engines with modified compression ratios or non-standard injectors.</UseCase>
+    <TuningAdvice>Small increases in advance can help cold starting in extreme conditions. Avoid excessive advance during cranking as it can cause 'kickback' against the starter motor.</TuningAdvice>
+  </Map>
+
+  <Map Key="Twisted camshaft torsion correction (zmwNWkoKL)">
+    <Title>Camshaft Torsion Compensation (zmwNWkoKL)</Title>
+    <Description>Compensates for the physical twisting (torsion) of the camshaft under high load. In PD engines, the injection pressure is generated by the cam lobes; at high RPM and high IQ, the mechanical stress causes the cam to deflect slightly. This map corrects the solenoid timing to ensure the actual injection occurs at the intended crankshaft angle.</Description>
+    <UseCase>Maintaining timing accuracy in high-power builds where injection pressures are significantly higher than stock.</UseCase>
+    <TuningAdvice>Do not modify unless you have performed high-resolution crank/cam angle logging and identified a consistent timing drift under load. Incorrect values will lead to 'jittery' timing and potential mechanical stress.</TuningAdvice>
+  </Map>
+
+  <Map Key="Fuel volume correction map (zmwMKOR_KF)">
+    <Title>Fuel Volume Thermal Correction (zmwMKOR_KF)</Title>
+    <Description>A fine-tuning map that applies a correction factor to the injected quantity based on engine speed and temperature. It accounts for the thermal expansion of diesel fuel and the mechanical tolerances of the high-pressure pump system, ensuring that the requested IQ matches the actual mass of fuel delivered.</Description>
+    <UseCase>Achieving perfect fueling accuracy across all operating temperatures.</UseCase>
+    <TuningAdvice>Only modify if you have verified the actual fuel flow via high-precision logging or a dyno. Small adjustments (1-2%) can help smooth out the torque curve as the engine warms up.</TuningAdvice>
+  </Map>
+
+  <Map Key="Generator load torque loss map (mrwDFMD_KF)">
+    <Title>Alternator Torque Compensation (mrwDFMD_KF)</Title>
+    <Description>Estimates the mechanical torque (in Nm) required to drive the alternator based on the electrical load (DF signal) and engine speed. The ECU uses this value to proactively adjust the injection quantity, ensuring that the idle speed remains stable when heavy electrical consumers (like seat heaters or window defrosters) are switched on.</Description>
+    <UseCase>Maintains idle refinement and prevents the engine from 'dipping' or stumbling under electrical load.</UseCase>
+    <TuningAdvice>Generally should not be touched. If you have installed a significantly higher-output alternator, this map may need adjustment to maintain perfect idle stability.</TuningAdvice>
+  </Map>
+
+  <Map Key="Air conditioning torque requirement (mrwKLMD_KF)">
+    <Title>AC Torque Compensation (mrwKLMD_KF)</Title>
+    <Description>This map defines the mechanical torque load placed on the engine by the air conditioning compressor. The ECU uses this value to adjust the idle speed controller and the anti-jerk logic, ensuring that the engine does not stumble or stall when the AC clutch engages or when refrigerant pressure is high.</Description>
+    <UseCase>Maintains idle stability and drivability when the air conditioning is active.</UseCase>
+    <TuningAdvice>Usually left stock. If you have installed a non-standard AC compressor or have significantly lightened the flywheel, you may need to adjust these values to maintain a smooth idle.</TuningAdvice>
+  </Map>
+
+  <Map Key="Motor mount control duty cycle (mlwTW_KF)">
+    <Title>Active Motor Mount Control (mlwTW_KF)</Title>
+    <Description>Controls the pulse-width modulation (PWM) signal sent to active (switchable) engine mounts. The ECU adjusts the stiffness of the mounts based on engine speed and coolant temperature to minimize the transmission of vibrations to the vehicle chassis, especially at idle.</Description>
+    <UseCase>Used to restore factory-like refinement if the engine has become more 'vibrant' due to tuning or if aftermarket mounts are installed.</UseCase>
+    <TuningAdvice>Tuners often leave this stock. However, if you experience excessive cabin vibration at specific RPMs, adjusting the duty cycle can help 'tune out' the resonance.</TuningAdvice>
+  </Map>
+
+  <Map Key="Air compressor switch-off time - min (klwTMIN_KF)">
+    <Title>AC Compressor Min Switch-Off Time (klwTMIN_KF)</Title>
+    <Description>This characteristic defines the minimum time the air conditioning compressor must remain off once it has been deactivated. This 'anti-cycling' logic protects the AC clutch and compressor from mechanical damage caused by rapid engagement and disengagement during high-load driving.</Description>
+    <UseCase>Protects the AC system hardware during aggressive driving where the ECU may frequently cut the AC load.</UseCase>
+    <TuningAdvice>Do not decrease this value. Increasing it can provide additional protection if the AC system is showing signs of premature wear in a tuned vehicle.</TuningAdvice>
+  </Map>
+
+  <Map Key="Misfire detection threshold map (mrwZUE_KF)">
+    <Title>Misfire Detection Sensitivity (mrwZUE_KF)</Title>
+    <Description>This map defines the thresholds for engine speed 'roughness' used to detect misfires. The ECU monitors the acceleration of the crankshaft after each firing event; if the acceleration is below these thresholds, the ECU flags a misfire. This is critical for EOBD compliance and engine protection.</Description>
+    <UseCase>Diagnostic monitoring of combustion quality.</UseCase>
+    <TuningAdvice>Do not modify. Lowering these thresholds will make the ECU blind to misfires, potentially leading to engine damage. Raising them may cause 'false positive' misfire codes, especially if a lightened flywheel is installed.</TuningAdvice>
+  </Map>
+
+  <Map Key="Fuel cooling control map (kuwKK_KF)">
+    <Title>Fuel Cooling Pump Control (kuwKK_KF)</Title>
+    <Description>Controls the activation and duty cycle of the fuel cooling system. PD engines return very hot fuel to the tank; this map ensures the fuel is cooled sufficiently to protect the fuel tank structure and maintain the lubricity of the diesel fuel for the high-pressure pump.</Description>
+    <UseCase>Thermal management of the fuel system during high-load or high-ambient temperature operation.</UseCase>
+    <TuningAdvice>Usually left stock. If you are running very high injection pressures or large nozzles that generate more heat, you may want to trigger the cooling pump earlier to keep fuel temperatures stable.</TuningAdvice>
+  </Map>
+
+  <Map Key="Electric fuel pump control (mrwEKP_KL)">
+    <Title>Electric Lift Pump Control (mrwEKP_KL)</Title>
+    <Description>This characteristic line manages the operation of the electric fuel lift pump located in the fuel tank. It ensures that the tandem pump on the cylinder head is always supplied with a steady flow of fuel, particularly during the start phase and under high engine load.</Description>
+    <UseCase>Ensuring fuel supply reliability across the RPM and load range.</UseCase>
+    <TuningAdvice>Usually left stock. If you have upgraded to a high-flow lift pump, this map may need adjustment to ensure the pump is not over-driven or causing excessive pressure in the return lines.</TuningAdvice>
+  </Map>
+
+  <Map Key="Tank shut-off valve control (mrwTAV_KL)">
+    <Title>Tank Shut-off Valve (TAV) Logic (mrwTAV_KL)</Title>
+    <Description>Defines the logic for the safety shut-off valve in the fuel tank. This valve is designed to immediately cut the fuel supply in the event of a detected crash (via the airbag signal) or a major system failure, preventing fuel from feeding a fire.</Description>
+    <UseCase>Safety-critical fuel system isolation.</UseCase>
+    <TuningAdvice>Do not modify. This is a primary safety feature of the vehicle. Disabling or delaying this valve can have life-threatening consequences in the event of an accident.</TuningAdvice>
+  </Map>
+
+  <Map Key="Gear-dependent torque limiters (mrwM_EBGxKL)">
+    <Title>Gear-Dependent Torque/Quantity Limits (mrwM_EBGxKL)</Title>
+    <Description>A series of characteristic lines (one for each gear) that define the maximum allowable torque or injection quantity. These are primarily used to protect the transmission and drivetrain components from excessive stress, particularly in lower gears where the torque multiplication is highest.</Description>
+    <UseCase>Limiting torque in 1st and 2nd gear to prevent gearbox failure or excessive wheel spin.</UseCase>
+    <TuningAdvice>When increasing power, these limits must be raised proportionally. However, be cautious with 1st and 2nd gear limits to avoid stripping gears or damaging the differential.</TuningAdvice>
+  </Map>
+
+  <Map Key="CVT-specific torque limit (mrwM_ECVTKL)">
+    <Title>CVT Transmission Torque Limit (mrwM_ECVTKL)</Title>
+    <Description>This characteristic line is specific to vehicles equipped with a Continuously Variable Transmission (CVT). It defines the maximum engine torque allowed to ensure the CVT belt does not slip and the variator pulleys are not overloaded.</Description>
+    <UseCase>Drivetrain protection for CVT-equipped VAG models (e.g., early Multitronic systems).</UseCase>
+    <TuningAdvice>Exercise extreme caution. CVT transmissions are very sensitive to torque increases. Exceeding the factory limits often leads to rapid belt wear or total transmission failure.</TuningAdvice>
+  </Map>
+
+  <Map Key="Automated manual transmission limit (mrwM_EASGKL)">
+    <Title>ASG/Automated Manual Torque Limit (mrwM_EASGKL)</Title>
+    <Description>Defines the torque limits for Automated Manual Transmissions (ASG). This map is used by the ECU to coordinate torque reduction during automated gear shifts, ensuring smooth clutch transitions and protecting the internal shift actuators.</Description>
+    <UseCase>Calibration of shift comfort and speed for ASG-equipped vehicles.</UseCase>
+    <TuningAdvice>If shifts feel 'jerky' after a tune, this map may need adjustment to allow for a smoother torque ramp-down and ramp-up during the shift phase.</TuningAdvice>
+  </Map>
+
+  <Map Key="General transmission protection limit (mrwM_EGETKL)">
+    <Title>TCU Requested Torque Limit (mrwM_EGETKL)</Title>
+    <Description>A global torque limit requested by the Transmission Control Unit (TCU) via the CAN bus. This map defines how the ECU should respond to these external requests, typically used during gear changes or when the TCU detects a transmission over-temperature condition.</Description>
+    <UseCase>Integration between the Engine ECU and Transmission ECU for drivetrain longevity.</UseCase>
+    <TuningAdvice>Do not disable. This is the primary communication channel for the transmission to protect itself. If the TCU requests a limit, there is usually a valid mechanical reason.</TuningAdvice>
+  </Map>
 </MapDescriptions>
