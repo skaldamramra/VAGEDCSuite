@@ -787,6 +787,7 @@ namespace VAGSuite
                     simpleButton4.BringToFront(); // Rotate Left
                     simpleButton5.BringToFront(); // Rotate Right
                     btnToggleWireframe.BringToFront(); // Wireframe Toggle
+                    btnToggleTooltips.BringToFront(); // Tooltip Toggle
 
                     // Ensure correct tooltips for zoom buttons
                     simpleButton7.ToolTip = "Zoom in";
@@ -1468,6 +1469,13 @@ namespace VAGSuite
 
         private void gridView1_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.T && nChartControl1.Visible)
+            {
+                btnToggleTooltips_Click(this, EventArgs.Empty);
+                e.Handled = true;
+                return;
+            }
+
             // Delegate to MapGridComponent for key handling (Add/Subtract/PageUp/PageDown/Home/End)
             _mapGridComponent.GridView1_KeyDown(sender, e);
         }
@@ -2451,6 +2459,14 @@ namespace VAGSuite
             if (_chart3DComponent != null)
             {
                 _chart3DComponent.ToggleRenderMode();
+            }
+        }
+
+        private void btnToggleTooltips_Click(object sender, EventArgs e)
+        {
+            if (_chart3DComponent != null)
+            {
+                _chart3DComponent.ToggleTooltips();
             }
         }
 

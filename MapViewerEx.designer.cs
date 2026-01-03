@@ -53,6 +53,7 @@ namespace VAGSuite
             this.xtraTabPage1 = new DevExpress.XtraTab.XtraTabPage();
             this.btnToggleOverlay = new DevExpress.XtraEditors.SimpleButton();
             this.btnToggleWireframe = new DevExpress.XtraEditors.SimpleButton();
+            this.btnToggleTooltips = new DevExpress.XtraEditors.SimpleButton();
             this.nChartControl1 = new OpenTK.GLControl();
             this.simpleButton4 = new DevExpress.XtraEditors.SimpleButton();
             this.simpleButton5 = new DevExpress.XtraEditors.SimpleButton();
@@ -304,6 +305,7 @@ namespace VAGSuite
             //
             this.xtraTabPage1.Controls.Add(this.btnToggleOverlay);
             this.xtraTabPage1.Controls.Add(this.btnToggleWireframe);
+            this.xtraTabPage1.Controls.Add(this.btnToggleTooltips);
             this.xtraTabPage1.Controls.Add(this.nChartControl1);
             this.xtraTabPage1.Controls.Add(this.simpleButton4);
             this.xtraTabPage1.Controls.Add(this.simpleButton5);
@@ -334,6 +336,17 @@ namespace VAGSuite
             this.btnToggleWireframe.Text = "W"; // Shows 'W' on the button
             this.btnToggleWireframe.ToolTip = "Toggle wireframe mode (W)";
             this.btnToggleWireframe.Click += new System.EventHandler(this.btnToggleWireframe_Click);
+            //
+            // btnToggleTooltips
+            //
+            this.btnToggleTooltips.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnToggleTooltips.Location = new System.Drawing.Point(806, 176);
+            this.btnToggleTooltips.Name = "btnToggleTooltips";
+            this.btnToggleTooltips.Size = new System.Drawing.Size(23, 23);
+            this.btnToggleTooltips.TabIndex = 16;
+            this.btnToggleTooltips.Text = "T";
+            this.btnToggleTooltips.ToolTip = "Toggle hover tooltips (T)";
+            this.btnToggleTooltips.Click += new System.EventHandler(this.btnToggleTooltips_Click);
             //
             // nChartControl1
             //
@@ -789,6 +802,7 @@ namespace VAGSuite
         private ZedGraph.ZedGraphControl nChartControl2;
         private DevExpress.XtraEditors.SimpleButton btnToggleOverlay;
         private DevExpress.XtraEditors.SimpleButton btnToggleWireframe;
+        private DevExpress.XtraEditors.SimpleButton btnToggleTooltips;
         private System.Windows.Forms.Timer timer5;
         private DevExpress.XtraEditors.SimpleButton simpleButton8;
         private DevExpress.XtraEditors.SimpleButton simpleButton9;

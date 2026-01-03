@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using VAGSuite.MapViewerEventArgs;
 using System.Data;
 using System.Linq;
@@ -80,15 +81,19 @@ namespace VAGSuite.Components
         private Point _lastMousePos;
         private Point _currentMousePos;
         private int _hoveredVertexIndex = -1;
+        private bool _showTooltips = true;
 
         // Rotation mode: true = rotate mesh, false = rotate camera
         private bool _rotateMesh = true;
 
-        // For responsive rotation - throttle redraws
-        private System.Windows.Forms.Timer _renderTimer;
-        private bool _pendingRender;
+        // Render synchronization - prevents overlapping renders
+        private int _renderLock = 0;
         private DateTime _lastRenderTime;
         private const int MIN_RENDER_INTERVAL_MS = 16; // ~60 FPS max
+        
+        // Hover tooltip optimization - cached screen position to avoid recalculation
+        private PointF _cachedHoverScreenPos = PointF.Empty;
+        private bool _hoverTooltipDirty = false;
 
         #endregion
 
@@ -154,22 +159,21 @@ namespace VAGSuite.Components
             }
         }
 
-        private void InitializeRenderTimer()
+        /// <summary>
+        /// Attempts to acquire the render lock. Returns true if lock was acquired.
+        /// This prevents overlapping renders which cause flickering.
+        /// </summary>
+        private bool TryAcquireRenderLock()
         {
-            if (_renderTimer == null)
-            {
-                _renderTimer = new System.Windows.Forms.Timer();
-                _renderTimer.Interval = MIN_RENDER_INTERVAL_MS;
-                _renderTimer.Tick += (s, e) =>
-                {
-                    if (_pendingRender && _glControl != null)
-                    {
-                        _pendingRender = false;
-                        _glControl.Invalidate();
-                    }
-                };
-                _renderTimer.Start();
-            }
+            return Interlocked.CompareExchange(ref _renderLock, 1, 0) == 0;
+        }
+
+        /// <summary>
+        /// Releases the render lock acquired by TryAcquireRenderLock.
+        /// </summary>
+        private void ReleaseRenderLock()
+        {
+            Interlocked.Exchange(ref _renderLock, 0);
         }
 
         private void OnGLPaint(object sender, PaintEventArgs e)
@@ -187,6 +191,13 @@ namespace VAGSuite.Components
             }
             
             if (!_isLoaded) return;
+
+            // Acquire render lock to prevent overlapping renders
+            if (!TryAcquireRenderLock())
+            {
+                // Another render is in progress, skip this one
+                return;
+            }
 
             try
             {
@@ -271,19 +282,31 @@ namespace VAGSuite.Components
                     GL.DisableVertexAttribArray(colLoc);
                     GL.UseProgram(0);
                 }
-            
+                
+                // Update hover state and cache screen position for tooltip
+                bool hoverChanged = UpdateHoverState();
+                
+                // Swap buffers first to show the 3D render
                 _glControl.SwapBuffers();
                 
-                // Update hover state before rendering labels
-                UpdateHoverState();
-
-                // Draw axis labels and tooltips using GDI+ after swap
+                // Now draw GDI+ overlays on top of the rendered frame
+                // Using CreateGraphics() after SwapBuffers is safe because we're drawing on the front buffer
                 RenderAxisLabels();
-                RenderHoverTooltip();
+                
+                // Only render hover tooltip if enabled and needed
+                if (_showTooltips && (_hoveredVertexIndex >= 0 || _hoverTooltipDirty))
+                {
+                    RenderHoverTooltip();
+                    _hoverTooltipDirty = false;
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Chart3DComponent: Paint error: " + ex.Message);
+            }
+            finally
+            {
+                ReleaseRenderLock();
             }
         }
 
@@ -715,9 +738,9 @@ namespace VAGSuite.Components
             return new PointF(screenX, screenY);
         }
 
-        private void UpdateHoverState()
+        private bool UpdateHoverState()
         {
-            if (_glControl == null || _mapContent == null || _tableWidth <= 0) return;
+            if (_glControl == null || _mapContent == null || _tableWidth <= 0) return false;
 
             int rows = _mapContent.Length / (_isSixteenBit ? 2 : 1) / _tableWidth;
             int cols = _tableWidth;
@@ -761,11 +784,33 @@ namespace VAGSuite.Components
                 }
             }
 
-            if (_hoveredVertexIndex != bestIdx)
+            bool changed = _hoveredVertexIndex != bestIdx;
+            if (changed)
             {
                 _hoveredVertexIndex = bestIdx;
-                RefreshChart();
+                
+                // Cache the screen position for tooltip rendering
+                if (bestIdx >= 0)
+                {
+                    int r = bestIdx / cols;
+                    int c = bestIdx % cols;
+                    float val = GetZValue(_mapContent, r, c);
+                    float xPos = (c - (cols - 1) / 2.0f) * scaleX;
+                    float yPos = (r - (rows - 1) / 2.0f) * scaleY;
+                    float zPos = (val - _dataMinZ) * scaleZ;
+                    if (_isUpsideDown) zPos = (range * scaleZ) - zPos;
+                    _cachedHoverScreenPos = ProjectToScreen(new Vector3(xPos, yPos, zPos));
+                }
+                else
+                {
+                    _cachedHoverScreenPos = PointF.Empty;
+                }
+                
+                // Mark tooltip as dirty so it will be rendered in the current paint cycle
+                _hoverTooltipDirty = true;
             }
+            
+            return changed;
         }
 
         private void RenderHoverTooltip()
@@ -800,7 +845,13 @@ namespace VAGSuite.Components
                 {
                     SizeF size = g.MeasureString(tooltip, font);
                     float padding = 5;
-                    RectangleF rect = new RectangleF(_currentMousePos.X + 15, _currentMousePos.Y - size.Height - 15, size.Width + padding * 2, size.Height + padding * 2);
+                    
+                    // Use cached screen position if available, otherwise calculate
+                    PointF tooltipPos = _cachedHoverScreenPos != PointF.Empty
+                        ? new PointF(_cachedHoverScreenPos.X + 15, _cachedHoverScreenPos.Y - size.Height - 15)
+                        : new PointF(_currentMousePos.X + 15, _currentMousePos.Y - size.Height - 15);
+                    
+                    RectangleF rect = new RectangleF(tooltipPos.X, tooltipPos.Y, size.Width + padding * 2, size.Height + padding * 2);
 
                     // Draw background
                     using (SolidBrush backBrush = new SolidBrush(Color.FromArgb(220, 40, 40, 40)))
@@ -816,23 +867,11 @@ namespace VAGSuite.Components
                         g.DrawString(tooltip, font, textBrush, rect.X + padding, rect.Y + padding);
                     }
 
-                    // Draw a small circle at the vertex
-                    // We need the screen position of the vertex again
-                    float scaleX = 10.0f / Math.Max(1, cols);
-                    int rows = _mapContent.Length / (_isSixteenBit ? 2 : 1) / _tableWidth;
-                    float scaleY = 10.0f / Math.Max(1, rows);
-                    float range = Math.Max(1, _dataMaxZ - _dataMinZ);
-                    float scaleZ = 6.0f / range;
-                    float xPos = (c - (cols - 1) / 2.0f) * scaleX;
-                    float yPos = (r - (rows - 1) / 2.0f) * scaleY;
-                    float zPos = (val - _dataMinZ) * scaleZ;
-                    if (_isUpsideDown) zPos = (range * scaleZ) - zPos;
-
-                    PointF vScreen = ProjectToScreen(new Vector3(xPos, yPos, zPos));
-                    if (vScreen != PointF.Empty)
+                    // Draw a small circle at the vertex using cached position
+                    if (_cachedHoverScreenPos != PointF.Empty)
                     {
-                        g.DrawEllipse(Pens.White, vScreen.X - 4, vScreen.Y - 4, 8, 8);
-                        g.FillEllipse(Brushes.Black, vScreen.X - 2, vScreen.Y - 2, 4, 4);
+                        g.DrawEllipse(Pens.White, _cachedHoverScreenPos.X - 4, _cachedHoverScreenPos.Y - 4, 8, 8);
+                        g.FillEllipse(Brushes.Black, _cachedHoverScreenPos.X - 2, _cachedHoverScreenPos.Y - 2, 4, 4);
                     }
                 }
             }
@@ -1276,8 +1315,22 @@ namespace VAGSuite.Components
             RefreshChart();
         }
 
+        /// <summary>
+        /// Toggles the visibility of hover tooltips.
+        /// </summary>
+        public void ToggleTooltips()
+        {
+            _showTooltips = !_showTooltips;
+            RefreshChart();
+        }
+
+        /// <summary>
+        /// Toggles the visibility of hover tooltips.
+        /// </summary>
+
         private void OnGLMouseDown(object sender, MouseEventArgs e)
         {
+            _glControl.Focus(); // Ensure control has focus to receive key events
             _lastMousePos = e.Location;
         }
 
@@ -1288,32 +1341,90 @@ namespace VAGSuite.Components
             if (e.Button == MouseButtons.Left)
             {
                 // Update rotation angles - this now rotates the view responsively
-                // because rotation is applied in GetMatrices via modelview matrix
                 float deltaX = (e.X - _lastMousePos.X) * 0.5f;
                 float deltaY = (e.Y - _lastMousePos.Y) * 0.5f;
                 
-                // Z-axis rotation: horizontal spin around the mesh
                 _rotation += deltaX;
-                
-                // Clamp rotation to 360° range (0-360 degrees)
                 _rotation = _rotation % 360f;
                 if (_rotation < 0) _rotation += 360f;
                 
-                // X-axis elevation: limited to ±60° to prevent extreme flipping
-                // This allows viewing from different angles while avoiding confusion
                 _elevation += deltaY;
                 _elevation = Math.Max(-60f, Math.Min(60f, _elevation));
                 
                 _lastMousePos = e.Location;
-                
-                // Use throttled rendering for responsive but controlled updates
                 RequestRender();
             }
             else
             {
-                // Just moving the mouse - check for hover
-                RequestRender();
+                // Smart Hover Refresh:
+                // Only check for hover changes if tooltips are enabled
+                if (_showTooltips)
+                {
+                    // Check if the hover state would change without triggering a full render yet
+                    if (CheckIfHoverChanged(e.Location))
+                    {
+                        // Only request a render if the hovered vertex actually changed
+                        RequestRender();
+                    }
+                }
+                else if (_hoveredVertexIndex != -1)
+                {
+                    // If we are already hovering the same vertex, we do NOT need to refresh.
+                    // The tooltip is anchored to the 3D vertex position, not the mouse cursor.
+                    // As long as the vertex hasn't changed and the mesh hasn't rotated,
+                    // the render is identical.
+                }
             }
+        }
+
+        /// <summary>
+        /// Performs a lightweight check to see if the hovered vertex has changed
+        /// based on the new mouse position, without modifying state.
+        /// </summary>
+        private bool CheckIfHoverChanged(Point mousePos)
+        {
+            if (_glControl == null || _mapContent == null || _tableWidth <= 0) return false;
+
+            int rows = _mapContent.Length / (_isSixteenBit ? 2 : 1) / _tableWidth;
+            int cols = _tableWidth;
+            int totalVertices = rows * cols;
+
+            float minDistance = 15.0f;
+            int bestIdx = -1;
+
+            float scaleX = 10.0f / Math.Max(1, cols);
+            float scaleY = 10.0f / Math.Max(1, rows);
+            float range = Math.Max(1, _dataMaxZ - _dataMinZ);
+            float scaleZ = 6.0f / range;
+
+            // We only check a subset of vertices or use the existing projection logic
+            // to determine if the 'bestIdx' would be different from '_hoveredVertexIndex'
+            for (int i = 0; i < totalVertices; i++)
+            {
+                int r = i / cols;
+                int c = i % cols;
+                float val = GetZValue(_mapContent, r, c);
+                
+                float xPos = (c - (cols - 1) / 2.0f) * scaleX;
+                float yPos = (r - (rows - 1) / 2.0f) * scaleY;
+                float zPos = (val - _dataMinZ) * scaleZ;
+                if (_isUpsideDown) zPos = (range * scaleZ) - zPos;
+
+                PointF screenPos = ProjectToScreen(new Vector3(xPos, yPos, zPos));
+                if (screenPos != PointF.Empty)
+                {
+                    float dx = screenPos.X - mousePos.X;
+                    float dy = screenPos.Y - mousePos.Y;
+                    float dist = (float)Math.Sqrt(dx * dx + dy * dy);
+                    if (dist < minDistance)
+                    {
+                        minDistance = dist;
+                        bestIdx = i;
+                    }
+                }
+            }
+
+            return bestIdx != _hoveredVertexIndex;
         }
 
         private void RequestRender()
@@ -1323,18 +1434,26 @@ namespace VAGSuite.Components
             DateTime now = DateTime.Now;
             TimeSpan elapsed = now - _lastRenderTime;
             
+            // Check if we can render immediately
             if (elapsed.TotalMilliseconds >= MIN_RENDER_INTERVAL_MS)
             {
-                // Render immediately if enough time has passed
-                _glControl.Invalidate();
-                _lastRenderTime = now;
+                // Try to acquire lock - if successful, render immediately
+                if (TryAcquireRenderLock())
+                {
+                    try
+                    {
+                        _glControl.Invalidate();
+                        _lastRenderTime = now;
+                    }
+                    finally
+                    {
+                        ReleaseRenderLock();
+                    }
+                }
+                // If lock is held, the current render will pick up the changes
             }
-            else
-            {
-                // Mark as pending render, timer will handle it
-                _pendingRender = true;
-                InitializeRenderTimer();
-            }
+            // If not enough time has passed, skip this request
+            // The next paint will include all accumulated changes
         }
 
         private void OnGLMouseWheel(object sender, MouseEventArgs e)
@@ -1354,6 +1473,10 @@ namespace VAGSuite.Components
             else if (e.KeyCode == Keys.R)
             {
                 ResetView();
+            }
+            else if (e.KeyCode == Keys.T)
+            {
+                ToggleTooltips();
             }
         }
 
