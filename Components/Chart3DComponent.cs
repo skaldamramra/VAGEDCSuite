@@ -968,8 +968,10 @@ namespace VAGSuite.Components
                 if (yPos > _meshMaxBounds.Y) _meshMaxBounds.Y = yPos;
                 if (zPos > _meshMaxBounds.Z) _meshMaxBounds.Z = zPos;
                 
-                // Color should follow the visual height (Red = High, Blue = Low)
-                colors[i] = GetColorForZ(val, minZ, maxZ, _isUpsideDown);
+                // Color should follow the physical height (Red = High, Blue = Low)
+                // We use the same logic as the Z-axis height: if correction factor is negative,
+                // the raw data inversion must be accounted for in the color gradient.
+                colors[i] = GetColorForZ(val, minZ, maxZ, _correctionFactor < 0);
             }
 
             // Calculate mesh center for camera targeting
