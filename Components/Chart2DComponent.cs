@@ -26,7 +26,9 @@ namespace VAGSuite.Components
         private ViewType _viewType;
         private string _mapName;
         private string _xAxisName;
+        private string _yAxisName;
         private byte[] _mapContent;
+        private int[] _xAxisValues;
         private int[] _yAxisValues;
         private double _correctionFactor;
         private double _correctionOffset;
@@ -84,7 +86,9 @@ namespace VAGSuite.Components
             _viewType = state.Configuration.ViewType;
             _mapName = state.Metadata.Name;
             _xAxisName = state.Metadata.XAxisName;
+            _yAxisName = state.Metadata.YAxisName;
             _mapContent = content;
+            _xAxisValues = state.Axes.XAxisValues;
             _yAxisValues = state.Axes.YAxisValues;
             _correctionFactor = state.Configuration.CorrectionFactor;
             _correctionOffset = state.Configuration.CorrectionOffset;
@@ -98,69 +102,83 @@ namespace VAGSuite.Components
         /// </summary>
         public void UpdateSlice(byte[] data, int sliceIndex)
         {
-            if (data == null || data.Length == 0) return;
+            if (data == null || data.Length == 0 || _tableWidth <= 0) return;
 
-            DataTable chartdt = new DataTable();
-            chartdt.Columns.Add("X", Type.GetType("System.Double"));
-            chartdt.Columns.Add("Y", Type.GetType("System.Double"));
+            var chartControl = GetChartControl();
+            if (chartControl == null || _pointList == null) return;
 
-            double valCount = 0;
-            int offsetInMap = sliceIndex;
+            _pointList.Clear();
+            CurrentSliceIndex = sliceIndex;
 
-            int numberOfRows = data.Length / _tableWidth;
-            if (_isSixteenBit)
+            // Slicing by X-axis (Columns):
+            // Fixed Column Index = sliceIndex
+            // Iterate through all Rows (Y-axis)
+            int numberOfRows = data.Length / (_isSixteenBit ? 2 : 1) / _tableWidth;
+            
+            double minY = double.MaxValue;
+            double maxY = double.MinValue;
+
+            // Update X-Axis title to show the Y-Axis name of the 3D map
+            chartControl.GraphPane.XAxis.Title.Text = _yAxisName ?? "Y Axis";
+
+            // Iterate through rows to extract the slice
+            for (int r = 0; r < numberOfRows; r++)
             {
-                numberOfRows /= 2;
-                offsetInMap *= 2;
-            }
+                // If IsUpsideDown is true, we need to reverse the row index to match the grid's visual order
+                int visualRowIndex = _isUpsideDown ? (numberOfRows - 1) - r : r;
+                int dataIndex = (visualRowIndex * _tableWidth + sliceIndex) * (_isSixteenBit ? 2 : 1);
+                
+                if (dataIndex >= data.Length || dataIndex < 0) continue;
 
-            if (_isSixteenBit)
-            {
-                for (int t = numberOfRows - 1; t >= 0; t--)
+                double value;
+                if (_isSixteenBit)
                 {
-                    double yVal = valCount;
-                    double value = Convert.ToDouble(data.GetValue(offsetInMap + (t * _tableWidth * 2))) * 256.0;
-                    value += Convert.ToDouble(data.GetValue(offsetInMap + (t * (_tableWidth * 2)) + 1));
-
+                    value = (double)data[dataIndex] * 256.0 + (double)data[dataIndex + 1];
                     if (value > 32000)
                     {
                         value = 65536 - value;
                         value = -value;
                     }
-
-                    value *= _correctionFactor;
-                    value += _correctionOffset;
-
-                    if (_yAxisValues.Length > valCount)
-                    {
-                        yVal = Convert.ToDouble(_yAxisValues[(int)valCount]);
-                    }
-
-                    chartdt.Rows.Add(yVal, value);
-                    valCount++;
                 }
-            }
-            else
-            {
-                for (int t = numberOfRows - 1; t >= 0; t--)
+                else
                 {
-                    double yVal = valCount;
-                    double value = Convert.ToDouble(data.GetValue(offsetInMap + (t * _tableWidth)));
+                    value = (double)data[dataIndex];
+                }
 
-                    value *= _correctionFactor;
-                    value += _correctionOffset;
+                // Apply correction factor and offset
+                value *= _correctionFactor;
+                value += _correctionOffset;
 
-                    if (_yAxisValues.Length > valCount)
-                    {
-                        yVal = Convert.ToDouble(_yAxisValues[(int)valCount]);
-                    }
+                // Map the 2D X-axis to the Y-axis values of the 3D map
+                // We use the visualRowIndex to ensure the axis labels match the data points
+                double xVal2D = visualRowIndex;
+                if (_yAxisValues != null && visualRowIndex < _yAxisValues.Length)
+                {
+                    xVal2D = Convert.ToDouble(_yAxisValues[visualRowIndex]);
+                }
 
-                    chartdt.Rows.Add(yVal, value);
-                    valCount++;
+                _pointList.Add(xVal2D, value);
+                if (value < minY) minY = value;
+                if (value > maxY) maxY = value;
+            }
+
+            // Sort the point list by X value to ensure the line is drawn correctly (Left to Right)
+            // regardless of whether the map data or axis values are stored in reverse.
+            _pointList.Sort(ZedGraph.SortType.XValues);
+
+            // Update Gradient Range
+            if (chartControl.GraphPane.CurveList.Count > 0)
+            {
+                var curve = chartControl.GraphPane.CurveList[0] as ZedGraph.LineItem;
+                if (curve != null && curve.Symbol.Fill.Type == ZedGraph.FillType.GradientByY)
+                {
+                    curve.Symbol.Fill.RangeMin = minY;
+                    curve.Symbol.Fill.RangeMax = maxY;
                 }
             }
 
-            RefreshChart();
+            chartControl.AxisChange();
+            chartControl.Invalidate();
         }
 
         /// <summary>
@@ -284,64 +302,59 @@ namespace VAGSuite.Components
                 var chartControl = GetChartControl();
                 if (chartControl == null || _pointList == null) return;
 
-                // Clear existing data points
+                // If it's a 3D map (TableWidth > 1), use UpdateSlice to show the current slice
+                if (_tableWidth > 1)
+                {
+                    int sliceIndex = state?.Configuration?.SliderPosition ?? CurrentSliceIndex;
+                    UpdateSlice(_mapContent, sliceIndex);
+                    return;
+                }
+
+                // Fallback for 1D maps
                 _pointList.Clear();
 
                 double valCount = 0;
-                int numberOfRows = _mapContent.Length;
-                if (_isSixteenBit) numberOfRows /= 2;
+                int numberOfRows = _mapContent.Length / (_isSixteenBit ? 2 : 1);
 
                 double minY = double.MaxValue;
                 double maxY = double.MinValue;
 
-                if (_isSixteenBit)
+                for (int t = 0; t < numberOfRows; t++)
                 {
-                    for (int t = 0; t < numberOfRows; t++)
-                    {
-                        int actualRow = t;
-                        double xval = valCount;
-                        int offset = actualRow * 2;
-                        double value = Convert.ToDouble(_mapContent.GetValue(offset)) * 256;
-                        value += Convert.ToDouble(_mapContent.GetValue(offset + 1));
+                    // If IsUpsideDown is true, we need to reverse the row index to match the grid's visual order
+                    int visualRowIndex = _isUpsideDown ? (numberOfRows - 1) - t : t;
+                    double xval = visualRowIndex;
+                    int offset = visualRowIndex * (_isSixteenBit ? 2 : 1);
+                    double value;
 
+                    if (_isSixteenBit)
+                    {
+                        value = Convert.ToDouble(_mapContent[offset]) * 256 + Convert.ToDouble(_mapContent[offset + 1]);
                         if (value > 32000)
                         {
                             value = 65536 - value;
                             value = -value;
                         }
-
-                        value *= _correctionFactor;
-                        value += _correctionOffset;
-
-                        if (_yAxisValues != null && _yAxisValues.Length > valCount)
-                            xval = Convert.ToDouble(_yAxisValues[(int)valCount]);
-
-                        _pointList.Add(xval, value);
-                        if (value < minY) minY = value;
-                        if (value > maxY) maxY = value;
-                        valCount++;
                     }
-                }
-                else
-                {
-                    for (int t = 0; t < numberOfRows; t++)
+                    else
                     {
-                        int actualRow = t;
-                        double xval = valCount;
-                        double value = Convert.ToDouble(_mapContent.GetValue(actualRow));
-
-                        value *= _correctionFactor;
-                        value += _correctionOffset;
-
-                        if (_yAxisValues != null && _yAxisValues.Length > valCount)
-                            xval = Convert.ToDouble(_yAxisValues[(int)valCount]);
-
-                        _pointList.Add(xval, value);
-                        if (value < minY) minY = value;
-                        if (value > maxY) maxY = value;
-                        valCount++;
+                        value = Convert.ToDouble(_mapContent[offset]);
                     }
+
+                    value *= _correctionFactor;
+                    value += _correctionOffset;
+
+                    // For 1D maps, the X-axis is usually the Y-axis values (rows)
+                    if (_yAxisValues != null && visualRowIndex < _yAxisValues.Length)
+                        xval = Convert.ToDouble(_yAxisValues[visualRowIndex]);
+
+                    _pointList.Add(xval, value);
+                    if (value < minY) minY = value;
+                    if (value > maxY) maxY = value;
                 }
+
+                // Sort the point list by X value to ensure the line is drawn correctly (Left to Right)
+                _pointList.Sort(ZedGraph.SortType.XValues);
 
                 // Update Gradient Range (Verified in Phase 2)
                 if (chartControl.GraphPane.CurveList.Count > 0)

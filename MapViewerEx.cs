@@ -1116,7 +1116,16 @@ namespace VAGSuite
             {
                 MapViewerState state = CreateMapViewerState();
                 _chart2DComponent.LoadData(data, m_map_length, state);
-                _chart2DComponent.RefreshChart(state);
+                
+                if (m_TableWidth > 1)
+                {
+                    // Explicitly update the slice based on current slider position
+                    _chart2DComponent.UpdateSlice(data, (int)trackBarControl1.EditValue);
+                }
+                else
+                {
+                    _chart2DComponent.RefreshChart(state);
+                }
             }
         }
 
