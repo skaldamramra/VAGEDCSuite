@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using VAGSuite.MapViewerEventArgs;
 using System.Data;
+using System.Linq;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
@@ -189,8 +190,12 @@ namespace VAGSuite.Components
             
                 SetupViewport();
             
+                Matrix4 projection;
+                Matrix4 modelView;
+                GetMatrices(out projection, out modelView);
+
                 // Draw Bounding Box and Grids
-                DrawBoundingBox();
+                DrawBoundingBox(modelView);
 
                 if (_buffersInitialized && _vertexCount > 0 && _shaderProgram > 0)
                 {
@@ -201,10 +206,6 @@ namespace VAGSuite.Components
                     int modelLoc = GL.GetUniformLocation(_shaderProgram, "uModel");
                     int posLoc = GL.GetAttribLocation(_shaderProgram, "aPosition");
                     int colLoc = GL.GetAttribLocation(_shaderProgram, "aColor");
-                    
-                    Matrix4 projection;
-                    Matrix4 modelView;
-                    GetMatrices(out projection, out modelView);
 
                     GL.UniformMatrix4(modelViewLoc, false, ref modelView);
                     GL.UniformMatrix4(projectionLoc, false, ref projection);
@@ -346,7 +347,7 @@ namespace VAGSuite.Components
             RefreshChart();
         }
 
-        private void DrawBoundingBox()
+        private void DrawBoundingBox(Matrix4 modelView)
         {
             GL.Disable(EnableCap.Lighting);
             GL.Enable(EnableCap.DepthTest);
@@ -355,7 +356,7 @@ namespace VAGSuite.Components
             Vector3 max = _meshMaxBounds;
 
             // Draw Back-face Grids first (so they are behind the mesh)
-            DrawBackGrids(min, max);
+            DrawBackGrids(min, max, modelView);
 
             // Draw Bounding Box Edges
             GL.Color4(0.7f, 0.7f, 0.7f, 0.5f);
@@ -383,51 +384,83 @@ namespace VAGSuite.Components
             GL.End();
         }
 
-        private void DrawBackGrids(Vector3 min, Vector3 max)
+        private void DrawBackGrids(Vector3 min, Vector3 max, Matrix4 modelView)
         {
             GL.Color4(0.4f, 0.4f, 0.4f, 0.2f);
-            GL.Begin(PrimitiveType.Lines);
-
+            
             int xDivs = 10;
             int yDivs = 5;
             int zDivs = 10;
 
-            // XZ Plane (Bottom)
-            for (int i = 0; i <= xDivs; i++)
+            // Define the 6 possible planes of the bounding box
+            // Each plane is defined by its constant axis and value, and its center point for depth testing
+            var planes = new[]
             {
-                float x = min.X + (max.X - min.X) * i / xDivs;
-                GL.Vertex3(x, min.Y, min.Z); GL.Vertex3(x, min.Y, max.Z);
-            }
-            for (int i = 0; i <= zDivs; i++)
+                new { Axis = "Y", Val = min.Y, Center = new Vector3((min.X+max.X)/2, min.Y, (min.Z+max.Z)/2), Name = "Bottom" },
+                new { Axis = "Y", Val = max.Y, Center = new Vector3((min.X+max.X)/2, max.Y, (min.Z+max.Z)/2), Name = "Top" },
+                new { Axis = "Z", Val = min.Z, Center = new Vector3((min.X+max.X)/2, (min.Y+max.Y)/2, min.Z), Name = "Front" },
+                new { Axis = "Z", Val = max.Z, Center = new Vector3((min.X+max.X)/2, (min.Y+max.Y)/2, max.Z), Name = "Back" },
+                new { Axis = "X", Val = min.X, Center = new Vector3(min.X, (min.Y+max.Y)/2, (min.Z+max.Z)/2), Name = "Left" },
+                new { Axis = "X", Val = max.X, Center = new Vector3(max.X, (min.Y+max.Y)/2, (min.Z+max.Z)/2), Name = "Right" }
+            };
+
+            // Calculate view-space Z for each plane center.
+            // Smaller Z = farther from camera in OpenTK's default LookAt.
+            var planeDepths = new List<Tuple<string, float, float>>();
+            foreach (var p in planes)
             {
-                float z = min.Z + (max.Z - min.Z) * i / zDivs;
-                GL.Vertex3(min.X, min.Y, z); GL.Vertex3(max.X, min.Y, z);
+                float depth = Vector4.Transform(new Vector4(p.Center, 1.0f), modelView).Z;
+                planeDepths.Add(new Tuple<string, float, float>(p.Axis, p.Val, depth));
             }
 
-            // XY Plane (Back)
-            for (int i = 0; i <= xDivs; i++)
-            {
-                float x = min.X + (max.X - min.X) * i / xDivs;
-                GL.Vertex3(x, min.Y, max.Z); GL.Vertex3(x, max.Y, max.Z);
-            }
-            for (int i = 0; i <= yDivs; i++)
-            {
-                float y = min.Y + (max.Y - min.Y) * i / yDivs;
-                GL.Vertex3(min.X, y, max.Z); GL.Vertex3(max.X, y, max.Z);
-            }
+            var sortedPlanes = planeDepths.OrderBy(p => p.Item3).Take(3).ToList();
 
-            // YZ Plane (Side)
-            for (int i = 0; i <= zDivs; i++)
+            GL.Begin(PrimitiveType.Lines);
+            foreach (var plane in sortedPlanes)
             {
-                float z = min.Z + (max.Z - min.Z) * i / zDivs;
-                GL.Vertex3(min.X, min.Y, z); GL.Vertex3(min.X, max.Y, z);
-            }
-            for (int i = 0; i <= yDivs; i++)
-            {
-                float y = min.Y + (max.Y - min.Y) * i / yDivs;
-                GL.Vertex3(min.X, y, min.Z); GL.Vertex3(min.X, y, max.Z);
-            }
+                string axis = plane.Item1;
+                float val = plane.Item2;
 
+                if (axis == "Y") // XZ Plane
+                {
+                    for (int i = 0; i <= xDivs; i++)
+                    {
+                        float x = min.X + (max.X - min.X) * i / xDivs;
+                        GL.Vertex3(x, val, min.Z); GL.Vertex3(x, val, max.Z);
+                    }
+                    for (int i = 0; i <= zDivs; i++)
+                    {
+                        float z = min.Z + (max.Z - min.Z) * i / zDivs;
+                        GL.Vertex3(min.X, val, z); GL.Vertex3(max.X, val, z);
+                    }
+                }
+                else if (axis == "Z") // XY Plane
+                {
+                    for (int i = 0; i <= xDivs; i++)
+                    {
+                        float x = min.X + (max.X - min.X) * i / xDivs;
+                        GL.Vertex3(x, min.Y, val); GL.Vertex3(x, max.Y, val);
+                    }
+                    for (int i = 0; i <= yDivs; i++)
+                    {
+                        float y = min.Y + (max.Y - min.Y) * i / yDivs;
+                        GL.Vertex3(min.X, y, val); GL.Vertex3(max.X, y, val);
+                    }
+                }
+                else if (axis == "X") // YZ Plane
+                {
+                    for (int i = 0; i <= zDivs; i++)
+                    {
+                        float z = min.Z + (max.Z - min.Z) * i / zDivs;
+                        GL.Vertex3(val, min.Y, z); GL.Vertex3(val, max.Y, z);
+                    }
+                    for (int i = 0; i <= yDivs; i++)
+                    {
+                        float y = min.Y + (max.Y - min.Y) * i / yDivs;
+                        GL.Vertex3(val, y, min.Z); GL.Vertex3(val, y, max.Z);
+                    }
+                }
+            }
             GL.End();
         }
 
