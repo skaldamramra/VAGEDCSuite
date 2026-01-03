@@ -781,6 +781,18 @@ namespace VAGSuite
                     nChartControl1.Dock = DockStyle.Fill;
                     nChartControl1.Visible = true;
                     nChartControl1.BringToFront();
+
+                    // Bring navigational buttons to front so they are visible over the OpenTK render
+                    simpleButton7.BringToFront(); // Zoom In
+                    simpleButton6.BringToFront(); // Zoom Out
+                    simpleButton4.BringToFront(); // Rotate Left
+                    simpleButton5.BringToFront(); // Rotate Right
+                    btnToggleWireframe.BringToFront(); // Wireframe Toggle
+
+                    // Ensure correct tooltips for zoom buttons
+                    simpleButton7.ToolTip = "Zoom in";
+                    simpleButton6.ToolTip = "Zoom out";
+
                     Console.WriteLine($"MapViewerEx: nChartControl1 size: {nChartControl1.Width}x{nChartControl1.Height}");
                 }
                 
@@ -1654,18 +1666,54 @@ namespace VAGSuite
 
         private void simpleButton7_Click(object sender, EventArgs e)
         {
+            // Zoom In: increase zoom value (decreases camera distance)
+            if (_chart3DComponent != null)
+            {
+                float rotation, elevation, zoom;
+                _chart3DComponent.GetView(out rotation, out elevation, out zoom);
+                zoom *= 1.15f;
+                // Clamp zoom between 0.5 and 5.0 (verified from Chart3DComponent line 308)
+                zoom = Math.Max(0.5f, Math.Min(5.0f, zoom));
+                _chart3DComponent.SetView(rotation, elevation, zoom);
+            }
         }
 
         private void simpleButton6_Click(object sender, EventArgs e)
         {
+            // Zoom Out: decrease zoom value (increases camera distance)
+            if (_chart3DComponent != null)
+            {
+                float rotation, elevation, zoom;
+                _chart3DComponent.GetView(out rotation, out elevation, out zoom);
+                zoom *= 0.85f;
+                // Clamp zoom between 0.5 and 5.0 (verified from Chart3DComponent line 308)
+                zoom = Math.Max(0.5f, Math.Min(5.0f, zoom));
+                _chart3DComponent.SetView(rotation, elevation, zoom);
+            }
         }
 
         private void simpleButton4_Click(object sender, EventArgs e)
         {
+            // Rotate Left: decrease rotation by 15 degrees
+            if (_chart3DComponent != null)
+            {
+                float rotation, elevation, zoom;
+                _chart3DComponent.GetView(out rotation, out elevation, out zoom);
+                rotation -= 15f; // Rotate counter-clockwise
+                _chart3DComponent.SetView(rotation, elevation, zoom);
+            }
         }
 
         private void simpleButton5_Click(object sender, EventArgs e)
         {
+            // Rotate Right: increase rotation by 15 degrees
+            if (_chart3DComponent != null)
+            {
+                float rotation, elevation, zoom;
+                _chart3DComponent.GetView(out rotation, out elevation, out zoom);
+                rotation += 15f; // Rotate clockwise
+                _chart3DComponent.SetView(rotation, elevation, zoom);
+            }
         }
 
         private void gridView1_SelectionChanged(object sender, DevExpress.Data.SelectionChangedEventArgs e)
@@ -2318,6 +2366,15 @@ namespace VAGSuite
         private void simpleButton8_Click(object sender, EventArgs e)
         {
             CastWriteToSRAM();
+        }
+
+        private void btnToggleWireframe_Click(object sender, EventArgs e)
+        {
+            // Toggle Wireframe Mode
+            if (_chart3DComponent != null)
+            {
+                _chart3DComponent.ToggleRenderMode();
+            }
         }
 
         private void timer5_Tick(object sender, EventArgs e)

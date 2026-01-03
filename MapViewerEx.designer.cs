@@ -52,6 +52,7 @@ namespace VAGSuite
             this.xtraTabControl1 = new DevExpress.XtraTab.XtraTabControl();
             this.xtraTabPage1 = new DevExpress.XtraTab.XtraTabPage();
             this.btnToggleOverlay = new DevExpress.XtraEditors.SimpleButton();
+            this.btnToggleWireframe = new DevExpress.XtraEditors.SimpleButton();
             this.nChartControl1 = new OpenTK.GLControl();
             this.simpleButton4 = new DevExpress.XtraEditors.SimpleButton();
             this.simpleButton5 = new DevExpress.XtraEditors.SimpleButton();
@@ -298,10 +299,11 @@ namespace VAGSuite
             this.xtraTabPage1,
             this.xtraTabPage2});
             this.xtraTabControl1.SelectedPageChanged += new DevExpress.XtraTab.TabPageChangedEventHandler(this.xtraTabControl1_SelectedPageChanged);
-            // 
+            //
             // xtraTabPage1
-            // 
+            //
             this.xtraTabPage1.Controls.Add(this.btnToggleOverlay);
+            this.xtraTabPage1.Controls.Add(this.btnToggleWireframe);
             this.xtraTabPage1.Controls.Add(this.nChartControl1);
             this.xtraTabPage1.Controls.Add(this.simpleButton4);
             this.xtraTabPage1.Controls.Add(this.simpleButton5);
@@ -312,7 +314,7 @@ namespace VAGSuite
             this.xtraTabPage1.Text = "3D Graph";
             // 
             // btnToggleOverlay
-            // 
+            //
             this.btnToggleOverlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnToggleOverlay.Location = new System.Drawing.Point(806, 118);
             this.btnToggleOverlay.Name = "btnToggleOverlay";
@@ -321,6 +323,17 @@ namespace VAGSuite
             this.btnToggleOverlay.ToolTip = "Toggle graph overlay";
             this.btnToggleOverlay.Visible = false;
             this.btnToggleOverlay.Click += new System.EventHandler(this.btnToggleOverlay_Click);
+            //
+            // btnToggleWireframe
+            //
+            this.btnToggleWireframe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnToggleWireframe.Location = new System.Drawing.Point(806, 147);
+            this.btnToggleWireframe.Name = "btnToggleWireframe";
+            this.btnToggleWireframe.Size = new System.Drawing.Size(23, 23);
+            this.btnToggleWireframe.TabIndex = 15;
+            this.btnToggleWireframe.Text = "W"; // Shows 'W' on the button
+            this.btnToggleWireframe.ToolTip = "Toggle wireframe mode (W)";
+            this.btnToggleWireframe.Click += new System.EventHandler(this.btnToggleWireframe_Click);
             //
             // nChartControl1
             //
@@ -341,6 +354,7 @@ namespace VAGSuite
             this.simpleButton4.Name = "simpleButton4";
             this.simpleButton4.Size = new System.Drawing.Size(23, 23);
             this.simpleButton4.TabIndex = 12;
+            this.simpleButton4.Text = "<";
             this.simpleButton4.ToolTip = "Turn graph counter clockwise";
             this.simpleButton4.Click += new System.EventHandler(this.simpleButton4_Click);
             // 
@@ -352,28 +366,31 @@ namespace VAGSuite
             this.simpleButton5.Name = "simpleButton5";
             this.simpleButton5.Size = new System.Drawing.Size(23, 23);
             this.simpleButton5.TabIndex = 11;
+            this.simpleButton5.Text = ">";
             this.simpleButton5.ToolTip = "Turn graph clockwise";
             this.simpleButton5.Click += new System.EventHandler(this.simpleButton5_Click);
-            // 
+            //
             // simpleButton6
-            // 
+            //
             this.simpleButton6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.simpleButton6.Image = ((System.Drawing.Image)(resources.GetObject("simpleButton6.Image")));
             this.simpleButton6.Location = new System.Drawing.Point(806, 32);
             this.simpleButton6.Name = "simpleButton6";
             this.simpleButton6.Size = new System.Drawing.Size(23, 23);
             this.simpleButton6.TabIndex = 10;
+            this.simpleButton6.Text = "";
             this.simpleButton6.ToolTip = "Zoom out";
             this.simpleButton6.Click += new System.EventHandler(this.simpleButton6_Click);
-            // 
+            //
             // simpleButton7
-            // 
+            //
             this.simpleButton7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.simpleButton7.Image = ((System.Drawing.Image)(resources.GetObject("simpleButton7.Image")));
             this.simpleButton7.Location = new System.Drawing.Point(806, 3);
             this.simpleButton7.Name = "simpleButton7";
             this.simpleButton7.Size = new System.Drawing.Size(23, 23);
             this.simpleButton7.TabIndex = 9;
+            this.simpleButton7.Text = "";
             this.simpleButton7.ToolTip = "Zoom in";
             this.simpleButton7.Click += new System.EventHandler(this.simpleButton7_Click);
             // 
@@ -771,6 +788,7 @@ namespace VAGSuite
         private OpenTK.GLControl nChartControl1;
         private ZedGraph.ZedGraphControl nChartControl2;
         private DevExpress.XtraEditors.SimpleButton btnToggleOverlay;
+        private DevExpress.XtraEditors.SimpleButton btnToggleWireframe;
         private System.Windows.Forms.Timer timer5;
         private DevExpress.XtraEditors.SimpleButton simpleButton8;
         private DevExpress.XtraEditors.SimpleButton simpleButton9;
