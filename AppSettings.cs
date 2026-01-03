@@ -128,6 +128,18 @@ namespace VAGSuite
             }
         }
 
+        private bool m_ShowMapDescriptions = true;
+
+        public bool ShowMapDescriptions
+        {
+            get { return m_ShowMapDescriptions; }
+            set
+            {
+                m_ShowMapDescriptions = value;
+                SaveRegistrySetting("ShowMapDescriptions", m_ShowMapDescriptions);
+            }
+        }
+
        
 
         private bool m_SynchronizeMapviewers = true;
@@ -555,6 +567,10 @@ namespace VAGSuite
                             else if (a == "UseVAGEDCDarkTheme")
                             {
                                 m_useVAGEDCDarkTheme = Settings.GetValue(a).ToString() == "1";
+                            }
+                            else if (a == "ShowMapDescriptions")
+                            {
+                                m_ShowMapDescriptions = Convert.ToBoolean(Settings.GetValue(a).ToString());
                             }
                             else if (a == "RequestProjectNotes")
                             {

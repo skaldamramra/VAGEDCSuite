@@ -119,7 +119,6 @@ namespace VAGSuite
     {
         private AppSettings m_appSettings;
         private System.Windows.Forms.Timer hoverTimer;
-        private bool m_mapDescriptionsEnabled = true;
         private int lastHoverRowHandle = -1;
         private DevExpress.Utils.ToolTipController gridToolTipController;
         private msiupdater m_msiUpdater;
@@ -172,7 +171,7 @@ namespace VAGSuite
         private void HoverTimer_Tick(object sender, EventArgs e)
         {
             hoverTimer.Stop();
-            if (m_mapDescriptionsEnabled && lastHoverRowHandle >= 0)
+            if (m_appSettings.ShowMapDescriptions && lastHoverRowHandle >= 0)
             {
                 SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow(lastHoverRowHandle);
                 if (sh != null)
@@ -1312,6 +1311,9 @@ namespace VAGSuite
             {
                 m_appSettings = new AppSettings();
                 
+                // Initialize map descriptions button appearance from settings
+                UpdateMapDescriptionsButtonAppearance();
+
                 // Initialize refactored services
                 InitializeServices();
             }
@@ -3396,11 +3398,12 @@ namespace VAGSuite
             }
         }
 
-        private void btnToggleMapDescriptions_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        /// <summary>
+        /// Updates the map descriptions button appearance based on current setting
+        /// </summary>
+        private void UpdateMapDescriptionsButtonAppearance()
         {
-            m_mapDescriptionsEnabled = !m_mapDescriptionsEnabled;
-
-            if (m_mapDescriptionsEnabled)
+            if (m_appSettings.ShowMapDescriptions)
             {
                 // Bright when enabled
                 btnToggleMapDescriptions.ItemAppearance.Normal.ForeColor = VAGSuite.Theming.VAGEDCColorPalette.TextPrimaryDark;
@@ -3411,6 +3414,12 @@ namespace VAGSuite
                 btnToggleMapDescriptions.ItemAppearance.Normal.ForeColor = VAGSuite.Theming.VAGEDCColorPalette.Gray500;
             }
             btnToggleMapDescriptions.ItemAppearance.Normal.Options.UseForeColor = true;
+        }
+
+        private void btnToggleMapDescriptions_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            m_appSettings.ShowMapDescriptions = !m_appSettings.ShowMapDescriptions;
+            UpdateMapDescriptionsButtonAppearance();
         }
 
         /// <summary>
