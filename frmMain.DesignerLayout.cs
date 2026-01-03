@@ -1,3 +1,5 @@
+using System.Drawing;
+
 namespace VAGSuite
 {
     public partial class frmMain
@@ -16,7 +18,8 @@ namespace VAGSuite
             this.ClientSize = new System.Drawing.Size(
                 LayoutConstants.DefaultFormWidth, 
                 LayoutConstants.DefaultFormHeight);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            // Load icon directly from file to support multi-resolution .ico
+            this.Icon = new Icon("vagedc.ico");
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "VAGEDCSuite";
