@@ -770,7 +770,7 @@ namespace VAGSuite
                 Console.WriteLine("MapViewerEx: Initializing Phase 5 Components...");
                 // Create component instances
                 _mapGridComponent = new MapGridComponent(_dataConversionService, _mapRenderingService);
-                _chart3DComponent = new Chart3DComponent(_chartService);
+                _chart3DComponent = new Chart3DComponent(_chartService, _dataConversionService);
                 _chart2DComponent = new Chart2DComponent(_chartService);
                 
                 // Wire up the external chart control to the component

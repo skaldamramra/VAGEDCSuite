@@ -27,6 +27,7 @@ namespace VAGSuite.Components
         #region Private Fields
 
         private readonly IChartService _chartService;
+        private readonly IDataConversionService _dataConversionService;
         
         // Reference to the external chart control (provided by MapViewerEx designer)
         private OpenTK.GLControl _glControl;
@@ -99,11 +100,13 @@ namespace VAGSuite.Components
         public Chart3DComponent()
         {
             _chartService = new ChartService();
+            _dataConversionService = new DataConversionService();
         }
 
-        public Chart3DComponent(IChartService chartService)
+        public Chart3DComponent(IChartService chartService, IDataConversionService dataConversionService)
         {
             _chartService = chartService ?? throw new ArgumentNullException("chartService");
+            _dataConversionService = dataConversionService ?? throw new ArgumentNullException("dataConversionService");
         }
 
         /// <summary>
@@ -596,7 +599,8 @@ namespace VAGSuite.Components
                                 float normalizedZ = (z - min.Z) / range;
                                 float actualVal = _dataMinZ + (_dataMaxZ - _dataMinZ) * normalizedZ;
                                 
-                                string val = FormatAxisValue((int)actualVal, _zAxisName);
+                                // Use FormatZAxisValue to format based on current view type
+                                string val = FormatZAxisValue(actualVal);
                                 g.DrawString(val, valueFont, textBrush, screenPos.X - 25, screenPos.Y - 5);
                             }
                         }
@@ -613,16 +617,54 @@ namespace VAGSuite.Components
 
         private string FormatAxisValue(int value, string axisName)
         {
-            // The value passed here is the raw axis value from the map
-            // We should format it directly as it appears in the table
+            // Use IDataConversionService to format values based on the current view type
+            // This ensures consistency with the grid display
             
             if (axisName != null && axisName.ToLower().Contains("rpm"))
             {
-                if (value > 1000) return $"{value / 1000.0:F1}k";
-                return value.ToString();
+                // Only apply "k" suffix for decimal/easy views, not hex
+                if (_viewType == ViewType.Decimal || _viewType == ViewType.Easy)
+                {
+                    if (value > 1000) return $"{value / 1000.0:F1}k";
+                }
+                return _dataConversionService.FormatValue(value, _viewType, false);
             }
             
-            return value.ToString();
+            return _dataConversionService.FormatValue(value, _viewType, false);
+        }
+
+        /// <summary>
+        /// Formats a Z-axis value (map cell value) based on the current view type.
+        /// For Easy view, applies correction factor and offset.
+        /// </summary>
+        private string FormatZAxisValue(double rawValue)
+        {
+            switch (_viewType)
+            {
+                case ViewType.Hexadecimal:
+                    // Hexadecimal view: show as hex string
+                    int intVal = (int)Math.Round(rawValue);
+                    return _dataConversionService.FormatValue(intVal, _viewType, _isSixteenBit);
+                    
+                case ViewType.Decimal:
+                    // Decimal view: show raw decimal value
+                    return rawValue.ToString("F0");
+                    
+                case ViewType.Easy:
+                    // Easy view: apply correction factor and offset
+                    double corrected = _dataConversionService.ApplyCorrection((int)Math.Round(rawValue), _correctionFactor, _correctionOffset);
+                    return corrected.ToString("F2");
+                    
+                case ViewType.ASCII:
+                    // ASCII view: show as character if printable
+                    int asciiVal = (int)Math.Round(rawValue);
+                    if (asciiVal >= 32 && asciiVal < 127)
+                        return ((char)asciiVal).ToString();
+                    return ".";
+                    
+                default:
+                    return rawValue.ToString("F0");
+            }
         }
 
         /// <summary>
