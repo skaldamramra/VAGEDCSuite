@@ -204,7 +204,7 @@ namespace VAGSuite.Components
                 _glControl.MakeCurrent();
                 CheckGLError("MakeCurrent");
 
-                GL.ClearColor(Color.FromArgb(50, 50, 50));
+                GL.ClearColor(Color.FromArgb(40, 40, 40));
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
                 CheckGLError("Clear");
             
@@ -549,7 +549,7 @@ namespace VAGSuite.Components
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                     using (Font labelFont = new Font("Segoe UI", 10, FontStyle.Bold)) // Slightly larger
                     using (Font valueFont = new Font("Segoe UI", 8, FontStyle.Bold)) // Larger and Bold
-                    using (SolidBrush textBrush = new SolidBrush(Color.White)) // High contrast White
+                    using (SolidBrush textBrush = new SolidBrush(Color.FromArgb(224, 224, 224))) // Slightly off-white for better readability on dark backgrounds
                     using (SolidBrush shadowBrush = new SolidBrush(Color.FromArgb(150, 0, 0, 0)))
                     {
                         Vector3 min = _meshMinBounds;
@@ -1088,14 +1088,15 @@ namespace VAGSuite.Components
             float normalized = (z - min) / range;
             if (inverted) normalized = 1.0f - normalized;
 
-            // Tamed 6-stop gradient (Verified in Phase 2)
+            // Pastel 6-stop gradient optimized for dark mode (Verified in Phase 2)
+            // Sequence: Pastel Dark Blue -> Dark Green -> Light Green -> Yellow -> Orange -> Red
             Color[] stops = new Color[] {
-                ColorTranslator.FromHtml("#206C7C"), // Blue
-                ColorTranslator.FromHtml("#2EA9A1"), // Cyan
-                ColorTranslator.FromHtml("#91EABC"), // Green
-                ColorTranslator.FromHtml("#FFF598"), // Yellow
-                ColorTranslator.FromHtml("#F7B74A"), // Orange
-                ColorTranslator.FromHtml("#FF4818")  // Red
+                ColorTranslator.FromHtml("#5B8FF9"), // Pastel Dark Blue
+                ColorTranslator.FromHtml("#61DDAA"), // Dark Green
+                ColorTranslator.FromHtml("#91CC75"), // Light Green
+                ColorTranslator.FromHtml("#FAC858"), // Yellow
+                ColorTranslator.FromHtml("#FC8452"), // Orange
+                ColorTranslator.FromHtml("#EE6666")  // Red
             };
 
             float scaled = normalized * (stops.Length - 1);
@@ -1113,7 +1114,7 @@ namespace VAGSuite.Components
             float g = (c1.G + (c2.G - c1.G) * fraction) / 255f;
             float b = (c1.B + (c2.B - c1.B) * fraction) / 255f;
 
-            return new Vector4(r, g, b, 0.85f); // Slightly higher alpha for "tamed" look
+            return new Vector4(r, g, b, 0.9f); // Higher alpha for better visibility on dark backgrounds
         }
 
         #endregion
