@@ -733,7 +733,11 @@ namespace VAGSuite
                     XAxisValues = x_axisvalues,
                     YAxisValues = y_axisvalues,
                     XAxisAddress = x_axisAddress,
-                    YAxisAddress = y_axisAddress
+                    YAxisAddress = y_axisAddress,
+                    XCorrectionFactor = m_Xaxiscorrectionfactor,
+                    XCorrectionOffset = m_Xaxiscorrectionoffset,
+                    YCorrectionFactor = m_Yaxiscorrectionfactor,
+                    YCorrectionOffset = m_Yaxiscorrectionoffset
                 },
                 Configuration = new ViewConfiguration
                 {

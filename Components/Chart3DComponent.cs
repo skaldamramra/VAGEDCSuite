@@ -74,6 +74,10 @@ namespace VAGSuite.Components
         private int[] _yAxisValues;
         private double _correctionFactor;
         private double _correctionOffset;
+        private double _xCorrectionFactor = 1.0;
+        private double _xCorrectionOffset = 0.0;
+        private double _yCorrectionFactor = 1.0;
+        private double _yCorrectionOffset = 0.0;
         private bool _isCompareViewer;
         private bool _onlineMode;
         private bool _overlayVisible;
@@ -669,14 +673,43 @@ namespace VAGSuite.Components
             // Use IDataConversionService to format values based on the current view type
             // This ensures consistency with the grid display
             
+            if (_viewType == ViewType.Easy)
+            {
+                double factor = 1.0;
+                double offset = 0.0;
+                string format = "F0";
+
+                // Determine which axis we are formatting to apply the correct factors
+                // Use case-insensitive comparison and check for nulls to be robust
+                if (string.Equals(axisName, _xAxisName, StringComparison.OrdinalIgnoreCase))
+                {
+                    factor = _xCorrectionFactor;
+                    offset = _xCorrectionOffset;
+                    format = "F2";
+                }
+                else if (string.Equals(axisName, _yAxisName, StringComparison.OrdinalIgnoreCase))
+                {
+                    factor = _yCorrectionFactor;
+                    offset = _yCorrectionOffset;
+                    format = "F1";
+                }
+
+                double corrected = _dataConversionService.ApplyCorrection(value, factor, offset);
+                
+                if (axisName != null && axisName.ToLower().Contains("rpm") && corrected > 1000)
+                {
+                    return $"{corrected / 1000.0:F1}k";
+                }
+                return corrected.ToString(format);
+            }
+
             if (axisName != null && axisName.ToLower().Contains("rpm"))
             {
-                // Only apply "k" suffix for decimal/easy views, not hex
-                if (_viewType == ViewType.Decimal || _viewType == ViewType.Easy)
+                // Only apply "k" suffix for decimal views, not hex
+                if (_viewType == ViewType.Decimal)
                 {
                     if (value > 1000) return $"{value / 1000.0:F1}k";
                 }
-                return _dataConversionService.FormatValue(value, _viewType, false);
             }
             
             return _dataConversionService.FormatValue(value, _viewType, false);
@@ -828,12 +861,20 @@ namespace VAGSuite.Components
         {
             if (_hoveredVertexIndex == -1 || _glControl == null || _mapContent == null) return;
 
-            int cols = _tableWidth;
-            int r = _hoveredVertexIndex / cols;
-            int c = _hoveredVertexIndex % cols;
+            // Sync indexing with UpdateBuffers logic
+            int rows = _mapContent.Length / (_isSixteenBit ? 2 : 1) / _tableWidth;
+            bool isRibbon = (_tableWidth == 1);
+            int renderCols = isRibbon ? 2 : _tableWidth;
 
-            float val = GetZValue(_mapContent, r, c);
-            int xVal = (_xAxisValues != null && c < _xAxisValues.Length) ? _xAxisValues[c] : c;
+            int r = _hoveredVertexIndex / renderCols;
+            int c = _hoveredVertexIndex % renderCols;
+
+            // For ribbons, both columns use the same data value
+            float val = isRibbon ? GetZValue(_mapContent, r, 0) : GetZValue(_mapContent, r, c);
+            
+            // For X-axis values in a ribbon, we use the single column index (0)
+            int xIdx = isRibbon ? 0 : c;
+            int xVal = (_xAxisValues != null && xIdx < _xAxisValues.Length) ? _xAxisValues[xIdx] : xIdx;
             int yVal = (_yAxisValues != null && r < _yAxisValues.Length) ? _yAxisValues[r] : r;
 
             string xStr = FormatAxisValue(xVal, _xAxisName);
@@ -1154,6 +1195,10 @@ namespace VAGSuite.Components
             _yAxisValues = state.Axes.YAxisValues;
             _correctionFactor = state.Configuration.CorrectionFactor;
             _correctionOffset = state.Configuration.CorrectionOffset;
+            _xCorrectionFactor = state.Axes.XCorrectionFactor;
+            _xCorrectionOffset = state.Axes.XCorrectionOffset;
+            _yCorrectionFactor = state.Axes.YCorrectionFactor;
+            _yCorrectionOffset = state.Axes.YCorrectionOffset;
             _isCompareViewer = state.IsCompareMode;
             _onlineMode = state.IsOnlineMode;
             _overlayVisible = true;
@@ -1518,41 +1563,8 @@ namespace VAGSuite.Components
             InitializeChart3D();
         }
 
-        private string ConvertYAxisValue(string currValue)
-        {
-            if (_yAxisValues == null || _yAxisValues.Length == 0) return currValue;
-            
-            // Apply correction factor
-            try
-            {
-                float temp = (float)Convert.ToDouble(currValue);
-                temp *= (float)_correctionFactor;
-                temp += (float)_correctionOffset;
-                return temp.ToString("F1");
-            }
-            catch
-            {
-                return currValue;
-            }
-        }
-
-        private string ConvertXAxisValue(string currValue)
-        {
-            if (_xAxisValues == null || _xAxisValues.Length == 0) return currValue;
-            
-            // Apply correction factor
-            try
-            {
-                float temp = (float)Convert.ToDouble(currValue);
-                temp *= (float)_correctionFactor;
-                temp += (float)_correctionOffset;
-                return temp.ToString("F2");
-            }
-            catch
-            {
-                return currValue;
-            }
-        }
+        // Legacy conversion methods removed as they were using incorrect correction factors
+        // and are now superseded by FormatAxisValue which uses axis-specific factors.
 
         private void RaiseViewChanged()
         {
