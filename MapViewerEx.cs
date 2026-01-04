@@ -954,11 +954,18 @@ namespace VAGSuite
                     btn.StateNormal.Content.ShortText.Color1 = Color.White;
                     btn.StateNormal.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
 
+                    // FORCE StateCommon to White to ensure inheritance works if StateDisabled fails
+                    btn.StateCommon.Content.ShortText.Color1 = Color.White;
+                    btn.StateCommon.Content.ShortText.Color2 = Color.White;
+                    btn.StateCommon.Content.ShortText.ColorStyle = PaletteColorStyle.Solid;
+
                     // Explicitly fix disabled state for bottom buttons (Undo, Save, Close, Read)
-                    // We use StateDisabled and ensure StateCommon doesn't have conflicting colors
+                    // We use StateDisabled with pure white text for maximum contrast on dark background
                     btn.StateDisabled.Back.Color1 = Color.FromArgb(45, 45, 45);
                     btn.StateDisabled.Back.ColorStyle = PaletteColorStyle.Solid;
-                    btn.StateDisabled.Content.ShortText.Color1 = Color.FromArgb(200, 200, 200); // High contrast light gray
+                    btn.StateDisabled.Content.ShortText.Color1 = Color.White; // Pure white for maximum contrast
+                    btn.StateDisabled.Content.ShortText.Color2 = Color.White;
+                    btn.StateDisabled.Content.ShortText.ColorStyle = PaletteColorStyle.Solid;
                     btn.StateDisabled.Border.Color1 = Color.FromArgb(64, 64, 64);
                     btn.StateDisabled.Border.DrawBorders = PaletteDrawBorders.All;
                     btn.StateDisabled.Border.Width = 1;
@@ -974,11 +981,33 @@ namespace VAGSuite
                     btn.StateTracking.Back.Color1 = Color.FromArgb(20, 142, 224);
                     btn.StateTracking.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StateTracking.Content.ShortText.Color1 = Color.White;
+                    btn.StateTracking.Content.ShortText.Color2 = Color.White;
+                    btn.StateTracking.Content.ShortText.ColorStyle = PaletteColorStyle.Solid;
                     
                     // And StatePressed
                     btn.StatePressed.Back.Color1 = Color.FromArgb(0, 102, 184);
                     btn.StatePressed.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StatePressed.Content.ShortText.Color1 = Color.White;
+                    btn.StatePressed.Content.ShortText.Color2 = Color.White;
+                    btn.StatePressed.Content.ShortText.ColorStyle = PaletteColorStyle.Solid;
+
+                    // OverrideDefault (AcceptButton state)
+                    btn.OverrideDefault.Back.Color1 = Color.FromArgb(0, 100, 180);
+                    btn.OverrideDefault.Back.ColorStyle = PaletteColorStyle.Solid;
+                    btn.OverrideDefault.Content.ShortText.Color1 = Color.White;
+                    btn.OverrideDefault.Content.ShortText.Color2 = Color.White;
+                    btn.OverrideDefault.Content.ShortText.ColorStyle = PaletteColorStyle.Solid;
+                    btn.OverrideDefault.Border.Color1 = theme.BorderPrimary;
+                    btn.OverrideDefault.Border.DrawBorders = PaletteDrawBorders.All;
+
+                    // OverrideFocus (Focused state)
+                    btn.OverrideFocus.Back.Color1 = Color.FromArgb(0, 100, 180);
+                    btn.OverrideFocus.Back.ColorStyle = PaletteColorStyle.Solid;
+                    btn.OverrideFocus.Content.ShortText.Color1 = Color.White;
+                    btn.OverrideFocus.Content.ShortText.Color2 = Color.White;
+                    btn.OverrideFocus.Content.ShortText.ColorStyle = PaletteColorStyle.Solid;
+                    btn.OverrideFocus.Border.Color1 = Color.White; // Highlight border for focus
+                    btn.OverrideFocus.Border.DrawBorders = PaletteDrawBorders.All;
                 }
             }
 

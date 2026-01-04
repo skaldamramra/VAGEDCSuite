@@ -45,6 +45,49 @@ namespace VAGSuite.Theming
             // Initialize the palette that will be used by complex controls
             _customPalette = new ComponentFactory.Krypton.Toolkit.KryptonPalette();
             _customPalette.BasePaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Office2010Black;
+            ConfigureCustomPalette();
+        }
+
+        private void ConfigureCustomPalette()
+        {
+            // Configure ButtonStandalone style directly on the palette to ensure consistency
+            // and override any system/base palette defaults that might cause visibility issues.
+            
+            // Common State
+            _customPalette.ButtonStyles.ButtonStandalone.StateCommon.Content.ShortText.Color1 = Color.White;
+            _customPalette.ButtonStyles.ButtonStandalone.StateCommon.Content.ShortText.Color2 = Color.White;
+            _customPalette.ButtonStyles.ButtonStandalone.StateCommon.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            _customPalette.ButtonStyles.ButtonStandalone.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
+
+            // Disabled State - Force White Text
+            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Back.Color1 = Color.FromArgb(45, 45, 45);
+            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Content.ShortText.Color1 = Color.White;
+            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Content.ShortText.Color2 = Color.White;
+            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Border.Color1 = Color.FromArgb(64, 64, 64);
+            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
+
+            // Tracking (Hover) State - Force White Text
+            _customPalette.ButtonStyles.ButtonStandalone.StateTracking.Back.Color1 = Color.FromArgb(20, 142, 224);
+            _customPalette.ButtonStyles.ButtonStandalone.StateTracking.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            _customPalette.ButtonStyles.ButtonStandalone.StateTracking.Content.ShortText.Color1 = Color.White;
+            _customPalette.ButtonStyles.ButtonStandalone.StateTracking.Content.ShortText.Color2 = Color.White;
+            _customPalette.ButtonStyles.ButtonStandalone.StateTracking.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+
+            // Pressed State - Force White Text
+            _customPalette.ButtonStyles.ButtonStandalone.StatePressed.Back.Color1 = Color.FromArgb(0, 102, 184);
+            _customPalette.ButtonStyles.ButtonStandalone.StatePressed.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            _customPalette.ButtonStyles.ButtonStandalone.StatePressed.Content.ShortText.Color1 = Color.White;
+            _customPalette.ButtonStyles.ButtonStandalone.StatePressed.Content.ShortText.Color2 = Color.White;
+            _customPalette.ButtonStyles.ButtonStandalone.StatePressed.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+
+            // Normal State
+            _customPalette.ButtonStyles.ButtonStandalone.StateNormal.Back.Color1 = Color.FromArgb(0, 100, 180);
+            _customPalette.ButtonStyles.ButtonStandalone.StateNormal.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            _customPalette.ButtonStyles.ButtonStandalone.StateNormal.Content.ShortText.Color1 = Color.White;
+            _customPalette.ButtonStyles.ButtonStandalone.StateNormal.Content.ShortText.Color2 = Color.White;
+            _customPalette.ButtonStyles.ButtonStandalone.StateNormal.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
         }
 
         private void LoadCustomFonts()
@@ -265,6 +308,11 @@ namespace VAGSuite.Theming
                 kButton.StateCommon.Border.Width = 1;
                 kButton.StateCommon.Border.Rounding = 2;
                 kButton.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
+                
+                // Force StateCommon text to white to ensure visibility in all states (including disabled fallback)
+                kButton.StateCommon.Content.ShortText.Color1 = Color.White;
+                kButton.StateCommon.Content.ShortText.Color2 = Color.White;
+                kButton.StateCommon.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
 
                 // Normal State - Explicitly reinforce dark color
                 kButton.StateNormal.Back.Color1 = Color.FromArgb(0, 100, 180);
@@ -272,10 +320,12 @@ namespace VAGSuite.Theming
                 kButton.StateNormal.Content.ShortText.Color1 = Color.White;
 
                 // StateDisabled - Fix readability issue (Verified: Krypton 4.5.9 properties)
-                // Mimic VS Code disabled button: Darker gray background with higher contrast muted text
+                // Mimic VS Code disabled button: Darker gray background with pure white text for maximum contrast
                 kButton.StateDisabled.Back.Color1 = Color.FromArgb(45, 45, 45);
                 kButton.StateDisabled.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-                kButton.StateDisabled.Content.ShortText.Color1 = Color.FromArgb(180, 180, 180);
+                kButton.StateDisabled.Content.ShortText.Color1 = Color.White; // Pure white for maximum contrast
+                kButton.StateDisabled.Content.ShortText.Color2 = Color.White;
+                kButton.StateDisabled.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StateDisabled.Border.Color1 = Color.FromArgb(64, 64, 64);
 
                 // OverrideDefault - This handles the "AcceptButton" state which often stays white
@@ -289,17 +339,31 @@ namespace VAGSuite.Theming
                 kButton.StateTracking.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StateTracking.Border.Color1 = Color.White;
                 kButton.StateTracking.Content.ShortText.Color1 = Color.White;
+                kButton.StateTracking.Content.ShortText.Color2 = Color.White;
+                kButton.StateTracking.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
 
                 // Pressed - Solid color, no gradients
                 kButton.StatePressed.Back.Color1 = Color.FromArgb(0, 102, 184);
                 kButton.StatePressed.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StatePressed.Content.ShortText.Color1 = Color.White;
+                kButton.StatePressed.Content.ShortText.Color2 = Color.White;
+                kButton.StatePressed.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+
+                // OverrideFocus - Ensure focused buttons don't revert to system style
+                kButton.OverrideFocus.Back.Color1 = Color.FromArgb(0, 100, 180);
+                kButton.OverrideFocus.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+                kButton.OverrideFocus.Content.ShortText.Color1 = Color.White;
+                kButton.OverrideFocus.Content.ShortText.Color2 = Color.White;
+                kButton.OverrideFocus.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+                kButton.OverrideFocus.Border.Color1 = Color.White;
 
                 // StateDisabled - Fix readability issue (Verified: Krypton 4.5.9 properties)
-                // Mimic VS Code disabled button: Darker gray background with higher contrast muted text
+                // Mimic VS Code disabled button: Darker gray background with pure white text for maximum contrast
                 kButton.StateDisabled.Back.Color1 = Color.FromArgb(45, 45, 45);
                 kButton.StateDisabled.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-                kButton.StateDisabled.Content.ShortText.Color1 = Color.FromArgb(180, 180, 180); // Increased contrast from 120 to 180
+                kButton.StateDisabled.Content.ShortText.Color1 = Color.White; // Pure white for maximum contrast
+                kButton.StateDisabled.Content.ShortText.Color2 = Color.White;
+                kButton.StateDisabled.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StateDisabled.Border.Color1 = Color.FromArgb(64, 64, 64);
             }
             else if (control is ComponentFactory.Krypton.Toolkit.KryptonLinkLabel kLink)
