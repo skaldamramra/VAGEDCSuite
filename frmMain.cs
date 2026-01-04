@@ -426,7 +426,7 @@ namespace VAGSuite
             return false;
         }
 
-        void tabdet_onAxisEditorRequested(object sender, MapViewerEventArgs.AxisEditorRequestedEventArgs e)
+        internal void tabdet_onAxisEditorRequested(object sender, MapViewerEventArgs.AxisEditorRequestedEventArgs e)
         {
             // start axis editor
             foreach (SymbolHelper sh in Tools.Instance.m_symbols)
@@ -441,7 +441,7 @@ namespace VAGSuite
             }
         }
 
-        void tabdet_onClose(object sender, EventArgs e)
+        internal void tabdet_onClose(object sender, EventArgs e)
         {
             // close the corresponding dockpanel
             if (sender is MapViewerEx)
@@ -460,7 +460,7 @@ namespace VAGSuite
             }
         }
 
-        void tabdet_onSymbolRead(object sender, MapViewerEventArgs.ReadSymbolEventArgs e)
+        internal void tabdet_onSymbolRead(object sender, MapViewerEventArgs.ReadSymbolEventArgs e)
         {
             if (sender is MapViewerEx)
             {
@@ -478,11 +478,11 @@ namespace VAGSuite
             }
         }
 
-        void tabdet_onSymbolSave(object sender, MapViewerEventArgs.SaveSymbolEventArgs e)
+        internal void tabdet_onSymbolSave(object sender, MapViewerEventArgs.SaveSymbolEventArgs e)
         {
             if (sender is MapViewerEx)
             {
-                // juiste filename kiezen 
+                // juiste filename kiezen
                 MapViewerEx tabdet = (MapViewerEx)sender;
                 string note = string.Empty;
                 if (m_appSettings.RequestProjectNotes && Tools.Instance.m_CurrentWorkingProject != "")
@@ -2353,22 +2353,22 @@ namespace VAGSuite
         }
 
         // van t5
-        void tabdet_onViewTypeChanged(object sender, MapViewerEventArgs.ViewTypeChangedEventArgs e)
+        internal void tabdet_onViewTypeChanged(object sender, MapViewerEventArgs.ViewTypeChangedEventArgs e)
         {
             _viewSyncService.OnViewTypeChanged(sender, e, null);
         }
 
-        void tabdet_onSurfaceGraphViewChangedEx(object sender, MapViewerEventArgs.SurfaceGraphViewChangedEventArgsEx e)
+        internal void tabdet_onSurfaceGraphViewChangedEx(object sender, MapViewerEventArgs.SurfaceGraphViewChangedEventArgsEx e)
         {
             _viewSyncService.OnSurfaceGraphViewChangedEx(sender, e, null);
         }
 
-        void tabdet_onSplitterMoved(object sender, MapViewerEventArgs.SplitterMovedEventArgs e)
+        internal void tabdet_onSplitterMoved(object sender, MapViewerEventArgs.SplitterMovedEventArgs e)
         {
             _viewSyncService.OnSplitterMoved(sender, e, null);
         }
 
-        void tabdet_onSelectionChanged(object sender, MapViewerEventArgs.CellSelectionChangedEventArgs e)
+        internal void tabdet_onSelectionChanged(object sender, MapViewerEventArgs.CellSelectionChangedEventArgs e)
         {
             _viewSyncService.OnSelectionChanged(sender, e, null);
         }
@@ -2393,7 +2393,7 @@ namespace VAGSuite
 
         }
 
-        void tabdet_onSliderMove(object sender, MapViewerEventArgs.SliderMoveEventArgs e)
+        internal void tabdet_onSliderMove(object sender, MapViewerEventArgs.SliderMoveEventArgs e)
         {
             _viewSyncService.OnSliderMove(sender, e, null);
         }
@@ -2440,7 +2440,7 @@ namespace VAGSuite
             return retval;
         }
 
-        void tabdet_onAxisLock(object sender, MapViewerEventArgs.AxisLockEventArgs e)
+        internal void tabdet_onAxisLock(object sender, MapViewerEventArgs.AxisLockEventArgs e)
         {
             _viewSyncService.OnAxisLock(sender, e, null);
         }

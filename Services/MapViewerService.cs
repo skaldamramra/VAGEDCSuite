@@ -104,8 +104,20 @@ namespace VAGSuite.Services
                         tabdet.ShowTable(columns, true);
                         tabdet.Dock = DockStyle.Fill;
 
-                        // Subscribe to axis editor event - FIX: was missing after refactor
+                        // Subscribe to events - FIX: was missing after refactor
                         tabdet.onAxisEditorRequested += tabdet_onAxisEditorRequested;
+                        if (Application.OpenForms["frmMain"] is frmMain mainForm)
+                        {
+                            tabdet.onClose += mainForm.tabdet_onClose;
+                            tabdet.onSymbolSave += mainForm.tabdet_onSymbolSave;
+                            tabdet.onSymbolRead += mainForm.tabdet_onSymbolRead;
+                            tabdet.onViewTypeChanged += mainForm.tabdet_onViewTypeChanged;
+                            tabdet.onSurfaceGraphViewChangedEx += mainForm.tabdet_onSurfaceGraphViewChangedEx;
+                            tabdet.onSplitterMoved += mainForm.tabdet_onSplitterMoved;
+                            tabdet.onSelectionChanged += mainForm.tabdet_onSelectionChanged;
+                            tabdet.onAxisLock += mainForm.tabdet_onAxisLock;
+                            tabdet.onSliderMove += mainForm.tabdet_onSliderMove;
+                        }
                         
                         string title = "Symbol: " + tabdet.Map_name + " [" + Path.GetFileName(currentFile) + "]";
                         KryptonPage page = new KryptonPage();
@@ -240,8 +252,20 @@ namespace VAGSuite.Services
                             tabdet.ShowTable(columns, true);
                             tabdet.Dock = DockStyle.Fill;
 
-                            // Subscribe to axis editor event - FIX: was missing after refactor
+                            // Subscribe to events - FIX: was missing after refactor
                             tabdet.onAxisEditorRequested += tabdet_onAxisEditorRequested;
+                            if (Application.OpenForms["frmMain"] is frmMain mainForm)
+                            {
+                                tabdet.onClose += mainForm.tabdet_onClose;
+                                tabdet.onSymbolSave += mainForm.tabdet_onSymbolSave;
+                                tabdet.onSymbolRead += mainForm.tabdet_onSymbolRead;
+                                tabdet.onViewTypeChanged += mainForm.tabdet_onViewTypeChanged;
+                                tabdet.onSurfaceGraphViewChangedEx += mainForm.tabdet_onSurfaceGraphViewChangedEx;
+                                tabdet.onSplitterMoved += mainForm.tabdet_onSplitterMoved;
+                                tabdet.onSelectionChanged += mainForm.tabdet_onSelectionChanged;
+                                tabdet.onAxisLock += mainForm.tabdet_onAxisLock;
+                                tabdet.onSliderMove += mainForm.tabdet_onSliderMove;
+                            }
 
                             string title = "Symbol: " + symbolName + " [" + Path.GetFileName(filename) + "]";
                             KryptonPage page = new KryptonPage();
@@ -353,8 +377,20 @@ namespace VAGSuite.Services
                             tabdet.ShowTable(columns, true);
                             tabdet.Dock = DockStyle.Fill;
 
-                            // Subscribe to axis editor event - FIX: was missing after refactor
+                            // Subscribe to events - FIX: was missing after refactor
                             tabdet.onAxisEditorRequested += tabdet_onAxisEditorRequested;
+                            if (Application.OpenForms["frmMain"] is frmMain mainForm)
+                            {
+                                tabdet.onClose += mainForm.tabdet_onClose;
+                                tabdet.onSymbolSave += mainForm.tabdet_onSymbolSave;
+                                tabdet.onSymbolRead += mainForm.tabdet_onSymbolRead;
+                                tabdet.onViewTypeChanged += mainForm.tabdet_onViewTypeChanged;
+                                tabdet.onSurfaceGraphViewChangedEx += mainForm.tabdet_onSurfaceGraphViewChangedEx;
+                                tabdet.onSplitterMoved += mainForm.tabdet_onSplitterMoved;
+                                tabdet.onSelectionChanged += mainForm.tabdet_onSelectionChanged;
+                                tabdet.onAxisLock += mainForm.tabdet_onAxisLock;
+                                tabdet.onSliderMove += mainForm.tabdet_onSliderMove;
+                            }
 
                             string title = "Symbol difference: " + sh.Varname + " [" + Path.GetFileName(filename) + "]";
                             KryptonPage page = new KryptonPage();

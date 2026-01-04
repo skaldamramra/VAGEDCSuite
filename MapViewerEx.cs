@@ -1297,6 +1297,10 @@ namespace VAGSuite
                     timer5.Enabled = true;
                 }
             }
+            // Reset mutation state after initial table load to prevent false-positive "Data was mutated" warnings
+            m_datasourceMutated = false;
+            simpleButton2.Enabled = false;
+            simpleButton3.Enabled = false;
         }
 
         // The Init2dChart method is now handled by Chart2DComponent.ConfigureChart
@@ -1573,6 +1577,7 @@ namespace VAGSuite
         {
             m_datasourceMutated = true;
             simpleButton2.Enabled = true;
+            simpleButton3.Enabled = true; // Enable the undo button when data is mutated
             
             // Update m_map_content with the latest data from the grid
             m_map_content = GetDataFromGridView(m_isUpsideDown);
@@ -1604,11 +1609,11 @@ namespace VAGSuite
             if (m_map_original_content != null)
             {
                 m_map_content = (byte[])m_map_original_content.Clone();
+                ShowTable(m_TableWidth, m_issixteenbit);
+                m_datasourceMutated = false;
+                simpleButton2.Enabled = false;
+                simpleButton3.Enabled = false;
             }
-            ShowTable(m_TableWidth, m_issixteenbit);
-            m_datasourceMutated = false;
-            simpleButton2.Enabled = false;
-            simpleButton3.Enabled = false;
         }
 
         private void simpleButton2_Click(object sender, EventArgs e)
