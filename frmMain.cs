@@ -1002,6 +1002,7 @@ namespace VAGSuite
 
             }
             SetFilterMode();
+            UpdateSymbolList(Tools.Instance.m_symbols);
         }
 
         private void SetFilterMode()

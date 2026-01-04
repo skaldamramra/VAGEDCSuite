@@ -84,7 +84,8 @@ namespace VAGSuite
                     parentNode.Nodes.Add(subNode);
                 }
 
-                var symbolNode = new TreeNode(string.Format("{0} [{1:X6}]", sh.Varname, sh.Flash_start_address));
+                string addressString = m_appSettings.ShowAddressesInHex ? sh.Flash_start_address.ToString("X6") : sh.Flash_start_address.ToString();
+                var symbolNode = new TreeNode(string.Format("{0} [{1}]", sh.Varname, addressString));
                 symbolNode.Tag = sh;
                 subNode.Nodes.Add(symbolNode);
             }

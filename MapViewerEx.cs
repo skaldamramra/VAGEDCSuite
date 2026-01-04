@@ -888,6 +888,101 @@ namespace VAGSuite
             xtraTabControl1.StateCommon.Tab.Back.Color1 = Color.FromArgb(45, 45, 45);
             xtraTabControl1.StateCommon.Tab.Back.ColorStyle = PaletteColorStyle.Solid;
             xtraTabControl1.StateCommon.Tab.Content.ShortText.Color1 = Color.FromArgb(150, 150, 150);
+
+            // Ensure the font is Source Sans Pro
+            xtraTabControl1.StateCommon.Tab.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
+        }
+
+        private void ApplyThemeToToolStrip()
+        {
+            var theme = VAGEDCThemeManager.Instance.CurrentTheme;
+            toolStrip1.Renderer = VAGEDCThemeManager.Instance.GetToolStripRenderer();
+            toolStrip1.BackColor = theme.ToolbarBackground;
+            toolStrip1.ForeColor = theme.ToolbarText;
+            
+            Font toolStripFont = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
+            foreach (ToolStripItem item in toolStrip1.Items)
+            {
+                item.Font = toolStripFont;
+                item.ForeColor = theme.ToolbarText;
+                if (item is ToolStripComboBox combo)
+                {
+                    combo.FlatStyle = FlatStyle.Flat;
+                }
+            }
+
+            // Style the GroupBox (Top Ribbon/Label area)
+            // CRITICAL: Must set PaletteMode to Custom explicitly to override global manager
+            groupControl1.PaletteMode = PaletteMode.Custom;
+            groupControl1.Palette = VAGEDCThemeManager.Instance.CustomPalette;
+            
+            // Use StateNormal instead of StateCommon to ensure higher priority over global styles
+            groupControl1.StateNormal.Back.Color1 = theme.PanelBackground;
+            groupControl1.StateNormal.Back.ColorStyle = PaletteColorStyle.Solid;
+            groupControl1.StateNormal.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(10f, FontStyle.Bold);
+            groupControl1.StateNormal.Content.ShortText.Color1 = theme.TextPrimary;
+            groupControl1.StateNormal.Border.Color1 = theme.BorderPrimary;
+            groupControl1.StateNormal.Border.DrawBorders = PaletteDrawBorders.All;
+
+            // Style Bottom Panel Buttons
+            KryptonButton[] bottomButtons = new KryptonButton[] { simpleButton1, simpleButton2, simpleButton3, simpleButton8, simpleButton9, simpleButton10 };
+            foreach (var btn in bottomButtons)
+            {
+                if (btn != null)
+                {
+                    // CRITICAL: Force Custom PaletteMode
+                    btn.PaletteMode = PaletteMode.Custom;
+                    btn.Palette = VAGEDCThemeManager.Instance.CustomPalette;
+                    btn.ButtonStyle = ButtonStyle.Standalone;
+                    
+                    // Use StateNormal to override global defaults
+                    btn.StateNormal.Back.Color1 = Color.FromArgb(0, 100, 180); // VS Code Blue
+                    btn.StateNormal.Back.ColorStyle = PaletteColorStyle.Solid;
+                    btn.StateNormal.Content.ShortText.Color1 = Color.White;
+                    btn.StateNormal.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
+                    
+                    btn.StateNormal.Border.Color1 = theme.BorderPrimary;
+                    btn.StateNormal.Border.DrawBorders = PaletteDrawBorders.All;
+                    btn.StateNormal.Border.Width = 1;
+
+                    // Also set StateTracking (Hover) to ensure it doesn't revert to system style
+                    btn.StateTracking.Back.Color1 = Color.FromArgb(20, 142, 224);
+                    btn.StateTracking.Back.ColorStyle = PaletteColorStyle.Solid;
+                    btn.StateTracking.Content.ShortText.Color1 = Color.White;
+                    
+                    // And StatePressed
+                    btn.StatePressed.Back.Color1 = Color.FromArgb(0, 102, 184);
+                    btn.StatePressed.Back.ColorStyle = PaletteColorStyle.Solid;
+                    btn.StatePressed.Content.ShortText.Color1 = Color.White;
+                }
+            }
+
+            // Style 3D Mesh Navigation Buttons (Vertical stack)
+            KryptonButton[] meshButtons = new KryptonButton[] { simpleButton4, simpleButton5, simpleButton6, simpleButton7, btnToggleWireframe, btnToggleTooltips, btnToggleOverlay };
+            foreach (var btn in meshButtons)
+            {
+                if (btn != null)
+                {
+                    btn.PaletteMode = PaletteMode.Custom;
+                    btn.Palette = VAGEDCThemeManager.Instance.CustomPalette;
+                    btn.ButtonStyle = ButtonStyle.Standalone;
+                    
+                    // Use StateNormal
+                    btn.StateNormal.Back.Color1 = Color.FromArgb(60, 60, 60); // Darker for overlay buttons
+                    btn.StateNormal.Back.ColorStyle = PaletteColorStyle.Solid;
+                    btn.StateNormal.Content.ShortText.Color1 = Color.White;
+                    btn.StateNormal.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(8f, FontStyle.Bold);
+                    
+                    btn.StateNormal.Border.Color1 = Color.White;
+                    btn.StateNormal.Border.DrawBorders = PaletteDrawBorders.All;
+                    btn.StateNormal.Border.Width = 1;
+
+                    // Hover state for mesh buttons
+                    btn.StateTracking.Back.Color1 = Color.FromArgb(80, 80, 80);
+                    btn.StateTracking.Back.ColorStyle = PaletteColorStyle.Solid;
+                    btn.StateTracking.Content.ShortText.Color1 = Color.White;
+                }
+            }
         }
 
         /// <summary>
@@ -1375,9 +1470,21 @@ namespace VAGSuite
                 // Apply coloring if not disabled
                 if (!m_disablecolors)
                 {
-                    using (SolidBrush sb = new SolidBrush(cellColor))
+                    // Check if cell is selected to provide visual feedback for area selection
+                    // Verified: DataGridViewElementStates.Selected is the standard way to check selection in CellPainting
+                    if ((e.State & DataGridViewElementStates.Selected) == DataGridViewElementStates.Selected)
                     {
-                        e.Graphics.FillRectangle(sb, e.CellBounds);
+                        using (SolidBrush sb = new SolidBrush(theme.GridSelection))
+                        {
+                            e.Graphics.FillRectangle(sb, e.CellBounds);
+                        }
+                    }
+                    else
+                    {
+                        using (SolidBrush sb = new SolidBrush(cellColor))
+                        {
+                            e.Graphics.FillRectangle(sb, e.CellBounds);
+                        }
                     }
                 }
 
@@ -1402,7 +1509,25 @@ namespace VAGSuite
                     e.Graphics.FillRectangle(sb, e.CellBounds);
                 }
 
-                TextRenderer.DrawText(e.Graphics, displayText, e.CellStyle.Font, e.CellBounds, e.CellStyle.ForeColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                // Enhance selection visibility with bold text and high contrast
+                bool isSelected = (e.State & DataGridViewElementStates.Selected) == DataGridViewElementStates.Selected;
+                Font textFont = e.CellStyle.Font;
+                Color textColor = e.CellStyle.ForeColor;
+
+                if (isSelected)
+                {
+                    // Use bold font and black text for selected cells to provide clear visual feedback
+                    textFont = new Font(e.CellStyle.Font, FontStyle.Bold);
+                    textColor = Color.Black;
+                }
+
+                TextRenderer.DrawText(e.Graphics, displayText, textFont, e.CellBounds, textColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+
+                // Clean up bold font if created
+                if (isSelected && textFont != e.CellStyle.Font)
+                {
+                    textFont.Dispose();
+                }
 
                 // Open Loop Indicator logic refactored to service
                 if (_mapRenderingService.ShouldShowOpenLoopIndicator(e.RowIndex, e.ColumnIndex, open_loop, x_axisvalues, y_axisvalues, m_xaxisUnits, m_yaxisUnits))
@@ -1424,6 +1549,7 @@ namespace VAGSuite
                         e.Graphics.FillPolygon(Brushes.SeaGreen, pnts, System.Drawing.Drawing2D.FillMode.Winding);
                     }
                 }
+                // Real-time tracking highlight (Yellow) takes precedence over selection
                 if (m_selectedrowhandle >= 0 && m_selectedcolumnindex >= 0)
                 {
                     if (e.RowIndex == m_selectedrowhandle && e.ColumnIndex == m_selectedcolumnindex)
@@ -2210,6 +2336,8 @@ namespace VAGSuite
                     DataGridViewCell cell = cellcollection[0];
                     CastSelectEvent(cell.RowIndex, cell.ColumnIndex);
                 }
+                // Force repaint to show selection highlight when dragging or clicking
+                gridControl1.Invalidate();
             }
             
         }
