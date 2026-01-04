@@ -29,6 +29,7 @@ namespace VAGSuite.Services
         /// </summary>
         public void StartTableViewer(SymbolHelper sh, string currentFile, SymbolCollection symbols)
         {
+            Console.WriteLine($"🧑🔬 [DEBUG] StartTableViewer: Attempting to open {sh?.Varname} at 0x{sh?.Flash_start_address:X}");
             if (sh == null) return;
             if (sh.Flash_start_address == 0 && sh.Start_address == 0) return;
 
@@ -120,9 +121,11 @@ namespace VAGSuite.Services
                         page.Controls.Add(tabdet);
                         
                         // Add to workspace so it stays below the ribbon
+                        Console.WriteLine($"🧑🔬 [DEBUG] StartTableViewer: Adding page {title} to Workspace...");
                         _kryptonDockingManager.AddToWorkspace("Workspace", new KryptonPage[] { page });
                         tabdet.Visible = true;
                         tabdet.BringToFront();
+                        Console.WriteLine($"🧑🔬 [DEBUG] StartTableViewer: Page added and brought to front.");
                     }
                     else
                     {

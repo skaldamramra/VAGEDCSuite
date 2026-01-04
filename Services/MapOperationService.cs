@@ -13,20 +13,35 @@ namespace VAGSuite.Services
         }
 
         public void ApplyOperation(
-            MapViewerState state, 
-            OperationType type, 
-            double operand, 
-            DevExpress.XtraGrid.Views.Base.GridCell[] selectedCells,
-            Func<int, DevExpress.XtraGrid.Columns.GridColumn, object> getCellValue,
-            Action<int, DevExpress.XtraGrid.Columns.GridColumn, string> updateCell)
+            MapViewerState state,
+            OperationType type,
+            double operand,
+            object[] selectedCells,
+            Func<int, object, object> getCellValue,
+            Action<int, object, string> updateCell)
         {
             if (selectedCells == null || selectedCells.Length == 0) return;
 
-            foreach (var cell in selectedCells)
+            foreach (var cellObj in selectedCells)
             {
                 try
                 {
-                    object cellVal = getCellValue(cell.RowHandle, cell.Column);
+                    int rowHandle = 0;
+                    object column = null;
+
+                    if (cellObj is System.Windows.Forms.DataGridViewCell)
+                    {
+                        var dgCell = (System.Windows.Forms.DataGridViewCell)cellObj;
+                        rowHandle = dgCell.RowIndex;
+                        column = dgCell.ColumnIndex;
+                    }
+                    else
+                    {
+                        // Fallback for other types if necessary
+                        continue;
+                    }
+
+                    object cellVal = getCellValue(rowHandle, column);
                     if (cellVal == null) continue;
 
                     int rawValue = _dataConversionService.ParseValue(cellVal.ToString(), state.Configuration.ViewType);
@@ -75,11 +90,11 @@ namespace VAGSuite.Services
                     if (finalRawValue < 0) finalRawValue = 0;
 
                     string formattedValue = _dataConversionService.FormatValue(
-                        finalRawValue, 
-                        state.Configuration.ViewType, 
+                        finalRawValue,
+                        state.Configuration.ViewType,
                         state.Data.IsSixteenBit);
 
-                    updateCell(cell.RowHandle, cell.Column, formattedValue);
+                    updateCell(rowHandle, column, formattedValue);
                 }
                 catch (Exception ex)
                 {

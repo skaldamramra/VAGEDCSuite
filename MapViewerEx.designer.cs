@@ -33,12 +33,12 @@ namespace VAGSuite
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MapViewerEx));
-            this.simpleButton3 = new DevExpress.XtraEditors.SimpleButton();
-            this.simpleButton2 = new DevExpress.XtraEditors.SimpleButton();
-            this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
+            this.simpleButton3 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.simpleButton2 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.groupControl1 = new ComponentFactory.Krypton.Toolkit.KryptonGroupBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.gridControl1 = new DevExpress.XtraGrid.GridControl();
+            this.gridControl1 = new Zuby.ADGV.AdvancedDataGridView();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copySelectedCellsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pasteSelectedCellsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,22 +48,21 @@ namespace VAGSuite
             this.editYaxisSymbolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.smoothSelectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.smoothSelectionToolProportionalStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.xtraTabControl1 = new DevExpress.XtraTab.XtraTabControl();
-            this.xtraTabPage1 = new DevExpress.XtraTab.XtraTabPage();
-            this.btnToggleOverlay = new DevExpress.XtraEditors.SimpleButton();
-            this.btnToggleWireframe = new DevExpress.XtraEditors.SimpleButton();
-            this.btnToggleTooltips = new DevExpress.XtraEditors.SimpleButton();
+            this.xtraTabControl1 = new ComponentFactory.Krypton.Navigator.KryptonNavigator();
+            this.xtraTabPage1 = new ComponentFactory.Krypton.Navigator.KryptonPage();
+            this.btnToggleOverlay = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.btnToggleWireframe = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.btnToggleTooltips = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.nChartControl1 = new OpenTK.GLControl();
-            this.simpleButton4 = new DevExpress.XtraEditors.SimpleButton();
-            this.simpleButton5 = new DevExpress.XtraEditors.SimpleButton();
-            this.simpleButton6 = new DevExpress.XtraEditors.SimpleButton();
-            this.simpleButton7 = new DevExpress.XtraEditors.SimpleButton();
-            this.xtraTabPage2 = new DevExpress.XtraTab.XtraTabPage();
+            this.simpleButton4 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.simpleButton5 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.simpleButton6 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.simpleButton7 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.xtraTabPage2 = new ComponentFactory.Krypton.Navigator.KryptonPage();
             this.nChartControl2 = new ZedGraph.ZedGraphControl();
-            this.labelControl9 = new DevExpress.XtraEditors.LabelControl();
-            this.labelControl8 = new DevExpress.XtraEditors.LabelControl();
-            this.trackBarControl1 = new DevExpress.XtraEditors.TrackBarControl();
+            this.labelControl9 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.labelControl8 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.trackBarControl1 = new ComponentFactory.Krypton.Toolkit.KryptonTrackBar();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -86,11 +85,12 @@ namespace VAGSuite
             this.timer3 = new System.Windows.Forms.Timer(this.components);
             this.timer4 = new System.Windows.Forms.Timer(this.components);
             this.timer5 = new System.Windows.Forms.Timer(this.components);
-            this.simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
-            this.simpleButton8 = new DevExpress.XtraEditors.SimpleButton();
-            this.simpleButton9 = new DevExpress.XtraEditors.SimpleButton();
-            this.simpleButton10 = new DevExpress.XtraEditors.SimpleButton();
+            this.simpleButton1 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.simpleButton8 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.simpleButton9 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.simpleButton10 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
+            this.groupControl1.Panel.SuspendLayout();
             this.groupControl1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -98,13 +98,10 @@ namespace VAGSuite
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xtraTabControl1)).BeginInit();
             this.xtraTabControl1.SuspendLayout();
             this.xtraTabPage1.SuspendLayout();
             this.xtraTabPage2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarControl1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarControl1.Properties)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -115,30 +112,30 @@ namespace VAGSuite
             this.simpleButton3.Name = "simpleButton3";
             this.simpleButton3.Size = new System.Drawing.Size(92, 23);
             this.simpleButton3.TabIndex = 9;
-            this.simpleButton3.Text = "Undo changes";
+            this.simpleButton3.Values.Text = "Undo changes";
             this.simpleButton3.Click += new System.EventHandler(this.simpleButton3_Click);
-            // 
+            //
             // simpleButton2
-            // 
+            //
             this.simpleButton2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.simpleButton2.Location = new System.Drawing.Point(710, 636);
             this.simpleButton2.Name = "simpleButton2";
             this.simpleButton2.Size = new System.Drawing.Size(75, 23);
             this.simpleButton2.TabIndex = 8;
-            this.simpleButton2.Text = "Save";
+            this.simpleButton2.Values.Text = "Save";
             this.simpleButton2.Click += new System.EventHandler(this.simpleButton2_Click);
-            // 
+            //
             // groupControl1
-            // 
+            //
             this.groupControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupControl1.Controls.Add(this.splitContainer1);
+            this.groupControl1.Values.Heading = "Symbol data";
+            this.groupControl1.Panel.Controls.Add(this.splitContainer1);
             this.groupControl1.Location = new System.Drawing.Point(3, 28);
             this.groupControl1.Name = "groupControl1";
             this.groupControl1.Size = new System.Drawing.Size(870, 604);
             this.groupControl1.TabIndex = 5;
-            this.groupControl1.Text = "Symbol data";
             this.groupControl1.DoubleClick += new System.EventHandler(this.groupControl1_DoubleClick);
             this.groupControl1.Paint += new System.Windows.Forms.PaintEventHandler(this.groupControl1_Paint);
             // 
@@ -179,12 +176,17 @@ namespace VAGSuite
             this.gridControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridControl1.Font = new System.Drawing.Font("Tahoma", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.gridControl1.Location = new System.Drawing.Point(0, 0);
-            this.gridControl1.MainView = this.gridView1;
             this.gridControl1.Name = "gridControl1";
             this.gridControl1.Size = new System.Drawing.Size(866, 287);
             this.gridControl1.TabIndex = 0;
-            this.gridControl1.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
-            this.gridView1});
+            this.gridControl1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+            this.gridControl1.MultiSelect = true;
+            this.gridControl1.AllowUserToAddRows = false;
+            this.gridControl1.AllowUserToDeleteRows = false;
+            this.gridControl1.RowHeadersVisible = true;
+            this.gridControl1.CellPainting += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.advancedDataGridView1_CellPainting);
+            this.gridControl1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.advancedDataGridView1_CellValueChanged);
+            this.gridControl1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.gridView1_KeyDown);
             // 
             // contextMenuStrip1
             // 
@@ -257,48 +259,19 @@ namespace VAGSuite
             this.smoothSelectionToolProportionalStripMenuItem.Text = "Proportional Smooth selection";
             this.smoothSelectionToolProportionalStripMenuItem.Click += new System.EventHandler(this.smoothSelectionToolProportionalStripMenuItem_Click);
             // 
-            // gridView1
-            // 
-            this.gridView1.GridControl = this.gridControl1;
-            this.gridView1.Name = "gridView1";
-            this.gridView1.OptionsBehavior.AllowAddRows = DevExpress.Utils.DefaultBoolean.False;
-            this.gridView1.OptionsBehavior.AllowDeleteRows = DevExpress.Utils.DefaultBoolean.False;
-            this.gridView1.OptionsCustomization.AllowColumnMoving = false;
-            this.gridView1.OptionsCustomization.AllowFilter = false;
-            this.gridView1.OptionsCustomization.AllowGroup = false;
-            this.gridView1.OptionsCustomization.AllowSort = false;
-            this.gridView1.OptionsNavigation.EnterMoveNextColumn = true;
-            this.gridView1.OptionsSelection.EnableAppearanceFocusedRow = false;
-            this.gridView1.OptionsSelection.MultiSelect = true;
-            this.gridView1.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.CellSelect;
-            this.gridView1.OptionsView.ShowGroupPanel = false;
-            this.gridView1.SelectionChanged += new DevExpress.Data.SelectionChangedEventHandler(this.gridView1_SelectionChanged_1);
-            this.gridView1.ValidatingEditor += new DevExpress.XtraEditors.Controls.BaseContainerValidateEditorEventHandler(this.gridView1_ValidatingEditor);
-            this.gridView1.CustomDrawRowIndicator += new DevExpress.XtraGrid.Views.Grid.RowIndicatorCustomDrawEventHandler(this.gridView1_CustomDrawRowIndicator);
-            this.gridView1.CellValueChanged += new DevExpress.XtraGrid.Views.Base.CellValueChangedEventHandler(this.gridView1_CellValueChanged);
-            this.gridView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.gridView1_KeyDown);
-            this.gridView1.CellValueChanging += new DevExpress.XtraGrid.Views.Base.CellValueChangedEventHandler(this.gridView1_CellValueChanging);
-            this.gridView1.CustomDrawCell += new DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventHandler(this.gridView1_CustomDrawCell);
-            this.gridView1.ShownEditor += new System.EventHandler(this.gridView1_ShownEditor);
-            this.gridView1.RowUpdated += new DevExpress.XtraGrid.Views.Base.RowObjectEventHandler(this.gridView1_RowUpdated);
-            this.gridView1.ShowingEditor += new System.ComponentModel.CancelEventHandler(this.gridView1_ShowingEditor);
-            this.gridView1.HiddenEditor += new System.EventHandler(this.gridView1_HiddenEditor);
-            this.gridView1.CustomDrawColumnHeader += new DevExpress.XtraGrid.Views.Grid.ColumnHeaderCustomDrawEventHandler(this.gridView1_CustomDrawColumnHeader);
-            // 
+            //
             // xtraTabControl1
-            // 
+            //
             this.xtraTabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.xtraTabControl1.HeaderLocation = DevExpress.XtraTab.TabHeaderLocation.Left;
-            this.xtraTabControl1.HeaderOrientation = DevExpress.XtraTab.TabOrientation.Vertical;
             this.xtraTabControl1.Location = new System.Drawing.Point(0, 0);
             this.xtraTabControl1.Name = "xtraTabControl1";
-            this.xtraTabControl1.SelectedTabPage = this.xtraTabPage1;
-            this.xtraTabControl1.Size = new System.Drawing.Size(866, 290);
-            this.xtraTabControl1.TabIndex = 2;
-            this.xtraTabControl1.TabPages.AddRange(new DevExpress.XtraTab.XtraTabPage[] {
+            this.xtraTabControl1.Pages.AddRange(new ComponentFactory.Krypton.Navigator.KryptonPage[] {
             this.xtraTabPage1,
             this.xtraTabPage2});
-            this.xtraTabControl1.SelectedPageChanged += new DevExpress.XtraTab.TabPageChangedEventHandler(this.xtraTabControl1_SelectedPageChanged);
+            this.xtraTabControl1.SelectedIndex = 0;
+            this.xtraTabControl1.Size = new System.Drawing.Size(866, 290);
+            this.xtraTabControl1.TabIndex = 2;
+            this.xtraTabControl1.SelectedPageChanged += new System.EventHandler(this.xtraTabControl1_SelectedPageChanged);
             //
             // xtraTabPage1
             //
@@ -313,7 +286,7 @@ namespace VAGSuite
             this.xtraTabPage1.Name = "xtraTabPage1";
             this.xtraTabPage1.Size = new System.Drawing.Size(841, 288);
             this.xtraTabPage1.Text = "3D Graph";
-            // 
+            //
             // btnToggleOverlay
             //
             this.btnToggleOverlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -321,7 +294,6 @@ namespace VAGSuite
             this.btnToggleOverlay.Name = "btnToggleOverlay";
             this.btnToggleOverlay.Size = new System.Drawing.Size(23, 23);
             this.btnToggleOverlay.TabIndex = 14;
-            this.btnToggleOverlay.ToolTip = "Toggle graph overlay";
             this.btnToggleOverlay.Visible = false;
             this.btnToggleOverlay.Click += new System.EventHandler(this.btnToggleOverlay_Click);
             //
@@ -332,8 +304,7 @@ namespace VAGSuite
             this.btnToggleWireframe.Name = "btnToggleWireframe";
             this.btnToggleWireframe.Size = new System.Drawing.Size(23, 23);
             this.btnToggleWireframe.TabIndex = 15;
-            this.btnToggleWireframe.Text = "W"; // Shows 'W' on the button
-            this.btnToggleWireframe.ToolTip = "Toggle wireframe mode (W)";
+            this.btnToggleWireframe.Values.Text = "W"; // Shows 'W' on the button
             this.btnToggleWireframe.Click += new System.EventHandler(this.btnToggleWireframe_Click);
             //
             // btnToggleTooltips
@@ -343,8 +314,7 @@ namespace VAGSuite
             this.btnToggleTooltips.Name = "btnToggleTooltips";
             this.btnToggleTooltips.Size = new System.Drawing.Size(23, 23);
             this.btnToggleTooltips.TabIndex = 16;
-            this.btnToggleTooltips.Text = "T";
-            this.btnToggleTooltips.ToolTip = "Toggle hover tooltips (T)";
+            this.btnToggleTooltips.Values.Text = "T";
             this.btnToggleTooltips.Click += new System.EventHandler(this.btnToggleTooltips_Click);
             //
             // nChartControl1
@@ -361,49 +331,41 @@ namespace VAGSuite
             // simpleButton4
             // 
             this.simpleButton4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.simpleButton4.Image = ((System.Drawing.Image)(resources.GetObject("simpleButton4.Image")));
             this.simpleButton4.Location = new System.Drawing.Point(806, 60);
             this.simpleButton4.Name = "simpleButton4";
             this.simpleButton4.Size = new System.Drawing.Size(23, 23);
             this.simpleButton4.TabIndex = 12;
-            this.simpleButton4.Text = "<";
-            this.simpleButton4.ToolTip = "Turn graph counter clockwise";
+            this.simpleButton4.Values.Text = "<-";
             this.simpleButton4.Click += new System.EventHandler(this.simpleButton4_Click);
-            // 
+            //
             // simpleButton5
-            // 
+            //
             this.simpleButton5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.simpleButton5.Image = ((System.Drawing.Image)(resources.GetObject("simpleButton5.Image")));
             this.simpleButton5.Location = new System.Drawing.Point(806, 89);
             this.simpleButton5.Name = "simpleButton5";
             this.simpleButton5.Size = new System.Drawing.Size(23, 23);
             this.simpleButton5.TabIndex = 11;
-            this.simpleButton5.Text = ">";
-            this.simpleButton5.ToolTip = "Turn graph clockwise";
+            this.simpleButton5.Values.Text = "->";
             this.simpleButton5.Click += new System.EventHandler(this.simpleButton5_Click);
             //
             // simpleButton6
             //
             this.simpleButton6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.simpleButton6.Image = ((System.Drawing.Image)(resources.GetObject("simpleButton6.Image")));
             this.simpleButton6.Location = new System.Drawing.Point(806, 32);
             this.simpleButton6.Name = "simpleButton6";
             this.simpleButton6.Size = new System.Drawing.Size(23, 23);
             this.simpleButton6.TabIndex = 10;
-            this.simpleButton6.Text = "";
-            this.simpleButton6.ToolTip = "Zoom out";
+            this.simpleButton6.Values.Text = "-";
             this.simpleButton6.Click += new System.EventHandler(this.simpleButton6_Click);
             //
             // simpleButton7
             //
             this.simpleButton7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.simpleButton7.Image = ((System.Drawing.Image)(resources.GetObject("simpleButton7.Image")));
             this.simpleButton7.Location = new System.Drawing.Point(806, 3);
             this.simpleButton7.Name = "simpleButton7";
             this.simpleButton7.Size = new System.Drawing.Size(23, 23);
             this.simpleButton7.TabIndex = 9;
-            this.simpleButton7.Text = "";
-            this.simpleButton7.ToolTip = "Zoom in";
+            this.simpleButton7.Values.Text = "+";
             this.simpleButton7.Click += new System.EventHandler(this.simpleButton7_Click);
             // 
             // xtraTabPage2
@@ -429,30 +391,25 @@ namespace VAGSuite
             // labelControl9
             // 
             this.labelControl9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelControl9.AutoEllipsis = true;
-            this.labelControl9.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.labelControl9.Location = new System.Drawing.Point(645, 201);
             this.labelControl9.Name = "labelControl9";
             this.labelControl9.Size = new System.Drawing.Size(188, 34);
             this.labelControl9.TabIndex = 4;
-            this.labelControl9.Text = "MAP";
-            // 
+            this.labelControl9.Values.Text = "MAP";
+            //
             // labelControl8
-            // 
+            //
             this.labelControl8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.labelControl8.AutoEllipsis = true;
-            this.labelControl8.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.labelControl8.Location = new System.Drawing.Point(6, 201);
             this.labelControl8.Name = "labelControl8";
             this.labelControl8.Size = new System.Drawing.Size(104, 34);
             this.labelControl8.TabIndex = 3;
-            this.labelControl8.Text = "MAP values";
-            // 
+            this.labelControl8.Values.Text = "MAP values";
+            //
             // trackBarControl1
-            // 
+            //
             this.trackBarControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.trackBarControl1.EditValue = null;
             this.trackBarControl1.Location = new System.Drawing.Point(125, 201);
             this.trackBarControl1.Name = "trackBarControl1";
             this.trackBarControl1.Size = new System.Drawing.Size(500, 45);
@@ -663,39 +620,39 @@ namespace VAGSuite
             this.simpleButton1.Name = "simpleButton1";
             this.simpleButton1.Size = new System.Drawing.Size(75, 23);
             this.simpleButton1.TabIndex = 14;
-            this.simpleButton1.Text = "Close";
+            this.simpleButton1.Values.Text = "Close";
             this.simpleButton1.Click += new System.EventHandler(this.simpleButton1_Click);
-            // 
+            //
             // simpleButton8
-            // 
+            //
             this.simpleButton8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.simpleButton8.Location = new System.Drawing.Point(518, 636);
             this.simpleButton8.Name = "simpleButton8";
             this.simpleButton8.Size = new System.Drawing.Size(90, 23);
             this.simpleButton8.TabIndex = 15;
-            this.simpleButton8.Text = "Save to ECU";
+            this.simpleButton8.Values.Text = "Save to ECU";
             this.simpleButton8.Visible = false;
             this.simpleButton8.Click += new System.EventHandler(this.simpleButton8_Click);
-            // 
+            //
             // simpleButton9
-            // 
+            //
             this.simpleButton9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.simpleButton9.Location = new System.Drawing.Point(422, 636);
             this.simpleButton9.Name = "simpleButton9";
             this.simpleButton9.Size = new System.Drawing.Size(90, 23);
             this.simpleButton9.TabIndex = 16;
-            this.simpleButton9.Text = "Read from ECU";
+            this.simpleButton9.Values.Text = "Read from ECU";
             this.simpleButton9.Visible = false;
             this.simpleButton9.Click += new System.EventHandler(this.simpleButton9_Click);
-            // 
+            //
             // simpleButton10
-            // 
+            //
             this.simpleButton10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.simpleButton10.Location = new System.Drawing.Point(614, 636);
             this.simpleButton10.Name = "simpleButton10";
             this.simpleButton10.Size = new System.Drawing.Size(90, 23);
             this.simpleButton10.TabIndex = 17;
-            this.simpleButton10.Text = "Read";
+            this.simpleButton10.Values.Text = "Read";
             this.simpleButton10.Click += new System.EventHandler(this.simpleButton10_Click);
             //
             // MapViewerEx
@@ -722,14 +679,11 @@ namespace VAGSuite
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
             this.contextMenuStrip1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.xtraTabControl1)).EndInit();
             this.xtraTabControl1.ResumeLayout(false);
             this.xtraTabPage1.ResumeLayout(false);
             this.xtraTabPage2.ResumeLayout(false);
             this.xtraTabPage2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarControl1.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarControl1)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -739,25 +693,24 @@ namespace VAGSuite
 
         #endregion
 
-        private DevExpress.XtraEditors.SimpleButton simpleButton3;
-        private DevExpress.XtraEditors.SimpleButton simpleButton2;
-        private DevExpress.XtraEditors.GroupControl groupControl1;
-        public DevExpress.XtraGrid.GridControl gridControl1;
-        private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton3;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton2;
+        private ComponentFactory.Krypton.Toolkit.KryptonGroupBox groupControl1;
+        public Zuby.ADGV.AdvancedDataGridView gridControl1;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private DevExpress.XtraTab.XtraTabControl xtraTabControl1;
-        private DevExpress.XtraTab.XtraTabPage xtraTabPage1;
-        private DevExpress.XtraTab.XtraTabPage xtraTabPage2;
-        private DevExpress.XtraEditors.LabelControl labelControl9;
-        private DevExpress.XtraEditors.LabelControl labelControl8;
-        private DevExpress.XtraEditors.TrackBarControl trackBarControl1;
+        private ComponentFactory.Krypton.Navigator.KryptonNavigator xtraTabControl1;
+        private ComponentFactory.Krypton.Navigator.KryptonPage xtraTabPage1;
+        private ComponentFactory.Krypton.Navigator.KryptonPage xtraTabPage2;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl9;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl8;
+        private ComponentFactory.Krypton.Toolkit.KryptonTrackBar trackBarControl1;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Timer timer2;
         private System.Windows.Forms.Timer timer3;
-        private DevExpress.XtraEditors.SimpleButton simpleButton4;
-        private DevExpress.XtraEditors.SimpleButton simpleButton5;
-        private DevExpress.XtraEditors.SimpleButton simpleButton6;
-        private DevExpress.XtraEditors.SimpleButton simpleButton7;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton4;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton5;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton6;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton7;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem copySelectedCellsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pasteSelectedCellsToolStripMenuItem;
@@ -790,15 +743,15 @@ namespace VAGSuite
         private System.Windows.Forms.ToolStripMenuItem asPreferredSettingInT5DashboardToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private DevExpress.XtraEditors.SimpleButton simpleButton1;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton1;
         private OpenTK.GLControl nChartControl1;
         private ZedGraph.ZedGraphControl nChartControl2;
-        private DevExpress.XtraEditors.SimpleButton btnToggleOverlay;
-        private DevExpress.XtraEditors.SimpleButton btnToggleWireframe;
-        private DevExpress.XtraEditors.SimpleButton btnToggleTooltips;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton btnToggleOverlay;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton btnToggleWireframe;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton btnToggleTooltips;
         private System.Windows.Forms.Timer timer5;
-        private DevExpress.XtraEditors.SimpleButton simpleButton8;
-        private DevExpress.XtraEditors.SimpleButton simpleButton9;
-        private DevExpress.XtraEditors.SimpleButton simpleButton10;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton8;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton9;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton10;
     }
 }

@@ -228,8 +228,8 @@ namespace VAGSuite.Components
                     int modelViewLoc = GL.GetUniformLocation(_shaderProgram, "uModelView");
                     int projectionLoc = GL.GetUniformLocation(_shaderProgram, "uProjection");
                     int modelLoc = GL.GetUniformLocation(_shaderProgram, "uModel");
-                    int posLoc = GL.GetAttribLocation(_shaderProgram, "aPosition");
-                    int colLoc = GL.GetAttribLocation(_shaderProgram, "aColor");
+                    int posLoc = 0; // Bound in CreateShaderProgram
+                    int colLoc = 1; // Bound in CreateShaderProgram
 
                     GL.UniformMatrix4(modelViewLoc, false, ref modelView);
                     GL.UniformMatrix4(projectionLoc, false, ref projection);
@@ -1289,7 +1289,19 @@ namespace VAGSuite.Components
             int program = GL.CreateProgram();
             GL.AttachShader(program, vertexShader);
             GL.AttachShader(program, fragmentShader);
+            
+            // Bind attribute locations before linking for GLSL 1.20 compatibility
+            GL.BindAttribLocation(program, 0, "aPosition");
+            GL.BindAttribLocation(program, 1, "aColor");
+            
             GL.LinkProgram(program);
+
+            GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int status);
+            if (status == 0)
+            {
+                string log = GL.GetProgramInfoLog(program);
+                throw new Exception($"Shader program linking failed: {log}");
+            }
 
             GL.DeleteShader(vertexShader);
             GL.DeleteShader(fragmentShader);

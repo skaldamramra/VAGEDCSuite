@@ -23,11 +23,11 @@ namespace VAGSuite.Services
         /// <param name="getCellValue">Callback to get raw cell value</param>
         /// <param name="updateCell">Callback to update cell with formatted value</param>
         void ApplyOperation(
-            MapViewerState state, 
-            OperationType type, 
-            double operand, 
-            DevExpress.XtraGrid.Views.Base.GridCell[] selectedCells,
-            Func<int, DevExpress.XtraGrid.Columns.GridColumn, object> getCellValue,
-            Action<int, DevExpress.XtraGrid.Columns.GridColumn, string> updateCell);
+            MapViewerState state,
+            OperationType type,
+            double operand,
+            object[] selectedCells,
+            Func<int, object, object> getCellValue,
+            Action<int, object, string> updateCell);
     }
 }

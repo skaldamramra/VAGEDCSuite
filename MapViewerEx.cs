@@ -5,17 +5,17 @@ using System.Drawing;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
-using DevExpress.XtraCharts;
+using ComponentFactory.Krypton.Toolkit;
+using ComponentFactory.Krypton.Navigator;
+using Zuby.ADGV;
 using System.Runtime.InteropServices;
-using DevExpress.XtraGrid.Views.Grid.ViewInfo;
-using DevExpress.XtraBars.Docking;
 using System.IO;
 using System.Globalization;
 using VAGSuite.MapViewerEventArgs;
 using VAGSuite.Models;
 using VAGSuite.Services;
 using VAGSuite.Components;
+using VAGSuite.Theming;
 
 namespace VAGSuite
 {
@@ -162,19 +162,13 @@ namespace VAGSuite
             m_vs = vs; 
             if (vs == ViewSize.SmallView)
             {
-                gridView1.PaintStyleName = "UltraFlat";
-                gridView1.Appearance.Row.Font = new Font("Tahoma", 8);
                 this.Font = new Font("Tahoma", 8);
-                gridView1.Appearance.Row.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
-                gridView1.Appearance.Row.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+                gridControl1.DefaultCellStyle.Font = new Font("Tahoma", 8);
             }
             else if (vs == ViewSize.ExtraSmallView)
             {
-                gridView1.PaintStyleName = "UltraFlat";
-                gridView1.Appearance.Row.Font = new Font("Tahoma", 7);
                 this.Font = new Font("Tahoma", 7);
-                gridView1.Appearance.Row.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
-                gridView1.Appearance.Row.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+                gridControl1.DefaultCellStyle.Font = new Font("Tahoma", 7);
             }
         }
         
@@ -206,15 +200,15 @@ namespace VAGSuite
             set { afr_counter = value; }
         }
 
-        private void ShowHitInfo(GridHitInfo hi)
+        private void ShowHitInfo(DataGridView.HitTestInfo hi)
         {
-            if (hi.InRowCell)
+            if (hi.Type == DataGridViewHitTestType.Cell)
             {
     
                 if (afr_counter != null)
                 {
                     // fetch correct counter
-                    int current_afrcounter = (int)afr_counter[(afr_counter.Length - ((hi.RowHandle + 1) * m_TableWidth)) + hi.Column.AbsoluteIndex];
+                    int current_afrcounter = (int)afr_counter[(afr_counter.Length - ((hi.RowIndex + 1) * m_TableWidth)) + hi.ColumnIndex];
                     // show number of measurements in balloon
                     string detailline = "# measurements: " + current_afrcounter.ToString();
                     // Show tooltip using the centralized TooltipService, anchored to gridControl1.
@@ -238,7 +232,7 @@ namespace VAGSuite
         {
             set
             {
-                gridView1.OptionsView.ColumnAutoWidth = value;
+                gridControl1.AutoSizeColumnsMode = value ? DataGridViewAutoSizeColumnsMode.Fill : DataGridViewAutoSizeColumnsMode.None;
             }
         }
 
@@ -276,7 +270,7 @@ namespace VAGSuite
                 _isCompareViewer = value;
                 if (_isCompareViewer)
                 {
-                    gridView1.OptionsBehavior.Editable = false; // don't let the user edit a compare viewer
+                    gridControl1.ReadOnly = true; // don't let the user edit a compare viewer
                     toolStripButton3.Enabled = false;
                     toolStripTextBox1.Enabled = false;
                     toolStripComboBox1.Enabled = false;
@@ -295,8 +289,8 @@ namespace VAGSuite
 
         public int SliderPosition
         {
-            get { return (int)trackBarControl1.EditValue; }
-            set { trackBarControl1.EditValue = value; }
+            get { return (int)trackBarControl1.Value; }
+            set { trackBarControl1.Value = value; }
         }
 
         public bool TableVisible
@@ -573,7 +567,7 @@ namespace VAGSuite
 
         private void SetGroupText()
         {
-            groupControl1.Text = "X: " + m_x_axis_name + " Y: " + m_y_axis_name + " Z: " + m_z_axis_name;
+            groupControl1.Values.Heading = "X: " + m_x_axis_name + " Y: " + m_y_axis_name + " Z: " + m_z_axis_name;
         }
 
         private string m_map_descr = string.Empty;
@@ -682,7 +676,10 @@ namespace VAGSuite
             nChartControl1.MouseDown += new MouseEventHandler(nChartControl1_MouseDown);
             nChartControl1.MouseUp += new MouseEventHandler(nChartControl1_MouseUp);
 
-            gridView1.MouseMove += new MouseEventHandler(gridView1_MouseMove);
+            gridControl1.MouseMove += new MouseEventHandler(gridView1_MouseMove);
+
+            // Initialize Phase 5 Components
+            InitializePhase5Components();
 
             // Initialize Phase 3 Services with default implementations
             _mapRenderingService = new MapRenderingService();
@@ -694,8 +691,6 @@ namespace VAGSuite
             _mapValidationService = new MapValidationService(_dataConversionService);
             _controller = new MapViewerController(this);
             
-            // Initialize Phase 5 Components
-            InitializePhase5Components();
         }
         
         /// <summary>
@@ -773,11 +768,22 @@ namespace VAGSuite
             try
             {
                 Console.WriteLine("MapViewerEx: Initializing Phase 5 Components...");
+                
+                // Ensure services are initialized before components
+                if (_dataConversionService == null) _dataConversionService = new DataConversionService();
+                if (_mapRenderingService == null) _mapRenderingService = new MapRenderingService();
+                if (_chartService == null) _chartService = new ChartService();
+
                 // Create component instances
                 _mapGridComponent = new MapGridComponent(_dataConversionService, _mapRenderingService);
                 _chart3DComponent = new Chart3DComponent(_chartService, _dataConversionService);
                 _chart2DComponent = new Chart2DComponent(_chartService);
                 
+                // Apply Theme
+                VAGEDCThemeManager.Instance.ApplyThemeToForm(this.FindForm() ?? new Form());
+                ApplyThemeToADGV();
+                ApplyThemeToNavigator();
+
                 // Wire up the external chart control to the component
                 // Verified: nChartControl1 is now OpenTK.GLControl and nChartControl2 is ZedGraph.ZedGraphControl
                 if (nChartControl1 != null)
@@ -795,9 +801,37 @@ namespace VAGSuite
                     btnToggleWireframe.BringToFront(); // Wireframe Toggle
                     btnToggleTooltips.BringToFront(); // Tooltip Toggle
 
-                    // Ensure correct tooltips for zoom buttons
-                    simpleButton7.ToolTip = "Zoom in";
-                    simpleButton6.ToolTip = "Zoom out";
+                    // Ensure overlay buttons have readable labels and themed font/color so they remain visible
+                    try
+                    {
+                        var btnFont = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Bold);
+                        KryptonButton[] overlayButtons = new KryptonButton[] { simpleButton7, simpleButton6, simpleButton4, simpleButton5, btnToggleWireframe, btnToggleTooltips };
+                        foreach (var kb in overlayButtons)
+                        {
+                            if (kb != null)
+                            {
+                                if (string.IsNullOrEmpty(kb.Values.Text))
+                                {
+                                    // Fallback labels for small overlay buttons
+                                    if (kb == simpleButton7) kb.Values.Text = "+";
+                                    else if (kb == simpleButton6) kb.Values.Text = "-";
+                                    else if (kb == simpleButton4) kb.Values.Text = "<";
+                                    else if (kb == simpleButton5) kb.Values.Text = ">";
+                                    else if (kb == btnToggleWireframe) kb.Values.Text = "W";
+                                    else if (kb == btnToggleTooltips) kb.Values.Text = "T";
+                                }
+                                // Apply a compact, legible font and theme color so labels are visible over GLControl
+                                kb.StateCommon.Content.ShortText.Font = btnFont;
+                                kb.StateCommon.Content.ShortText.Color1 = VAGEDCThemeManager.Instance.CurrentTheme.TextPrimary;
+                                // Prefer text-only for these overlay buttons
+                                kb.Values.Image = null;
+                                kb.Refresh();
+                            }
+                        }
+                    }
+                    catch { }
+
+                    // Tooltips removed for buildability in legacy Krypton 4.5.9
 
                     Console.WriteLine($"MapViewerEx: nChartControl1 size: {nChartControl1.Width}x{nChartControl1.Height}");
                 }
@@ -817,11 +851,50 @@ namespace VAGSuite
             }
         }
 
+        private void ApplyThemeToADGV()
+        {
+            var theme = VAGEDCThemeManager.Instance.CurrentTheme;
+            gridControl1.BackgroundColor = theme.GridBackground;
+            gridControl1.GridColor = theme.GridBorder;
+            gridControl1.DefaultCellStyle.BackColor = theme.GridBackground;
+            gridControl1.DefaultCellStyle.ForeColor = theme.TextPrimary;
+            gridControl1.DefaultCellStyle.SelectionBackColor = theme.GridSelection;
+            gridControl1.DefaultCellStyle.SelectionForeColor = Color.White;
+            
+            gridControl1.ColumnHeadersDefaultCellStyle.BackColor = theme.GridHeaderBackground;
+            gridControl1.ColumnHeadersDefaultCellStyle.ForeColor = theme.GridHeaderText;
+            gridControl1.ColumnHeadersDefaultCellStyle.Font = theme.GridHeaderFont;
+            gridControl1.EnableHeadersVisualStyles = false;
+
+            gridControl1.RowHeadersDefaultCellStyle.BackColor = theme.GridHeaderBackground;
+            gridControl1.RowHeadersDefaultCellStyle.ForeColor = theme.GridHeaderText;
+        }
+
+        private void ApplyThemeToNavigator()
+        {
+            // Style Navigator tabs to match VS Code dark mode
+            xtraTabControl1.PaletteMode = PaletteMode.Custom;
+            xtraTabControl1.Palette = VAGEDCThemeManager.Instance.CustomPalette;
+            
+            xtraTabControl1.StateCommon.Bar.CheckButtonGap = 2;
+            xtraTabControl1.StateCommon.Tab.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
+            
+            // Active Tab (VS Code style: Darker background, blue indicator/accent)
+            xtraTabControl1.StateSelected.Tab.Back.Color1 = Color.FromArgb(30, 30, 30);
+            xtraTabControl1.StateSelected.Tab.Back.ColorStyle = PaletteColorStyle.Solid;
+            xtraTabControl1.StateSelected.Tab.Content.ShortText.Color1 = Color.White;
+            
+            // Inactive Tab
+            xtraTabControl1.StateCommon.Tab.Back.Color1 = Color.FromArgb(45, 45, 45);
+            xtraTabControl1.StateCommon.Tab.Back.ColorStyle = PaletteColorStyle.Solid;
+            xtraTabControl1.StateCommon.Tab.Content.ShortText.Color1 = Color.FromArgb(150, 150, 150);
+        }
+
         /// <summary>
         /// Uses MapGridComponent to render cell with proper coloring and formatting.
         /// This method delegates to the component for rendering logic while keeping control in MapViewerEx.
         /// </summary>
-        private void RenderCellWithComponent(DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e, int cellValue)
+        private void RenderCellWithComponent(DataGridViewCellPaintingEventArgs e, int cellValue)
         {
             // Use MapGridComponent's rendering logic
             _mapGridComponent.LoadData(
@@ -838,8 +911,10 @@ namespace VAGSuite
             
             if (!m_disablecolors)
             {
-                SolidBrush sb = new SolidBrush(cellColor);
-                e.Graphics.FillRectangle(sb, e.Bounds);
+                using (SolidBrush sb = new SolidBrush(cellColor))
+                {
+                    e.Graphics.FillRectangle(sb, e.CellBounds);
+                }
             }
         }
 
@@ -873,7 +948,7 @@ namespace VAGSuite
         /// </summary>
         private int GetCellValueFromGrid(int rowHandle, int columnIndex)
         {
-            object cellValue = gridView1.GetRowCellValue(rowHandle, gridView1.Columns[columnIndex]);
+            object cellValue = gridControl1.Rows[rowHandle].Cells[columnIndex].Value;
             if (cellValue == null) return 0;
             
             if (m_viewtype == ViewType.Hexadecimal)
@@ -891,7 +966,7 @@ namespace VAGSuite
         /// </summary>
         private void SetCellValueInGrid(int rowHandle, int columnIndex, object value)
         {
-            gridView1.SetRowCellValue(rowHandle, gridView1.Columns[columnIndex], value);
+            gridControl1.Rows[rowHandle].Cells[columnIndex].Value = value;
         }
 
         private void OnChart3DViewChanged(object sender, SurfaceGraphViewChangedEventArgsEx e)
@@ -903,7 +978,7 @@ namespace VAGSuite
         {
             if (m_map_name == "TargetAFR" || m_map_name == "FeedbackAFR" || m_map_name == "FeedbackvsTargetAFR")
             {
-                ShowHitInfo(gridView1.CalcHitInfo(new Point(e.X, e.Y)));
+                ShowHitInfo(gridControl1.HitTest(e.X, e.Y));
             }
         }
 
@@ -982,6 +1057,7 @@ namespace VAGSuite
 
         public void ShowTable(int tablewidth, bool issixteenbits)
         {
+            Console.WriteLine($"🧑🔬 [DEBUG] MapViewerEx.ShowTable: Width={tablewidth}, 16bit={issixteenbits}, Name={m_map_name}");
             m_TableWidth = tablewidth;
             m_issixteenbit = issixteenbits;
 
@@ -1003,16 +1079,17 @@ namespace VAGSuite
 
                 gridControl1.DataSource = dt;
 
-                if (!gridView1.OptionsView.ColumnAutoWidth)
+                if (gridControl1.AutoSizeColumnsMode != DataGridViewAutoSizeColumnsMode.Fill)
                 {
-                    for (int c = 0; c < gridView1.Columns.Count; c++)
+                    for (int c = 0; c < gridControl1.Columns.Count; c++)
                     {
-                        gridView1.Columns[c].Width = 40;
+                        gridControl1.Columns[c].Width = 40;
                     }
                 }
 
-                // set axis indicator width for Y-axis labels
+                // set axis indicator width for Y-axis labels and accommodate unit labels
                 int indicatorwidth = -1;
+                float xUnitWidth = 0f, yUnitWidth = 0f;
                 using (Graphics g = gridControl1.CreateGraphics())
                 {
                     for (int i = 0; i < y_axisvalues.Length; i++)
@@ -1023,15 +1100,19 @@ namespace VAGSuite
                         if (size.Width > indicatorwidth) indicatorwidth = (int)size.Width;
                         m_textheight = (int)size.Height;
                     }
+                    Font smallFont = VAGEDCThemeManager.Instance.GetCustomFont(8f, FontStyle.Regular);
+                    if (!string.IsNullOrEmpty(m_xaxisUnits)) xUnitWidth = g.MeasureString(m_xaxisUnits, smallFont).Width;
+                    if (!string.IsNullOrEmpty(m_yaxisUnits)) yUnitWidth = g.MeasureString(m_yaxisUnits, smallFont).Width;
                 }
                 if (indicatorwidth > 0)
                 {
-                    // Ensure minimum width for units display in top-left
-                    gridView1.IndicatorWidth = Math.Max(indicatorwidth + 10, 45);
+                    // Ensure minimum width for units display in top-left and provide padding
+                    int unitWidth = (int)Math.Ceiling(Math.Max(xUnitWidth, yUnitWidth));
+                    gridControl1.RowHeadersWidth = Math.Max(Math.Max(indicatorwidth + 10, unitWidth + 18), 45);
                 }
 
                 // Apply X-axis labels to column headers
-                for (int i = 0; i < x_axisvalues.Length && i < gridView1.Columns.Count; i++)
+                for (int i = 0; i < x_axisvalues.Length && i < gridControl1.Columns.Count; i++)
                 {
                     int xval = Convert.ToInt32(x_axisvalues.GetValue(i));
                     if (xval > 0xF000)
@@ -1051,19 +1132,33 @@ namespace VAGSuite
                         double temp = (double)xval * m_Xaxiscorrectionfactor + m_Xaxiscorrectionoffset;
                         xlabel = temp.ToString("F2");
                     }
-                    gridView1.Columns[i].Caption = xlabel;
+                    gridControl1.Columns[i].HeaderText = xlabel;
                 }
                 if (x_axisvalues.Length > 0 && x_axisvalues[0] <= 255) m_xformatstringforhex = "X2";
+                Console.WriteLine($"🧑🔬 [DEBUG] MapViewerEx.ShowTable: Data bound. Rows={gridControl1.RowCount}");
+
+                // Disable filter/sort arrows on column headers
+                foreach (DataGridViewColumn col in gridControl1.Columns)
+                {
+                    col.SortMode = DataGridViewColumnSortMode.NotSortable;
+                    // Use reflection to disable filtering if the specific type is not available at compile time
+                    try
+                    {
+                        var filterProp = col.GetType().GetProperty("FilterAndSortEnabled");
+                        if (filterProp != null) filterProp.SetValue(col, false, null);
+                    }
+                    catch { }
+                }
             }
 
             if (m_TableWidth > 1)
             {
-                xtraTabControl1.SelectedTabPage = xtraTabPage1;
+                xtraTabControl1.SelectedPage = xtraTabPage1;
                
                 SetViewTypeParams(m_vs);
-                trackBarControl1.Properties.Minimum = 0;
-                trackBarControl1.Properties.Maximum = x_axisvalues.Length - 1;
-                labelControl8.Text = X_axis_name + " values";
+                trackBarControl1.Minimum = 0;
+                trackBarControl1.Maximum = x_axisvalues.Length - 1;
+                labelControl8.Values.Text = X_axis_name + " values";
                 trackBarControl1.Value = 0;
                 // Initialize and configure the 3D chart using the component
                 if (_chart3DComponent != null)
@@ -1075,17 +1170,17 @@ namespace VAGSuite
             }
             else if (m_TableWidth == 1)
             {
-                xtraTabControl1.SelectedTabPage = xtraTabPage2;
+                xtraTabControl1.SelectedPage = xtraTabPage2;
                 
                 SetViewTypeParams(m_vs);
-                trackBarControl1.Properties.Minimum = 0;
-                trackBarControl1.Properties.Maximum = x_axisvalues.Length - 1;
-                labelControl8.Text = X_axis_name + " values";
+                trackBarControl1.Minimum = 0;
+                trackBarControl1.Maximum = x_axisvalues.Length - 1;
+                labelControl8.Values.Text = X_axis_name + " values";
                 /*** end test ***/
-                trackBarControl1.Properties.Minimum = 0;
-                trackBarControl1.Properties.Maximum = 0;
+                trackBarControl1.Minimum = 0;
+                trackBarControl1.Maximum = 0;
                 trackBarControl1.Enabled = false;
-                labelControl8.Text = X_axis_name;
+                labelControl8.Values.Text = X_axis_name;
 
                 // Initialize and configure the 2D chart using the component
                 if (_chart2DComponent != null)
@@ -1126,7 +1221,7 @@ namespace VAGSuite
                 if (m_TableWidth > 1)
                 {
                     // Explicitly update the slice based on current slider position
-                    _chart2DComponent.UpdateSlice(data, (int)trackBarControl1.EditValue);
+                    _chart2DComponent.UpdateSlice(data, (int)trackBarControl1.Value);
                 }
                 else
                 {
@@ -1190,13 +1285,85 @@ namespace VAGSuite
 
 
 
-        private void gridView1_CustomDrawCell(object sender, DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e)
+        private void advancedDataGridView1_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
             try
             {
-                if (e.CellValue == null || e.CellValue == DBNull.Value) return;
+                var theme = VAGEDCThemeManager.Instance.CurrentTheme;
+                if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                {
+                    // Column header cell (top row) - paint without ADGV filter glyphs
+                    if (e.RowIndex == -1 && e.ColumnIndex >= 0)
+                    {
+                        e.PaintBackground(e.CellBounds, true);
+                        // Draw header text centered and suppress filter glyphs (custom painting avoids ADGV floating filter)
+                        string headerText = gridControl1.Columns[e.ColumnIndex].HeaderText;
+                        using (SolidBrush brush = new SolidBrush(theme.GridHeaderText))
+                        {
+                            TextRenderer.DrawText(e.Graphics, headerText, gridControl1.ColumnHeadersDefaultCellStyle.Font ?? e.CellStyle.Font, e.CellBounds, theme.GridHeaderText, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                        }
+                        e.Handled = true;
+                    }
+                    // Handle the top-left corner cell (Unit display with diagonal line)
+                    else if (e.RowIndex == -1 && e.ColumnIndex == -1)
+                    {
+                        e.PaintBackground(e.CellBounds, true);
+                        using (Pen pen = new Pen(theme.GridBorder, 1))
+                        {
+                            e.Graphics.DrawLine(pen, e.CellBounds.Left, e.CellBounds.Top, e.CellBounds.Right, e.CellBounds.Bottom);
+                        }
 
-                int cellValue = _dataConversionService.ParseValue(e.CellValue.ToString(), m_viewtype);
+                        using (SolidBrush brush = new SolidBrush(theme.GridHeaderText))
+                        {
+                            Font smallFont = VAGEDCThemeManager.Instance.GetCustomFont(8f, FontStyle.Regular);
+                            // Measure sizes to place units properly without overlap
+                            SizeF ySize = e.Graphics.MeasureString(m_yaxisUnits, smallFont);
+                            SizeF xSize = e.Graphics.MeasureString(m_xaxisUnits, smallFont);
+                            float yX = e.CellBounds.Right - ySize.Width - 6f;
+                            float yY = e.CellBounds.Top + 2f;
+                            float xX = e.CellBounds.Left + 4f;
+                            float xY = e.CellBounds.Bottom - xSize.Height - 3f;
+                            if (!string.IsNullOrEmpty(m_yaxisUnits))
+                                e.Graphics.DrawString(m_yaxisUnits, smallFont, brush, new PointF(yX, yY));
+                            if (!string.IsNullOrEmpty(m_xaxisUnits))
+                                e.Graphics.DrawString(m_xaxisUnits, smallFont, brush, new PointF(xX, xY));
+                        }
+                        e.Handled = true;
+                    }
+                    // Handle row headers for Y-axis labels
+                    else if (e.RowIndex >= 0 && e.ColumnIndex == -1 && y_axisvalues != null && y_axisvalues.Length > e.RowIndex)
+                    {
+                        string yvalue;
+                        int index = m_isUpsideDown ? (y_axisvalues.Length - 1) - e.RowIndex : e.RowIndex;
+                        int rawY = Convert.ToInt32(y_axisvalues.GetValue(index));
+
+                        if (m_viewtype == ViewType.Hexadecimal)
+                        {
+                            yvalue = rawY.ToString("X4");
+                        }
+                        else
+                        {
+                            double temp = (double)rawY * m_Yaxiscorrectionfactor + m_Yaxiscorrectionoffset;
+                            yvalue = temp.ToString("F1");
+                        }
+
+                        e.PaintBackground(e.CellBounds, true);
+                        using (SolidBrush brush = new SolidBrush(theme.GridHeaderText))
+                        {
+                            // Use the themed grid cell font and vertically center the text
+                            var fontToUse = theme.GridCellFont;
+                            SizeF measured = e.Graphics.MeasureString(yvalue, fontToUse);
+                            float y = e.CellBounds.Y + (e.CellBounds.Height - measured.Height) / 2f;
+                            e.Graphics.DrawString(yvalue, fontToUse, brush, new PointF(e.CellBounds.X + 4, y));
+                        }
+                        e.Handled = true;
+                    }
+                    return;
+                }
+
+                if (e.Value == null || e.Value == DBNull.Value) return;
+
+                int cellValue = _dataConversionService.ParseValue(e.Value.ToString(), m_viewtype);
 
                 // Use IMapRenderingService for color calculation
                 Color cellColor = _mapRenderingService.CalculateCellColor(
@@ -1210,47 +1377,64 @@ namespace VAGSuite
                 {
                     using (SolidBrush sb = new SolidBrush(cellColor))
                     {
-                        e.Graphics.FillRectangle(sb, e.Bounds);
+                        e.Graphics.FillRectangle(sb, e.CellBounds);
                     }
                 }
 
                 // Use IMapRenderingService for unified value formatting and unit handling
-                e.DisplayText = _mapRenderingService.FormatCellDisplayText(
+                string displayText = _mapRenderingService.FormatCellDisplayText(
                     cellValue,
                     CreateMapViewerState().Configuration,
                     CreateMapViewerState().Metadata,
                     m_issixteenbit);
 
+                e.PaintContent(e.CellBounds);
+                
+                // Fix: 3D map view has 2 sets of values in each cell instead of only one
+                // The original code was likely calling e.PaintContent AND TextRenderer.DrawText
+                // Since we are handling painting manually (e.Handled = true), we should only use DrawText
+                // or let PaintContent handle it if we don't override the text.
+                // However, we need custom formatting, so we use DrawText.
+                
+                // Clear the background again to ensure no ghost text from PaintContent
+                using (SolidBrush sb = new SolidBrush(m_disablecolors ? Color.White : cellColor))
+                {
+                    e.Graphics.FillRectangle(sb, e.CellBounds);
+                }
+
+                TextRenderer.DrawText(e.Graphics, displayText, e.CellStyle.Font, e.CellBounds, e.CellStyle.ForeColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+
                 // Open Loop Indicator logic refactored to service
-                if (_mapRenderingService.ShouldShowOpenLoopIndicator(e.RowHandle, e.Column.AbsoluteIndex, open_loop, x_axisvalues, y_axisvalues, m_xaxisUnits, m_yaxisUnits))
+                if (_mapRenderingService.ShouldShowOpenLoopIndicator(e.RowIndex, e.ColumnIndex, open_loop, x_axisvalues, y_axisvalues, m_xaxisUnits, m_yaxisUnits))
                 {
                     if (m_StandardFill == 1)
                     {
                         using (Pen p = new Pen(Brushes.Black, 2))
                         {
-                            e.Graphics.DrawRectangle(p, e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
+                            e.Graphics.DrawRectangle(p, e.CellBounds.X + 1, e.CellBounds.Y + 1, e.CellBounds.Width - 2, e.CellBounds.Height - 2);
                         }
                     }
                     else if (m_StandardFill > 1)
                     {
                         Point[] pnts = new Point[4];
-                        pnts[0] = new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y);
-                        pnts[1] = new Point(e.Bounds.X + e.Bounds.Width - (e.Bounds.Height / 2), e.Bounds.Y);
-                        pnts[2] = new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y + (e.Bounds.Height / 2));
-                        pnts[3] = new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y);
+                        pnts[0] = new Point(e.CellBounds.X + e.CellBounds.Width, e.CellBounds.Y);
+                        pnts[1] = new Point(e.CellBounds.X + e.CellBounds.Width - (e.CellBounds.Height / 2), e.CellBounds.Y);
+                        pnts[2] = new Point(e.CellBounds.X + e.CellBounds.Width, e.CellBounds.Y + (e.CellBounds.Height / 2));
+                        pnts[3] = new Point(e.CellBounds.X + e.CellBounds.Width, e.CellBounds.Y);
                         e.Graphics.FillPolygon(Brushes.SeaGreen, pnts, System.Drawing.Drawing2D.FillMode.Winding);
                     }
                 }
                 if (m_selectedrowhandle >= 0 && m_selectedcolumnindex >= 0)
                 {
-                    if (e.RowHandle == m_selectedrowhandle && e.Column.AbsoluteIndex == m_selectedcolumnindex)
+                    if (e.RowIndex == m_selectedrowhandle && e.ColumnIndex == m_selectedcolumnindex)
                     {
                         using (SolidBrush sbsb = new SolidBrush(Color.Yellow))
                         {
-                            e.Graphics.FillRectangle(sbsb, e.Bounds);
+                            e.Graphics.FillRectangle(sbsb, e.CellBounds);
                         }
                     }
                 }
+                e.Handled = true;
             }
             catch (Exception E)
             {
@@ -1259,10 +1443,33 @@ namespace VAGSuite
         }
 
 
-        private void gridView1_RowUpdated(object sender, DevExpress.XtraGrid.Views.Base.RowObjectEventArgs e)
+        private void advancedDataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             m_datasourceMutated = true;
             simpleButton2.Enabled = true;
+            
+            // Update m_map_content with the latest data from the grid
+            m_map_content = GetDataFromGridView(m_isUpsideDown);
+            
+            // Ensure components are updated with the new content
+            if (_chart3DComponent != null) _chart3DComponent.LoadData(CreateMapViewerState());
+            if (_chart2DComponent != null) _chart2DComponent.LoadData(m_map_content, m_map_length, CreateMapViewerState());
+
+            if (nChartControl1.Visible)
+            {
+                StartSurfaceChartUpdateTimer();
+            }
+            else if (nChartControl2.Visible)
+            {
+                if (m_TableWidth == 1)
+                {
+                    StartSingleLineGraphTimer();
+                }
+                else
+                {
+                    StartChartUpdateTimer();
+                }
+            }
         }
 
         private void simpleButton3_Click(object sender, EventArgs e)
@@ -1296,7 +1503,7 @@ namespace VAGSuite
         {
             if (onSliderMove != null)
             {
-                onSliderMove(this, new SliderMoveEventArgs((int)trackBarControl1.EditValue, m_map_name, m_filename));
+                onSliderMove(this, new SliderMoveEventArgs((int)trackBarControl1.Value, m_map_name, m_filename));
             }
         }
 
@@ -1343,8 +1550,8 @@ namespace VAGSuite
             try
             {
                 m_prohibitcellchange = true;
-                gridView1.ClearSelection();
-                gridView1.SelectCell(rowhandle, gridView1.Columns[colindex]);
+                gridControl1.ClearSelection();
+                gridControl1.Rows[rowhandle].Cells[colindex].Selected = true;
                 m_prohibitcellchange = false;
             }
             catch (Exception E)
@@ -1441,36 +1648,6 @@ namespace VAGSuite
 
         }
 
-        private void gridView1_CellValueChanged(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
-        {
-            
-            m_datasourceMutated = true;
-            simpleButton2.Enabled = true;
-            simpleButton3.Enabled = true; // Enable the undo button when data is mutated
-            // Update m_map_content with the latest data from the grid
-            m_map_content = GetDataFromGridView(m_isUpsideDown);
-            
-            // Ensure components are updated with the new content
-            if (_chart3DComponent != null) _chart3DComponent.LoadData(CreateMapViewerState());
-            if (_chart2DComponent != null) _chart2DComponent.LoadData(m_map_content, m_map_length, CreateMapViewerState());
-
-            if (nChartControl1.Visible)
-            {
-                StartSurfaceChartUpdateTimer();
-            }
-            else if (nChartControl2.Visible)
-            {
-                if (m_TableWidth == 1)
-                {
-                    StartSingleLineGraphTimer();
-                }
-                else
-                {
-                    StartChartUpdateTimer();
-                    //   UpdateChartControlSlice(GetDataFromGridView(false));
-                }
-            }
-        }
 
         private void StartSingleLineGraphTimer() => DebounceTimer(timer3);
         private void StartChartUpdateTimer() => DebounceTimer(timer1);
@@ -1495,81 +1672,6 @@ namespace VAGSuite
             _mapGridComponent.GridView1_KeyDown(sender, e);
         }
 
-        private void gridView1_CustomDrawRowIndicator(object sender, DevExpress.XtraGrid.Views.Grid.RowIndicatorCustomDrawEventArgs e)
-        {
-            try
-            {
-                // Check if this is the top-left indicator button (header)
-                if (e.RowHandle == DevExpress.XtraGrid.GridControl.InvalidRowHandle)
-                {
-                    e.Appearance.FillRectangle(e.Cache, e.Bounds);
-                    e.Graphics.DrawRectangle(e.Cache.GetPen(e.Appearance.BorderColor), e.Bounds);
-
-                    // Draw diagonal line using theme border color
-                    e.Graphics.DrawLine(e.Cache.GetPen(e.Appearance.BorderColor), e.Bounds.Left, e.Bounds.Top, e.Bounds.Right, e.Bounds.Bottom);
-
-                    // Use a smaller font for units
-                    using (Font unitFont = new Font(this.Font.FontFamily, 6.5f))
-                    {
-                        Brush textBrush = e.Cache.GetSolidBrush(e.Appearance.ForeColor);
-                        
-                        // X-axis unit (Top Right)
-                        if (!string.IsNullOrEmpty(m_xaxisUnits))
-                        {
-                            using (StringFormat sfX = new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Near })
-                            {
-                                e.Cache.DrawString(m_xaxisUnits, unitFont, textBrush, new Rectangle(e.Bounds.X, e.Bounds.Y + 2, e.Bounds.Width - 2, e.Bounds.Height - 2), sfX);
-                            }
-                        }
-
-                        // Y-axis unit (Bottom Left)
-                        if (!string.IsNullOrEmpty(m_yaxisUnits))
-                        {
-                            using (StringFormat sfY = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far })
-                            {
-                                e.Cache.DrawString(m_yaxisUnits, unitFont, textBrush, new Rectangle(e.Bounds.X + 2, e.Bounds.Y, e.Bounds.Width - 2, e.Bounds.Height - 2), sfY);
-                            }
-                        }
-                    }
-                    e.Handled = true;
-                    return;
-                }
-
-                // Draw Y-axis labels directly using MapViewerEx's y_axisvalues
-                if (e.RowHandle >= 0 && y_axisvalues != null && y_axisvalues.Length > e.RowHandle)
-                {
-                    string yvalue;
-                    int index = m_isUpsideDown ? (y_axisvalues.Length - 1) - e.RowHandle : e.RowHandle;
-                    int rawY = Convert.ToInt32(y_axisvalues.GetValue(index));
-
-                    if (m_viewtype == ViewType.Hexadecimal)
-                    {
-                        yvalue = rawY.ToString("X4");
-                    }
-                    else
-                    {
-                        double temp = (double)rawY * m_Yaxiscorrectionfactor + m_Yaxiscorrectionoffset;
-                        yvalue = temp.ToString("F1");
-                    }
-
-                    // Use theme appearance for background and text
-                    e.Appearance.FillRectangle(e.Cache, e.Bounds);
-                    e.Graphics.DrawRectangle(e.Cache.GetPen(e.Appearance.BorderColor), e.Bounds);
-                    e.Graphics.DrawString(yvalue, this.Font, e.Cache.GetSolidBrush(e.Appearance.ForeColor), new PointF(e.Bounds.X + 4, e.Bounds.Y + 1 + (e.Bounds.Height - 12) / 2));
-                    e.Handled = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("MapViewerEx.CustomDrawRowIndicator error: " + ex.Message);
-            }
-        }
-
-        private void gridView1_CustomDrawColumnHeader(object sender, DevExpress.XtraGrid.Views.Grid.ColumnHeaderCustomDrawEventArgs e)
-        {
-            // Ensure we use the component's drawing logic which contains the themed colors
-            _mapGridComponent.CustomDrawColumnHeader(sender, e, this.Font);
-        }
 
 
         internal void ReShowTable()
@@ -1589,73 +1691,16 @@ namespace VAGSuite
                 if (m_TableWidth > 1)
                 {
                     UpdateChartControlSlice(GetDataFromGridView(false));
-                    _sp_dragging = null;
                     timer4.Enabled = false;
                     CastSliderMoveEvent();
                 }
             }
         }
 
-        private void chartControl1_CustomDrawSeriesPoint(object sender, CustomDrawSeriesPointEventArgs e)
-        {
-            
-        }
-
-        private void chartControl1_ObjectHotTracked(object sender, HotTrackEventArgs e)
-        {
-            if (e.Object is Series)
-            {
-                Series s = (Series)e.Object;
-                if (e.AdditionalObject is SeriesPoint)
-                {
-                    SeriesPoint sp = (SeriesPoint)e.AdditionalObject;
-                    _sp_dragging = (SeriesPoint)e.AdditionalObject;
-                    //timer4.Enabled = true;
-                    // alleen hier selecteren, niet meer blinken
-                    if (_sp_dragging != null)
-                    {
-                        string yaxisvalue = _sp_dragging.Argument;
-                        int rowhandle = -1;
-                        for (int t = 0; t < y_axisvalues.Length; t++)
-                        {
-                            if (y_axisvalues.GetValue(t).ToString() == yaxisvalue)
-                            {
-                                rowhandle = (y_axisvalues.Length - 1) - t;
-                            }
-                        }
-                        if (m_TableWidth == 1)
-                        {
-                            // single column graph..
-                            int numberofrows = m_map_length;
-                            if (m_issixteenbit) numberofrows /= 2;
-                            rowhandle = (numberofrows - 1) - Convert.ToInt32(yaxisvalue);
-                        }
-                        if (rowhandle != -1)
-                        {
-                            gridView1.ClearSelection();
-                            gridView1.SelectCell(rowhandle, gridView1.Columns[(int)trackBarControl1.Value]);
-                        }
-                    }
-    
-                    string detailline = Y_axis_name + ": " + sp.Argument + Environment.NewLine + Z_axis_name + ": " + sp.Values[0].ToString();
-                    if (m_map_name.StartsWith("Ign_map_0!") || m_map_name.StartsWith("Ign_map_4!")) detailline += " \u00b0";// +"C";
-                    // Show tooltip using TooltipService anchored to the 3D chart control (nChartControl1).
-                    TooltipService.ShowForControl(nChartControl1, nChartControl1.PointToClient(Cursor.Position), "Details", detailline);
-                }
-            }
-            else
-            {
-                TooltipService.Hide();
-                
-            }
-
-        }
 
         private void chartControl1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
         }
-
-        private SeriesPoint _sp_dragging;
 
         private void chartControl1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -1702,7 +1747,7 @@ namespace VAGSuite
 
         public void SetSelectedTabPageIndex(int tabpageindex)
         {
-            xtraTabControl1.SelectedTabPageIndex = tabpageindex;
+            xtraTabControl1.SelectedIndex = tabpageindex;
             Invalidate();
         }
 
@@ -1719,13 +1764,13 @@ namespace VAGSuite
         {
             if (onGraphSelectionChanged != null)
             {
-                onGraphSelectionChanged(this, new GraphSelectionChangedEventArgs(xtraTabControl1.SelectedTabPageIndex, m_map_name));
+                onGraphSelectionChanged(this, new GraphSelectionChangedEventArgs(xtraTabControl1.SelectedIndex, m_map_name));
             }
         }
 
-        private void xtraTabControl1_SelectedPageChanged(object sender, DevExpress.XtraTab.TabPageChangedEventArgs e)
+        private void xtraTabControl1_SelectedPageChanged(object sender, EventArgs e)
         {
-            if (xtraTabControl1.SelectedTabPage == xtraTabPage1)
+            if (xtraTabControl1.SelectedPage == xtraTabPage1)
             {
                 // 3d graph
                 if (nChartControl1 != null)
@@ -1742,15 +1787,10 @@ namespace VAGSuite
             CastGraphSelectionChangedEvent();
         }
 
-        private void chartControl1_CustomDrawSeries(object sender, CustomDrawSeriesEventArgs e)
-        {
-            
-        }
 
         private void chartControl1_MouseUp(object sender, MouseEventArgs e)
         {
             m_isDragging = false;
-            _sp_dragging = null;
             timer4.Enabled = false;
         }
 
@@ -1762,7 +1802,6 @@ namespace VAGSuite
 
         private void groupControl1_DoubleClick(object sender, EventArgs e)
         {
-            gridView1.OptionsView.AllowCellMerge = !gridView1.OptionsView.AllowCellMerge;
         }
 
         private void simpleButton7_Click(object sender, EventArgs e)
@@ -1817,19 +1856,15 @@ namespace VAGSuite
             }
         }
 
-        private void gridView1_SelectionChanged(object sender, DevExpress.Data.SelectionChangedEventArgs e)
-        {
-        }
-
-        private void gridView1_CustomRowCellEdit(object sender, DevExpress.XtraGrid.Views.Grid.CustomRowCellEditEventArgs e)
+        private void gridView1_SelectionChanged(object sender, EventArgs e)
         {
         }
 
         private void MapViewerCellEdit_KeyDown(object sender, KeyEventArgs e)
         {
-            if (sender is TextEdit)
+            if (sender is KryptonTextBox)
             {
-                TextEdit txtedit = (TextEdit)sender;
+                KryptonTextBox txtedit = (KryptonTextBox)sender;
                 if (e.KeyCode == Keys.Add)
                 {
                     e.SuppressKeyPress = true;
@@ -1914,16 +1949,16 @@ namespace VAGSuite
         {
             try
             {
-                DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
+                DataGridViewSelectedCellCollection cellcollection = gridControl1.SelectedCells;
                 
                 // Prepare cells array in format expected by ClipboardService: [colIndex, rowHandle, value, ...]
-                object[] cells = new object[cellcollection.Length * 3];
-                for (int i = 0; i < cellcollection.Length; i++)
+                object[] cells = new object[cellcollection.Count * 3];
+                for (int i = 0; i < cellcollection.Count; i++)
                 {
-                    DevExpress.XtraGrid.Views.Base.GridCell gc = cellcollection[i];
-                    int colIndex = gc.Column.AbsoluteIndex;
-                    int rowHandle = gc.RowHandle;
-                    object o = gridView1.GetRowCellValue(gc.RowHandle, gc.Column);
+                    DataGridViewCell gc = cellcollection[i];
+                    int colIndex = gc.ColumnIndex;
+                    int rowHandle = gc.RowIndex;
+                    object o = gc.Value;
                     int value = _dataConversionService.ParseValue(o?.ToString() ?? "0", m_viewtype);
                     
                     cells[i * 3] = colIndex;
@@ -1942,15 +1977,15 @@ namespace VAGSuite
 
         private void CopyMapToClipboard()
         {
-            gridView1.SelectAll();
+            gridControl1.SelectAll();
             CopySelectionToClipboard();
-            gridView1.ClearSelection();
+            gridControl1.ClearSelection();
         }
 
         private void copySelectedCellsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-            if (cellcollection.Length > 0)
+            DataGridViewSelectedCellCollection cellcollection = gridControl1.SelectedCells;
+            if (cellcollection.Count > 0)
             {
                 CopySelectionToClipboard();
             }
@@ -1965,13 +2000,13 @@ namespace VAGSuite
 
         private void atCurrentlySelectedLocationToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-            if (cellcollection.Length >= 1)
+            DataGridViewSelectedCellCollection cellcollection = gridControl1.SelectedCells;
+            if (cellcollection.Count >= 1)
             {
                 try
                 {
-                    int rowhandlefrom = cellcollection[0].RowHandle;
-                    int colindexfrom = cellcollection[0].Column.AbsoluteIndex;
+                    int rowhandlefrom = cellcollection[0].RowIndex;
+                    int colindexfrom = cellcollection[0].ColumnIndex;
                     
                     // Prepare target cells array for ClipboardService
                     object[] targetCells = new object[3];
@@ -1987,7 +2022,7 @@ namespace VAGSuite
                     foreach (var pasteInfo in pasteList)
                     {
                         int val = _dataConversionService.ParseValue(pasteInfo.Value.ToString(), m_viewtype);
-                        gridView1.SetRowCellValue(pasteInfo.Row, gridView1.Columns[pasteInfo.Column], _dataConversionService.FormatValue(val, m_viewtype, m_issixteenbit));
+                        gridControl1.Rows[pasteInfo.Row].Cells[pasteInfo.Column].Value = _dataConversionService.FormatValue(val, m_viewtype, m_issixteenbit);
                     }
                 }
                 catch (Exception pasteE)
@@ -2012,7 +2047,7 @@ namespace VAGSuite
             foreach (var pasteInfo in pasteList)
             {
                 int val = _dataConversionService.ParseValue(pasteInfo.Value.ToString(), m_viewtype);
-                gridView1.SetRowCellValue(pasteInfo.Row, gridView1.Columns[pasteInfo.Column], _dataConversionService.FormatValue(val, m_viewtype, m_issixteenbit));
+                gridControl1.Rows[pasteInfo.Row].Cells[pasteInfo.Column].Value = _dataConversionService.FormatValue(val, m_viewtype, m_issixteenbit);
             }
         }
 
@@ -2038,17 +2073,22 @@ namespace VAGSuite
             try
             {
                 double workValue = Convert.ToDouble(toolStripTextBox1.Text);
-                var selectedCells = gridView1.GetSelectedCells();
-                if (selectedCells.Length > 0)
+                DataGridViewSelectedCellCollection selectedCells = gridControl1.SelectedCells;
+                if (selectedCells.Count > 0)
                 {
                     OperationType opType = (OperationType)toolStripComboBox1.SelectedIndex;
+                    
+                    // Convert DataGridViewSelectedCellCollection to object array for service
+                    object[] cells = new object[selectedCells.Count];
+                    for (int i = 0; i < selectedCells.Count; i++) cells[i] = selectedCells[i];
+
                     _mapOperationService.ApplyOperation(
                         CreateMapViewerState(),
                         opType,
                         workValue,
-                        selectedCells,
-                        (rh, col) => gridView1.GetRowCellValue(rh, col),
-                        (rh, col, val) => gridView1.SetRowCellValue(rh, col, val)
+                        cells,
+                        (rh, col) => gridControl1.Rows[rh].Cells[Convert.ToInt32(col)].Value,
+                        (rh, col, val) => gridControl1.Rows[rh].Cells[Convert.ToInt32(col)].Value = val
                     );
                 }
             }
@@ -2142,38 +2182,8 @@ namespace VAGSuite
 
         private void timer4_Tick(object sender, EventArgs e)
         {
-            if (_sp_dragging != null)
-            {
-                string yaxisvalue = _sp_dragging.Argument;
-                int rowhandle = -1;
-                for (int t = 0; t < y_axisvalues.Length; t++)
-                {
-                    if (y_axisvalues.GetValue(t).ToString() == yaxisvalue)
-                    {
-                        rowhandle = (y_axisvalues.Length - 1) - t;
-                    }
-                }
-                if (m_TableWidth == 1)
-                {
-                    // single column graph.. 
-                    int numberofrows = m_map_length;
-                    if (m_issixteenbit) numberofrows /= 2;
-                    rowhandle = (numberofrows - 1) - Convert.ToInt32(yaxisvalue);
-                }
-                if (rowhandle != -1)
-                {
-                    if (tmr_toggle)
-                    {
-                        gridView1.SelectCell(rowhandle, gridView1.Columns[(int)trackBarControl1.Value]);
-                        tmr_toggle = false;
-                    }
-                    else
-                    {
-                        gridView1.ClearSelection();
-                        tmr_toggle = true;
-                    }
-                }
-            }
+            // Logic for highlighting grid cells from graph selection removed
+            // as it was tied to DevExpress SeriesPoint.
         }
 
         private void popupContainerEdit1_CustomDisplayText(object sender, DevExpress.XtraEditors.Controls.ConvertEditValueEventArgs e)
@@ -2181,20 +2191,15 @@ namespace VAGSuite
 //            e.Value = System.IO.Path.GetFileName(m_filename) + " : " + m_map_name + " flash address : " + m_map_address.ToString("X6") + " sram address : " + m_map_sramaddress.ToString("X4");
         }
 
-        private void gridView1_SelectionChanged_1(object sender, DevExpress.Data.SelectionChangedEventArgs e)
+        private void gridView1_SelectionChanged_1(object sender, EventArgs e)
         {
             if (!m_prohibitcellchange)
             {
-                DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-                if (cellcollection.Length == 1)
+                DataGridViewSelectedCellCollection cellcollection = gridControl1.SelectedCells;
+                if (cellcollection.Count == 1)
                 {
-                    object o = cellcollection.GetValue(0);
-                    if (o is DevExpress.XtraGrid.Views.Base.GridCell)
-                    {
-                        DevExpress.XtraGrid.Views.Base.GridCell cell = (DevExpress.XtraGrid.Views.Base.GridCell)o;
-                        CastSelectEvent(cell.RowHandle, cell.Column.AbsoluteIndex);
-                    }
-
+                    DataGridViewCell cell = cellcollection[0];
+                    CastSelectEvent(cell.RowIndex, cell.ColumnIndex);
                 }
             }
             
@@ -2245,23 +2250,23 @@ namespace VAGSuite
             CastViewTypeChangedEvent();
         }
 
-        private void gridView1_CellValueChanging(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
+        private void gridView1_CellValueChanging(object sender, DataGridViewCellEventArgs e)
         {
            
         }
 
-        private void gridView1_ValidatingEditor(object sender, DevExpress.XtraEditors.Controls.BaseContainerValidateEditorEventArgs e)
+        private void gridView1_ValidatingEditor(object sender, DataGridViewCellValidatingEventArgs e)
         {
             string errorText;
             object validatedValue;
-            if (!_mapValidationService.ValidateEditorValue(e.Value, CreateMapViewerState(), out errorText, out validatedValue))
+            if (!_mapValidationService.ValidateEditorValue(e.FormattedValue, CreateMapViewerState(), out errorText, out validatedValue))
             {
-                e.Valid = false;
-                e.ErrorText = errorText;
+                e.Cancel = true;
+                gridControl1.Rows[e.RowIndex].ErrorText = errorText;
             }
             else
             {
-                e.Value = validatedValue;
+                gridControl1.Rows[e.RowIndex].ErrorText = "";
             }
         }
 
@@ -2282,11 +2287,6 @@ namespace VAGSuite
 
         private void gridView1_ShownEditor(object sender, EventArgs e)
         {
-            if (m_viewtype == ViewType.Easy )
-            {
-                gridView1.ActiveEditor.EditValue = ConvertToEasyValue((float)Convert.ToDouble(gridView1.ActiveEditor.EditValue)).ToString("F2");
-                Console.WriteLine("Started editor with value: " + gridView1.ActiveEditor.EditValue.ToString());
-            }
         }
 
         private void gridView1_ShowingEditor(object sender, CancelEventArgs e)
@@ -2295,7 +2295,6 @@ namespace VAGSuite
 
         private void gridView1_HiddenEditor(object sender, EventArgs e)
         {
-            Console.WriteLine("Hidden editor with value: " + gridView1.GetFocusedRowCellDisplayText(gridView1.FocusedColumn));
         }
 
         private void MapViewer_VisibleChanged(object sender, EventArgs e)
@@ -2307,7 +2306,7 @@ namespace VAGSuite
 
         internal void ClearSelection()
         {
-            gridView1.ClearSelection();
+            gridControl1.ClearSelection();
         }
 
         private int m_selectedrowhandle = -1;
@@ -2423,17 +2422,17 @@ namespace VAGSuite
                 MessageBox.Show("Smoothing cannot be done in Hex view!");
                 return;
             }
-            DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-            if (cellcollection.Length > 2)
+            DataGridViewSelectedCellCollection cellcollection = gridControl1.SelectedCells;
+            if (cellcollection.Count > 2)
             {
                 // Use the refactored SmoothingService for proportional smoothing
-                object[] cells = new object[cellcollection.Length];
-                for (int i = 0; i < cellcollection.Length; i++)
+                object[] cells = new object[cellcollection.Count];
+                for (int i = 0; i < cellcollection.Count; i++)
                 {
                     cells[i] = cellcollection[i];
                 }
                 
-                _smoothingService.SmoothProportional(cells, gridView1, x_axisvalues, y_axisvalues);
+                _smoothingService.SmoothProportional(cells, gridControl1, x_axisvalues, y_axisvalues);
             }
         }
 
@@ -2444,15 +2443,15 @@ namespace VAGSuite
                 MessageBox.Show("Smoothing cannot be done in Hex view!");
                 return;
             }
-            DevExpress.XtraGrid.Views.Base.GridCell[] cellcollection = gridView1.GetSelectedCells();
-            if (cellcollection.Length > 2)
+            DataGridViewSelectedCellCollection cellcollection = gridControl1.SelectedCells;
+            if (cellcollection.Count > 2)
             {
-                object[] cells = new object[cellcollection.Length];
-                for (int i = 0; i < cellcollection.Length; i++)
+                object[] cells = new object[cellcollection.Count];
+                for (int i = 0; i < cellcollection.Count; i++)
                 {
                     cells[i] = cellcollection[i];
                 }
-                _smoothingService.SmoothInterpolated(cells, gridView1, x_axisvalues, y_axisvalues);
+                _smoothingService.SmoothInterpolated(cells, gridControl1, x_axisvalues, y_axisvalues);
                 m_datasourceMutated = true;
                 simpleButton2.Enabled = true;
                 simpleButton3.Enabled = true;
@@ -2509,7 +2508,7 @@ namespace VAGSuite
             if (e.KeyCode == Keys.Enter)
             {
                 // see if there's a selection being made
-                gridView1.ClearSelection();
+                gridControl1.ClearSelection();
                 string strValue = toolStripComboBox3.Text;
                 char[] sep = new char[1];
                 sep.SetValue(' ', 0);
@@ -2522,20 +2521,20 @@ namespace VAGSuite
                         SelectCellsWithValue(dblres);
                     }
                 }
-                gridView1.Focus();
+                gridControl1.Focus();
 
             }
         }
 
         private void SelectCellsWithValue(double value)
         {
-            for (int rh = 0; rh < gridView1.RowCount; rh++)
+            for (int rh = 0; rh < gridControl1.RowCount; rh++)
             {
-                for (int ch = 0; ch < gridView1.Columns.Count; ch++)
+                for (int ch = 0; ch < gridControl1.Columns.Count; ch++)
                 {
                     try
                     {
-                        object ov = gridView1.GetRowCellValue(rh, gridView1.Columns[ch]);
+                        object ov = gridControl1.Rows[rh].Cells[ch].Value;
                         if (ov == null) continue;
 
                         int rawVal = _dataConversionService.ParseValue(ov.ToString(), m_viewtype);
@@ -2544,7 +2543,7 @@ namespace VAGSuite
                         double diff = Math.Abs(val - value);
                         if (diff < 0.009)
                         {
-                            gridView1.SelectCell(rh, gridView1.Columns[ch]);
+                            gridControl1.Rows[rh].Cells[ch].Selected = true;
                         }
                     }
                     catch (Exception E)
