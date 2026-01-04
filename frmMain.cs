@@ -61,6 +61,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using ComponentFactory.Krypton.Toolkit;
 using DevExpress.XtraBars.Docking;
 using DevExpress.XtraBars;
 using DevExpress.Skins;
@@ -115,8 +116,9 @@ namespace VAGSuite
         Damos
     }
 
-    public partial class frmMain : DevExpress.XtraEditors.XtraForm
+    public partial class frmMain : KryptonForm
     {
+        private KryptonManager kryptonManager;
         private AppSettings m_appSettings;
         private System.Windows.Forms.Timer hoverTimer;
         private int lastHoverRowHandle = -1;
@@ -151,6 +153,9 @@ namespace VAGSuite
             Application.DoEvents();
                 
             InitializeComponent();
+
+            this.kryptonManager = new KryptonManager(this.components);
+            this.kryptonManager.GlobalPaletteMode = PaletteModeManager.ProfessionalSystem;
 
             m_DelegateStartReleaseNotePanel = new DelegateStartReleaseNotePanel(this.StartReleaseNotesViewer);
             InitializeHoverTimer();

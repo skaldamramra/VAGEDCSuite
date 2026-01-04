@@ -200,6 +200,29 @@ namespace VAGSuite.Theming
             // Apply global DevExpress font
             Font customFont = GetCustomFont(9f, FontStyle.Regular);
             DevExpress.Utils.AppearanceObject.DefaultFont = customFont;
+
+            if (form is ComponentFactory.Krypton.Toolkit.KryptonForm kForm)
+            {
+                // Force Custom Palette to enable dark title bar (chrome)
+                kForm.PaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Custom;
+                kForm.AllowFormChrome = true;
+
+                kForm.StateCommon.Back.Color1 = _currentTheme.WindowBackground;
+                kForm.StateCommon.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+                
+                // Header (Title Bar) - VS Code style
+                // We use StateCommon to ensure it applies to both active and inactive states
+                kForm.StateCommon.Header.Back.Color1 = Color.FromArgb(37, 37, 38); // VS Code Header Gray
+                kForm.StateCommon.Header.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+                kForm.StateCommon.Header.Content.ShortText.Color1 = _currentTheme.TextPrimary;
+                kForm.StateCommon.Header.Content.ShortText.Font = GetCustomFont(10f, FontStyle.Bold);
+                
+                // Border - VS Code style subtle border
+                kForm.StateCommon.Border.Draw = ComponentFactory.Krypton.Toolkit.InheritBool.True;
+                kForm.StateCommon.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
+                kForm.StateCommon.Border.Color1 = Color.FromArgb(64, 64, 64);
+                kForm.StateCommon.Border.Width = 1;
+            }
             
             // Apply to all controls recursively
             ApplyThemeToControl(form);
@@ -210,6 +233,61 @@ namespace VAGSuite.Theming
         /// </summary>
         private void ApplyThemeToControl(Control control)
         {
+            // Krypton Controls
+            if (control is ComponentFactory.Krypton.Toolkit.KryptonPanel kPanel)
+            {
+                kPanel.StateCommon.Color1 = _currentTheme.PanelBackground;
+                kPanel.StateCommon.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            }
+            else if (control is ComponentFactory.Krypton.Toolkit.KryptonLabel kLabel)
+            {
+                kLabel.StateCommon.ShortText.Color1 = _currentTheme.TextPrimary;
+                kLabel.StateCommon.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
+                kLabel.StateCommon.ShortText.MultiLine = ComponentFactory.Krypton.Toolkit.InheritBool.True;
+                kLabel.StateCommon.ShortText.MultiLineH = ComponentFactory.Krypton.Toolkit.PaletteRelativeAlign.Near;
+            }
+            else if (control is ComponentFactory.Krypton.Toolkit.KryptonButton kButton)
+            {
+                // VS Code style button: Solid accent color with subtle border
+                kButton.ButtonStyle = ComponentFactory.Krypton.Toolkit.ButtonStyle.Standalone;
+                
+                // StateCommon - Set the base for ALL states to be dark
+                kButton.StateCommon.Back.Color1 = Color.FromArgb(0, 100, 180);
+                kButton.StateCommon.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+                kButton.StateCommon.Border.Color1 = Color.FromArgb(64, 64, 64);
+                kButton.StateCommon.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
+                kButton.StateCommon.Border.Width = 1;
+                kButton.StateCommon.Border.Rounding = 2;
+                kButton.StateCommon.Content.ShortText.Color1 = Color.White;
+                kButton.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
+
+                // Normal State - Explicitly reinforce dark color
+                kButton.StateNormal.Back.Color1 = Color.FromArgb(0, 100, 180);
+                kButton.StateNormal.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+
+                // OverrideDefault - This handles the "AcceptButton" state which often stays white
+                kButton.OverrideDefault.Back.Color1 = Color.FromArgb(0, 100, 180);
+                kButton.OverrideDefault.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+                kButton.OverrideDefault.Border.Color1 = Color.FromArgb(0, 122, 204);
+                kButton.OverrideDefault.Content.ShortText.Color1 = Color.White;
+
+                // Tracking (Hover) - Solid color, no gradients
+                kButton.StateTracking.Back.Color1 = Color.FromArgb(20, 142, 224);
+                kButton.StateTracking.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+                kButton.StateTracking.Border.Color1 = Color.White;
+                kButton.StateTracking.Content.ShortText.Color1 = Color.White;
+
+                // Pressed - Solid color, no gradients
+                kButton.StatePressed.Back.Color1 = Color.FromArgb(0, 102, 184);
+                kButton.StatePressed.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+                kButton.StatePressed.Content.ShortText.Color1 = Color.White;
+            }
+            else if (control is ComponentFactory.Krypton.Toolkit.KryptonLinkLabel kLink)
+            {
+                kLink.StateCommon.ShortText.Color1 = _currentTheme.AccentSecondary;
+                kLink.StateCommon.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
+            }
+
             // DevExpress RibbonControl
             if (control is RibbonControl)
             {
@@ -221,7 +299,7 @@ namespace VAGSuite.Theming
                 ApplyThemeToGrid((GridControl)control);
             }
             // Standard Panel
-            else if (control is Panel)
+            else if (control is Panel && !(control is ComponentFactory.Krypton.Toolkit.KryptonPanel))
             {
                 Panel panel = (Panel)control;
                 panel.BackColor = _currentTheme.PanelBackground;

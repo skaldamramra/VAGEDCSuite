@@ -28,150 +28,160 @@ namespace VAGSuite
         /// </summary>
         private void InitializeComponent()
         {
-            this.panelControl1 = new DevExpress.XtraEditors.PanelControl();
-            this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
-            this.simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
-            this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
-            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
-            this.labelControl5 = new DevExpress.XtraEditors.LabelControl();
-            this.labelControl6 = new DevExpress.XtraEditors.LabelControl();
-            this.hyperLinkEdit1 = new DevExpress.XtraEditors.HyperLinkEdit();
+            this.panelControl1 = new ComponentFactory.Krypton.Toolkit.KryptonPanel();
+            this.labelControl1 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.simpleButton1 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.labelControl2 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.labelControl3 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.labelControl5 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.labelControl6 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.hyperLinkEdit1 = new ComponentFactory.Krypton.Toolkit.KryptonLinkLabel();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
             this.panelControl1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.hyperLinkEdit1.Properties)).BeginInit();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
-            // 
+            //
             // panelControl1
-            // 
-            this.panelControl1.Appearance.BackColor = System.Drawing.Color.White;
-            this.panelControl1.Appearance.BackColor2 = System.Drawing.Color.White;
-            this.panelControl1.Appearance.Options.UseBackColor = true;
+            //
             this.panelControl1.Controls.Add(this.labelControl1);
             this.panelControl1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelControl1.Location = new System.Drawing.Point(0, 0);
-            this.panelControl1.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
-            this.panelControl1.LookAndFeel.UseDefaultLookAndFeel = false;
             this.panelControl1.Name = "panelControl1";
-            this.panelControl1.Size = new System.Drawing.Size(355, 57);
+            this.panelControl1.Size = new System.Drawing.Size(450, 70);
             this.panelControl1.TabIndex = 0;
-            // 
+            //
             // labelControl1
-            // 
-            this.labelControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelControl1.Appearance.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelControl1.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.labelControl1.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
-            this.labelControl1.Location = new System.Drawing.Point(6, 10);
+            //
+            this.labelControl1.AutoSize = false;
+            this.labelControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelControl1.Location = new System.Drawing.Point(0, 0);
             this.labelControl1.Name = "labelControl1";
-            this.labelControl1.Size = new System.Drawing.Size(343, 35);
+            this.labelControl1.Size = new System.Drawing.Size(450, 70);
+            this.labelControl1.StateCommon.ShortText.Font = new System.Drawing.Font("Source Sans Pro", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelControl1.StateCommon.ShortText.TextH = ComponentFactory.Krypton.Toolkit.PaletteRelativeAlign.Center;
+            this.labelControl1.StateCommon.ShortText.TextV = ComponentFactory.Krypton.Toolkit.PaletteRelativeAlign.Center;
             this.labelControl1.TabIndex = 0;
-            this.labelControl1.Text = "VAGEDCSuite";
+            this.labelControl1.Values.Text = "VAGEDCSuite";
             this.labelControl1.DoubleClick += new System.EventHandler(this.labelControl1_DoubleClick);
-            // 
+            //
             // simpleButton1
-            // 
+            //
             this.simpleButton1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.simpleButton1.Location = new System.Drawing.Point(268, 212);
+            this.simpleButton1.Location = new System.Drawing.Point(340, 310);
             this.simpleButton1.Name = "simpleButton1";
-            this.simpleButton1.Size = new System.Drawing.Size(75, 23);
+            this.simpleButton1.Size = new System.Drawing.Size(90, 32);
             this.simpleButton1.TabIndex = 1;
-            this.simpleButton1.Text = "Ok";
+            this.simpleButton1.Values.Text = "OK";
             this.simpleButton1.Click += new System.EventHandler(this.simpleButton1_Click);
-            // 
+            //
+            // tableLayoutPanel1
+            //
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Controls.Add(this.labelControl2, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.labelControl3, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.hyperLinkEdit1, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.labelControl6, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.labelControl5, 0, 4);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 80);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 5;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(426, 220);
+            this.tableLayoutPanel1.TabIndex = 8;
+            //
             // labelControl2
-            // 
-            this.labelControl2.Appearance.TextOptions.WordWrap = DevExpress.Utils.WordWrap.Wrap;
-            this.labelControl2.AutoEllipsis = true;
-            this.labelControl2.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
-            this.labelControl2.Location = new System.Drawing.Point(11, 72);
+            //
+            this.labelControl2.AutoSize = true;
+            this.labelControl2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelControl2.Location = new System.Drawing.Point(3, 3);
             this.labelControl2.Name = "labelControl2";
-            this.labelControl2.Size = new System.Drawing.Size(332, 47);
+            this.labelControl2.Size = new System.Drawing.Size(420, 40);
             this.labelControl2.TabIndex = 2;
-            this.labelControl2.Text = "VAGEDCSuite was created with the help of lots of people on ecuconnections.com and" +
+            this.labelControl2.Values.Text = "VAGEDCSuite was created with the help of lots of people on ecuconnections.com and" +
                 " chiptuners.org";
             this.labelControl2.DoubleClick += new System.EventHandler(this.labelControl2_DoubleClick);
-            // 
+            //
             // labelControl3
-            // 
-            this.labelControl3.Appearance.TextOptions.WordWrap = DevExpress.Utils.WordWrap.Wrap;
-            this.labelControl3.AutoEllipsis = true;
-            this.labelControl3.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
-            this.labelControl3.Location = new System.Drawing.Point(11, 115);
+            //
+            this.labelControl3.AutoSize = true;
+            this.labelControl3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelControl3.Location = new System.Drawing.Point(3, 49);
             this.labelControl3.Name = "labelControl3";
-            this.labelControl3.Size = new System.Drawing.Size(269, 25);
+            this.labelControl3.Size = new System.Drawing.Size(420, 20);
             this.labelControl3.TabIndex = 3;
-            this.labelControl3.Text = "Special thanks go out to:";
+            this.labelControl3.Values.Text = "Special thanks go out to:";
             this.labelControl3.DoubleClick += new System.EventHandler(this.labelControl3_DoubleClick);
-            // 
-            // labelControl5
-            // 
-            this.labelControl5.Appearance.ForeColor = System.Drawing.Color.Black;
-            this.labelControl5.Appearance.TextOptions.WordWrap = DevExpress.Utils.WordWrap.Wrap;
-            this.labelControl5.AutoEllipsis = true;
-            this.labelControl5.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
-            this.labelControl5.Location = new System.Drawing.Point(11, 199);
-            this.labelControl5.Name = "labelControl5";
-            this.labelControl5.Size = new System.Drawing.Size(188, 36);
-            this.labelControl5.TabIndex = 5;
-            this.labelControl5.Text = "You can send an email for support to skaldamramra@yahoo.com";
-            this.labelControl5.DoubleClick += new System.EventHandler(this.labelControl5_DoubleClick);
-            // 
-            // labelControl6
-            // 
-            this.labelControl6.Appearance.ForeColor = System.Drawing.Color.Green;
-            this.labelControl6.Appearance.TextOptions.WordWrap = DevExpress.Utils.WordWrap.Wrap;
-            this.labelControl6.AutoEllipsis = true;
-            this.labelControl6.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
-            this.labelControl6.Location = new System.Drawing.Point(11, 169);
-            this.labelControl6.Name = "labelControl6";
-            this.labelControl6.Size = new System.Drawing.Size(332, 34);
-            this.labelControl6.TabIndex = 6;
-            this.labelControl6.Text = "rkam, Pixis5, othmar77, dieseljohnny, bazare, bondiblu, Relic, Macadam, dilemma";
-            // 
+            //
             // hyperLinkEdit1
-            // 
-            this.hyperLinkEdit1.EditValue = "http://www.mtx-electronics.com";
-            this.hyperLinkEdit1.Location = new System.Drawing.Point(11, 146);
+            //
+            this.hyperLinkEdit1.AutoSize = true;
+            this.hyperLinkEdit1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.hyperLinkEdit1.Location = new System.Drawing.Point(3, 75);
             this.hyperLinkEdit1.Name = "hyperLinkEdit1";
-            this.hyperLinkEdit1.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            this.hyperLinkEdit1.Size = new System.Drawing.Size(332, 18);
+            this.hyperLinkEdit1.Size = new System.Drawing.Size(420, 20);
             this.hyperLinkEdit1.TabIndex = 7;
-            // 
+            this.hyperLinkEdit1.Values.Text = "http://www.mtx-electronics.com";
+            //
+            // labelControl6
+            //
+            this.labelControl6.AutoSize = true;
+            this.labelControl6.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelControl6.Location = new System.Drawing.Point(3, 101);
+            this.labelControl6.Name = "labelControl6";
+            this.labelControl6.Size = new System.Drawing.Size(420, 40);
+            this.labelControl6.TabIndex = 6;
+            this.labelControl6.Values.Text = "rkam, Pixis5, othmar77, dieseljohnny, bazare, bondiblu, Relic, Macadam, dilemma";
+            //
+            // labelControl5
+            //
+            this.labelControl5.AutoSize = true;
+            this.labelControl5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelControl5.Location = new System.Drawing.Point(3, 147);
+            this.labelControl5.Name = "labelControl5";
+            this.labelControl5.Size = new System.Drawing.Size(420, 40);
+            this.labelControl5.TabIndex = 5;
+            this.labelControl5.Values.Text = "You can send an email for support to skaldamramra@yahoo.com";
+            this.labelControl5.DoubleClick += new System.EventHandler(this.labelControl5_DoubleClick);
+            //
             // frmAbout
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(355, 247);
-            this.Controls.Add(this.hyperLinkEdit1);
-            this.Controls.Add(this.labelControl6);
-            this.Controls.Add(this.labelControl5);
-            this.Controls.Add(this.labelControl3);
-            this.Controls.Add(this.labelControl2);
+            this.ClientSize = new System.Drawing.Size(450, 355);
+            this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.simpleButton1);
             this.Controls.Add(this.panelControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "frmAbout";
+            this.PaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Custom;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "About...";
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).EndInit();
             this.panelControl1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.hyperLinkEdit1.Properties)).EndInit();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private DevExpress.XtraEditors.PanelControl panelControl1;
-        private DevExpress.XtraEditors.LabelControl labelControl1;
-        private DevExpress.XtraEditors.SimpleButton simpleButton1;
-        private DevExpress.XtraEditors.LabelControl labelControl2;
-        private DevExpress.XtraEditors.LabelControl labelControl3;
-        private DevExpress.XtraEditors.LabelControl labelControl5;
-        private DevExpress.XtraEditors.LabelControl labelControl6;
-        private DevExpress.XtraEditors.HyperLinkEdit hyperLinkEdit1;
+        private ComponentFactory.Krypton.Toolkit.KryptonPanel panelControl1;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl1;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton1;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl2;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl3;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl5;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl6;
+        private ComponentFactory.Krypton.Toolkit.KryptonLinkLabel hyperLinkEdit1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }

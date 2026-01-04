@@ -5,15 +5,16 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmAbout : DevExpress.XtraEditors.XtraForm
+    public partial class frmAbout : KryptonForm
     {
         public frmAbout()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         public void SetInformation(string info)
