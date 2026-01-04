@@ -2355,22 +2355,22 @@ namespace VAGSuite
         // van t5
         internal void tabdet_onViewTypeChanged(object sender, MapViewerEventArgs.ViewTypeChangedEventArgs e)
         {
-            _viewSyncService.OnViewTypeChanged(sender, e, null);
+            _viewSyncService.OnViewTypeChanged(sender, e, kryptonDockingManager1);
         }
 
         internal void tabdet_onSurfaceGraphViewChangedEx(object sender, MapViewerEventArgs.SurfaceGraphViewChangedEventArgsEx e)
         {
-            _viewSyncService.OnSurfaceGraphViewChangedEx(sender, e, null);
+            _viewSyncService.OnSurfaceGraphViewChangedEx(sender, e, kryptonDockingManager1);
         }
 
         internal void tabdet_onSplitterMoved(object sender, MapViewerEventArgs.SplitterMovedEventArgs e)
         {
-            _viewSyncService.OnSplitterMoved(sender, e, null);
+            _viewSyncService.OnSplitterMoved(sender, e, kryptonDockingManager1);
         }
 
         internal void tabdet_onSelectionChanged(object sender, MapViewerEventArgs.CellSelectionChangedEventArgs e)
         {
-            _viewSyncService.OnSelectionChanged(sender, e, null);
+            _viewSyncService.OnSelectionChanged(sender, e, kryptonDockingManager1);
         }
 
         private void SetMapSliderPosition(string filename, string symbolname, int sliderposition)
@@ -2395,7 +2395,7 @@ namespace VAGSuite
 
         internal void tabdet_onSliderMove(object sender, MapViewerEventArgs.SliderMoveEventArgs e)
         {
-            _viewSyncService.OnSliderMove(sender, e, null);
+            _viewSyncService.OnSliderMove(sender, e, kryptonDockingManager1);
         }
 
         private void SetMapScale(string filename, string symbolname, int axismax, int lockmode)
@@ -2442,7 +2442,7 @@ namespace VAGSuite
 
         internal void tabdet_onAxisLock(object sender, MapViewerEventArgs.AxisLockEventArgs e)
         {
-            _viewSyncService.OnAxisLock(sender, e, null);
+            _viewSyncService.OnAxisLock(sender, e, kryptonDockingManager1);
         }
 
         private void btnActivateLaunchControl_ItemClick(object sender, ItemClickEventArgs e)

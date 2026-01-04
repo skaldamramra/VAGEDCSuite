@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using DevExpress.XtraBars.Docking;
+using ComponentFactory.Krypton.Docking;
+using ComponentFactory.Krypton.Navigator;
 using VAGSuite;
 using VAGSuite.MapViewerEventArgs;
 
@@ -26,11 +27,12 @@ namespace VAGSuite.Services
         /// <summary>
         /// Synchronizes view type changes across all map viewers
         /// </summary>
-        public void OnViewTypeChanged(object sender, MapViewerEventArgs.ViewTypeChangedEventArgs e, DockManager dockManager)
+        public void OnViewTypeChanged(object sender, MapViewerEventArgs.ViewTypeChangedEventArgs e, KryptonDockingManager dockManager)
         {
+            if (dockManager == null) return;
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {
-                foreach (DockPanel pnl in dockManager.Panels)
+                foreach (KryptonPage pnl in dockManager.Pages)
                 {
                     foreach (Control c in pnl.Controls)
                     {
@@ -47,46 +49,6 @@ namespace VAGSuite.Services
                                 }
                             }
                         }
-                        else if (c is DockPanel)
-                        {
-                            DockPanel tpnl = (DockPanel)c;
-                            foreach (Control c2 in tpnl.Controls)
-                            {
-                                if (c2 is MapViewerEx)
-                                {
-                                    if (c2 != sender)
-                                    {
-                                        MapViewerEx vwr2 = (MapViewerEx)c2;
-                                        if (vwr2.Map_name == e.Mapname || _appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr2.Viewtype = e.View;
-                                            vwr2.ReShowTable();
-                                            vwr2.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (c is DockPanel)
-                        {
-                            DockPanel cntr = (DockPanel)c;
-                            foreach (Control c3 in cntr.Controls)
-                            {
-                                if (c3 is MapViewerEx)
-                                {
-                                    if (c3 != sender)
-                                    {
-                                        MapViewerEx vwr3 = (MapViewerEx)c3;
-                                        if (vwr3.Map_name == e.Mapname || _appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr3.Viewtype = e.View;
-                                            vwr3.ReShowTable();
-                                            vwr3.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -99,11 +61,12 @@ namespace VAGSuite.Services
         /// <summary>
         /// Synchronizes surface graph view changes across all map viewers
         /// </summary>
-        public void OnSurfaceGraphViewChangedEx(object sender, MapViewerEventArgs.SurfaceGraphViewChangedEventArgsEx e, DockManager dockManager)
+        public void OnSurfaceGraphViewChangedEx(object sender, MapViewerEventArgs.SurfaceGraphViewChangedEventArgsEx e, KryptonDockingManager dockManager)
         {
+            if (dockManager == null) return;
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {
-                foreach (DockPanel pnl in dockManager.Panels)
+                foreach (KryptonPage pnl in dockManager.Pages)
                 {
                     foreach (Control c in pnl.Controls)
                     {
@@ -119,44 +82,6 @@ namespace VAGSuite.Services
                                 }
                             }
                         }
-                        else if (c is DockPanel)
-                        {
-                            DockPanel tpnl = (DockPanel)c;
-                            foreach (Control c2 in tpnl.Controls)
-                            {
-                                if (c2 is MapViewerEx)
-                                {
-                                    if (c2 != sender)
-                                    {
-                                        MapViewerEx vwr2 = (MapViewerEx)c2;
-                                        if (vwr2.Map_name == e.Mapname || _appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr2.SetSurfaceGraphViewEx(e.DepthX, e.DepthY, e.Zoom, e.Rotation, e.Elevation);
-                                            vwr2.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (c is DockPanel)
-                        {
-                            DockPanel cntr = (DockPanel)c;
-                            foreach (Control c3 in cntr.Controls)
-                            {
-                                if (c3 is MapViewerEx)
-                                {
-                                    if (c3 != sender)
-                                    {
-                                        MapViewerEx vwr3 = (MapViewerEx)c3;
-                                        if (vwr3.Map_name == e.Mapname || _appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr3.SetSurfaceGraphViewEx(e.DepthX, e.DepthY, e.Zoom, e.Rotation, e.Elevation);
-                                            vwr3.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -169,11 +94,12 @@ namespace VAGSuite.Services
         /// <summary>
         /// Synchronizes splitter position changes across all map viewers
         /// </summary>
-        public void OnSplitterMoved(object sender, MapViewerEventArgs.SplitterMovedEventArgs e, DockManager dockManager)
+        public void OnSplitterMoved(object sender, MapViewerEventArgs.SplitterMovedEventArgs e, KryptonDockingManager dockManager)
         {
+            if (dockManager == null) return;
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {
-                foreach (DockPanel pnl in dockManager.Panels)
+                foreach (KryptonPage pnl in dockManager.Pages)
                 {
                     foreach (Control c in pnl.Controls)
                     {
@@ -189,44 +115,6 @@ namespace VAGSuite.Services
                                 }
                             }
                         }
-                        else if (c is DockPanel)
-                        {
-                            DockPanel tpnl = (DockPanel)c;
-                            foreach (Control c2 in tpnl.Controls)
-                            {
-                                if (c2 is MapViewerEx)
-                                {
-                                    if (c2 != sender)
-                                    {
-                                        MapViewerEx vwr2 = (MapViewerEx)c2;
-                                        if (vwr2.Map_name == e.Mapname || _appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr2.SetSplitter(e.Panel1height, e.Panel2height, e.Splitdistance, e.Panel1collapsed, e.Panel2collapsed);
-                                            vwr2.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (c is DockPanel)
-                        {
-                            DockPanel cntr = (DockPanel)c;
-                            foreach (Control c3 in cntr.Controls)
-                            {
-                                if (c3 is MapViewerEx)
-                                {
-                                    if (c3 != sender)
-                                    {
-                                        MapViewerEx vwr3 = (MapViewerEx)c3;
-                                        if (vwr3.Map_name == e.Mapname || _appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr3.SetSplitter(e.Panel1height, e.Panel2height, e.Splitdistance, e.Panel1collapsed, e.Panel2collapsed);
-                                            vwr3.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -239,11 +127,12 @@ namespace VAGSuite.Services
         /// <summary>
         /// Synchronizes cell selection changes across all map viewers
         /// </summary>
-        public void OnSelectionChanged(object sender, MapViewerEventArgs.CellSelectionChangedEventArgs e, DockManager dockManager)
+        public void OnSelectionChanged(object sender, MapViewerEventArgs.CellSelectionChangedEventArgs e, KryptonDockingManager dockManager)
         {
+            if (dockManager == null) return;
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {
-                foreach (DockPanel pnl in dockManager.Panels)
+                foreach (KryptonPage pnl in dockManager.Pages)
                 {
                     foreach (Control c in pnl.Controls)
                     {
@@ -259,44 +148,6 @@ namespace VAGSuite.Services
                                 }
                             }
                         }
-                        else if (c is DockPanel)
-                        {
-                            DockPanel tpnl = (DockPanel)c;
-                            foreach (Control c2 in tpnl.Controls)
-                            {
-                                if (c2 is MapViewerEx)
-                                {
-                                    if (c2 != sender)
-                                    {
-                                        MapViewerEx vwr2 = (MapViewerEx)c2;
-                                        if (vwr2.Map_name == e.Mapname || _appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr2.SelectCell(e.Rowhandle, e.Colindex);
-                                            vwr2.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (c is DockPanel)
-                        {
-                            DockPanel cntr = (DockPanel)c;
-                            foreach (Control c3 in cntr.Controls)
-                            {
-                                if (c3 is MapViewerEx)
-                                {
-                                    if (c3 != sender)
-                                    {
-                                        MapViewerEx vwr3 = (MapViewerEx)c3;
-                                        if (vwr3.Map_name == e.Mapname || _appSettings.SynchronizeMapviewersDifferentMaps)
-                                        {
-                                            vwr3.SelectCell(e.Rowhandle, e.Colindex);
-                                            vwr3.Invalidate();
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -309,8 +160,9 @@ namespace VAGSuite.Services
         /// <summary>
         /// Synchronizes slider position changes across all map viewers
         /// </summary>
-        public void OnSliderMove(object sender, MapViewerEventArgs.SliderMoveEventArgs e, DockManager dockManager)
+        public void OnSliderMove(object sender, MapViewerEventArgs.SliderMoveEventArgs e, KryptonDockingManager dockManager)
         {
+            if (dockManager == null) return;
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {
                 SetMapSliderPosition(e.Filename, e.SymbolName, e.SliderPosition, dockManager);
@@ -320,9 +172,10 @@ namespace VAGSuite.Services
         /// <summary>
         /// Sets the slider position for all viewers showing a specific symbol
         /// </summary>
-        public void SetMapSliderPosition(string filename, string symbolname, int sliderposition, DockManager dockManager)
+        public void SetMapSliderPosition(string filename, string symbolname, int sliderposition, KryptonDockingManager dockManager)
         {
-            foreach (DockPanel pnl in dockManager.Panels)
+            if (dockManager == null) return;
+            foreach (KryptonPage pnl in dockManager.Pages)
             {
                 foreach (Control c in pnl.Controls)
                 {
@@ -333,38 +186,6 @@ namespace VAGSuite.Services
                         {
                             vwr.SliderPosition = sliderposition;
                             vwr.Invalidate();
-                        }
-                    }
-                    else if (c is DockPanel)
-                    {
-                        DockPanel tpnl = (DockPanel)c;
-                        foreach (Control c2 in tpnl.Controls)
-                        {
-                            if (c2 is MapViewerEx)
-                            {
-                                MapViewerEx vwr2 = (MapViewerEx)c2;
-                                if (vwr2.Map_name == symbolname)
-                                {
-                                    vwr2.SliderPosition = sliderposition;
-                                    vwr2.Invalidate();
-                                }
-                            }
-                        }
-                    }
-                    else if (c is DockPanel)
-                    {
-                        DockPanel cntr = (DockPanel)c;
-                        foreach (Control c3 in cntr.Controls)
-                        {
-                            if (c3 is MapViewerEx)
-                            {
-                                MapViewerEx vwr3 = (MapViewerEx)c3;
-                                if (vwr3.Map_name == symbolname)
-                                {
-                                    vwr3.SliderPosition = sliderposition;
-                                    vwr3.Invalidate();
-                                }
-                            }
                         }
                     }
                 }
@@ -378,9 +199,10 @@ namespace VAGSuite.Services
         /// <summary>
         /// Sets the scale (axis max value and lock mode) for all viewers showing a specific symbol
         /// </summary>
-        public void SetMapScale(string filename, string symbolname, int axismax, int lockmode, DockManager dockManager)
+        public void SetMapScale(string filename, string symbolname, int axismax, int lockmode, KryptonDockingManager dockManager)
         {
-            foreach (DockPanel pnl in dockManager.Panels)
+            if (dockManager == null) return;
+            foreach (KryptonPage pnl in dockManager.Pages)
             {
                 foreach (Control c in pnl.Controls)
                 {
@@ -394,40 +216,6 @@ namespace VAGSuite.Services
                             vwr.Invalidate();
                         }
                     }
-                    else if (c is DockPanel)
-                    {
-                        DockPanel tpnl = (DockPanel)c;
-                        foreach (Control c2 in tpnl.Controls)
-                        {
-                            if (c2 is MapViewerEx)
-                            {
-                                MapViewerEx vwr2 = (MapViewerEx)c2;
-                                if (vwr2.Map_name == symbolname || _appSettings.SynchronizeMapviewersDifferentMaps)
-                                {
-                                    vwr2.Max_y_axis_value = axismax;
-                                    vwr2.LockMode = lockmode;
-                                    vwr2.Invalidate();
-                                }
-                            }
-                        }
-                    }
-                    else if (c is DockPanel)
-                    {
-                        DockPanel cntr = (DockPanel)c;
-                        foreach (Control c3 in cntr.Controls)
-                        {
-                            if (c3 is MapViewerEx)
-                            {
-                                MapViewerEx vwr3 = (MapViewerEx)c3;
-                                if (vwr3.Map_name == symbolname || _appSettings.SynchronizeMapviewersDifferentMaps)
-                                {
-                                    vwr3.Max_y_axis_value = axismax;
-                                    vwr3.LockMode = lockmode;
-                                    vwr3.Invalidate();
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -439,10 +227,11 @@ namespace VAGSuite.Services
         /// <summary>
         /// Finds the maximum value in a table across all viewers showing a specific symbol
         /// </summary>
-        public int FindMaxTableValue(string symbolname, int orgvalue, DockManager dockManager)
+        public int FindMaxTableValue(string symbolname, int orgvalue, KryptonDockingManager dockManager)
         {
+            if (dockManager == null) return orgvalue;
             int retval = orgvalue;
-            foreach (DockPanel pnl in dockManager.Panels)
+            foreach (KryptonPage pnl in dockManager.Pages)
             {
                 foreach (Control c in pnl.Controls)
                 {
@@ -452,36 +241,6 @@ namespace VAGSuite.Services
                         if (vwr.Map_name == symbolname)
                         {
                             if (vwr.MaxValueInTable > retval) retval = vwr.MaxValueInTable;
-                        }
-                    }
-                    else if (c is DockPanel)
-                    {
-                        DockPanel tpnl = (DockPanel)c;
-                        foreach (Control c2 in tpnl.Controls)
-                        {
-                            if (c2 is MapViewerEx)
-                            {
-                                MapViewerEx vwr2 = (MapViewerEx)c2;
-                                if (vwr2.Map_name == symbolname)
-                                {
-                                    if (vwr2.MaxValueInTable > retval) retval = vwr2.MaxValueInTable;
-                                }
-                            }
-                        }
-                    }
-                    else if (c is DockPanel)
-                    {
-                        DockPanel cntr = (DockPanel)c;
-                        foreach (Control c3 in cntr.Controls)
-                        {
-                            if (c3 is MapViewerEx)
-                            {
-                                MapViewerEx vwr3 = (MapViewerEx)c3;
-                                if (vwr3.Map_name == symbolname)
-                                {
-                                    if (vwr3.MaxValueInTable > retval) retval = vwr3.MaxValueInTable;
-                                }
-                            }
                         }
                     }
                 }
@@ -496,7 +255,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Handles axis lock event and synchronizes across all viewers
         /// </summary>
-        public void OnAxisLock(object sender, MapViewerEventArgs.AxisLockEventArgs e, DockManager dockManager)
+        public void OnAxisLock(object sender, MapViewerEventArgs.AxisLockEventArgs e, KryptonDockingManager dockManager)
         {
             if (_appSettings.SynchronizeMapviewers || _appSettings.SynchronizeMapviewersDifferentMaps)
             {
