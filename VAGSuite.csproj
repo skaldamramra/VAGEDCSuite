@@ -148,6 +148,7 @@
     <Compile Include="Services\SmokeLimiterService.cs" />
     <Compile Include="Services\ProjectRebuildService.cs" />
     <Compile Include="Services\MapDescriptionService.cs" />
+    <Compile Include="Services\TooltipService.cs" />
     <Compile Include="Services\IDataConversionService.cs" />
     <Compile Include="Services\DataConversionService.cs" />
     <Compile Include="Services\IMapRenderingService.cs" />

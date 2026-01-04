@@ -122,7 +122,6 @@ namespace VAGSuite
         private KryptonManager kryptonManager;
         private AppSettings m_appSettings;
         private int lastHoverRowHandle = -1;
-        private DevExpress.Utils.ToolTipController gridToolTipController;
         private msiupdater m_msiUpdater;
         public DelegateStartReleaseNotePanel m_DelegateStartReleaseNotePanel;
         private frmSplash splash;
@@ -158,9 +157,6 @@ namespace VAGSuite
             this.kryptonManager.GlobalPaletteMode = PaletteModeManager.ProfessionalSystem;
 
             m_DelegateStartReleaseNotePanel = new DelegateStartReleaseNotePanel(this.StartReleaseNotesViewer);
-            gridToolTipController = new DevExpress.Utils.ToolTipController();
-            gridToolTipController.AutoPopDelay = 10000;
-            gridToolTipController.InitialDelay = 500;
         }
 
         /// <summary>
@@ -3068,7 +3064,7 @@ namespace VAGSuite
             m_appSettings.ShowMapDescriptions = !m_appSettings.ShowMapDescriptions;
             if (!m_appSettings.ShowMapDescriptions)
             {
-                gridToolTipController.HideHint();
+                TooltipService.Hide();
             }
             UpdateMapDescriptionsButtonAppearance();
         }

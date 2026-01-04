@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Drawing;
 using ComponentFactory.Krypton.Toolkit;
+using VAGSuite.Services;
 
 namespace VAGSuite
 {
@@ -135,8 +136,9 @@ namespace VAGSuite
                 string description = VAGSuite.Services.MapDescriptionService.Instance.GetDescription(sh.Varname);
                 if (!string.IsNullOrEmpty(description))
                 {
-                    // Keep using the DevExpress controller; provide caption and screen position.
-                    gridToolTipController.ShowHint(description, sh.Varname, System.Windows.Forms.Cursor.Position);
+                    // Use the WinForms-based TooltipService to update the shown tooltip position/text.
+                    // ShowForControl expects a client coordinate relative to the owner control; we have e.Location.
+                    TooltipService.ShowForControl(tvSymbols, e.Location, sh.Varname, description);
                 }
             }
         }
@@ -144,7 +146,7 @@ namespace VAGSuite
         private void tvSymbols_MouseLeave(object sender, EventArgs e)
         {
             hoverTimer.Stop();
-            gridToolTipController.HideHint();
+            TooltipService.Hide();
             activeNode = null;
             isTooltipActive = false;
         }
@@ -153,15 +155,15 @@ namespace VAGSuite
         {
             hoverTimer.Stop();
             if (m_appSettings == null || !m_appSettings.ShowMapDescriptions) return;
-
+    
             if (activeNode != null && activeNode.Tag is SymbolHelper sh)
             {
                 string description = VAGSuite.Services.MapDescriptionService.Instance.GetDescription(sh.Varname);
                 if (!string.IsNullOrEmpty(description))
                 {
                     isTooltipActive = true;
-                    // Use the overload that takes text, caption and a screen position.
-                    gridToolTipController.ShowHint(description, sh.Varname, System.Windows.Forms.Cursor.Position);
+                    // Use TooltipService (WinForms.ToolTip wrapper) to show the hint.
+                    TooltipService.ShowForControl(tvSymbols, tvSymbols.PointToClient(System.Windows.Forms.Cursor.Position), sh.Varname, description);
                 }
             }
         }
@@ -176,7 +178,7 @@ namespace VAGSuite
             {
                 // Ensure we hide any active tooltip when descriptions are disabled.
                 hoverTimer.Stop();
-                if (gridToolTipController != null) gridToolTipController.HideHint();
+                TooltipService.Hide();
                 activeNode = null;
                 isTooltipActive = false;
                 return;
@@ -196,7 +198,7 @@ namespace VAGSuite
                     activeNode = null;
                     isTooltipActive = false;
                     hoverTimer.Stop();
-                    gridToolTipController.HideHint();
+                    TooltipService.Hide();
                 }
                 return;
             }
@@ -221,9 +223,9 @@ namespace VAGSuite
                 // Node changed: reset tooltip state and start hover timer for the new node.
                 activeNode = node;
                 isTooltipActive = false;
-                try { gridToolTipController.HideHint(); } catch { }
+                try { TooltipService.Hide(); } catch { }
                 hoverTimer.Stop();
-
+    
                 if (node != null)
                 {
                     hoverTimer.Start();

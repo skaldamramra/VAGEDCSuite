@@ -66,7 +66,6 @@ namespace VAGSuite
             this.trackBarControl1 = new DevExpress.XtraEditors.TrackBarControl();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.timer2 = new System.Windows.Forms.Timer(this.components);
-            this.toolTipController1 = new DevExpress.Utils.ToolTipController(this.components);
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripComboBox1 = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripTextBox1 = new System.Windows.Forms.ToolStripTextBox();
@@ -467,13 +466,9 @@ namespace VAGSuite
             // timer2
             // 
             this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
-            // 
-            // toolTipController1
-            // 
-            this.toolTipController1.Rounded = true;
-            // 
+            //
             // toolStrip1
-            // 
+            //
             this.toolStrip1.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripComboBox1,
@@ -758,7 +753,6 @@ namespace VAGSuite
         private DevExpress.XtraEditors.TrackBarControl trackBarControl1;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Timer timer2;
-        private DevExpress.Utils.ToolTipController toolTipController1;
         private System.Windows.Forms.Timer timer3;
         private DevExpress.XtraEditors.SimpleButton simpleButton4;
         private DevExpress.XtraEditors.SimpleButton simpleButton5;

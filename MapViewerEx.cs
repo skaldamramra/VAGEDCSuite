@@ -210,19 +210,21 @@ namespace VAGSuite
         {
             if (hi.InRowCell)
             {
-
+    
                 if (afr_counter != null)
                 {
                     // fetch correct counter
                     int current_afrcounter = (int)afr_counter[(afr_counter.Length - ((hi.RowHandle + 1) * m_TableWidth)) + hi.Column.AbsoluteIndex];
                     // show number of measurements in balloon
                     string detailline = "# measurements: " + current_afrcounter.ToString();
-                    toolTipController1.ShowHint(detailline, "Information", Cursor.Position);
+                    // Show tooltip using the centralized TooltipService, anchored to gridControl1.
+                    // We convert the screen cursor position to the gridControl1 client coordinates.
+                    TooltipService.ShowForControl(gridControl1, gridControl1.PointToClient(Cursor.Position), "Information", detailline);
                 }
             }
             else
             {
-                toolTipController1.HideHint();
+                TooltipService.Hide();
             }
         }
 
@@ -1623,7 +1625,7 @@ namespace VAGSuite
                         }
                         if (m_TableWidth == 1)
                         {
-                            // single column graph.. 
+                            // single column graph..
                             int numberofrows = m_map_length;
                             if (m_issixteenbit) numberofrows /= 2;
                             rowhandle = (numberofrows - 1) - Convert.ToInt32(yaxisvalue);
@@ -1634,15 +1636,16 @@ namespace VAGSuite
                             gridView1.SelectCell(rowhandle, gridView1.Columns[(int)trackBarControl1.Value]);
                         }
                     }
-
+    
                     string detailline = Y_axis_name + ": " + sp.Argument + Environment.NewLine + Z_axis_name + ": " + sp.Values[0].ToString();
                     if (m_map_name.StartsWith("Ign_map_0!") || m_map_name.StartsWith("Ign_map_4!")) detailline += " \u00b0";// +"C";
-                    toolTipController1.ShowHint(detailline, "Details", Cursor.Position);
+                    // Show tooltip using TooltipService anchored to the 3D chart control (nChartControl1).
+                    TooltipService.ShowForControl(nChartControl1, nChartControl1.PointToClient(Cursor.Position), "Details", detailline);
                 }
             }
             else
             {
-                toolTipController1.HideHint();
+                TooltipService.Hide();
                 
             }
 
@@ -1662,7 +1665,7 @@ namespace VAGSuite
                 timer4.Enabled = true;
                 _mouse_drag_x = e.X;
                 _mouse_drag_y = e.Y;
-                toolTipController1.HideHint();
+                TooltipService.Hide();
             }
         }
 
