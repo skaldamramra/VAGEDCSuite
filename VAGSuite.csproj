@@ -307,6 +307,9 @@
     <Compile Include="frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmMain.KryptonDocking.cs">
+      <DependentUpon>frmMain.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmMain.KryptonRibbon.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>

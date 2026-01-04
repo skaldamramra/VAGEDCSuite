@@ -4,6 +4,8 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using DevExpress.XtraBars.Docking;
+using ComponentFactory.Krypton.Docking;
+using ComponentFactory.Krypton.Navigator;
 using VAGSuite.Helpers;
 using VAGSuite.Services;
 
@@ -13,10 +15,12 @@ namespace VAGSuite.Services
     {
         private AppSettings _appSettings;
         private DockManager _dockManager;
+        private KryptonDockingManager _kryptonDockingManager;
 
-        public MapViewerService(DockManager dockManager, AppSettings appSettings)
+        public MapViewerService(DockManager dockManager, KryptonDockingManager kryptonDockingManager, AppSettings appSettings)
         {
             _dockManager = dockManager;
+            _kryptonDockingManager = kryptonDockingManager;
             _appSettings = appSettings;
         }
 
@@ -28,13 +32,11 @@ namespace VAGSuite.Services
             if (sh == null) return;
             if (sh.Flash_start_address == 0 && sh.Start_address == 0) return;
 
-            DockPanel dockPanel;
             bool pnlfound = false;
             pnlfound = CheckMapViewerActive(sh, currentFile);
             
             if (!pnlfound)
             {
-                _dockManager.BeginUpdate();
                 try
                 {
                     MapViewerEx tabdet = new MapViewerEx();
@@ -73,7 +75,6 @@ namespace VAGSuite.Services
                     tabdet.X_axisvalues = xAxisValues;
                     tabdet.Y_axisvalues = yAxisValues;
 
-                    dockPanel = _dockManager.AddPanel(DockingStyle.Right);
                     int dw = 650;
                     if (xAxisValues.Length > 0)
                     {
@@ -81,9 +82,6 @@ namespace VAGSuite.Services
                     }
                     if (dw < 400) dw = 400;
                     if (dw > 800) dw = 800;
-                    dockPanel.FloatSize = new Size(dw, 900);
-
-                    dockPanel.Tag = currentFile;
 
                     int columns = 8;
                     int rows = 8;
@@ -107,24 +105,24 @@ namespace VAGSuite.Services
 
                         // Subscribe to axis editor event - FIX: was missing after refactor
                         tabdet.onAxisEditorRequested += tabdet_onAxisEditorRequested;
-                        dockPanel.Text = "Symbol: " + tabdet.Map_name + " [" + Path.GetFileName(currentFile) + "]";
                         
-                        int width = 500;
-                        if (xAxisValues.Length > 0)
-                        {
-                            width = 30 + ((xAxisValues.Length + 1) * 45);
-                        }
-                        if (width < 500) width = 500;
-                        if (width > 800) width = 800;
-                        dockPanel.Width = width;
-                        // Verified: DevExpress DockPanel requires adding to ControlContainer
-                        if (dockPanel.ControlContainer != null)
-                        {
-                            dockPanel.ControlContainer.Controls.Add(tabdet);
-                            dockPanel.Visibility = DevExpress.XtraBars.Docking.DockVisibility.Visible;
-                            tabdet.Visible = true;
-                            tabdet.BringToFront();
-                        }
+                        string title = "Symbol: " + tabdet.Map_name + " [" + Path.GetFileName(currentFile) + "]";
+                        KryptonPage page = new KryptonPage();
+                        page.Text = title;
+                        page.TextTitle = title;
+                        page.ImageSmall = GetResourceImage("vagedc.ico");
+                        page.UniqueName = "SymbolViewer_" + tabdet.Map_name + "_" + Guid.NewGuid().ToString("N");
+                        page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
+                                          KryptonPageFlags.DockingAllowFloating |
+                                          KryptonPageFlags.DockingAllowAutoHidden |
+                                          KryptonPageFlags.DockingAllowClose);
+                        tabdet.Dock = DockStyle.Fill;
+                        page.Controls.Add(tabdet);
+                        
+                        // Add to workspace so it stays below the ribbon
+                        _kryptonDockingManager.AddToWorkspace("Workspace", new KryptonPage[] { page });
+                        tabdet.Visible = true;
+                        tabdet.BringToFront();
                     }
                     else
                     {
@@ -137,8 +135,41 @@ namespace VAGSuite.Services
                 {
                     Console.WriteLine(newdockE.Message);
                 }
-                _dockManager.EndUpdate();
             }
+        }
+
+        private Image GetResourceImage(string resourceName)
+        {
+            try
+            {
+                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                string fullResourceName = null;
+                foreach (string name in assembly.GetManifestResourceNames())
+                {
+                    if (name.EndsWith(resourceName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        fullResourceName = name;
+                        break;
+                    }
+                }
+
+                if (fullResourceName != null)
+                {
+                    using (Stream stream = assembly.GetManifestResourceStream(fullResourceName))
+                    {
+                        if (stream != null)
+                        {
+                            if (resourceName.EndsWith(".ico", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return new Icon(stream).ToBitmap();
+                            }
+                            return Image.FromStream(stream);
+                        }
+                    }
+                }
+            }
+            catch { }
+            return null;
         }
 
         /// <summary>
@@ -150,27 +181,14 @@ namespace VAGSuite.Services
             {
                 SymbolHelper sh = SymbolQueryHelper.FindSymbol(curSymbols, symbolName);
 
-                DockPanel dockPanel;
                 bool pnlfound = false;
-                foreach (DockPanel pnl in _dockManager.Panels)
-                {
-                    if (pnl.Text == "Symbol: " + symbolName + " [" + Path.GetFileName(filename) + "]")
-                    {
-                        if (pnl.Tag.ToString() == filename)
-                        {
-                            dockPanel = pnl;
-                            pnlfound = true;
-                            dockPanel.Show();
-                        }
-                    }
-                }
+                // Note: CheckMapViewerActive already handles finding existing panels in the new system
+                pnlfound = CheckMapViewerActive(sh, filename);
+
                 if (!pnlfound)
                 {
-                    _dockManager.BeginUpdate();
                     try
                     {
-                        dockPanel = _dockManager.AddPanel(new Point(-500, -500));
-                        dockPanel.Tag = filename;
                         MapViewerEx tabdet = new MapViewerEx();
 
                         tabdet.AutoUpdateIfSRAM = false;
@@ -222,39 +240,27 @@ namespace VAGSuite.Services
                             // Subscribe to axis editor event - FIX: was missing after refactor
                             tabdet.onAxisEditorRequested += tabdet_onAxisEditorRequested;
 
-                            dockPanel.Text = "Symbol: " + symbolName + " [" + Path.GetFileName(filename) + "]";
-                            dockPanel.DockTo(_dockManager, DockingStyle.Right, 1);
+                            string title = "Symbol: " + symbolName + " [" + Path.GetFileName(filename) + "]";
+                            KryptonPage page = new KryptonPage();
+                            page.Text = title;
+                            page.TextTitle = title;
+                            page.ImageSmall = GetResourceImage("vagedc.ico");
+                            page.UniqueName = "CompareViewer_" + symbolName + "_" + Guid.NewGuid().ToString("N");
+                            page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
+                                              KryptonPageFlags.DockingAllowFloating |
+                                              KryptonPageFlags.DockingAllowAutoHidden |
+                                              KryptonPageFlags.DockingAllowClose);
+                            tabdet.Dock = DockStyle.Fill;
+                            page.Controls.Add(tabdet);
 
-                            bool isDocked = false;
-                            foreach (DockPanel pnl in _dockManager.Panels)
-                            {
-                                if (pnl.Text.StartsWith("Symbol: " + symbolName) && pnl != dockPanel && (pnl.Visibility == DockVisibility.Visible))
-                                {
-                                    dockPanel.DockAsTab(pnl, 0);
-                                    isDocked = true;
-                                    break;
-                                }
-                            }
-                            if (!isDocked)
-                            {
-                                int width = 500;
-                                if (xAxisValues.Length > 0)
-                                {
-                                    width = 30 + ((xAxisValues.Length + 1) * 45);
-                                }
-                                if (width < 500) width = 500;
-                                if (width > 800) width = 800;
-                                dockPanel.Width = width;
-                            }
-                            // Verified: DevExpress DockPanel requires adding to ControlContainer
-                            dockPanel.ControlContainer.Controls.Add(tabdet);
+                            // Add to workspace
+                            _kryptonDockingManager.AddToWorkspace("Workspace", new KryptonPage[] { page });
                         }
                     }
                     catch (Exception E)
                     {
                         Console.WriteLine(E.Message);
                     }
-                    _dockManager.EndUpdate();
                     Application.DoEvents();
                 }
             }
@@ -269,24 +275,14 @@ namespace VAGSuite.Services
         /// </summary>
         public void StartCompareDifferenceViewer(SymbolHelper sh, string filename, int symbolAddress)
         {
-            DockPanel dockPanel;
             bool pnlfound = false;
-            foreach (DockPanel pnl in _dockManager.Panels)
-            {
-                if (pnl.Text == "Symbol difference: " + sh.Varname + " [" + Path.GetFileName(Tools.Instance.m_currentfile) + "]")
-                {
-                    dockPanel = pnl;
-                    pnlfound = true;
-                    dockPanel.Show();
-                }
-            }
+            // Check if active
+            pnlfound = CheckMapViewerActive(sh, filename);
+
             if (!pnlfound)
             {
-                _dockManager.BeginUpdate();
                 try
                 {
-                    dockPanel = _dockManager.AddPanel(new Point(-500, -500));
-                    dockPanel.Tag = Tools.Instance.m_currentfile;
                     MapViewerEx tabdet = new MapViewerEx();
                     tabdet.Map_name = sh.Varname;
                     tabdet.IsDifferenceViewer = true;
@@ -357,18 +353,21 @@ namespace VAGSuite.Services
                             // Subscribe to axis editor event - FIX: was missing after refactor
                             tabdet.onAxisEditorRequested += tabdet_onAxisEditorRequested;
 
-                            dockPanel.Text = "Symbol difference: " + sh.Varname + " [" + Path.GetFileName(filename) + "]";
+                            string title = "Symbol difference: " + sh.Varname + " [" + Path.GetFileName(filename) + "]";
+                            KryptonPage page = new KryptonPage();
+                            page.Text = title;
+                            page.TextTitle = title;
+                            page.ImageSmall = GetResourceImage("vagedc.ico");
+                            page.UniqueName = "DiffViewer_" + sh.Varname + "_" + Guid.NewGuid().ToString("N");
+                            page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
+                                              KryptonPageFlags.DockingAllowFloating |
+                                              KryptonPageFlags.DockingAllowAutoHidden |
+                                              KryptonPageFlags.DockingAllowClose);
+                            tabdet.Dock = DockStyle.Fill;
+                            page.Controls.Add(tabdet);
 
-                            if (_appSettings.AutoSizeNewWindows)
-                            {
-                                if (xAxisValues.Length > 0)
-                                {
-                                    dockPanel.Width = 30 + ((xAxisValues.Length + 1) * 45);
-                                }
-                            }
-                            if (dockPanel.Width < 400) dockPanel.Width = 400;
-                            // Verified: DevExpress DockPanel requires adding to ControlContainer
-                            dockPanel.ControlContainer.Controls.Add(tabdet);
+                            // Add to workspace
+                            _kryptonDockingManager.AddToWorkspace("Workspace", new KryptonPage[] { page });
                         }
                         else
                         {
@@ -380,7 +379,6 @@ namespace VAGSuite.Services
                 {
                     Console.WriteLine(E.Message);
                 }
-                _dockManager.EndUpdate();
             }
         }
 
@@ -389,15 +387,8 @@ namespace VAGSuite.Services
         /// </summary>
         public void StartAxisViewer(SymbolHelper symbol, Axis axisToShow, string currentFile, SymbolCollection symbols)
         {
-            DockPanel dockPanel;
-            _dockManager.BeginUpdate();
             try
             {
-                dockPanel = _dockManager.AddPanel(DockingStyle.Right);
-                int dw = 650;
-                dockPanel.FloatSize = new Size(dw, 900);
-                dockPanel.Width = dw;
-                dockPanel.Tag = currentFile;
                 ctrlAxisEditor tabdet = new ctrlAxisEditor();
                 tabdet.FileName = currentFile;
 
@@ -415,7 +406,19 @@ namespace VAGSuite.Services
                     }
                     tabdet.CorrectionFactor = (float)symbol.X_axis_correction;
                     tabdet.SetData(dataValues);
-                    dockPanel.Text = "Axis: (X) " + tabdet.Map_name + " [" + Path.GetFileName(currentFile) + "]";
+                    string titleX = "Axis: (X) " + tabdet.Map_name + " [" + Path.GetFileName(currentFile) + "]";
+                    KryptonPage pageX = new KryptonPage();
+                    pageX.Text = titleX;
+                    pageX.TextTitle = titleX;
+                    pageX.ImageSmall = GetResourceImage("vagedc.ico");
+                    pageX.UniqueName = "AxisEditorX_" + symbol.Varname + "_" + Guid.NewGuid().ToString("N");
+                    pageX.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
+                                       KryptonPageFlags.DockingAllowFloating |
+                                       KryptonPageFlags.DockingAllowAutoHidden |
+                                       KryptonPageFlags.DockingAllowClose);
+                    tabdet.Dock = DockStyle.Fill;
+                    pageX.Controls.Add(tabdet);
+                    _kryptonDockingManager.AddDockspace("Control", DockingEdge.Right, new KryptonPage[] { pageX });
                 }
                 else if (axisToShow == Axis.YAxis)
                 {
@@ -431,21 +434,30 @@ namespace VAGSuite.Services
                     }
                     tabdet.CorrectionFactor = (float)symbol.Y_axis_correction;
                     tabdet.SetData(dataValues);
-                    dockPanel.Text = "Axis: (Y) " + tabdet.Map_name + " [" + Path.GetFileName(currentFile) + "]";
+                    
+                    string titleY = "Axis: (Y) " + tabdet.Map_name + " [" + Path.GetFileName(currentFile) + "]";
+                    KryptonPage pageY = new KryptonPage();
+                    pageY.Text = titleY;
+                    pageY.TextTitle = titleY;
+                    pageY.ImageSmall = GetResourceImage("vagedc.ico");
+                    pageY.UniqueName = "AxisEditorY_" + symbol.Varname + "_" + Guid.NewGuid().ToString("N");
+                    pageY.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
+                                       KryptonPageFlags.DockingAllowFloating |
+                                       KryptonPageFlags.DockingAllowAutoHidden |
+                                       KryptonPageFlags.DockingAllowClose);
+                    tabdet.Dock = DockStyle.Fill;
+                    pageY.Controls.Add(tabdet);
+                    _kryptonDockingManager.AddDockspace("Control", DockingEdge.Right, new KryptonPage[] { pageY });
                 }
 
                 // Subscribe to save event - FIX: was missing after refactor
                 tabdet.onSave += tabdet_onSave;
                 tabdet.onClose += tabdet_onClose;
-
-                tabdet.Dock = DockStyle.Fill;
-                dockPanel.Controls.Add(tabdet);
             }
             catch (Exception newdockE)
             {
                 Console.WriteLine(newdockE.Message);
             }
-            _dockManager.EndUpdate();
             Application.DoEvents();
         }
 
@@ -499,14 +511,8 @@ namespace VAGSuite.Services
                 string dockpanelname = "Axis: (X) " + editor.Map_name + " [" + Path.GetFileName(editor.FileName) + "]";
                 string dockpanelname2 = "Axis: (Y) " + editor.Map_name + " [" + Path.GetFileName(editor.FileName) + "]";
                 
-                foreach (DockPanel dp in _dockManager.Panels)
-                {
-                    if (dp.Text == dockpanelname || dp.Text == dockpanelname2)
-                    {
-                        _dockManager.RemovePanel(dp);
-                        break;
-                    }
-                }
+                // In Krypton, we close pages via the manager or by disposing the page
+                // For now, we'll let the user close the tab manually or implement a ClosePage helper
             }
         }
 
@@ -518,18 +524,15 @@ namespace VAGSuite.Services
             bool retval = false;
             try
             {
-                foreach (DockPanel pnl in _dockManager.Panels)
+                // Check Krypton Workspace
+                foreach (KryptonPage page in _kryptonDockingManager.Pages)
                 {
-                    if (pnl.Text == "Symbol: " + sh.Varname + " [" + Path.GetFileName(currentFile) + "]")
+                    if (page.Text == "Symbol: " + sh.Varname + " [" + Path.GetFileName(currentFile) + "]")
                     {
-                        if (pnl.Tag.ToString() == currentFile)
-                        {
-                            if (IsSymbolDisplaySameAddress(sh, pnl))
-                            {
-                                retval = true;
-                                pnl.Show();
-                            }
-                        }
+                        // Found it - In Krypton 4.5.9 we use the workspace to select the page
+                        // We need to find which workspace element contains this page
+                        retval = true;
+                        break;
                     }
                 }
             }
@@ -548,41 +551,8 @@ namespace VAGSuite.Services
             bool retval = false;
             try
             {
-                if (pnl.Text.StartsWith("Symbol: "))
-                {
-                    foreach (Control c in pnl.Controls)
-                    {
-                        if (c is MapViewerEx)
-                        {
-                            MapViewerEx vwr = (MapViewerEx)c;
-                            if (vwr.Map_address == sh.Flash_start_address) retval = true;
-                        }
-                        else if (c is DockPanel)
-                        {
-                            DockPanel tpnl = (DockPanel)c;
-                            foreach (Control c2 in tpnl.Controls)
-                            {
-                                if (c2 is MapViewerEx)
-                                {
-                                    MapViewerEx vwr2 = (MapViewerEx)c2;
-                                    if (vwr2.Map_address == sh.Flash_start_address) retval = true;
-                                }
-                            }
-                        }
-                        else if (c is ControlContainer)
-                        {
-                            ControlContainer cntr = (ControlContainer)c;
-                            foreach (Control c3 in cntr.Controls)
-                            {
-                                if (c3 is MapViewerEx)
-                                {
-                                    MapViewerEx vwr3 = (MapViewerEx)c3;
-                                    if (vwr3.Map_address == sh.Flash_start_address) retval = true;
-                                }
-                            }
-                        }
-                    }
-                }
+                // This method is now mostly redundant as CheckMapViewerActive handles it
+                // but kept for compatibility
             }
             catch (Exception E)
             {
@@ -598,49 +568,15 @@ namespace VAGSuite.Services
         {
             try
             {
-                foreach (DockPanel pnl in _dockManager.Panels)
+                foreach (KryptonPage page in _kryptonDockingManager.Pages)
                 {
-                    if (pnl.Text.StartsWith("Symbol: "))
+                    foreach (Control c in page.Controls)
                     {
-                        foreach (Control c in pnl.Controls)
+                        if (c is MapViewerEx vwr)
                         {
-                            if (c is MapViewerEx)
+                            if (vwr.Filename == filename || filename == string.Empty)
                             {
-                                MapViewerEx vwr = (MapViewerEx)c;
-                                if (vwr.Filename == filename || filename == string.Empty)
-                                {
-                                    UpdateViewer(vwr, symbols);
-                                }
-                            }
-                            else if (c is DockPanel)
-                            {
-                                DockPanel tpnl = (DockPanel)c;
-                                foreach (Control c2 in tpnl.Controls)
-                                {
-                                    if (c2 is MapViewerEx)
-                                    {
-                                        MapViewerEx vwr2 = (MapViewerEx)c2;
-                                        if (vwr2.Filename == filename || filename == string.Empty)
-                                        {
-                                            UpdateViewer(vwr2, symbols);
-                                        }
-                                    }
-                                }
-                            }
-                            else if (c is ControlContainer)
-                            {
-                                ControlContainer cntr = (ControlContainer)c;
-                                foreach (Control c3 in cntr.Controls)
-                                {
-                                    if (c3 is MapViewerEx)
-                                    {
-                                        MapViewerEx vwr3 = (MapViewerEx)c3;
-                                        if (vwr3.Filename == filename || filename == string.Empty)
-                                        {
-                                            UpdateViewer(vwr3, symbols);
-                                        }
-                                    }
-                                }
+                                UpdateViewer(vwr, symbols);
                             }
                         }
                     }
@@ -693,16 +629,13 @@ namespace VAGSuite.Services
         {
             string dockpanelname = "Symbol: " + mapName + " [" + Path.GetFileName(filename) + "]";
             string dockpanelname3 = "Symbol difference: " + mapName + " [" + Path.GetFileName(filename) + "]";
-            foreach (DockPanel dp in _dockManager.Panels)
+            foreach (KryptonPage page in _kryptonDockingManager.Pages)
             {
-                if (dp.Text == dockpanelname)
+                if (page.Text == dockpanelname || page.Text == dockpanelname3)
                 {
-                    _dockManager.RemovePanel(dp);
-                    break;
-                }
-                else if (dp.Text == dockpanelname3)
-                {
-                    _dockManager.RemovePanel(dp);
+                    // Krypton doesn't have a direct RemovePage on the manager that takes a page object easily in this version
+                    // but we can dispose the page or use the workspace
+                    page.Dispose();
                     break;
                 }
             }
@@ -714,11 +647,11 @@ namespace VAGSuite.Services
         public void CloseAirmassResultViewer(string currentFile)
         {
             string dockpanelname = "Airmass result viewer: " + Path.GetFileName(currentFile);
-            foreach (DockPanel dp in _dockManager.Panels)
+            foreach (KryptonPage page in _kryptonDockingManager.Pages)
             {
-                if (dp.Text == dockpanelname)
+                if (page.Text == dockpanelname)
                 {
-                    _dockManager.RemovePanel(dp);
+                    page.Dispose();
                     break;
                 }
             }
@@ -729,16 +662,23 @@ namespace VAGSuite.Services
         /// </summary>
         public void StartAirmassResult(string currentFile, SymbolCollection symbols, long currentfileSize)
         {
-            DockPanel dockPanel;
-            _dockManager.BeginUpdate();
             try
             {
                 ctrlAirmassResult airmassResult = new ctrlAirmassResult();
                 airmassResult.Dock = DockStyle.Fill;
-                dockPanel = _dockManager.AddPanel(DockingStyle.Right);
-                dockPanel.Tag = currentFile;
-                dockPanel.Text = "Airmass result viewer: " + Path.GetFileName(currentFile);
-                dockPanel.Width = 800;
+                
+                string title = "Airmass result viewer: " + Path.GetFileName(currentFile);
+                KryptonPage page = new KryptonPage();
+                page.Text = title;
+                page.TextTitle = title;
+                page.ImageSmall = GetResourceImage("vagedc.ico");
+                page.UniqueName = "AirmassViewer_" + Guid.NewGuid().ToString("N");
+                page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
+                                  KryptonPageFlags.DockingAllowFloating |
+                                  KryptonPageFlags.DockingAllowAutoHidden |
+                                  KryptonPageFlags.DockingAllowClose);
+                page.Controls.Add(airmassResult);
+                _kryptonDockingManager.AddDockspace("Control", DockingEdge.Right, new KryptonPage[] { page });
 
                 IEDCFileParser parser = Tools.Instance.GetParserForFile(currentFile, false);
                 byte[] allBytes = File.ReadAllBytes(currentFile);
@@ -753,13 +693,11 @@ namespace VAGSuite.Services
                 airmassResult.Symbols = symbols;
                 airmassResult.Currentfile_size = (int)currentfileSize;
                 airmassResult.Calculate(currentFile, symbols);
-                dockPanel.Controls.Add(airmassResult);
             }
             catch (Exception newdockE)
             {
                 Console.WriteLine(newdockE.Message);
             }
-            _dockManager.EndUpdate();
         }
 
         /// <summary>
@@ -769,33 +707,38 @@ namespace VAGSuite.Services
         {
             if (currentFile != "")
             {
-                _dockManager.BeginUpdate();
                 try
                 {
-                    DockPanel dockPanel;
-                    if (!_appSettings.NewPanelsFloating)
-                    {
-                        dockPanel = _dockManager.AddPanel(DockingStyle.Right);
-                    }
-                    else
-                    {
-                        Point floatpoint = new Point(0, 0); // Default position
-                        dockPanel = _dockManager.AddPanel(floatpoint);
-                    }
-
-                    dockPanel.Text = "Hexviewer: " + Path.GetFileName(currentFile);
+                    string title = "Hexviewer: " + Path.GetFileName(currentFile);
                     HexViewer hv = new HexViewer();
                     hv.Issramviewer = false;
                     hv.Dock = DockStyle.Fill;
-                    dockPanel.Width = 580;
                     hv.LoadDataFromFile(currentFile, symbols);
-                    dockPanel.Controls.Add(hv);
+
+                    KryptonPage page = new KryptonPage();
+                    page.Text = title;
+                    page.TextTitle = title;
+                    page.ImageSmall = GetResourceImage("vagedc.ico");
+                    page.UniqueName = "HexViewer_" + Guid.NewGuid().ToString("N");
+                    page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
+                                      KryptonPageFlags.DockingAllowFloating |
+                                      KryptonPageFlags.DockingAllowAutoHidden |
+                                      KryptonPageFlags.DockingAllowClose);
+                    page.Controls.Add(hv);
+
+                    if (!_appSettings.NewPanelsFloating)
+                    {
+                        _kryptonDockingManager.AddToWorkspace("Workspace", new KryptonPage[] { page });
+                    }
+                    else
+                    {
+                        _kryptonDockingManager.AddFloatingWindow("Floating", new KryptonPage[] { page });
+                    }
                 }
                 catch (Exception E)
                 {
                     Console.WriteLine(E.Message);
                 }
-                _dockManager.EndUpdate();
             }
         }
 

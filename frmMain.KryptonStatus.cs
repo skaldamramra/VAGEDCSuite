@@ -32,9 +32,9 @@ namespace VAGSuite
             }
             
             // Ensure it's at the bottom and visible
+            // CRITICAL: Do NOT call BringToFront() here - let the initialization order handle Z-order
             this.kryptonStatusStrip1.Visible = true;
             this.kryptonStatusStrip1.Dock = DockStyle.Bottom;
-            this.kryptonStatusStrip1.BringToFront();
 
             this.statusFilename = new ToolStripStatusLabel();
             this.statusChecksum = new ToolStripStatusLabel();
@@ -160,8 +160,6 @@ namespace VAGSuite
             this.statusMapDescriptions.DisplayStyle = ToolStripItemDisplayStyle.Text;
             this.statusMapDescriptions.CheckOnClick = true;
             this.statusMapDescriptions.Click += new System.EventHandler(this.statusMapDescriptions_Click);
-
-            this.kryptonStatusStrip1.BringToFront();
         }
 
         private void statusMapDescriptions_Click(object sender, EventArgs e)

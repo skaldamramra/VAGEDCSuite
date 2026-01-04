@@ -62,6 +62,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using ComponentFactory.Krypton.Toolkit;
+using ComponentFactory.Krypton.Docking;
 using DevExpress.XtraBars.Docking;
 using DevExpress.XtraBars;
 using DevExpress.Skins;
@@ -202,10 +203,10 @@ namespace VAGSuite
             // Subscribe to axis editor event from coordinator
             _mapViewerCoordinator.OnAxisEditorRequested += MapCoordinator_OnAxisEditorRequested;
             _importExportService = new ImportExportService(m_appSettings);
-            _fileComparisonService = new FileComparisonService(m_appSettings);
+            _fileComparisonService = new FileComparisonService(kryptonDockingManager1, m_appSettings);
             _viewSyncService = new ViewSynchronizationService(m_appSettings);
             _transactionService = new TransactionService(m_appSettings);
-            _mapViewerService = new MapViewerService(dockManager1, m_appSettings);
+            _mapViewerService = new MapViewerService(dockManager1, kryptonDockingManager1, m_appSettings);
             
             // Wire the MouseMove event for tooltips
             gridControl1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.gridControl1_MouseMove);
@@ -215,7 +216,7 @@ namespace VAGSuite
             _exportService = new ExportService(m_appSettings);
             _quickAccessService = new QuickAccessService(_mapViewerService);
             _layoutService = new LayoutService(m_appSettings);
-            _searchService = new SearchService(dockManager1, m_appSettings);
+            _searchService = new SearchService(dockManager1, kryptonDockingManager1, m_appSettings);
             _firmwareService = new FirmwareService(m_appSettings);
             _launchControlService = new LaunchControlService(m_appSettings);
             _smokeLimiterService = new SmokeLimiterService(m_appSettings);
@@ -225,17 +226,12 @@ namespace VAGSuite
 
         private void StartReleaseNotesViewer(string xmlfilename, string version)
         {
-            dockManager1.BeginUpdate();
-            DockPanel dp = dockManager1.AddPanel(DockingStyle.Right);
-            dp.ClosedPanel += new DockPanelEventHandler(dockPanel_ClosedPanel);
-            dp.Tag = xmlfilename;
             ctrlReleaseNotes mv = new ctrlReleaseNotes();
             mv.LoadXML(xmlfilename);
             mv.Dock = DockStyle.Fill;
-            dp.Width = 500;
-            dp.Text = "Release notes: " + version;
-            dp.Controls.Add(mv);
-            dockManager1.EndUpdate();
+            
+            string title = "Release notes: " + version;
+            AddControlToDocking(mv, title, "ReleaseNotes", DockingEdge.Right);
         }
 
         private void btnBinaryCompare_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
@@ -801,20 +797,17 @@ namespace VAGSuite
         {
             if (Tools.Instance.m_symbols.Count > 0)
             {
-                dockManager1.BeginUpdate();
                 try
                 {
-                    DevExpress.XtraBars.Docking.DockPanel dockPanel = dockManager1.AddPanel(new System.Drawing.Point(-500, -500));
                     CompareResults tabdet = new CompareResults();
                     tabdet.ShowAddressesInHex = true;
                     tabdet.SetFilterMode(true);
                     tabdet.Dock = DockStyle.Fill;
                     tabdet.Filename = filename;
                     tabdet.onSymbolSelect += new CompareResults.NotifySelectSymbol(tabdet_onSymbolSelect);
-                    dockPanel.Controls.Add(tabdet);
-                    dockPanel.Text = "Compare results: " + Path.GetFileName(filename);
-                    dockPanel.DockTo(dockManager1, DevExpress.XtraBars.Docking.DockingStyle.Left, 1);
-                    dockPanel.Width = 500;
+                    
+                    string title = "Compare results: " + Path.GetFileName(filename);
+                    AddControlToDocking(tabdet, title, "CompareResults", DockingEdge.Left);
                     
                     // Detect maps in comparison file
                     List<CodeBlock> compare_blocks = new List<CodeBlock>();
@@ -845,7 +838,6 @@ namespace VAGSuite
                 {
                     Console.WriteLine(E.Message);
                 }
-                dockManager1.EndUpdate();
             }
         }
         /// <summary>
@@ -1319,6 +1311,8 @@ namespace VAGSuite
 
         private void frmMain_Load(object sender, EventArgs e)
         {
+            SetupDockingHierarchy();
+
             try
             {
                 m_appSettings = new AppSettings();

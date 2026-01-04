@@ -506,9 +506,22 @@ namespace VAGSuite
         /// </summary>
         private void EndComponentInitialization()
         {
-            // Ensure Krypton controls are on top of DevExpress ones
-            if (this.kryptonRibbon1 != null) this.kryptonRibbon1.BringToFront();
-            if (this.kryptonStatusStrip1 != null) this.kryptonStatusStrip1.BringToFront();
+            // CRITICAL Z-ORDER FIX:
+            // The correct Z-order is established by the control addition order in InitializeComponent:
+            // 1. Ribbon is added first (InitializeKryptonRibbon) -> claims top space
+            // 2. StatusStrip is added second (InitializeKryptonStatusBar) -> claims bottom space
+            // 3. Docking panel is added last (InitializeKryptonDocking) -> fills remaining space
+            //
+            // We explicitly send the docking panel to back to ensure it doesn't overlap the Ribbon/StatusStrip
+            if (this.kryptonDockableWorkspace1 != null)
+            {
+                this.kryptonDockableWorkspace1.SendToBack();
+            }
+
+            if (this.kryptonDockingPanel != null)
+            {
+                this.kryptonDockingPanel.SendToBack();
+            }
 
             ((System.ComponentModel.ISupportInitialize)(this.ribbonControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.barAndDockingController1)).EndInit();

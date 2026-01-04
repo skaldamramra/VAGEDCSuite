@@ -516,19 +516,10 @@ namespace VAGSuite
 
             ((System.ComponentModel.ISupportInitialize)(this.kryptonRibbon1)).EndInit();
 
-            // Add to form controls and set docking at the VERY END
+            // Add to form controls and set docking
+            // CRITICAL: Do NOT call BringToFront() here - let the initialization order handle Z-order
             this.Controls.Add(this.kryptonRibbon1);
             this.kryptonRibbon1.Dock = DockStyle.Top;
-            this.kryptonRibbon1.BringToFront();
-
-            // Ensure DevExpress dock panels don't push the ribbon aside
-            foreach (Control c in this.Controls)
-            {
-                if (c != null && c.GetType().FullName.Contains("DevExpress.XtraBars.Docking.DockPanel"))
-                {
-                    c.SendToBack();
-                }
-            }
         }
 
 

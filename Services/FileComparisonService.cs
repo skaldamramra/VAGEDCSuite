@@ -4,6 +4,8 @@ using System.Data;
 using System.IO;
 using System.Windows.Forms;
 using DevExpress.XtraBars.Docking;
+using ComponentFactory.Krypton.Docking;
+using ComponentFactory.Krypton.Navigator;
 using VAGSuite;
 using VAGSuite.Helpers;
 
@@ -16,9 +18,11 @@ namespace VAGSuite.Services
     public class FileComparisonService
     {
         private AppSettings _appSettings;
+        private KryptonDockingManager _kryptonDockingManager;
         
-        public FileComparisonService(AppSettings appSettings)
+        public FileComparisonService(KryptonDockingManager kryptonDockingManager, AppSettings appSettings)
         {
+            _kryptonDockingManager = kryptonDockingManager;
             _appSettings = appSettings;
         }
 
@@ -200,9 +204,9 @@ namespace VAGSuite.Services
         /// </summary>
         public void DumpDockWindows(DockManager dockManager)
         {
-            foreach(DockPanel dp in dockManager.Panels)
+            foreach(KryptonPage page in _kryptonDockingManager.Pages)
             {
-                Console.WriteLine(dp.Text);
+                Console.WriteLine(page.Text);
             }
         }
 

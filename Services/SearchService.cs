@@ -6,6 +6,8 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using DevExpress.XtraBars.Docking;
+using ComponentFactory.Krypton.Docking;
+using ComponentFactory.Krypton.Navigator;
 using VAGSuite.Helpers;
 
 namespace VAGSuite.Services
@@ -14,10 +16,12 @@ namespace VAGSuite.Services
     {
         private AppSettings _appSettings;
         private DockManager _dockManager;
+        private KryptonDockingManager _kryptonDockingManager;
 
-        public SearchService(DockManager dockManager, AppSettings appSettings)
+        public SearchService(DockManager dockManager, KryptonDockingManager kryptonDockingManager, AppSettings appSettings)
         {
             _dockManager = dockManager;
+            _kryptonDockingManager = kryptonDockingManager;
             _appSettings = appSettings;
         }
 
@@ -171,12 +175,10 @@ namespace VAGSuite.Services
         /// <summary>
         /// Creates a dock panel for displaying search results
         /// </summary>
-        public DockPanel CreateSearchResultsPanel(string currentFile, SymbolCollection resultCollection, DataTable dt, CompareResults.NotifySelectSymbol onSymbolSelect)
+        public void CreateSearchResultsPanel(string currentFile, SymbolCollection resultCollection, DataTable dt, CompareResults.NotifySelectSymbol onSymbolSelect)
         {
-            _dockManager.BeginUpdate();
             try
             {
-                DockPanel dockPanel = _dockManager.AddPanel(new Point(-500, -500));
                 CompareResults tabdet = new CompareResults();
                 tabdet.ShowAddressesInHex = _appSettings.ShowAddressesInHex;
                 tabdet.SetFilterMode(_appSettings.ShowAddressesInHex);
@@ -184,25 +186,23 @@ namespace VAGSuite.Services
                 tabdet.UseForFind = true;
                 tabdet.Filename = currentFile;
                 tabdet.onSymbolSelect += onSymbolSelect;
-                dockPanel.Controls.Add(tabdet);
-                dockPanel.Text = "Search results: " + Path.GetFileName(currentFile);
-                dockPanel.DockTo(_dockManager, DockingStyle.Left, 1);
-                dockPanel.Width = 500;
+                
+                string title = "Search results: " + Path.GetFileName(currentFile);
+                KryptonPage page = new KryptonPage();
+                page.Text = title;
+                page.TextTitle = title;
+                page.UniqueName = "SearchResults_" + Guid.NewGuid().ToString("N");
+                page.Controls.Add(tabdet);
 
                 tabdet.CompareSymbolCollection = resultCollection;
                 tabdet.OpenGridViewGroups(tabdet.gridControl1, 1);
                 tabdet.gridControl1.DataSource = dt.Copy();
 
-                return dockPanel;
+                _kryptonDockingManager.AddDockspace("Control", DockingEdge.Left, new KryptonPage[] { page });
             }
             catch (Exception E)
             {
                 Console.WriteLine(E.Message);
-                return null;
-            }
-            finally
-            {
-                _dockManager.EndUpdate();
             }
         }
 

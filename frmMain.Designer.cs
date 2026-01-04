@@ -48,6 +48,7 @@
             
             // Step 5: Initialize docking controls
             InitializeDockingControls();
+            InitializeKryptonDocking();
             
             // Step 6: Initialize grid controls
             InitializeGridControls();
