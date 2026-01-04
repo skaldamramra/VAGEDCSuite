@@ -311,6 +311,9 @@
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
     <Compile Include="frmMain.LayoutConstants.cs" />
+    <Compile Include="frmMain.KryptonStatus.cs">
+      <DependentUpon>frmMain.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmMain.DesignerHelpers.cs" />
     <Compile Include="frmMain.DesignerInit.cs" />
     <Compile Include="frmMain.DesignerInit2.cs" />

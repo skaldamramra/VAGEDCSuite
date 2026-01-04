@@ -360,6 +360,12 @@ namespace VAGSuite
                 barAdditionalInfo.Caption = $"{info.PartNumber} {info.CarMake} {info.EcuType} {parser.ExtractInfo(allBytes)}";
                 barSymCount.Caption = $"{result.Symbols.Count} symbols";
 
+                // Sync Krypton Status Bar
+                if (statusFilename != null) statusFilename.Text = barFilenameText.Caption;
+                if (statusPartNumber != null) statusPartNumber.Text = $"Part: {barPartnumber.Caption}";
+                if (statusSymCount != null) statusSymCount.Text = barSymCount.Caption;
+                if (statusReadOnly != null) statusReadOnly.Text = barReadOnly.Caption;
+
                 // Update launch control button
                 if (_fileOperationsManager.GetMapCount("Launch control map", result.Symbols) == 0)
                 {
@@ -616,6 +622,7 @@ namespace VAGSuite
 
             // Update status bar
             barChecksum.Caption = _checksumService.GetStatusBarMessage(result);
+            if (statusChecksum != null) statusChecksum.Text = barChecksum.Caption;
 
             // Show dialog if needed
             if (showInfo && !string.IsNullOrEmpty(result.StatusMessage))
@@ -3419,6 +3426,15 @@ namespace VAGSuite
                 btnToggleMapDescriptions.ItemAppearance.Normal.ForeColor = VAGSuite.Theming.VAGEDCColorPalette.Gray500;
             }
             btnToggleMapDescriptions.ItemAppearance.Normal.Options.UseForeColor = true;
+
+            // Sync Krypton Status Button
+            if (statusMapDescriptions != null)
+            {
+                statusMapDescriptions.Checked = m_appSettings.ShowMapDescriptions;
+                // Visual feedback: use a different color when active if the checkmark isn't obvious
+                statusMapDescriptions.BackColor = m_appSettings.ShowMapDescriptions ?
+                    Color.FromArgb(60, 60, 60) : Color.Transparent;
+            }
         }
 
         private void btnToggleMapDescriptions_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)

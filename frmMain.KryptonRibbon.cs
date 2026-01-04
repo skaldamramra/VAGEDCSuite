@@ -233,14 +233,36 @@ namespace VAGSuite
             // 
             this.kryptonRibbonTabTuning.Text = "Tuning";
 
-            // 
+            //
             // kryptonRibbonTabSkins
-            // 
+            //
             this.kryptonRibbonTabSkins.Text = "Skins";
+            KryptonRibbonGroup rbpgSkins = new KryptonRibbonGroup();
+            rbpgSkins.TextLine1 = "Application Skins";
+            KryptonRibbonGroupTriple rbpgSkinsTriple = new KryptonRibbonGroupTriple();
+            
+            KryptonRibbonGroupButton btnSkinVAGEDCDark = new KryptonRibbonGroupButton();
+            btnSkinVAGEDCDark.TextLine1 = "VAGEDC Dark";
+            btnSkinVAGEDCDark.Tag = "CUSTOM_VAGEDC_DARK";
+            btnSkinVAGEDCDark.Click += new EventHandler(OnKryptonSkinClick);
+            
+            KryptonRibbonGroupButton btnSkinOffice2010 = new KryptonRibbonGroupButton();
+            btnSkinOffice2010.TextLine1 = "Office 2010";
+            btnSkinOffice2010.Tag = PaletteMode.Office2010Blue;
+            btnSkinOffice2010.Click += new EventHandler(OnKryptonSkinClick);
 
-            // 
+            KryptonRibbonGroupButton btnSkinSparkle = new KryptonRibbonGroupButton();
+            btnSkinSparkle.TextLine1 = "Sparkle";
+            btnSkinSparkle.Tag = PaletteMode.SparkleBlue;
+            btnSkinSparkle.Click += new EventHandler(OnKryptonSkinClick);
+
+            rbpgSkinsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnSkinVAGEDCDark, btnSkinOffice2010, btnSkinSparkle });
+            rbpgSkins.Items.Add(rbpgSkinsTriple);
+            this.kryptonRibbonTabSkins.Groups.Add(rbpgSkins);
+
+            //
             // kryptonRibbonTabHelp
-            // 
+            //
             this.kryptonRibbonTabHelp.Text = "Help";
 
             ((System.ComponentModel.ISupportInitialize)(this.kryptonRibbon1)).EndInit();
@@ -260,18 +282,6 @@ namespace VAGSuite
             }
         }
 
-        private void InitializeKryptonStatusBar()
-        {
-            this.kryptonStatusStrip1 = new System.Windows.Forms.StatusStrip();
-            // Standard StatusStrip is themed by KryptonManager automatically in v4.5.9
-            this.kryptonStatusStrip1.Name = "kryptonStatusStrip1";
-            this.kryptonStatusStrip1.Visible = true;
-            this.ribbonStatusBar1.Visible = false;
-
-            this.Controls.Add(this.kryptonStatusStrip1);
-            this.kryptonStatusStrip1.Dock = DockStyle.Bottom;
-            this.kryptonStatusStrip1.BringToFront();
-        }
 
         #region Krypton Ribbon Event Shims
         
@@ -318,6 +328,27 @@ namespace VAGSuite
         private void btnKryptonChecksum_Click(object sender, EventArgs e)
         {
             btnChecksum_ItemClick(sender, null);
+        }
+
+        private void OnKryptonSkinClick(object sender, EventArgs e)
+        {
+            if (sender is KryptonRibbonGroupButton btn && btn.Tag != null)
+            {
+                if (btn.Tag.ToString() == "CUSTOM_VAGEDC_DARK")
+                {
+                    ApplyVAGEDCDarkTheme();
+                    m_appSettings.UseVAGEDCDarkTheme = true;
+                    m_appSettings.Skinname = "VAGEDC Dark";
+                }
+                else if (btn.Tag is PaletteMode mode)
+                {
+                    // Convert PaletteMode to PaletteModeManager for the manager component
+                    this.kryptonManager1.GlobalPaletteMode = (PaletteModeManager)((int)mode);
+                    m_appSettings.UseVAGEDCDarkTheme = false;
+                    m_appSettings.Skinname = mode.ToString();
+                    VAGEDCThemeManager.Instance.DeactivateCustomTheme();
+                }
+            }
         }
 
         private Image GetResourceImage(string resourceName)

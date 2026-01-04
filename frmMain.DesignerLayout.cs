@@ -12,11 +12,14 @@ namespace VAGSuite
         /// </summary>
         private void ConfigureLayout()
         {
+            // Krypton Integration: Enable status strip merging into the form chrome
+            this.AllowStatusStripMerge = true;
+
             // Form settings
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(
-                LayoutConstants.DefaultFormWidth, 
+                LayoutConstants.DefaultFormWidth,
                 LayoutConstants.DefaultFormHeight);
             // Load icon directly from file to support multi-resolution .ico
             this.Icon = new Icon("vagedc.ico");

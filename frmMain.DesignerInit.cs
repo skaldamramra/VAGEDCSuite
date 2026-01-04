@@ -80,6 +80,9 @@ namespace VAGSuite
                 LayoutConstants.DefaultFormWidth, 
                 LayoutConstants.RibbonHeight);
             this.ribbonControl1.StatusBar = this.ribbonStatusBar1;
+            this.ribbonControl1.Visible = false;
+            this.ribbonStatusBar1.Visible = false;
+            this.ribbonStatusBar1.Enabled = false;
 
             // Bar and docking controller
             this.barAndDockingController1.PropertiesBar.AllowLinkLighting = false;
@@ -503,6 +506,10 @@ namespace VAGSuite
         /// </summary>
         private void EndComponentInitialization()
         {
+            // Ensure Krypton controls are on top of DevExpress ones
+            if (this.kryptonRibbon1 != null) this.kryptonRibbon1.BringToFront();
+            if (this.kryptonStatusStrip1 != null) this.kryptonStatusStrip1.BringToFront();
+
             ((System.ComponentModel.ISupportInitialize)(this.ribbonControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.barAndDockingController1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager1)).EndInit();
