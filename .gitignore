@@ -179,6 +179,7 @@ pip-log.txt
 
 # PowerShell supporting scripts
 build.ps1
+build - copy.ps1
 clean.ps1
 copy_missing_dependencies.ps1
 rebuild.ps1
