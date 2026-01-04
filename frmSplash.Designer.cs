@@ -29,29 +29,27 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSplash));
-            this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
+            this.labelControl1 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
             this.SuspendLayout();
-            // 
+            //
             // labelControl1
-            // 
-            this.labelControl1.Appearance.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.labelControl1.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.labelControl1.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
+            //
             this.labelControl1.Location = new System.Drawing.Point(12, 12);
             this.labelControl1.Name = "labelControl1";
             this.labelControl1.Size = new System.Drawing.Size(1000, 13);
             this.labelControl1.TabIndex = 0;
+            this.labelControl1.Values.Text = "";
             //
             // frmSplash
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackgroundImageLayoutStore = System.Windows.Forms.ImageLayout.Zoom;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             using (System.IO.Stream stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("VAGSuite.splash_new.png"))
             {
                 if (stream != null)
                 {
-                    this.BackgroundImageStore = System.Drawing.Image.FromStream(stream);
+                    this.BackgroundImage = System.Drawing.Image.FromStream(stream);
                 }
             }
             this.ClientSize = new System.Drawing.Size(1024, 925);
@@ -68,6 +66,6 @@
 
         #endregion
 
-        private DevExpress.XtraEditors.LabelControl labelControl1;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl1;
     }
 }

@@ -5,20 +5,23 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
+using VAGSuite.Theming;
 
 namespace VAGSuite
 {
-    public partial class frmSplash : DevExpress.XtraEditors.XtraForm
+    public partial class frmSplash : KryptonForm
     {
         private DateTime _startTime;
 
         public frmSplash()
         {
             InitializeComponent();
+            VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
             _startTime = DateTime.Now;
             labelControl1.Text = "ver " + Application.ProductVersion.ToString();
-            labelControl1.Appearance.Font = new Font(labelControl1.Appearance.Font, FontStyle.Bold);
+            // Use a safe default size (9pt) for the bold font to avoid NullReferenceException
+            labelControl1.StateCommon.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Bold);
             AdjustSizeToScreen();
         }
 
@@ -45,11 +48,10 @@ namespace VAGSuite
             }
             
             // Move label to bottom right
-            labelControl1.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
-            labelControl1.BackColor = Color.Transparent;
-            labelControl1.ForeColor = Color.White;
+            labelControl1.AutoSize = false;
+            labelControl1.StateCommon.ShortText.Color1 = Color.White;
             labelControl1.Size = new Size(200, 20); // Fixed size to ensure it's not 0 or too large
-            labelControl1.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Far; // Right align text
+            labelControl1.StateCommon.ShortText.TextH = PaletteRelativeAlign.Far; // Right align text
             labelControl1.Location = new Point(this.Width - labelControl1.Width - 20, this.Height - labelControl1.Height - 20);
             labelControl1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             labelControl1.BringToFront();

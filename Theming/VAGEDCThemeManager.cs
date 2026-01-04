@@ -284,8 +284,19 @@ namespace VAGSuite.Theming
             }
             else if (control is ComponentFactory.Krypton.Toolkit.KryptonLinkLabel kLink)
             {
-                kLink.StateCommon.ShortText.Color1 = _currentTheme.AccentSecondary;
+                kLink.StateCommon.ShortText.Color1 = Color.FromArgb(0, 122, 204); // VS Code Blue
                 kLink.StateCommon.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
+                // Use overrides for link states in Krypton 4.5.9
+                kLink.OverrideNotVisited.ShortText.Color1 = Color.FromArgb(0, 122, 204);
+                kLink.OverridePressed.ShortText.Color1 = Color.FromArgb(20, 142, 224);
+            }
+            else if (control is ComponentFactory.Krypton.Toolkit.KryptonGroupBox kGroup)
+            {
+                kGroup.StateCommon.Back.Color1 = _currentTheme.PanelBackground;
+                kGroup.StateCommon.Content.ShortText.Color1 = _currentTheme.TextPrimary;
+                kGroup.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
+                kGroup.StateCommon.Border.Color1 = _currentTheme.BorderPrimary;
+                kGroup.StateCommon.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
             }
 
             // DevExpress RibbonControl
