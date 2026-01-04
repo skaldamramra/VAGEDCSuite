@@ -1777,6 +1777,15 @@ namespace VAGSuite
                 {
                     nChartControl1.Visible = true;
                     nChartControl1.BringToFront();
+                    
+                    // Ensure overlay buttons are on top of the 3D control
+                    if (simpleButton7 != null) simpleButton7.BringToFront();
+                    if (simpleButton6 != null) simpleButton6.BringToFront();
+                    if (simpleButton4 != null) simpleButton4.BringToFront();
+                    if (simpleButton5 != null) simpleButton5.BringToFront();
+                    if (btnToggleWireframe != null) btnToggleWireframe.BringToFront();
+                    if (btnToggleTooltips != null) btnToggleTooltips.BringToFront();
+                    if (btnToggleOverlay != null && btnToggleOverlay.Visible) btnToggleOverlay.BringToFront();
                 }
                 RefreshMeshGraph();
             }
