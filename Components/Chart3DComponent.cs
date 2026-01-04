@@ -1171,6 +1171,13 @@ namespace VAGSuite.Components
 
         #endregion
 
+        #region Public Properties
+
+        public bool IsWireframeMode => _renderMode == RenderMode.Wireframe;
+        public bool IsTooltipsEnabled => _showTooltips;
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>

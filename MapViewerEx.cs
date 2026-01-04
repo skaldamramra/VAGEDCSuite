@@ -783,6 +783,8 @@ namespace VAGSuite
                 VAGEDCThemeManager.Instance.ApplyThemeToForm(this.FindForm() ?? new Form());
                 ApplyThemeToADGV();
                 ApplyThemeToNavigator();
+                ApplyThemeToToolStrip();
+                UpdateMeshButtonHighlights();
 
                 // Wire up the external chart control to the component
                 // Verified: nChartControl1 is now OpenTK.GLControl and nChartControl2 is ZedGraph.ZedGraphControl
@@ -907,7 +909,16 @@ namespace VAGSuite
                 item.ForeColor = theme.ToolbarText;
                 if (item is ToolStripComboBox combo)
                 {
+                    // Fix white-on-white for ToolStripComboBox (Map modifiers and View types)
+                    // Verified: VS Code Dark+ uses #3C3C3C for input backgrounds
                     combo.FlatStyle = FlatStyle.Flat;
+                    combo.ComboBox.BackColor = Color.FromArgb(60, 60, 60);
+                    combo.ComboBox.ForeColor = Color.White;
+                }
+                else if (item is ToolStripTextBox textBox)
+                {
+                    textBox.BackColor = Color.FromArgb(60, 60, 60);
+                    textBox.ForeColor = Color.White;
                 }
             }
 
@@ -936,10 +947,24 @@ namespace VAGSuite
                     btn.ButtonStyle = ButtonStyle.Standalone;
                     
                     // Use StateNormal to override global defaults
+                    // Use StateCommon for the base colors to ensure they are applied correctly
+                    // but we must be careful not to let them override StateDisabled
                     btn.StateNormal.Back.Color1 = Color.FromArgb(0, 100, 180); // VS Code Blue
                     btn.StateNormal.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StateNormal.Content.ShortText.Color1 = Color.White;
                     btn.StateNormal.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
+
+                    // Explicitly fix disabled state for bottom buttons (Undo, Save, Close, Read)
+                    // We use StateDisabled and ensure StateCommon doesn't have conflicting colors
+                    btn.StateDisabled.Back.Color1 = Color.FromArgb(45, 45, 45);
+                    btn.StateDisabled.Back.ColorStyle = PaletteColorStyle.Solid;
+                    btn.StateDisabled.Content.ShortText.Color1 = Color.FromArgb(200, 200, 200); // High contrast light gray
+                    btn.StateDisabled.Border.Color1 = Color.FromArgb(64, 64, 64);
+                    btn.StateDisabled.Border.DrawBorders = PaletteDrawBorders.All;
+                    btn.StateDisabled.Border.Width = 1;
+
+                    // Force refresh to apply state changes
+                    btn.Refresh();
                     
                     btn.StateNormal.Border.Color1 = theme.BorderPrimary;
                     btn.StateNormal.Border.DrawBorders = PaletteDrawBorders.All;
@@ -982,6 +1007,27 @@ namespace VAGSuite
                     btn.StateTracking.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StateTracking.Content.ShortText.Color1 = Color.White;
                 }
+            }
+        }
+
+        private void UpdateMeshButtonHighlights()
+        {
+            if (_chart3DComponent == null) return;
+
+            var theme = VAGEDCThemeManager.Instance.CurrentTheme;
+            Color activeColor = Color.FromArgb(0, 122, 204); // VS Code Blue for active state
+            Color inactiveColor = Color.FromArgb(60, 60, 60); // Default dark for overlay buttons
+
+            if (btnToggleWireframe != null)
+            {
+                bool isWireframe = _chart3DComponent.IsWireframeMode;
+                btnToggleWireframe.StateNormal.Back.Color1 = isWireframe ? activeColor : inactiveColor;
+            }
+
+            if (btnToggleTooltips != null)
+            {
+                bool isTooltips = _chart3DComponent.IsTooltipsEnabled;
+                btnToggleTooltips.StateNormal.Back.Color1 = isTooltips ? activeColor : inactiveColor;
             }
         }
 
@@ -2616,6 +2662,7 @@ namespace VAGSuite
             if (_chart3DComponent != null)
             {
                 _chart3DComponent.ToggleRenderMode();
+                UpdateMeshButtonHighlights();
             }
         }
 
@@ -2624,6 +2671,7 @@ namespace VAGSuite
             if (_chart3DComponent != null)
             {
                 _chart3DComponent.ToggleTooltips();
+                UpdateMeshButtonHighlights();
             }
         }
 

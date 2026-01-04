@@ -259,18 +259,24 @@ namespace VAGSuite.Theming
                 kButton.ButtonStyle = ComponentFactory.Krypton.Toolkit.ButtonStyle.Standalone;
                 
                 // StateCommon - Set the base for ALL states to be dark
-                kButton.StateCommon.Back.Color1 = Color.FromArgb(0, 100, 180);
+                // We remove the hardcoded blue from StateCommon so it doesn't leak into StateDisabled
                 kButton.StateCommon.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-                kButton.StateCommon.Border.Color1 = Color.FromArgb(64, 64, 64);
                 kButton.StateCommon.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
                 kButton.StateCommon.Border.Width = 1;
                 kButton.StateCommon.Border.Rounding = 2;
-                kButton.StateCommon.Content.ShortText.Color1 = Color.White;
                 kButton.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
 
                 // Normal State - Explicitly reinforce dark color
                 kButton.StateNormal.Back.Color1 = Color.FromArgb(0, 100, 180);
                 kButton.StateNormal.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+                kButton.StateNormal.Content.ShortText.Color1 = Color.White;
+
+                // StateDisabled - Fix readability issue (Verified: Krypton 4.5.9 properties)
+                // Mimic VS Code disabled button: Darker gray background with higher contrast muted text
+                kButton.StateDisabled.Back.Color1 = Color.FromArgb(45, 45, 45);
+                kButton.StateDisabled.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+                kButton.StateDisabled.Content.ShortText.Color1 = Color.FromArgb(180, 180, 180);
+                kButton.StateDisabled.Border.Color1 = Color.FromArgb(64, 64, 64);
 
                 // OverrideDefault - This handles the "AcceptButton" state which often stays white
                 kButton.OverrideDefault.Back.Color1 = Color.FromArgb(0, 100, 180);
@@ -288,6 +294,13 @@ namespace VAGSuite.Theming
                 kButton.StatePressed.Back.Color1 = Color.FromArgb(0, 102, 184);
                 kButton.StatePressed.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StatePressed.Content.ShortText.Color1 = Color.White;
+
+                // StateDisabled - Fix readability issue (Verified: Krypton 4.5.9 properties)
+                // Mimic VS Code disabled button: Darker gray background with higher contrast muted text
+                kButton.StateDisabled.Back.Color1 = Color.FromArgb(45, 45, 45);
+                kButton.StateDisabled.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+                kButton.StateDisabled.Content.ShortText.Color1 = Color.FromArgb(180, 180, 180); // Increased contrast from 120 to 180
+                kButton.StateDisabled.Border.Color1 = Color.FromArgb(64, 64, 64);
             }
             else if (control is ComponentFactory.Krypton.Toolkit.KryptonLinkLabel kLink)
             {
