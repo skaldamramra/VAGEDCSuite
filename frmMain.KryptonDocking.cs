@@ -62,15 +62,14 @@ namespace VAGSuite
             // Note: The new AdvancedDataGridView (adgvSymbols) is added to this page
             // during InitializeSymbolGrid() in frmMain.SymbolList.cs
 
-            // CRITICAL: Add the docking panel AFTER Ribbon and StatusStrip so it's behind them in Z-order
-            // The Ribbon should already be in Controls (added by InitializeKryptonRibbon)
-            // The StatusStrip should already be in Controls (added by InitializeKryptonStatusBar)
-            // We add the docking panel last so it goes behind them
-            this.Controls.Add(this.kryptonDockingPanel);
-            
-            // Ensure Z-order: DockingPanel at back, Ribbon at top, Status at bottom
-            // In WinForms, controls added later are on top, so we need to send the panel to back
-            this.kryptonDockingPanel.SendToBack();
+            // NOTE: The docking panel must be added to the form AFTER the ribbon and status strip
+            // so that WinForms docking calculation reserves space for the top/bottom docked controls.
+            // Historically this was added here, but InitializeComponent() adds ribbon/statusbar later
+            // which caused incorrect layout (dock fill calculated before ribbon existed).
+            // We therefore defer adding the docking panel to ConfigureLayout() so it is added
+            // after the ribbon/status bar and the DockStyle.Fill behaves correctly.
+            //
+            // Do NOT call SendToBack() - rely on correct Controls.Add order performed in ConfigureLayout().
             
             // Ensure the workspace doesn't force a maximized layout that hides headers
             this.kryptonDockableWorkspace1.ShowMaximizeButton = true;
@@ -98,6 +97,35 @@ namespace VAGSuite
 
             // 4. Add the Symbols page to the left side (replacing dockSymbols)
             kryptonDockingManager1.AddDockspace("Control", DockingEdge.Left, new KryptonPage[] { pageSymbols });
+ 
+            // Set a reasonable initial minimum width for the left dockspace so map names are visible.
+            // This is a best-effort sizing step — if the docking hierarchy hasn't created the dockspace
+            // control yet the casts will safely fail and we silently continue.
+            try
+            {
+                var dockingControl = kryptonDockingManager1["Control"] as KryptonDockingControl;
+                if (dockingControl != null)
+                {
+                    var leftEdge = dockingControl["Left"] as KryptonDockingEdge;
+                    if (leftEdge != null)
+                    {
+                        var docked = leftEdge["Docked"];
+                        if (docked != null && docked.Count > 0)
+                        {
+                            // The first dockspace should be the one we just added.
+                            var dockspace = docked[0] as KryptonDockingDockspace;
+                            if (dockspace != null && dockspace.DockspaceControl != null)
+                            {
+                                dockspace.DockspaceControl.MinimumSize = new Size(450, 100);
+                                // Ensure a sensible starting width when form is first shown
+                                if (dockspace.DockspaceControl.Width < 450)
+                                    dockspace.DockspaceControl.Width = 450;
+                            }
+                        }
+                    }
+                }
+            }
+            catch { /* non-fatal - best effort sizing */ }
         }
 
         /// <summary>

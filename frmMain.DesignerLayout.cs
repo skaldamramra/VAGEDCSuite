@@ -1,5 +1,6 @@
 using System.Drawing;
-
+using System.Windows.Forms;
+ 
 namespace VAGSuite
 {
     public partial class frmMain
@@ -30,8 +31,26 @@ namespace VAGSuite
 
             // Add controls to form
             this.Controls.Add(this.ribbonStatusBar1);
-            this.Controls.Add(this.ribbonControl1);
+            // this.Controls.Add(this.ribbonControl1); // DevExpress ribbon removed
 
+            // Add Krypton docking panel after the ribbon and status bar so DockStyle.Fill
+            // correctly reserves space for the top/bottom docked controls.
+            // This ensures the docking panel (and its workspace) will be laid out below the ribbon.
+            if (this.kryptonDockingPanel != null && !this.Controls.Contains(this.kryptonDockingPanel))
+            {
+                this.Controls.Add(this.kryptonDockingPanel);
+                this.kryptonDockingPanel.Dock = DockStyle.Fill;
+            }
+
+            // CRITICAL: Enforce Z-Order for correct Docking behavior.
+            // WinForms docks controls from the BOTTOM of the Z-order (Highest Index) to the TOP (Lowest Index).
+            // 1. Ribbon (SendToBack -> Bottom) -> Docks Top first.
+            // 2. StatusBar (SendToBack -> Bottom) -> Docks Bottom second.
+            // 3. DockingPanel (BringToFront -> Top) -> Docks Fill last (taking remaining space).
+            if (this.kryptonRibbon1 != null) this.kryptonRibbon1.SendToBack();
+            if (this.ribbonStatusBar1 != null) this.ribbonStatusBar1.SendToBack();
+            if (this.kryptonDockingPanel != null) this.kryptonDockingPanel.BringToFront();
+            
             // Form event handlers
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.Shown += new System.EventHandler(this.frmMain_Shown);
