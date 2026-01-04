@@ -37,9 +37,11 @@
             
             // Step 2: Configure ribbon infrastructure
             InitializeRibbonInfrastructure();
+            InitializeKryptonRibbon();
             
             // Step 3: Initialize status bar items (needed for AddButtonsToRibbon)
             InitializeStatusBar();
+            InitializeKryptonStatusBar();
             
             // Step 4: Create and configure all buttons
             InitializeRibbonButtons();
@@ -71,6 +73,15 @@
         #endregion
 
         // Field declarations - all UI control fields
+        private ComponentFactory.Krypton.Toolkit.KryptonManager kryptonManager1;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbon kryptonRibbon1;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonTab kryptonRibbonTabFile;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonTab kryptonRibbonTabActions;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonTab kryptonRibbonTabTuning;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonTab kryptonRibbonTabSkins;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonTab kryptonRibbonTabHelp;
+        private System.Windows.Forms.StatusStrip kryptonStatusStrip1;
+
         private DevExpress.XtraBars.Ribbon.RibbonControl ribbonControl1;
         private DevExpress.XtraBars.Ribbon.RibbonPage ribFile;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup rbpgGeneralFile;

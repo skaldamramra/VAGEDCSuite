@@ -20,6 +20,9 @@ namespace VAGSuite.Theming
         private bool _isCustomThemeActive = false;
         private PrivateFontCollection _fontCollection = new PrivateFontCollection();
         private FontFamily _sourceSansProFamily;
+        private ComponentFactory.Krypton.Toolkit.KryptonPalette _customPalette;
+
+        public ComponentFactory.Krypton.Toolkit.KryptonPalette CustomPalette => _customPalette;
 
         public static VAGEDCThemeManager Instance
         {
@@ -38,6 +41,10 @@ namespace VAGSuite.Theming
                 GetCustomFont(12f, FontStyle.Bold),
                 GetCustomFont(12f, FontStyle.Regular)
             );
+            
+            // Initialize the palette that will be used by complex controls
+            _customPalette = new ComponentFactory.Krypton.Toolkit.KryptonPalette();
+            _customPalette.BasePaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Office2010Black;
         }
 
         private void LoadCustomFonts()

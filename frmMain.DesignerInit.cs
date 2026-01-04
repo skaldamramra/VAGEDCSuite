@@ -8,6 +8,7 @@ namespace VAGSuite
         private void InitializeComponentInstances()
         {
             // Core components
+            this.kryptonManager1 = new ComponentFactory.Krypton.Toolkit.KryptonManager(this.components);
             this.ribbonControl1 = new DevExpress.XtraBars.Ribbon.RibbonControl();
             this.barAndDockingController1 = new DevExpress.XtraBars.BarAndDockingController(this.components);
             this.dockManager1 = new DevExpress.XtraBars.Docking.DockManager(this.components);
