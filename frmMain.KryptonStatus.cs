@@ -158,7 +158,7 @@ namespace VAGSuite
             this.statusMapDescriptions.ForeColor = textColor;
             this.statusMapDescriptions.Text = "Map Descriptions";
             this.statusMapDescriptions.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            this.statusMapDescriptions.CheckOnClick = true;
+            this.statusMapDescriptions.CheckOnClick = false; // Manual control to avoid sync issues
             this.statusMapDescriptions.Click += new System.EventHandler(this.statusMapDescriptions_Click);
         }
 

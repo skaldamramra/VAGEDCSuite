@@ -29,7 +29,6 @@ namespace VAGSuite
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
 
             // Add controls to form
-            this.Controls.Add(this.dockSymbols);
             this.Controls.Add(this.ribbonStatusBar1);
             this.Controls.Add(this.ribbonControl1);
 

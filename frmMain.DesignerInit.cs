@@ -11,7 +11,6 @@ namespace VAGSuite
             this.kryptonManager1 = new ComponentFactory.Krypton.Toolkit.KryptonManager(this.components);
             this.ribbonControl1 = new DevExpress.XtraBars.Ribbon.RibbonControl();
             this.barAndDockingController1 = new DevExpress.XtraBars.BarAndDockingController(this.components);
-            this.dockManager1 = new DevExpress.XtraBars.Docking.DockManager(this.components);
 
             // Ribbon pages
             this.ribFile = new DevExpress.XtraBars.Ribbon.RibbonPage();
@@ -36,14 +35,6 @@ namespace VAGSuite
             // Status bar
             this.ribbonStatusBar1 = new DevExpress.XtraBars.Ribbon.RibbonStatusBar();
 
-            // Docking
-            this.dockSymbols = new DevExpress.XtraBars.Docking.DockPanel();
-            this.dockPanel1_Container = new DevExpress.XtraBars.Docking.ControlContainer();
-
-            // Grid
-            this.gridControl1 = new DevExpress.XtraGrid.GridControl();
-            this.gridViewSymbols = new DevExpress.XtraGrid.Views.Grid.GridView();
-
             // Context menu
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
 
@@ -56,12 +47,7 @@ namespace VAGSuite
             // Begin initialization
             ((System.ComponentModel.ISupportInitialize)(this.ribbonControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barAndDockingController1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dockManager1)).BeginInit();
-            this.dockSymbols.SuspendLayout();
-            this.dockPanel1_Container.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridViewSymbols)).BeginInit();
         }
 
         /// <summary>
@@ -497,8 +483,6 @@ namespace VAGSuite
             this.btnVCDSDiagnosticMAPOffset.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagMAPOffset_ItemClick);
             this.btnVCDSDiagnosticIQOffset.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnVCDSDiagIQOffset_ItemClick);
 
-            // Dock manager layout upgrade
-            this.dockManager1.LayoutUpgrade += new DevExpress.Utils.LayoutUpgadeEventHandler(this.dockManager1_LayoutUpgrade);
         }
 
         /// <summary>
@@ -525,12 +509,10 @@ namespace VAGSuite
 
             ((System.ComponentModel.ISupportInitialize)(this.ribbonControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.barAndDockingController1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dockManager1)).EndInit();
-            this.dockSymbols.ResumeLayout(false);
-            this.dockPanel1_Container.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
             this.contextMenuStrip1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridViewSymbols)).EndInit();
+
+            // Initialize the new Symbol Grid (ADGV)
+            InitializeSymbolGrid();
         }
     }
 }

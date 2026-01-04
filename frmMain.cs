@@ -63,7 +63,7 @@ using System.Windows.Forms;
 using System.IO;
 using ComponentFactory.Krypton.Toolkit;
 using ComponentFactory.Krypton.Docking;
-using DevExpress.XtraBars.Docking;
+using ComponentFactory.Krypton.Navigator;
 using DevExpress.XtraBars;
 using DevExpress.Skins;
 using VAGSuite.Services;
@@ -121,7 +121,6 @@ namespace VAGSuite
     {
         private KryptonManager kryptonManager;
         private AppSettings m_appSettings;
-        private System.Windows.Forms.Timer hoverTimer;
         private int lastHoverRowHandle = -1;
         private DevExpress.Utils.ToolTipController gridToolTipController;
         private msiupdater m_msiUpdater;
@@ -159,37 +158,9 @@ namespace VAGSuite
             this.kryptonManager.GlobalPaletteMode = PaletteModeManager.ProfessionalSystem;
 
             m_DelegateStartReleaseNotePanel = new DelegateStartReleaseNotePanel(this.StartReleaseNotesViewer);
-            InitializeHoverTimer();
-        }
-
-        private void InitializeHoverTimer()
-        {
-            hoverTimer = new System.Windows.Forms.Timer();
-            hoverTimer.Interval = 300; // 300ms
-            hoverTimer.Tick += HoverTimer_Tick;
-
             gridToolTipController = new DevExpress.Utils.ToolTipController();
             gridToolTipController.AutoPopDelay = 10000;
             gridToolTipController.InitialDelay = 500;
-            gridControl1.ToolTipController = gridToolTipController;
-        }
-
-        private void HoverTimer_Tick(object sender, EventArgs e)
-        {
-            hoverTimer.Stop();
-            if (m_appSettings.ShowMapDescriptions && lastHoverRowHandle >= 0)
-            {
-                SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow(lastHoverRowHandle);
-                if (sh != null)
-                {
-                    string description = VAGSuite.Services.MapDescriptionService.Instance.GetDescription(sh.Varname);
-                    if (!string.IsNullOrEmpty(description))
-                    {
-                        // Use the overload that takes a string and a point
-                        gridToolTipController.ShowHint(description, sh.Varname, System.Windows.Forms.Cursor.Position);
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -199,24 +170,24 @@ namespace VAGSuite
         {
             _fileOperationsManager = new FileOperationsManager(m_appSettings);
             _checksumService = new ChecksumService(m_appSettings);
-            _mapViewerCoordinator = new MapViewerCoordinator(dockManager1, m_appSettings);
+            _mapViewerCoordinator = new MapViewerCoordinator(null, m_appSettings);
             // Subscribe to axis editor event from coordinator
             _mapViewerCoordinator.OnAxisEditorRequested += MapCoordinator_OnAxisEditorRequested;
             _importExportService = new ImportExportService(m_appSettings);
             _fileComparisonService = new FileComparisonService(kryptonDockingManager1, m_appSettings);
             _viewSyncService = new ViewSynchronizationService(m_appSettings);
             _transactionService = new TransactionService(m_appSettings);
-            _mapViewerService = new MapViewerService(dockManager1, kryptonDockingManager1, m_appSettings);
+            _mapViewerService = new MapViewerService(null, kryptonDockingManager1, m_appSettings);
             
             // Wire the MouseMove event for tooltips
-            gridControl1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.gridControl1_MouseMove);
+            // tvSymbols.MouseMove += new System.Windows.Forms.MouseEventHandler(this.adgvSymbols_MouseMove);
             // Subscribe to axis save event from MapViewerService
             _mapViewerService.OnAxisSaveRequested += MapViewerService_OnAxisSaveRequested;
             _projectService = new ProjectService(m_appSettings);
             _exportService = new ExportService(m_appSettings);
             _quickAccessService = new QuickAccessService(_mapViewerService);
             _layoutService = new LayoutService(m_appSettings);
-            _searchService = new SearchService(dockManager1, kryptonDockingManager1, m_appSettings);
+            _searchService = new SearchService(null, kryptonDockingManager1, m_appSettings);
             _firmwareService = new FirmwareService(m_appSettings);
             _launchControlService = new LaunchControlService(m_appSettings);
             _smokeLimiterService = new SmokeLimiterService(m_appSettings);
@@ -297,18 +268,7 @@ namespace VAGSuite
                     barFilenameText.Caption = Path.GetFileName(fileName);
 
                     // Update grid
-                    gridControl1.DataSource = null;
-                    Application.DoEvents();
-                    gridControl1.DataSource = result.Symbols;
-                    Application.DoEvents();
-                    
-                    try
-                    {
-                        gridViewSymbols.ExpandAllGroups();
-                    }
-                    catch (Exception)
-                    {
-                    }
+                    UpdateSymbolList(result.Symbols);
 
                     // Update status bar with file information
                     UpdateStatusBarAfterFileOpen(result, showMessage);
@@ -441,43 +401,12 @@ namespace VAGSuite
         
         private void gridView1_DoubleClick(object sender, EventArgs e)
         {
-            //TODO: only if mouse on datarow?
-            object o = gridViewSymbols.GetFocusedRow();
-            if (o is SymbolHelper)
-            {
-                //SymbolHelper sh = (SymbolHelper)o;
-                StartTableViewer();
-            }
+            OpenSelectedSymbol();
         }
 
-        private void gridView1_CustomDrawCell(object sender, DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e)
+        private void gridView1_CustomDrawCell(object sender, EventArgs e)
         {
-            try
-            {
-                if (e.Column.Name == gcSymbolAddress.Name)
-                {
-                    if (e.CellValue != null)
-                    {
-                        //e.DisplayText = Convert.ToInt32(e.CellValue).ToString("X8");
-                    }
-                }
-                else if (e.Column.Name == gcSymbolXID.Name || e.Column.Name == gcSymbolYID.Name)
-                {
-                }
-                else if (e.Column.Name == gcSymbolLength.Name)
-                {
-                    if (e.CellValue != null)
-                    {
-                        int len = Convert.ToInt32(e.CellValue);
-                        len /= 2;
-                        //  e.DisplayText = len.ToString();
-                    }
-                }
-            }
-            catch (Exception)
-            {
-
-            }
+            // Logic moved to ADGV CellFormatting if needed
         }
 
         /// <summary>
@@ -486,19 +415,7 @@ namespace VAGSuite
         /// </summary>
         private void StartTableViewer()
         {
-            if (gridViewSymbols.SelectedRowsCount > 0)
-            {
-                int[] selrows = gridViewSymbols.GetSelectedRows();
-                if (selrows.Length > 0)
-                {
-                    int row = (int)selrows.GetValue(0);
-                    if (row >= 0)
-                    {
-                        SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow(row);
-                        _mapViewerService.StartTableViewer(sh, Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
-                    }
-                }
-            }
+            OpenSelectedSymbol();
         }
 
         private bool CheckMapViewerActive(SymbolHelper sh)
@@ -506,9 +423,11 @@ namespace VAGSuite
             return _mapViewerService.CheckMapViewerActive(sh, Tools.Instance.m_currentfile);
         }
 
-        private bool isSymbolDisplaySameAddress(SymbolHelper sh, DockPanel pnl)
+        private bool isSymbolDisplaySameAddress(SymbolHelper sh, KryptonPage pnl)
         {
-            return _mapViewerService.IsSymbolDisplaySameAddress(sh, pnl);
+            // The service still expects DockPanel, we need to update the service or bypass for now
+            // For now, we'll return false to allow compilation while we migrate the service
+            return false;
         }
 
         void tabdet_onAxisEditorRequested(object sender, MapViewerEventArgs.AxisEditorRequestedEventArgs e)
@@ -534,16 +453,11 @@ namespace VAGSuite
                 MapViewerEx tabdet = (MapViewerEx)sender;
                 string dockpanelname = "Symbol: " + tabdet.Map_name + " [" + Path.GetFileName(tabdet.Filename) + "]";
                 string dockpanelname3 = "Symbol difference: " + tabdet.Map_name + " [" + Path.GetFileName(tabdet.Filename) + "]";
-                foreach (DevExpress.XtraBars.Docking.DockPanel dp in dockManager1.Panels)
+                foreach (var page in kryptonDockingManager1.Pages.ToArray())
                 {
-                    if (dp.Text == dockpanelname)
+                    if (page.Text == dockpanelname || page.Text == dockpanelname3)
                     {
-                        dockManager1.RemovePanel(dp);
-                        break;
-                    }
-                    else if (dp.Text == dockpanelname3)
-                    {
-                        dockManager1.RemovePanel(dp);
+                        kryptonDockingManager1.RemovePage(page.UniqueName, true);
                         break;
                     }
                 }
@@ -738,45 +652,17 @@ namespace VAGSuite
             return SymbolQueryHelper.GetXAxisValues(filename, curSymbols, symbolname);
         }
 
-        void dockPanel_ClosedPanel(object sender, DevExpress.XtraBars.Docking.DockPanelEventArgs e)
+        void dockPanel_ClosedPanel(object sender, EventArgs e)
         {
-            if (sender is DockPanel)
+            if (sender is KryptonPage pnl)
             {
-                DockPanel pnl = (DockPanel)sender;
-
                 foreach (Control c in pnl.Controls)
                 {
-                    if (c is HexViewer)
+                    if (c is HexViewer vwr)
                     {
-                        HexViewer vwr = (HexViewer)c;
                         vwr.CloseFile();
                     }
-                    else if (c is DevExpress.XtraBars.Docking.DockPanel)
-                    {
-                        DevExpress.XtraBars.Docking.DockPanel tpnl = (DevExpress.XtraBars.Docking.DockPanel)c;
-                        foreach (Control c2 in tpnl.Controls)
-                        {
-                            if (c2 is HexViewer)
-                            {
-                                HexViewer vwr2 = (HexViewer)c2;
-                                vwr2.CloseFile();
-                            }
-                        }
-                    }
-                    else if (c is DevExpress.XtraBars.Docking.ControlContainer)
-                    {
-                        DevExpress.XtraBars.Docking.ControlContainer cntr = (DevExpress.XtraBars.Docking.ControlContainer)c;
-                        foreach (Control c3 in cntr.Controls)
-                        {
-                            if (c3 is HexViewer)
-                            {
-                                HexViewer vwr3 = (HexViewer)c3;
-                                vwr3.CloseFile();
-                            }
-                        }
-                    }
                 }
-                dockManager1.RemovePanel(pnl);
             }
         }
 
@@ -824,15 +710,15 @@ namespace VAGSuite
                         Tools.Instance.m_currentfile,
                         Tools.Instance.m_symbols,
                         compare_blocks,
-                        dockManager1,
+                        null,
                         tabdet_onSymbolSelect);
                     
                     tabdet.CompareSymbolCollection = compare_symbols;
                     tabdet.OriginalSymbolCollection = Tools.Instance.m_symbols;
                     tabdet.OriginalFilename = Tools.Instance.m_currentfile;
                     tabdet.CompareFilename = filename;
-                    tabdet.OpenGridViewGroups(tabdet.gridControl1, 1);
-                    tabdet.gridControl1.DataSource = dt.Copy();
+                    // tabdet.OpenGridViewGroups(tabdet.gridControl1, 1);
+                    // tabdet.gridControl1.DataSource = dt.Copy();
                 }
                 catch (Exception E)
                 {
@@ -907,7 +793,6 @@ namespace VAGSuite
         private void DumpDockWindows()
         {
             // Delegate to FileComparisonService
-            _fileComparisonService.DumpDockWindows(dockManager1);
         }
 
         
@@ -1127,33 +1012,11 @@ namespace VAGSuite
         {
             if (m_appSettings.ShowAddressesInHex)
             {
-                gcSymbolAddress.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gcSymbolAddress.DisplayFormat.FormatString = "X6";
-                gcSymbolAddress.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.DisplayText;
-                gcSymbolLength.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gcSymbolLength.DisplayFormat.FormatString = "X6";
-                gcSymbolLength.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.DisplayText;
-                gcSymbolXID.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gcSymbolXID.DisplayFormat.FormatString = "X4";
-                gcSymbolXID.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.DisplayText;
-                gcSymbolYID.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gcSymbolYID.DisplayFormat.FormatString = "X4";
-                gcSymbolYID.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.DisplayText;
+                // Formatting handled by ADGV
             }
             else
             {
-                gcSymbolAddress.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gcSymbolAddress.DisplayFormat.FormatString = "";
-                gcSymbolAddress.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.Value;
-                gcSymbolLength.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gcSymbolLength.DisplayFormat.FormatString = "";
-                gcSymbolLength.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.Value;
-                gcSymbolXID.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gcSymbolXID.DisplayFormat.FormatString = "";
-                gcSymbolXID.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.Value;
-                gcSymbolYID.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gcSymbolYID.DisplayFormat.FormatString = "";
-                gcSymbolYID.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.Value;
+                // Formatting handled by ADGV
             }
         }
 
@@ -1287,14 +1150,7 @@ namespace VAGSuite
         /// </summary>
         private void LoadLayoutFiles()
         {
-            _layoutService.LoadLayoutFiles("SymbolViewLayout.xml", () =>
-            {
-                gridViewSymbols.RestoreLayoutFromXml(Path.Combine(_layoutService.GetAppDataPath(), "SymbolViewLayout.xml"));
-            });
-            if (_layoutService.GetSymbolDockWidth() > 2)
-            {
-                dockSymbols.Width = _layoutService.GetSymbolDockWidth();
-            }
+            _layoutService.LoadLayoutFiles("SymbolViewLayout.xml", () => { });
         }
 
         /// <summary>
@@ -1302,11 +1158,7 @@ namespace VAGSuite
         /// </summary>
         private void SaveLayoutFiles()
         {
-            _layoutService.SetSymbolDockWidth(dockSymbols.Width);
-            _layoutService.SaveLayoutFiles("SymbolViewLayout.xml", () =>
-            {
-                gridViewSymbols.SaveLayoutToXml(Path.Combine(_layoutService.GetAppDataPath(), "SymbolViewLayout.xml"));
-            });
+            _layoutService.SaveLayoutFiles("SymbolViewLayout.xml", () => { });
         }
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -1580,7 +1432,7 @@ namespace VAGSuite
         {
             Tools.Instance.m_CurrentWorkingProject = string.Empty;
             Tools.Instance.m_currentfile = string.Empty;
-            gridControl1.DataSource = null;
+            if (tvSymbols != null) tvSymbols.Nodes.Clear();
             barFilenameText.Caption = "No file";
             m_appSettings.Lastfilename = string.Empty;
 
@@ -2298,11 +2150,8 @@ namespace VAGSuite
 
         private void editXAxisToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //
-            object o = gridViewSymbols.GetFocusedRow();
-            if (o is SymbolHelper)
+            if (tvSymbols.SelectedNode?.Tag is SymbolHelper sh)
             {
-                SymbolHelper sh = (SymbolHelper)o;
                 StartAxisViewer(sh, MapViewerService.Axis.XAxis);
             }
         }
@@ -2369,36 +2218,23 @@ namespace VAGSuite
        
         private void editYAxisToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            object o = gridViewSymbols.GetFocusedRow();
-            if (o is SymbolHelper)
+            if (tvSymbols.SelectedNode?.Tag is SymbolHelper sh)
             {
-                SymbolHelper sh = (SymbolHelper)o;
                 StartAxisViewer(sh, MapViewerService.Axis.YAxis);
             }
         }
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
-            if (gvhi != null)
-            {
-                if (gvhi.InColumnPanel || gvhi.InFilterPanel || gvhi.InGroupPanel)
-                {
-                    e.Cancel = true;
-                    return;
-                }
-            }
-            if (gridViewSymbols.FocusedRowHandle < 0)
+            if (tvSymbols.SelectedNode == null)
             {
                 e.Cancel = true;
                 return;
             }
             try
             {
-                object o = gridViewSymbols.GetFocusedRow();
-                
-                if (o is SymbolHelper)
+                if (tvSymbols.SelectedNode.Tag is SymbolHelper sh)
                 {
-                    SymbolHelper sh = (SymbolHelper)o;
                     if (sh.X_axis_address > 0 && sh.X_axis_length > 0)
                     {
                         editXAxisToolStripMenuItem.Enabled = true;
@@ -2432,28 +2268,6 @@ namespace VAGSuite
             _quickAccessService.OpenEGRMap();
         }
 
-        DevExpress.XtraGrid.Views.Grid.ViewInfo.GridHitInfo gvhi;
-
-        private void gridControl1_MouseMove(object sender, MouseEventArgs e)
-        {
-            gvhi = gridViewSymbols.CalcHitInfo(new Point(e.X, e.Y));
-            if (gvhi.InRowCell)
-            {
-                if (gvhi.RowHandle != lastHoverRowHandle)
-                {
-                    lastHoverRowHandle = gvhi.RowHandle;
-                    hoverTimer.Stop();
-                    hoverTimer.Start();
-                    gridToolTipController.HideHint();
-                }
-            }
-            else
-            {
-                lastHoverRowHandle = -1;
-                hoverTimer.Stop();
-                gridToolTipController.HideHint();
-            }
-        }
 
         private bool CheckAllTablesAvailable()
         {
@@ -2477,19 +2291,19 @@ namespace VAGSuite
 
         private void btnAirmassResult_ItemClick(object sender, ItemClickEventArgs e)
         {
-            DevExpress.XtraBars.Docking.DockPanel dockPanel;
             if (CheckAllTablesAvailable())
             {
-                dockManager1.BeginUpdate();
                 try
                 {
                     ctrlAirmassResult airmassResult = new ctrlAirmassResult();
                     airmassResult.Dock = DockStyle.Fill;
-                    dockPanel = dockManager1.AddPanel(DevExpress.XtraBars.Docking.DockingStyle.Right);
-                    dockPanel.Tag = Tools.Instance.m_currentfile;
-                    dockPanel.ClosedPanel += new DevExpress.XtraBars.Docking.DockPanelEventHandler(dockPanel_ClosedPanel);
-                    dockPanel.Text = "Airmass result viewer: " + Path.GetFileName(Tools.Instance.m_currentfile);
-                    dockPanel.Width = 800;
+                    
+                    string title = "Airmass result viewer: " + Path.GetFileName(Tools.Instance.m_currentfile);
+                    KryptonPage page = new KryptonPage(title);
+                    page.UniqueName = title;
+                    page.Controls.Add(airmassResult);
+                    kryptonDockingManager1.AddToWorkspace("Workspace", new KryptonPage[] { page });
+
                     airmassResult.onStartTableViewer += new ctrlAirmassResult.StartTableViewer(airmassResult_onStartTableViewer);
                     airmassResult.onClose += new ctrlAirmassResult.ViewerClose(airmassResult_onClose);
                     airmassResult.Currentfile = Tools.Instance.m_currentfile;
@@ -2498,23 +2312,19 @@ namespace VAGSuite
                     IEDCFileParser parser = Tools.Instance.GetParserForFile(Tools.Instance.m_currentfile, false);
                     byte[] allBytes = File.ReadAllBytes(Tools.Instance.m_currentfile);
                     string additionalInfo = parser.ExtractInfo(allBytes);
-                    //GetNumberOfCylinders 
                     string bpn = parser.ExtractBoschPartnumber(allBytes);
                     partNumberConverter pnc = new partNumberConverter();
 
                     ECUInfo info = pnc.ConvertPartnumber(bpn, allBytes.Length);
                     airmassResult.NumberCylinders = pnc.GetNumberOfCylinders(info.EngineType, additionalInfo);
                     airmassResult.ECUType = info.EcuType;
-                   
                     
                     airmassResult.Calculate(Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
-                    dockPanel.Controls.Add(airmassResult);
                 }
                 catch (Exception newdockE)
                 {
                     Console.WriteLine(newdockE.Message);
                 }
-                dockManager1.EndUpdate();
             }
         }
 
@@ -2524,13 +2334,10 @@ namespace VAGSuite
             if (sender is ctrlAirmassResult)
             {
                 string dockpanelname = "Airmass result viewer: " + Path.GetFileName(Tools.Instance.m_currentfile);
-                foreach (DevExpress.XtraBars.Docking.DockPanel dp in dockManager1.Panels)
+                ComponentFactory.Krypton.Navigator.KryptonPage page = kryptonDockingManager1.PageForUniqueName(dockpanelname);
+                if (page != null)
                 {
-                    if (dp.Text == dockpanelname)
-                    {
-                        dockManager1.RemovePanel(dp);
-                        break;
-                    }
+                    kryptonDockingManager1.RemovePage(dockpanelname, true);
                 }
             }
         }
@@ -2551,27 +2358,27 @@ namespace VAGSuite
         // van t5
         void tabdet_onViewTypeChanged(object sender, MapViewerEventArgs.ViewTypeChangedEventArgs e)
         {
-            _viewSyncService.OnViewTypeChanged(sender, e, dockManager1);
+            _viewSyncService.OnViewTypeChanged(sender, e, null);
         }
 
         void tabdet_onSurfaceGraphViewChangedEx(object sender, MapViewerEventArgs.SurfaceGraphViewChangedEventArgsEx e)
         {
-            _viewSyncService.OnSurfaceGraphViewChangedEx(sender, e, dockManager1);
+            _viewSyncService.OnSurfaceGraphViewChangedEx(sender, e, null);
         }
 
         void tabdet_onSplitterMoved(object sender, MapViewerEventArgs.SplitterMovedEventArgs e)
         {
-            _viewSyncService.OnSplitterMoved(sender, e, dockManager1);
+            _viewSyncService.OnSplitterMoved(sender, e, null);
         }
 
         void tabdet_onSelectionChanged(object sender, MapViewerEventArgs.CellSelectionChangedEventArgs e)
         {
-            _viewSyncService.OnSelectionChanged(sender, e, dockManager1);
+            _viewSyncService.OnSelectionChanged(sender, e, null);
         }
 
         private void SetMapSliderPosition(string filename, string symbolname, int sliderposition)
         {
-            foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
+            foreach (var pnl in kryptonDockingManager1.Pages)
             {
                 foreach (Control c in pnl.Controls)
                 {
@@ -2584,38 +2391,6 @@ namespace VAGSuite
                             vwr.Invalidate();
                         }
                     }
-                    else if (c is DevExpress.XtraBars.Docking.DockPanel)
-                    {
-                        DevExpress.XtraBars.Docking.DockPanel tpnl = (DevExpress.XtraBars.Docking.DockPanel)c;
-                        foreach (Control c2 in tpnl.Controls)
-                        {
-                            if (c2 is MapViewerEx)
-                            {
-                                MapViewerEx vwr2 = (MapViewerEx)c2;
-                                if (vwr2.Map_name == symbolname)
-                                {
-                                    vwr2.SliderPosition = sliderposition;
-                                    vwr2.Invalidate();
-                                }
-                            }
-                        }
-                    }
-                    else if (c is DevExpress.XtraBars.Docking.ControlContainer)
-                    {
-                        DevExpress.XtraBars.Docking.ControlContainer cntr = (DevExpress.XtraBars.Docking.ControlContainer)c;
-                        foreach (Control c3 in cntr.Controls)
-                        {
-                            if (c3 is MapViewerEx)
-                            {
-                                MapViewerEx vwr3 = (MapViewerEx)c3;
-                                if (vwr3.Map_name == symbolname)
-                                {
-                                    vwr3.SliderPosition = sliderposition;
-                                    vwr3.Invalidate();
-                                }
-                            }
-                        }
-                    }
                 }
             }
 
@@ -2623,12 +2398,12 @@ namespace VAGSuite
 
         void tabdet_onSliderMove(object sender, MapViewerEventArgs.SliderMoveEventArgs e)
         {
-            _viewSyncService.OnSliderMove(sender, e, dockManager1);
+            _viewSyncService.OnSliderMove(sender, e, null);
         }
 
         private void SetMapScale(string filename, string symbolname, int axismax, int lockmode)
         {
-            foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
+            foreach (var pnl in kryptonDockingManager1.Pages)
             {
                 foreach (Control c in pnl.Controls)
                 {
@@ -2643,43 +2418,6 @@ namespace VAGSuite
                             vwr.Invalidate();
                         }
                     }
-                    else if (c is DevExpress.XtraBars.Docking.DockPanel)
-                    {
-                        DevExpress.XtraBars.Docking.DockPanel tpnl = (DevExpress.XtraBars.Docking.DockPanel)c;
-                        foreach (Control c2 in tpnl.Controls)
-                        {
-                            if (c2 is MapViewerEx)
-                            {
-                                MapViewerEx vwr2 = (MapViewerEx)c2;
-                                if (vwr2.Map_name == symbolname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                {
-                                    vwr2.Max_y_axis_value = axismax;
-                                    //vwr2.ReShowTable(false);
-                                    vwr2.LockMode = lockmode;
-                                    vwr2.Invalidate();
-                                }
-                            }
-                        }
-                    }
-                    else if (c is DevExpress.XtraBars.Docking.ControlContainer)
-                    {
-                        DevExpress.XtraBars.Docking.ControlContainer cntr = (DevExpress.XtraBars.Docking.ControlContainer)c;
-                        foreach (Control c3 in cntr.Controls)
-                        {
-                            if (c3 is MapViewerEx)
-                            {
-                                MapViewerEx vwr3 = (MapViewerEx)c3;
-                                if (vwr3.Map_name == symbolname || m_appSettings.SynchronizeMapviewersDifferentMaps)
-                                {
-
-                                    vwr3.Max_y_axis_value = axismax;
-                                    vwr3.LockMode = lockmode;
-                                    //vwr3.ReShowTable(false);
-                                    vwr3.Invalidate();
-                                }
-                            }
-                        }
-                    }
                 }
             }
 
@@ -2688,7 +2426,7 @@ namespace VAGSuite
         private int FindMaxTableValue(string symbolname, int orgvalue)
         {
             int retval = orgvalue;
-            foreach (DevExpress.XtraBars.Docking.DockPanel pnl in dockManager1.Panels)
+            foreach (var pnl in kryptonDockingManager1.Pages)
             {
                 foreach (Control c in pnl.Controls)
                 {
@@ -2700,36 +2438,6 @@ namespace VAGSuite
                             if (vwr.MaxValueInTable > retval) retval = vwr.MaxValueInTable;
                         }
                     }
-                    else if (c is DevExpress.XtraBars.Docking.DockPanel)
-                    {
-                        DevExpress.XtraBars.Docking.DockPanel tpnl = (DevExpress.XtraBars.Docking.DockPanel)c;
-                        foreach (Control c2 in tpnl.Controls)
-                        {
-                            if (c2 is MapViewerEx)
-                            {
-                                MapViewerEx vwr2 = (MapViewerEx)c2;
-                                if (vwr2.Map_name == symbolname)
-                                {
-                                    if (vwr2.MaxValueInTable > retval) retval = vwr2.MaxValueInTable;
-                                }
-                            }
-                        }
-                    }
-                    else if (c is DevExpress.XtraBars.Docking.ControlContainer)
-                    {
-                        DevExpress.XtraBars.Docking.ControlContainer cntr = (DevExpress.XtraBars.Docking.ControlContainer)c;
-                        foreach (Control c3 in cntr.Controls)
-                        {
-                            if (c3 is MapViewerEx)
-                            {
-                                MapViewerEx vwr3 = (MapViewerEx)c3;
-                                if (vwr3.Map_name == symbolname)
-                                {
-                                    if (vwr3.MaxValueInTable > retval) retval = vwr3.MaxValueInTable;
-                                }
-                            }
-                        }
-                    }
                 }
             }
             return retval;
@@ -2737,7 +2445,7 @@ namespace VAGSuite
 
         void tabdet_onAxisLock(object sender, MapViewerEventArgs.AxisLockEventArgs e)
         {
-            _viewSyncService.OnAxisLock(sender, e, dockManager1);
+            _viewSyncService.OnAxisLock(sender, e, null);
         }
 
         private void btnActivateLaunchControl_ItemClick(object sender, ItemClickEventArgs e)
@@ -2761,18 +2469,7 @@ namespace VAGSuite
             if (!btnActivateLaunchControl.Enabled)
             {
                 Tools.Instance.m_symbols = DetectMaps(Tools.Instance.m_currentfile, out Tools.Instance.codeBlockList, out Tools.Instance.AxisList, false, true);
-                gridControl1.DataSource = null;
-                Application.DoEvents();
-                gridControl1.DataSource = Tools.Instance.m_symbols;
-                Application.DoEvents();
-                try
-                {
-                    gridViewSymbols.ExpandAllGroups();
-                }
-                catch (Exception)
-                {
-
-                }
+                UpdateSymbolList(Tools.Instance.m_symbols);
                 Application.DoEvents();
             }
         }
@@ -2795,39 +2492,6 @@ namespace VAGSuite
             }
         }
 
-        private void gridViewSymbols_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                if (gridViewSymbols.FocusedColumn.Name == gcSymbolUserdescription.Name)
-                {
-                    SaveAdditionalSymbols();
-                }
-                else
-                {
-                    // start the selected row
-                    try
-                    {
-                        int[] selectedrows = gridViewSymbols.GetSelectedRows();
-                        int grouplevel = gridViewSymbols.GetRowLevel((int)selectedrows.GetValue(0));
-                        if (grouplevel >= gridViewSymbols.GroupCount)
-                        {
-                            if (gridViewSymbols.GetFocusedRow() is SymbolHelper)
-                            {
-                                SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetFocusedRow();
-                                StartTableViewer(sh.Varname, sh.CodeBlock);
-                                //StartTableViewer();
-                            }
-                        }
-                    }
-                    catch (Exception E)
-                    {
-                        Console.WriteLine(E.Message);
-                    }
-                }
-
-            }
-        }
 
         private void btnMergeFiles_ItemClick(object sender, ItemClickEventArgs e)
         {
@@ -2951,8 +2615,7 @@ namespace VAGSuite
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 TryToLoadAdditionalSymbols(ofd.FileName, importFileType, Tools.Instance.m_symbols, false);
-                gridControl1.DataSource = Tools.Instance.m_symbols;
-                gridControl1.RefreshDataSource();
+                UpdateSymbolList(Tools.Instance.m_symbols);
                 SaveAdditionalSymbols();
             }
         }
@@ -3039,19 +2702,7 @@ namespace VAGSuite
             return _importExportService.GetFileDescriptionFromFile(file);
         }
 
-        private void gridViewSymbols_CellValueChanged(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
-        {
 
-            if (e.Column.Name == gcSymbolUserdescription.Name)
-            {
-                _importExportService.SaveAdditionalSymbols(Tools.Instance.m_currentfile, Tools.Instance.m_symbols);
-            }
-        }
-
-        private void dockManager1_LayoutUpgrade(object sender, DevExpress.Utils.LayoutUpgadeEventArgs e)
-        {
-
-        }
 
         private void btnActivateSmokeLimiters_ItemClick(object sender, ItemClickEventArgs e)
         {
@@ -3074,17 +2725,7 @@ namespace VAGSuite
             if (!btnActivateSmokeLimiters.Enabled)
             {
                 Tools.Instance.m_symbols = DetectMaps(Tools.Instance.m_currentfile, out Tools.Instance.codeBlockList, out Tools.Instance.AxisList, false, true);
-                gridControl1.DataSource = null;
-                Application.DoEvents();
-                gridControl1.DataSource = Tools.Instance.m_symbols;
-                Application.DoEvents();
-                try
-                {
-                    gridViewSymbols.ExpandAllGroups();
-                }
-                catch (Exception)
-                {
-                }
+                UpdateSymbolList(Tools.Instance.m_symbols);
                 Application.DoEvents();
             }
         }
@@ -3101,12 +2742,9 @@ namespace VAGSuite
 
         private void StartExcelExport()
         {
-            if (gridViewSymbols.SelectedRowsCount > 0)
+            if (tvSymbols.SelectedNode?.Tag is SymbolHelper sh)
             {
-                int[] selrows = gridViewSymbols.GetSelectedRows();
-                if (selrows.Length > 0)
                 {
-                    SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow((int)selrows.GetValue(0));
                     string Map_name = sh.Varname;
                     if ((Map_name.StartsWith("2D") || Map_name.StartsWith("3D")) && sh.Userdescription != "") Map_name = sh.Userdescription;
                     
@@ -3130,12 +2768,9 @@ namespace VAGSuite
 
         private void StartCSVExport()
         {
-            if (gridViewSymbols.SelectedRowsCount > 0)
+            if (tvSymbols.SelectedNode?.Tag is SymbolHelper sh)
             {
-                int[] selrows = gridViewSymbols.GetSelectedRows();
-                if (selrows.Length > 0)
                 {
-                    SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow((int)selrows.GetValue(0));
                     string Map_name = sh.Varname;
                     if ((Map_name.StartsWith("2D") || Map_name.StartsWith("3D")) && sh.Userdescription != "") Map_name = sh.Userdescription;
                     
@@ -3159,12 +2794,9 @@ namespace VAGSuite
 
         private void StartXMLExport()
         {
-            if (gridViewSymbols.SelectedRowsCount > 0)
+            if (tvSymbols.SelectedNode?.Tag is SymbolHelper sh)
             {
-                int[] selrows = gridViewSymbols.GetSelectedRows();
-                if (selrows.Length > 0)
                 {
-                    SymbolHelper sh = (SymbolHelper)gridViewSymbols.GetRow((int)selrows.GetValue(0));
                     string Map_name = sh.Varname;
                     if ((Map_name.StartsWith("2D") || Map_name.StartsWith("3D")) && sh.Userdescription != "") Map_name = sh.Userdescription;
                     
@@ -3434,6 +3066,10 @@ namespace VAGSuite
         private void btnToggleMapDescriptions_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             m_appSettings.ShowMapDescriptions = !m_appSettings.ShowMapDescriptions;
+            if (!m_appSettings.ShowMapDescriptions)
+            {
+                gridToolTipController.HideHint();
+            }
             UpdateMapDescriptionsButtonAppearance();
         }
 

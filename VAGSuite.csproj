@@ -314,6 +314,9 @@
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
     <Compile Include="frmMain.LayoutConstants.cs" />
+    <Compile Include="frmMain.SymbolList.cs">
+      <DependentUpon>frmMain.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmMain.KryptonStatus.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>

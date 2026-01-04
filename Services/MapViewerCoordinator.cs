@@ -20,7 +20,7 @@ namespace VAGSuite.Services
 
         public MapViewerCoordinator(DockManager dockManager, AppSettings appSettings)
         {
-            _dockManager = dockManager ?? throw new ArgumentNullException(nameof(dockManager));
+            _dockManager = dockManager;
             _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
         }
 

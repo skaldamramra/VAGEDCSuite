@@ -702,11 +702,10 @@ namespace VAGSuite
             this.simpleButton10.TabIndex = 17;
             this.simpleButton10.Text = "Read";
             this.simpleButton10.Click += new System.EventHandler(this.simpleButton10_Click);
-            // 
+            //
             // MapViewerEx
-            // 
-            this.Appearance.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Appearance.Options.UseFont = true;
+            //
+            this.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.simpleButton10);

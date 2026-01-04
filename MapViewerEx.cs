@@ -19,7 +19,7 @@ using VAGSuite.Components;
 
 namespace VAGSuite
 {
-    public partial class MapViewerEx : DevExpress.XtraEditors.XtraUserControl //IMapViewer
+    public partial class MapViewerEx : System.Windows.Forms.UserControl //IMapViewer
     {
         // Phase 3 Services - Business Logic (initialized in constructor for backward compatibility)
         private IMapRenderingService _mapRenderingService;

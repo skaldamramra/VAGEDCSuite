@@ -59,13 +59,8 @@ namespace VAGSuite
             pageSymbols.UniqueName = "SymbolsPage";
             pageSymbols.ImageSmall = GetResourceImage("vagedc.ico");
             
-            // Move the existing grid into the page
-            // Note: We keep the DevExpress grid for now as per migration strategy (Phase 5 is Grid migration)
-            if (this.gridControl1 != null)
-            {
-                this.gridControl1.Dock = DockStyle.Fill;
-                pageSymbols.Controls.Add(this.gridControl1);
-            }
+            // Note: The new AdvancedDataGridView (adgvSymbols) is added to this page
+            // during InitializeSymbolGrid() in frmMain.SymbolList.cs
 
             // CRITICAL: Add the docking panel AFTER Ribbon and StatusStrip so it's behind them in Z-order
             // The Ribbon should already be in Controls (added by InitializeKryptonRibbon)
@@ -86,23 +81,6 @@ namespace VAGSuite
         {
             // As per docking.pdf: "You should always wait until the load event occurs before executing any docking code."
             
-            // CRITICAL FIX: Disable DevExpress DockManager completely to prevent Z-order conflicts
-            // The DevExpress DockManager was causing map windows to appear behind the Ribbon
-            // because it was managing its own docking layout independently of Krypton
-            if (this.dockManager1 != null)
-            {
-                // Hide all DevExpress dock panels
-                this.dockSymbols.Visibility = DevExpress.XtraBars.Docking.DockVisibility.Hidden;
-                this.dockSymbols.Enabled = false;
-                
-                // Remove DevExpress dock panels from the form's control hierarchy
-                // This prevents them from interfering with Krypton's layout
-                foreach (DevExpress.XtraBars.Docking.DockPanel panel in this.dockManager1.Panels)
-                {
-                    panel.Visibility = DevExpress.XtraBars.Docking.DockVisibility.Hidden;
-                    panel.Enabled = false;
-                }
-            }
             
             // Link the workspace to the docking manager for dragging support
             // (Derived from page_dragging.pdf p. 72)
