@@ -88,7 +88,7 @@ namespace VAGSuite.Theming
                 GridBorder = VAGEDCColorPalette.Gray600,
                 GridHeaderBackground = VAGEDCColorPalette.Gray800,  // Changed from Gray700 to Gray800 for darker headers
                 GridHeaderText = VAGEDCColorPalette.TextPrimaryDark,
-                GridHoverRow = Color.FromArgb(128, 64, 64, 64),  // Gray600 at 50% opacity (Muted hover)
+                GridHoverRow = VAGEDCColorPalette.Gray700,  // Use elevated gray for hover (opaque)
                 GridHeaderFont = headerFont ?? new Font("Segoe UI", 12f, FontStyle.Bold),
                 GridCellFont = cellFont ?? new Font("Segoe UI", 12f, FontStyle.Regular),
                 
@@ -96,8 +96,9 @@ namespace VAGSuite.Theming
                 ToolbarBackground = VAGEDCColorPalette.Gray800,
                 ToolbarText = VAGEDCColorPalette.TextPrimaryDark,
                 ToolbarHover = VAGEDCColorPalette.Primary500,
-                StatusBarBackground = VAGEDCColorPalette.Gray900,
-                StatusBarText = VAGEDCColorPalette.TextSecondaryDark,
+                // VS Code Dark+ uses an accent blue for status bar — mirror that here for authenticity
+                StatusBarBackground = VAGEDCColorPalette.Primary500,
+                StatusBarText = Color.White,
                 
                 // Semantic
                 AccentPrimary = VAGEDCColorPalette.Primary500,

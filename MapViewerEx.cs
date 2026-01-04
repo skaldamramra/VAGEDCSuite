@@ -665,6 +665,9 @@ namespace VAGSuite
         {
             Console.WriteLine("MapViewerEx: Constructor started");
             InitializeComponent();
+            // Set background color to match theme to avoid white flashes
+            this.BackColor = VAGEDCThemeManager.Instance.CurrentTheme.WindowBackground;
+            
             toolStripComboBox1.SelectedIndex = 0;
             toolStripComboBox2.SelectedIndex = 0;
 
@@ -887,9 +890,10 @@ namespace VAGSuite
             xtraTabControl1.StateSelected.Tab.Content.ShortText.Color1 = Color.White;
             
             // Inactive Tab
-            xtraTabControl1.StateCommon.Tab.Back.Color1 = Color.FromArgb(45, 45, 45);
+            // Align inactive tab background/text with VS Code Dark+ neutrals
+            xtraTabControl1.StateCommon.Tab.Back.Color1 = Color.FromArgb(37, 37, 38);
             xtraTabControl1.StateCommon.Tab.Back.ColorStyle = PaletteColorStyle.Solid;
-            xtraTabControl1.StateCommon.Tab.Content.ShortText.Color1 = Color.FromArgb(150, 150, 150);
+            xtraTabControl1.StateCommon.Tab.Content.ShortText.Color1 = Color.FromArgb(187, 187, 187);
 
             // Ensure the font is Source Sans Pro
             xtraTabControl1.StateCommon.Tab.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
@@ -944,12 +948,14 @@ namespace VAGSuite
                     // CRITICAL: Force Custom PaletteMode
                     btn.PaletteMode = PaletteMode.Custom;
                     btn.Palette = VAGEDCThemeManager.Instance.CustomPalette;
-                    btn.ButtonStyle = ButtonStyle.Standalone;
+                    // Use Custom1 style to bypass Office theme image assets that might override colors
+                    btn.ButtonStyle = ButtonStyle.Custom1;
                     
                     // Use StateNormal to override global defaults
                     // Use StateCommon for the base colors to ensure they are applied correctly
                     // but we must be careful not to let them override StateDisabled
-                    btn.StateNormal.Back.Color1 = Color.FromArgb(0, 100, 180); // VS Code Blue
+                    // Use VS Code Dark+ friendly blues: normal = #0E639C, pressed = #007ACC
+                    btn.StateNormal.Back.Color1 = Color.FromArgb(14, 99, 156); // VS Code-like normal blue (#0E639C)
                     btn.StateNormal.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StateNormal.Content.ShortText.Color1 = Color.White;
                     btn.StateNormal.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
@@ -960,8 +966,8 @@ namespace VAGSuite
                     btn.StateCommon.Content.ShortText.ColorStyle = PaletteColorStyle.Solid;
 
                     // Explicitly fix disabled state for bottom buttons (Undo, Save, Close, Read)
-                    // We use StateDisabled with pure white text for maximum contrast on dark background
-                    btn.StateDisabled.Back.Color1 = Color.FromArgb(45, 45, 45);
+                    // Use a muted gray for disabled background similar to VS Code disabled controls
+                    btn.StateDisabled.Back.Color1 = Color.FromArgb(58, 61, 65);
                     btn.StateDisabled.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StateDisabled.Content.ShortText.Color1 = Color.White; // Pure white for maximum contrast
                     btn.StateDisabled.Content.ShortText.Color2 = Color.White;
@@ -978,21 +984,21 @@ namespace VAGSuite
                     btn.StateNormal.Border.Width = 1;
 
                     // Also set StateTracking (Hover) to ensure it doesn't revert to system style
-                    btn.StateTracking.Back.Color1 = Color.FromArgb(20, 142, 224);
+                    btn.StateTracking.Back.Color1 = Color.FromArgb(17, 119, 187); // hover (#1177BB-ish)
                     btn.StateTracking.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StateTracking.Content.ShortText.Color1 = Color.White;
                     btn.StateTracking.Content.ShortText.Color2 = Color.White;
                     btn.StateTracking.Content.ShortText.ColorStyle = PaletteColorStyle.Solid;
                     
                     // And StatePressed
-                    btn.StatePressed.Back.Color1 = Color.FromArgb(0, 102, 184);
+                    btn.StatePressed.Back.Color1 = Color.FromArgb(0, 122, 204); // pressed (#007ACC)
                     btn.StatePressed.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StatePressed.Content.ShortText.Color1 = Color.White;
                     btn.StatePressed.Content.ShortText.Color2 = Color.White;
                     btn.StatePressed.Content.ShortText.ColorStyle = PaletteColorStyle.Solid;
 
                     // OverrideDefault (AcceptButton state)
-                    btn.OverrideDefault.Back.Color1 = Color.FromArgb(0, 100, 180);
+                    btn.OverrideDefault.Back.Color1 = Color.FromArgb(14, 99, 156);
                     btn.OverrideDefault.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.OverrideDefault.Content.ShortText.Color1 = Color.White;
                     btn.OverrideDefault.Content.ShortText.Color2 = Color.White;
@@ -1001,7 +1007,7 @@ namespace VAGSuite
                     btn.OverrideDefault.Border.DrawBorders = PaletteDrawBorders.All;
 
                     // OverrideFocus (Focused state)
-                    btn.OverrideFocus.Back.Color1 = Color.FromArgb(0, 100, 180);
+                    btn.OverrideFocus.Back.Color1 = Color.FromArgb(14, 99, 156);
                     btn.OverrideFocus.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.OverrideFocus.Content.ShortText.Color1 = Color.White;
                     btn.OverrideFocus.Content.ShortText.Color2 = Color.White;
@@ -1021,8 +1027,8 @@ namespace VAGSuite
                     btn.Palette = VAGEDCThemeManager.Instance.CustomPalette;
                     btn.ButtonStyle = ButtonStyle.Standalone;
                     
-                    // Use StateNormal
-                    btn.StateNormal.Back.Color1 = Color.FromArgb(60, 60, 60); // Darker for overlay buttons
+                    // Use StateNormal - use a neutral VS Code-like surface for overlay buttons
+                    btn.StateNormal.Back.Color1 = Color.FromArgb(51, 51, 51); // neutral dark surface
                     btn.StateNormal.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StateNormal.Content.ShortText.Color1 = Color.White;
                     btn.StateNormal.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(8f, FontStyle.Bold);
