@@ -8,7 +8,7 @@ using System.Windows.Forms;
 namespace VAGSuite.Theming
 {
     /// <summary>
-    /// Manages application of VAGEDC custom themes - VS Code Dark+ inspired theme for Krypton/WinForms
+    /// Manages application of VAGEDC custom themes - VAGEDC Dark skin for Krypton/WinForms
     /// </summary>
     public class VAGEDCThemeManager
     {
@@ -49,24 +49,24 @@ namespace VAGSuite.Theming
         {
             // ===== BUTTON STYLES =====
             
-            // ButtonStandalone - Primary button style (VS Code Dark+ style)
+            // ButtonStandalone - Primary button style (VAGEDC Dark skin)
             var btnStandalone = _customPalette.ButtonStyles.ButtonStandalone;
             btnStandalone.StateCommon.Content.ShortText.Color1 = Color.White;
             btnStandalone.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
 
-            // Disabled State - VS Code disabled appearance
+            // Disabled State - VAGEDC Dark disabled appearance
             btnStandalone.StateDisabled.Back.Color1 = VAGEDCColorPalette.Gray500;
             btnStandalone.StateDisabled.Content.ShortText.Color1 = Color.White;
 
-            // Tracking (Hover) State - VS Code hover blue
+            // Tracking (Hover) State - VAGEDC Dark hover blue
             btnStandalone.StateTracking.Back.Color1 = VAGEDCColorPalette.Primary600;
             btnStandalone.StateTracking.Content.ShortText.Color1 = Color.White;
 
-            // Pressed State - VS Code accent
+            // Pressed State - VAGEDC Dark accent
             btnStandalone.StatePressed.Back.Color1 = VAGEDCColorPalette.Primary500;
             btnStandalone.StatePressed.Content.ShortText.Color1 = Color.White;
 
-            // Normal State - VS Code button blue
+            // Normal State - VAGEDC Dark button blue
             btnStandalone.StateNormal.Back.Color1 = VAGEDCColorPalette.Primary600;
             btnStandalone.StateNormal.Content.ShortText.Color1 = Color.White;
 
@@ -283,13 +283,13 @@ namespace VAGSuite.Theming
                 kForm.StateCommon.Back.Color1 = _currentTheme.WindowBackground;
                 kForm.StateCommon.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
 
-                // Header (Title Bar) - VS Code Dark+ style
+                // Header (Title Bar) - VAGEDC Dark skin style
                 kForm.StateCommon.Header.Back.Color1 = VAGEDCColorPalette.Gray700; // #2D2D2D
                 kForm.StateCommon.Header.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kForm.StateCommon.Header.Content.ShortText.Color1 = _currentTheme.TextPrimary;
                 kForm.StateCommon.Header.Content.ShortText.Font = GetCustomFont(10f, FontStyle.Bold);
 
-                // Border - VS Code style subtle border
+                // Border - VAGEDC Dark skin subtle border
                 kForm.StateCommon.Border.Draw = ComponentFactory.Krypton.Toolkit.InheritBool.True;
                 kForm.StateCommon.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
                 kForm.StateCommon.Border.Color1 = VAGEDCColorPalette.Gray600; // #333333
@@ -320,7 +320,7 @@ namespace VAGSuite.Theming
             }
             else if (control is ComponentFactory.Krypton.Toolkit.KryptonButton kButton)
             {
-                // VS Code style button: Solid accent color with subtle border
+                // VAGEDC Dark skin button: Solid accent color with subtle border
                 kButton.ButtonStyle = ComponentFactory.Krypton.Toolkit.ButtonStyle.Standalone;
                 
                 // StateCommon - Set the base for ALL states to be dark
@@ -336,12 +336,12 @@ namespace VAGSuite.Theming
                 kButton.StateCommon.Content.ShortText.Color2 = Color.White;
                 kButton.StateCommon.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
 
-                // Normal State - primary accent similar to VS Code Dark+
+                // Normal State - primary accent for VAGEDC Dark skin
                 kButton.StateNormal.Back.Color1 = VAGEDCColorPalette.Primary600; // #0E639C
                 kButton.StateNormal.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StateNormal.Content.ShortText.Color1 = Color.White;
 
-                // StateDisabled - VS Code-like disabled appearance
+                // StateDisabled - VAGEDC Dark skin disabled appearance
                 kButton.StateDisabled.Back.Color1 = VAGEDCColorPalette.Gray500; // #3A3D41
                 kButton.StateDisabled.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StateDisabled.Content.ShortText.Color1 = Color.White; // Pure white for maximum contrast
@@ -355,7 +355,7 @@ namespace VAGSuite.Theming
                 kButton.OverrideDefault.Border.Color1 = VAGEDCColorPalette.Primary500; // #007ACC
                 kButton.OverrideDefault.Content.ShortText.Color1 = Color.White;
 
-                // Tracking (Hover) - VS Code hover blue
+                // Tracking (Hover) - VAGEDC Dark hover blue
                 kButton.StateTracking.Back.Color1 = VAGEDCColorPalette.Primary600; // #0E639C
                 kButton.StateTracking.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StateTracking.Border.Color1 = Color.White;
@@ -363,7 +363,7 @@ namespace VAGSuite.Theming
                 kButton.StateTracking.Content.ShortText.Color2 = Color.White;
                 kButton.StateTracking.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
 
-                // Pressed - VS Code accent
+                // Pressed - VAGEDC Dark accent
                 kButton.StatePressed.Back.Color1 = VAGEDCColorPalette.Primary500; // #007ACC
                 kButton.StatePressed.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StatePressed.Content.ShortText.Color1 = Color.White;
@@ -380,7 +380,7 @@ namespace VAGSuite.Theming
             }
             else if (control is ComponentFactory.Krypton.Toolkit.KryptonLinkLabel kLink)
             {
-                kLink.StateCommon.ShortText.Color1 = VAGEDCColorPalette.Primary500; // VS Code Blue
+                kLink.StateCommon.ShortText.Color1 = VAGEDCColorPalette.Primary500; // VAGEDC Dark Blue
                 kLink.StateCommon.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
                 // Use overrides for link states in Krypton 4.5.9
                 kLink.OverrideNotVisited.ShortText.Color1 = VAGEDCColorPalette.Primary500;
@@ -465,7 +465,7 @@ namespace VAGSuite.Theming
                 treeView.LineColor = VAGEDCColorPalette.Gray600;
 
                 // Note: TreeView selection colors are set via DrawMode in individual forms
-                // Selected items should use VS Code selection blue (#264F78) with white text
+                // Selected items should use VAGEDC Dark selection blue (#264F78) with white text
             }
             // Standard ListView
             else if (control is ListView)
@@ -508,7 +508,7 @@ namespace VAGSuite.Theming
         
         
         /// <summary>
-        /// Applies VS Code Dark+ theme to a DataGridView control
+        /// Applies VAGEDC Dark skin to a DataGridView control
         /// </summary>
         private void ApplyThemeToDataGridView(DataGridView dgv)
         {
@@ -525,7 +525,7 @@ namespace VAGSuite.Theming
             dgv.RowsDefaultCellStyle.BackColor = _currentTheme.GridBackground;
             dgv.RowsDefaultCellStyle.ForeColor = _currentTheme.TextPrimary;
             
-            // Selection style - VS Code selection blue
+            // Selection style - VAGEDC Dark selection blue
             dgv.SelectionMode = DataGridViewSelectionMode.CellSelect;
             dgv.DefaultCellStyle.SelectionBackColor = VAGEDCColorPalette.Primary500;
             dgv.DefaultCellStyle.SelectionForeColor = Color.White;
@@ -554,7 +554,7 @@ namespace VAGSuite.Theming
     }
     
     /// <summary>
-    /// Custom color table for ToolStrip controls - VS Code Dark+ style
+    /// Custom color table for ToolStrip controls - VAGEDC Dark skin style
     /// </summary>
     internal class VAGEDCToolStripColorTable : ProfessionalColorTable
     {

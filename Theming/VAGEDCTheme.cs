@@ -3,7 +3,7 @@ using System.Drawing;
 namespace VAGSuite.Theming
 {
     /// <summary>
-    /// Defines a complete VAGEDC Dark theme with VS Code Dark+ color assignments
+    /// Defines a complete VAGEDC Dark theme - VAGEDC Dark skin color assignments
     /// </summary>
     public class VAGEDCTheme
     {
@@ -63,13 +63,13 @@ namespace VAGSuite.Theming
         public Color ToolbarText { get; set; }
         /// <summary>Toolbar item hover - #007ACC</summary>
         public Color ToolbarHover { get; set; }
-        /// <summary>Status bar background - #007ACC (VS Code accent)</summary>
+        /// <summary>Status bar background - #007ACC (VAGEDC Dark accent)</summary>
         public Color StatusBarBackground { get; set; }
         /// <summary>Status bar text - #FFFFFF</summary>
         public Color StatusBarText { get; set; }
 
         // ===== SEMANTIC COLORS =====
-        /// <summary>Primary accent - VS Code Blue #007ACC</summary>
+        /// <summary>Primary accent - VAGEDC Dark Blue #007ACC</summary>
         public Color AccentPrimary { get; set; }
         /// <summary>Secondary accent - Muted Emerald #6AE7B7</summary>
         public Color AccentSecondary { get; set; }
@@ -80,8 +80,8 @@ namespace VAGSuite.Theming
         /// <summary>Danger/Error color - Red #F44747</summary>
         public Color Danger { get; set; }
 
-        // ===== VS CODE SPECIFIC COLORS =====
-        /// <summary>VS Code selection blue - #264F78</summary>
+        // ===== VAGEDC DARK SKIN COLORS =====
+        /// <summary>VAGEDC Dark selection blue - #264F78</summary>
         public Color SelectionBackground { get; set; }
         /// <summary>Widget border - #303031</summary>
         public Color WidgetBorder { get; set; }
@@ -111,7 +111,7 @@ namespace VAGSuite.Theming
                 BorderPrimary = VAGEDCColorPalette.Gray600,         // #333333
 
                 // ===== CONTROLS =====
-                ControlBackground = Color.FromArgb(60, 60, 60),      // #3C3C3C (VS Code input bg)
+                ControlBackground = Color.FromArgb(60, 60, 60),      // #3C3C3C (VAGEDC Dark input bg)
                 ControlHover = VAGEDCColorPalette.Gray700,          // #2D2D2D
                 ControlActive = VAGEDCColorPalette.Primary500,      // #007ACC
                 ControlDisabled = VAGEDCColorPalette.Gray500,       // #3A3D41
@@ -131,7 +131,7 @@ namespace VAGSuite.Theming
                 ToolbarBackground = VAGEDCColorPalette.Gray800,     // #252526
                 ToolbarText = VAGEDCColorPalette.TextPrimaryDark,   // #D4D4D4
                 ToolbarHover = VAGEDCColorPalette.Primary500,       // #007ACC
-                StatusBarBackground = VAGEDCColorPalette.Primary500, // #007ACC (VS Code accent)
+                StatusBarBackground = VAGEDCColorPalette.Primary500, // #007ACC (VAGEDC Dark accent)
                 StatusBarText = Color.White,
 
                 // ===== SEMANTIC =====
@@ -141,7 +141,7 @@ namespace VAGSuite.Theming
                 Success = VAGEDCColorPalette.Success500,            // #B5CEA8
                 Danger = VAGEDCColorPalette.Danger500,              // #F44747
 
-                // ===== VS CODE SPECIFIC =====
+                // ===== VAGEDC DARK SKIN =====
                 SelectionBackground = Color.FromArgb(38, 79, 120),   // #264F78
                 WidgetBorder = Color.FromArgb(48, 48, 49),          // #303031
                 MenuSeparator = VAGEDCColorPalette.Gray600           // #333333
@@ -199,7 +199,7 @@ namespace VAGSuite.Theming
                 Success = VAGEDCColorPalette.Success500,
                 Danger = VAGEDCColorPalette.Danger500,
 
-                // ===== VS CODE SPECIFIC =====
+                // ===== VAGEDC LIGHT SKIN =====
                 SelectionBackground = Color.FromArgb(209, 231, 255), // #D1E5FF
                 WidgetBorder = Color.FromArgb(203, 213, 225),       // #CBD5E1
                 MenuSeparator = VAGEDCColorPalette.Gray200

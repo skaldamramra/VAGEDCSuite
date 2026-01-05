@@ -877,20 +877,20 @@ namespace VAGSuite
 
         private void ApplyThemeToNavigator()
         {
-            // Style Navigator tabs to match VS Code dark mode
+            // Style Navigator tabs to match VAGEDC Dark skin
             xtraTabControl1.PaletteMode = PaletteMode.Custom;
             xtraTabControl1.Palette = VAGEDCThemeManager.Instance.CustomPalette;
             
             xtraTabControl1.StateCommon.Bar.CheckButtonGap = 2;
             xtraTabControl1.StateCommon.Tab.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
             
-            // Active Tab (VS Code style: Darker background, blue indicator/accent)
+            // Active Tab (VAGEDC Dark skin: Darker background, blue indicator/accent)
             xtraTabControl1.StateSelected.Tab.Back.Color1 = Color.FromArgb(30, 30, 30);
             xtraTabControl1.StateSelected.Tab.Back.ColorStyle = PaletteColorStyle.Solid;
             xtraTabControl1.StateSelected.Tab.Content.ShortText.Color1 = Color.White;
             
             // Inactive Tab
-            // Align inactive tab background/text with VS Code Dark+ neutrals
+            // Align inactive tab background/text with VAGEDC Dark skin neutrals
             xtraTabControl1.StateCommon.Tab.Back.Color1 = Color.FromArgb(37, 37, 38);
             xtraTabControl1.StateCommon.Tab.Back.ColorStyle = PaletteColorStyle.Solid;
             xtraTabControl1.StateCommon.Tab.Content.ShortText.Color1 = Color.FromArgb(187, 187, 187);
@@ -914,7 +914,7 @@ namespace VAGSuite
                 if (item is ToolStripComboBox combo)
                 {
                     // Fix white-on-white for ToolStripComboBox (Map modifiers and View types)
-                    // Verified: VS Code Dark+ uses #3C3C3C for input backgrounds
+                    // VAGEDC Dark skin uses #3C3C3C for input backgrounds
                     combo.FlatStyle = FlatStyle.Flat;
                     combo.ComboBox.BackColor = Color.FromArgb(60, 60, 60);
                     combo.ComboBox.ForeColor = Color.White;
@@ -954,8 +954,8 @@ namespace VAGSuite
                     // Use StateNormal to override global defaults
                     // Use StateCommon for the base colors to ensure they are applied correctly
                     // but we must be careful not to let them override StateDisabled
-                    // Use VS Code Dark+ friendly blues: normal = #0E639C, pressed = #007ACC
-                    btn.StateNormal.Back.Color1 = Color.FromArgb(14, 99, 156); // VS Code-like normal blue (#0E639C)
+                    // Use VAGEDC Dark skin blues: normal = #0E639C, pressed = #007ACC
+                    btn.StateNormal.Back.Color1 = Color.FromArgb(14, 99, 156); // VAGEDC Dark normal blue (#0E639C)
                     btn.StateNormal.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StateNormal.Content.ShortText.Color1 = Color.White;
                     btn.StateNormal.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
@@ -966,7 +966,7 @@ namespace VAGSuite
                     btn.StateCommon.Content.ShortText.ColorStyle = PaletteColorStyle.Solid;
 
                     // Explicitly fix disabled state for bottom buttons (Undo, Save, Close, Read)
-                    // Use a muted gray for disabled background similar to VS Code disabled controls
+                    // Use a muted gray for disabled background similar to VAGEDC Dark skin disabled controls
                     btn.StateDisabled.Back.Color1 = Color.FromArgb(58, 61, 65);
                     btn.StateDisabled.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StateDisabled.Content.ShortText.Color1 = Color.White; // Pure white for maximum contrast
@@ -1027,7 +1027,7 @@ namespace VAGSuite
                     btn.Palette = VAGEDCThemeManager.Instance.CustomPalette;
                     btn.ButtonStyle = ButtonStyle.Standalone;
                     
-                    // Use StateNormal - use a neutral VS Code-like surface for overlay buttons
+                    // Use StateNormal - use a neutral VAGEDC Dark skin surface for overlay buttons
                     btn.StateNormal.Back.Color1 = Color.FromArgb(51, 51, 51); // neutral dark surface
                     btn.StateNormal.Back.ColorStyle = PaletteColorStyle.Solid;
                     btn.StateNormal.Content.ShortText.Color1 = Color.White;
@@ -1050,7 +1050,7 @@ namespace VAGSuite
             if (_chart3DComponent == null) return;
 
             var theme = VAGEDCThemeManager.Instance.CurrentTheme;
-            Color activeColor = Color.FromArgb(0, 122, 204); // VS Code Blue for active state
+            Color activeColor = Color.FromArgb(0, 122, 204); // VAGEDC Dark Blue for active state
             Color inactiveColor = Color.FromArgb(60, 60, 60); // Default dark for overlay buttons
 
             if (btnToggleWireframe != null)

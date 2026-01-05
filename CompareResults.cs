@@ -6,6 +6,7 @@ using System.Data;
 using System.Text;
 using System.Windows.Forms;
 using ComponentFactory.Krypton.Toolkit;
+using VAGSuite.Theming;
 
 namespace VAGSuite
 {
@@ -15,6 +16,18 @@ namespace VAGSuite
         public event CompareResults.NotifySelectSymbol onSymbolSelect;
 
         private string m_OriginalFilename = string.Empty;
+
+        // VAGEDC Dark skin compatible category colors (darker variants for dark backgrounds)
+        private static readonly Dictionary<XDFCategories, Color> CategoryColors = new Dictionary<XDFCategories, Color>
+        {
+            { XDFCategories.Fuel, Color.FromArgb(70, 130, 180) },      // SteelBlue
+            { XDFCategories.Ignition, Color.FromArgb(60, 179, 113) },  // MediumSeaGreen
+            { XDFCategories.Boost_control, Color.FromArgb(205, 92, 92) }, // IndianRed
+            { XDFCategories.Misc, Color.FromArgb(119, 136, 153) },     // LightSlateGray
+            { XDFCategories.Sensor, Color.FromArgb(218, 165, 32) },    // GoldenRod
+            { XDFCategories.Correction, Color.FromArgb(255, 105, 180) }, // HotPink
+            { XDFCategories.Idle, Color.FromArgb(222, 184, 135) },     // BurlyWood
+        };
 
         public string OriginalFilename
         {
@@ -103,6 +116,31 @@ namespace VAGSuite
         public CompareResults()
         {
             InitializeComponent();
+            ApplyThemeToControl();
+        }
+
+        private void ApplyThemeToControl()
+        {
+            var theme = VAGEDCThemeManager.Instance.CurrentTheme;
+            
+            // Apply VAGEDC Dark skin colors to the DataGridView
+            if (gridControl1 != null)
+            {
+                gridControl1.BackgroundColor = theme.GridBackground;
+                gridControl1.ForeColor = theme.TextPrimary;
+                gridControl1.DefaultCellStyle.BackColor = theme.GridBackground;
+                gridControl1.DefaultCellStyle.ForeColor = theme.TextPrimary;
+                gridControl1.ColumnHeadersDefaultCellStyle.BackColor = theme.GridHeaderBackground;
+                gridControl1.ColumnHeadersDefaultCellStyle.ForeColor = theme.GridHeaderText;
+                gridControl1.RowHeadersDefaultCellStyle.BackColor = theme.GridHeaderBackground;
+                gridControl1.RowHeadersDefaultCellStyle.ForeColor = theme.GridHeaderText;
+                gridControl1.GridColor = theme.GridBorder;
+                gridControl1.BorderStyle = BorderStyle.FixedSingle;
+                
+                // Apply VAGEDC Dark skin selection colors
+                gridControl1.DefaultCellStyle.SelectionBackColor = VAGEDCColorPalette.Primary500;
+                gridControl1.DefaultCellStyle.SelectionForeColor = Color.White;
+            }
         }
 
         public void SetGridWidth()
@@ -296,39 +334,43 @@ namespace VAGSuite
         private void gridControl1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.RowIndex < 0) return;
+            var theme = VAGEDCThemeManager.Instance.CurrentTheme;
+            
             if (gridControl1.Columns[e.ColumnIndex].Name == gridColumn6.Name)
             {
                 DataGridViewRow row = gridControl1.Rows[e.RowIndex];
                 DataRowView dr = (DataRowView)row.DataBoundItem;
                 object o = dr.Row["CATEGORY"];
-                Color c = Color.White;
+                Color c = theme.GridBackground; // Use theme background as default
                 if (o != DBNull.Value)
                 {
                     int cat = Convert.ToInt32(o);
-                    if (cat == (int)XDFCategories.Fuel) c = Color.LightSteelBlue;
-                    else if (cat == (int)XDFCategories.Ignition) c = Color.LightGreen;
-                    else if (cat == (int)XDFCategories.Boost_control) c = Color.OrangeRed;
-                    else if (cat == (int)XDFCategories.Misc) c = Color.LightGray;
-                    else if (cat == (int)XDFCategories.Sensor) c = Color.Yellow;
-                    else if (cat == (int)XDFCategories.Correction) c = Color.LightPink;
-                    else if (cat == (int)XDFCategories.Idle) c = Color.BurlyWood;
+                    XDFCategories category = (XDFCategories)cat;
+                    if (CategoryColors.TryGetValue(category, out Color categoryColor))
+                    {
+                        c = categoryColor;
+                    }
                 }
-                if (c != Color.White)
+                if (c != theme.GridBackground)
                 {
                     e.CellStyle.BackColor = c;
+                    // Ensure text is readable on colored backgrounds
+                    e.CellStyle.ForeColor = Color.White;
                 }
             }
             
-            // Handle missing symbol indicators (Salmon/CornflowerBlue)
+            // Handle missing symbol indicators (VAGEDC Dark skin compatible colors)
             DataGridViewRow dgvRow = gridControl1.Rows[e.RowIndex];
             DataRowView drv = (DataRowView)dgvRow.DataBoundItem;
             if (drv.Row["MissingInOriFile"] != DBNull.Value && (bool)drv.Row["MissingInOriFile"])
             {
-                e.CellStyle.BackColor = Color.Salmon;
+                e.CellStyle.BackColor = VAGEDCColorPalette.Danger500; // Red for missing in original
+                e.CellStyle.ForeColor = Color.White;
             }
             else if (drv.Row["MissingInCompareFile"] != DBNull.Value && (bool)drv.Row["MissingInCompareFile"])
             {
-                e.CellStyle.BackColor = Color.CornflowerBlue;
+                e.CellStyle.BackColor = VAGEDCColorPalette.Primary500; // Blue for missing in compare
+                e.CellStyle.ForeColor = Color.White;
             }
         }
 

@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.IO;
 using Be.Windows.Forms;
 using ComponentFactory.Krypton.Toolkit;
+using VAGSuite.Theming;
 
 namespace VAGSuite
 {
@@ -25,6 +26,11 @@ namespace VAGSuite
 
         private bool m_OutsideSymbolRangeCheck = false;
 
+        // VAGEDC Dark skin colors for binary compare
+        private Color ThemeTextColor => VAGEDCThemeManager.Instance.CurrentTheme.TextPrimary;
+        private Color ThemeDiffColor => VAGEDCColorPalette.Danger500; // #F44747 (VAGEDC Dark error red)
+        private Color ThemeBackground => VAGEDCThemeManager.Instance.CurrentTheme.PanelBackground;
+
         public bool OutsideSymbolRangeCheck
         {
             get { return m_OutsideSymbolRangeCheck; }
@@ -35,6 +41,18 @@ namespace VAGSuite
         {
             InitializeComponent();
             VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
+            ApplyThemeToListBoxes();
+        }
+
+        private void ApplyThemeToListBoxes()
+        {
+            // Set background colors to match VAGEDC Dark skin panel background
+            listBox1.BackColor = ThemeBackground;
+            listBox2.BackColor = ThemeBackground;
+            
+            // Force redraw to apply theme
+            listBox1.Invalidate();
+            listBox2.Invalidate();
         }
 
         private bool CheckOutsideSymbolRange(int address)
@@ -180,6 +198,12 @@ namespace VAGSuite
             {
                 if (e.Index >= 0 && e.Index < currstrList.Count)
                 {
+                    // Apply VAGEDC Dark skin colors
+                    using (SolidBrush bgBrush = new SolidBrush(ThemeBackground))
+                    {
+                        e.Graphics.FillRectangle(bgBrush, e.Bounds);
+                    }
+
                     string symbolName = string.Empty;
                     try
                     {
@@ -198,10 +222,15 @@ namespace VAGSuite
                     string drawItem = currstrList[e.Index];
                     if(symbolName != string.Empty) drawItem += " << " + symbolName;
                     
-                    Brush textBrush = Brushes.Black;
-                    if (!checkButton1.Checked && linediffs[e.Index]) textBrush = Brushes.Red;
+                    // Use VAGEDC Dark skin colors: TextPrimary (#D4D4D4) for normal, Danger (#F44747) for diffs
+                    Color textColor = ThemeTextColor;
+                    if (!checkButton1.Checked && linediffs[e.Index]) textColor = ThemeDiffColor;
                     
-                    listBox1.DefaultDrawItem(e, drawItem, textBrush);
+                    using (SolidBrush textBrush = new SolidBrush(textColor))
+                    {
+                        TextRenderer.DrawText(e.Graphics, drawItem, e.Font, e.Bounds, textColor,
+                            TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
+                    }
                 }
             }
             catch (Exception) { }
@@ -213,10 +242,21 @@ namespace VAGSuite
             {
                 if (e.Index >= 0 && e.Index < compstrList.Count)
                 {
-                    Brush textBrush = Brushes.Black;
-                    if (!checkButton1.Checked && linediffs[e.Index]) textBrush = Brushes.Red;
+                    // Apply VAGEDC Dark skin colors
+                    using (SolidBrush bgBrush = new SolidBrush(ThemeBackground))
+                    {
+                        e.Graphics.FillRectangle(bgBrush, e.Bounds);
+                    }
+
+                    // Use VAGEDC Dark skin colors: TextPrimary (#D4D4D4) for normal, Danger (#F44747) for diffs
+                    Color textColor = ThemeTextColor;
+                    if (!checkButton1.Checked && linediffs[e.Index]) textColor = ThemeDiffColor;
                     
-                    listBox2.DefaultDrawItem(e, compstrList[e.Index], textBrush);
+                    using (SolidBrush textBrush = new SolidBrush(textColor))
+                    {
+                        TextRenderer.DrawText(e.Graphics, compstrList[e.Index], e.Font, e.Bounds, textColor,
+                            TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
+                    }
                 }
             }
             catch (Exception) { }

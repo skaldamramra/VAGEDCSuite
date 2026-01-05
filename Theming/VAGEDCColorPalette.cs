@@ -3,13 +3,13 @@ using System.Drawing;
 namespace VAGSuite.Theming
 {
     /// <summary>
-    /// Color palette for VAGEDC Dark theme aligned to VS Code Dark+ color tokens
+    /// Color palette for VAGEDC Dark theme - VAGEDC Dark skin colors
     /// </summary>
     public static class VAGEDCColorPalette
     {
         // ===== PRIMARY COLORS =====
-        // Primary accent colors: Primary500 is VS Code accent (#007ACC)
-        public static readonly Color Primary500 = Color.FromArgb(0, 122, 204);    // VS Code Blue #007ACC
+        // Primary accent colors: Primary500 is the VAGEDC Dark accent (#007ACC)
+        public static readonly Color Primary500 = Color.FromArgb(0, 122, 204);    // VAGEDC Dark Blue #007ACC
         public static readonly Color Primary600 = Color.FromArgb(14, 99, 156);    // Button/Strong Blue #0E639C
         
         // ===== SECONDARY COLORS =====
@@ -20,7 +20,7 @@ namespace VAGSuite.Theming
         public static readonly Color Success500 = Color.FromArgb(52, 211, 153);     // Muted Green
         public static readonly Color Danger500 = Color.FromArgb(239, 68, 68);       // Red
         
-        // ===== DARK MODE NEUTRALS (mapped to VS Code Dark+) =====
+        // ===== DARK MODE NEUTRALS (VAGEDC Dark skin colors) =====
         public static readonly Color Gray900 = Color.FromArgb(30, 30, 30);    // Editor/Window background #1E1E1E
         public static readonly Color Gray800 = Color.FromArgb(37, 37, 38);    // Side bar / panel background ~#252526
         public static readonly Color Gray700 = Color.FromArgb(45, 45, 45);    // Elevated surfaces / tabs #2D2D2D

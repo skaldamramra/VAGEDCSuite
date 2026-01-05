@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.IO;
 using Be.Windows.Forms;
 using ComponentFactory.Krypton.Toolkit;
+using VAGSuite.Theming;
 
 namespace VAGSuite
 {
@@ -21,6 +22,10 @@ namespace VAGSuite
 
         private string _fileName = string.Empty;
         private string _lastFilename = string.Empty;
+
+        // VAGEDC Dark skin colors for HexViewer
+        private Color ThemeBackground => VAGEDCThemeManager.Instance.CurrentTheme.WindowBackground;
+        private Color ThemeTextColor => VAGEDCThemeManager.Instance.CurrentTheme.TextPrimary;
 
         public string LastFilename
         {
@@ -52,6 +57,67 @@ namespace VAGSuite
         public HexViewer()
         {
             InitializeComponent();
+            ApplyThemeToHexViewer();
+        }
+
+        /// <summary>
+        /// Applies VAGEDC Dark skin colors to the HexViewer control
+        /// </summary>
+        private void ApplyThemeToHexViewer()
+        {
+            // Apply theme to the HexBox control (Be.Windows.Forms)
+            if (hexBox1 != null)
+            {
+                hexBox1.BackColor = ThemeBackground;
+                hexBox1.ForeColor = ThemeTextColor;
+                
+                // Apply to the inner control if available
+                ApplyThemeToHexBoxInnerControl(hexBox1);
+            }
+
+            // Apply theme to toolstrip
+            if (toolStrip1 != null)
+            {
+                toolStrip1.Renderer = VAGEDCThemeManager.Instance.GetToolStripRenderer();
+                toolStrip1.BackColor = VAGEDCThemeManager.Instance.CurrentTheme.ToolbarBackground;
+                toolStrip1.ForeColor = VAGEDCThemeManager.Instance.CurrentTheme.ToolbarText;
+                
+                foreach (ToolStripItem item in toolStrip1.Items)
+                {
+                    item.ForeColor = VAGEDCThemeManager.Instance.CurrentTheme.ToolbarText;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Recursively applies theme to HexBox inner controls
+        /// </summary>
+        private void ApplyThemeToHexBoxInnerControl(HexBox hexBox)
+        {
+            if (hexBox == null) return;
+
+            // Try to find and theme the inner RichTextBox or similar control
+            foreach (Control child in hexBox.Controls)
+            {
+                if (child is RichTextBox rtb)
+                {
+                    rtb.BackColor = ThemeBackground;
+                    rtb.ForeColor = ThemeTextColor;
+                }
+                else
+                {
+                    ApplyThemeToHexBoxInnerControl(child as HexBox);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Public method to refresh theme (can be called when theme changes)
+        /// </summary>
+        public void RefreshTheme()
+        {
+            ApplyThemeToHexViewer();
+            hexBox1?.Invalidate();
         }
 
         public void SelectText(string symbolname, int fileoffset, int length)

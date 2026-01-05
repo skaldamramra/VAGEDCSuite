@@ -6,6 +6,7 @@ using System.Data;
 using System.Text;
 using System.Windows.Forms;
 using ComponentFactory.Krypton.Toolkit;
+using VAGSuite.Theming;
 
 namespace VAGSuite
 {
@@ -43,6 +44,11 @@ namespace VAGSuite
 
         private bool _isInitiallyLoaded = false;
 
+        // VAGEDC Dark skin compatible chart colors (visible on dark backgrounds)
+        private Color ChartColorNominal => VAGEDCColorPalette.Success500;  // #B5CEA8 (green)
+        private Color ChartColorLow => VAGEDCColorPalette.Primary500;      // #007ACC (blue)
+        private Color ChartColorHigh => VAGEDCColorPalette.Danger500;      // #F44747 (red)
+
         public bool IsInitiallyLoaded
         {
             get { return _isInitiallyLoaded; }
@@ -52,9 +58,29 @@ namespace VAGSuite
         public ctrlCompressorMap()
         {
             InitializeComponent();
+            ApplyThemeToControl();
+        }
 
+        private void ApplyThemeToControl()
+        {
+            var theme = VAGEDCThemeManager.Instance.CurrentTheme;
             
-
+            // Apply VAGEDC Dark skin colors to the control
+            this.BackColor = theme.PanelBackground;
+            this.ForeColor = theme.TextPrimary;
+            
+            // Apply to toolstrip if present
+            if (toolStrip1 != null)
+            {
+                toolStrip1.Renderer = VAGEDCThemeManager.Instance.GetToolStripRenderer();
+                toolStrip1.BackColor = theme.ToolbarBackground;
+                toolStrip1.ForeColor = theme.ToolbarText;
+                
+                foreach (ToolStripItem item in toolStrip1.Items)
+                {
+                    item.ForeColor = theme.ToolbarText;
+                }
+            }
         }
 
         private void t25ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -146,13 +172,14 @@ namespace VAGSuite
         {
             float prev_x_location = 0;
             float prev_y_location = 0;
-            Pen p = new Pen(Color.LimeGreen, 3);
+            // Use VAGEDC Dark skin compatible colors for chart elements
+            Pen p = new Pen(ChartColorNominal, 3);
             float prev_x_locationLow = 0;
             float prev_y_locationLow = 0;
-            Pen pLow = new Pen(Color.CornflowerBlue, 3);
+            Pen pLow = new Pen(ChartColorLow, 3);
             float prev_x_locationHigh = 0;
             float prev_y_locationHigh = 0;
-            Pen pHigh = new Pen(Color.IndianRed, 3);
+            Pen pHigh = new Pen(ChartColorHigh, 3);
 
             //if (_compressor == CompressorMap.None) return;
             try
@@ -348,9 +375,12 @@ namespace VAGSuite
                     if (i > 0)
                     {
                         // draw line
-                        e.Graphics.DrawLine(p, new PointF(prev_x_location, prev_y_location), new PointF(x_location, y_location));
-                    }
-                    e.Graphics.FillEllipse(Brushes.Green, x_location - 4, y_location - 4, 8, 8);
+                            e.Graphics.DrawLine(p, new PointF(prev_x_location, prev_y_location), new PointF(x_location, y_location));
+                        }
+                        using (SolidBrush brush = new SolidBrush(ChartColorNominal))
+                        {
+                            e.Graphics.FillEllipse(brush, x_location - 4, y_location - 4, 8, 8);
+                        }
                     prev_x_location = x_location;
                     prev_y_location = y_location;
                     // HIGH ALTITUDE
@@ -361,9 +391,12 @@ namespace VAGSuite
                     if (i > 0)
                     {
                         // draw line
-                        e.Graphics.DrawLine(pLow, new PointF(prev_x_locationLow, prev_y_locationLow), new PointF(x_location, y_location));
-                    }
-                    e.Graphics.FillEllipse(Brushes.Blue, x_location - 4, y_location - 4, 8, 8);
+                            e.Graphics.DrawLine(pLow, new PointF(prev_x_locationLow, prev_y_locationLow), new PointF(x_location, y_location));
+                        }
+                        using (SolidBrush brush = new SolidBrush(ChartColorLow))
+                        {
+                            e.Graphics.FillEllipse(brush, x_location - 4, y_location - 4, 8, 8);
+                        }
                     prev_x_locationLow = x_location;
                     prev_y_locationLow = y_location;
                     // High pressure
@@ -374,9 +407,12 @@ namespace VAGSuite
                     if (i > 0)
                     {
                         // draw line
-                        e.Graphics.DrawLine(pHigh, new PointF(prev_x_locationHigh, prev_y_locationHigh), new PointF(x_location, y_location));
-                    }
-                    e.Graphics.FillEllipse(Brushes.Red, x_location - 4, y_location - 4, 8, 8);
+                            e.Graphics.DrawLine(pHigh, new PointF(prev_x_locationHigh, prev_y_locationHigh), new PointF(x_location, y_location));
+                        }
+                        using (SolidBrush brush = new SolidBrush(ChartColorHigh))
+                        {
+                            e.Graphics.FillEllipse(brush, x_location - 4, y_location - 4, 8, 8);
+                        }
                     prev_x_locationHigh = x_location;
                     prev_y_locationHigh = y_location;
 

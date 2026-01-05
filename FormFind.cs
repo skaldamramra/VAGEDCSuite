@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using Be.Windows.Forms;
 using ComponentFactory.Krypton.Toolkit;
+using VAGSuite.Theming;
 
 namespace VAGSuite
 {
@@ -32,14 +33,40 @@ namespace VAGSuite
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+			ApplyThemeToForm();
 
 			rbString.CheckedChanged += new EventHandler(rb_CheckedChanged);
 			rbHex.CheckedChanged += new EventHandler(rb_CheckedChanged);
 
-//			rbString.Enter += new EventHandler(rbString_Enter);
-//			rbHex.Enter += new EventHandler(rbHex_Enter);
+ //			rbString.Enter += new EventHandler(rbString_Enter);
+ //			rbHex.Enter += new EventHandler(rbHex_Enter);
 
 			hexBox.ByteProvider = new DynamicByteProvider(  new System.Collections.Generic.List<byte>() );
+		}
+
+		private void ApplyThemeToForm()
+		{
+			var theme = VAGEDCThemeManager.Instance.CurrentTheme;
+			
+			// Apply VAGEDC Dark skin colors to non-Krypton controls
+			label1.ForeColor = VAGEDCColorPalette.Primary500; // VAGEDC Dark Blue #007ACC
+			
+			// Apply to radio buttons
+			rbString.ForeColor = theme.TextPrimary;
+			rbHex.ForeColor = theme.TextPrimary;
+			
+			// Apply to textbox
+			txtString.BackColor = theme.ControlBackground;
+			txtString.ForeColor = theme.TextPrimary;
+			
+			// Apply to buttons
+			btnOK.BackColor = theme.ControlBackground;
+			btnOK.ForeColor = theme.TextPrimary;
+			btnCancel.BackColor = theme.ControlBackground;
+			btnCancel.ForeColor = theme.TextPrimary;
+			
+			// Apply to groupBox (non-Krypton)
+			groupBox1.BackColor = theme.PanelBackground;
 		}
 
 		/// <summary>

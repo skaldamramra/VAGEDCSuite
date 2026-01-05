@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using Be.Windows.Forms;
 using ComponentFactory.Krypton.Toolkit;
+using VAGSuite.Theming;
 
 namespace VAGSuite
 {
@@ -30,7 +31,20 @@ namespace VAGSuite
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+			ApplyThemeToForm();
+		}
 
+		private void ApplyThemeToForm()
+		{
+			var theme = VAGEDCThemeManager.Instance.CurrentTheme;
+			
+			// Apply VAGEDC Dark skin colors to non-Krypton controls
+			lblFinding.ForeColor = VAGEDCColorPalette.Primary500; // VAGEDC Dark Blue #007ACC
+			label1.ForeColor = VAGEDCColorPalette.Primary500;     // VAGEDC Dark Blue #007ACC
+			lblPercent.ForeColor = theme.TextPrimary;
+			
+			// Apply to groupBox (non-Krypton)
+			groupBox1.BackColor = theme.PanelBackground;
 		}
 
 		/// <summary>
