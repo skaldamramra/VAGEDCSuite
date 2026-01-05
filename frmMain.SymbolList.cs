@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using ComponentFactory.Krypton.Toolkit;
 using VAGSuite.Services;
+using VAGSuite.Theming;
 
 namespace VAGSuite
 {
@@ -18,6 +19,8 @@ namespace VAGSuite
             this.tvSymbols.Dock = DockStyle.Fill;
             
             // Apply VAGEDC Dark Theme to TreeView
+            this.tvSymbols.Palette = VAGEDCThemeManager.Instance.CustomPalette;
+            this.tvSymbols.PaletteMode = PaletteMode.Custom;
             this.tvSymbols.StateCommon.Back.Color1 = Color.FromArgb(30, 30, 30);
             this.tvSymbols.StateCommon.Node.Content.ShortText.Color1 = Color.FromArgb(220, 220, 220);
             this.tvSymbols.StateCommon.Node.Content.ShortText.Color2 = Color.FromArgb(220, 220, 220);

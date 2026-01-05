@@ -674,6 +674,8 @@ namespace VAGSuite
                     tabdet.ShowAddressesInHex = true;
                     tabdet.SetFilterMode(true);
                     tabdet.Dock = DockStyle.Fill;
+                    // Ensure theme is applied to the dynamically created control
+                    VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
                     tabdet.Filename = filename;
                     tabdet.onSymbolSelect += new CompareResults.NotifySelectSymbol(tabdet_onSymbolSelect);
                     
@@ -1011,6 +1013,9 @@ namespace VAGSuite
             if (m_appSettings.UseVAGEDCDarkTheme)
             {
                 VAGEDCThemeManager.Instance.ActivateVAGEDCDark(this);
+                // Ensure global manager also uses the custom palette
+                this.kryptonManager.GlobalPalette = VAGEDCThemeManager.Instance.CustomPalette;
+                this.kryptonManager.GlobalPaletteMode = PaletteModeManager.Custom;
             }
             else
             {

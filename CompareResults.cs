@@ -126,6 +126,9 @@ namespace VAGSuite
             // Apply VAGEDC Dark skin colors to the DataGridView
             if (gridControl1 != null)
             {
+                // Disable visual styles to allow custom header colors
+                gridControl1.EnableHeadersVisualStyles = false;
+
                 gridControl1.BackgroundColor = theme.GridBackground;
                 gridControl1.ForeColor = theme.TextPrimary;
                 gridControl1.DefaultCellStyle.BackColor = theme.GridBackground;
@@ -141,6 +144,13 @@ namespace VAGSuite
                 gridControl1.DefaultCellStyle.SelectionBackColor = VAGEDCColorPalette.Primary500;
                 gridControl1.DefaultCellStyle.SelectionForeColor = Color.White;
             }
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            // Force dark scrollbars as soon as the Win32 handle exists
+            VAGEDCThemeManager.Instance.ApplyDarkScrollbars(this);
         }
 
         public void SetGridWidth()

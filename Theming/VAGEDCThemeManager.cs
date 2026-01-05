@@ -4,6 +4,7 @@ using System.Drawing.Text;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace VAGSuite.Theming
 {
@@ -12,6 +13,9 @@ namespace VAGSuite.Theming
     /// </summary>
     public class VAGEDCThemeManager
     {
+        [DllImport("uxtheme.dll", SetLastError = true, ExactSpelling = true, CharSet = CharSet.Unicode)]
+        private static extern int SetWindowTheme(IntPtr hWnd, string pszSubAppName, string pszSubIdList);
+
         private static VAGEDCThemeManager _instance;
         private VAGEDCTheme _currentTheme;
         private bool _isCustomThemeActive = false;
@@ -106,6 +110,30 @@ namespace VAGSuite.Theming
 
             // Tab hover state
             tabStyle.StateTracking.Back.Color1 = VAGEDCColorPalette.Gray600;
+
+            // ===== DOCKING HEADER STYLES =====
+            // DockActive - Active window header
+            var dockActive = _customPalette.HeaderStyles.HeaderDockActive;
+            dockActive.StateCommon.Back.Color1 = VAGEDCColorPalette.Gray700;
+            dockActive.StateCommon.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            dockActive.StateCommon.Content.ShortText.Color1 = _currentTheme.TextPrimary;
+            dockActive.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
+            
+            // DockInactive - Inactive window header
+            var dockInactive = _customPalette.HeaderStyles.HeaderDockInactive;
+            dockInactive.StateCommon.Back.Color1 = _currentTheme.PanelBackground;
+            dockInactive.StateCommon.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            dockInactive.StateCommon.Content.ShortText.Color1 = _currentTheme.TextSecondary;
+            dockInactive.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
+
+            // Ensure Primary/Secondary headers also match for docking cells
+            var headerPrimary = _customPalette.HeaderStyles.HeaderPrimary;
+            headerPrimary.StateCommon.Back.Color1 = VAGEDCColorPalette.Gray700;
+            headerPrimary.StateCommon.Content.ShortText.Color1 = _currentTheme.TextPrimary;
+
+            var headerSecondary = _customPalette.HeaderStyles.HeaderSecondary;
+            headerSecondary.StateCommon.Back.Color1 = _currentTheme.PanelBackground;
+            headerSecondary.StateCommon.Content.ShortText.Color1 = _currentTheme.TextSecondary;
 
             // ===== LABEL STYLES =====
             var labelStyle = _customPalette.LabelStyles.LabelNormalControl;
@@ -298,6 +326,22 @@ namespace VAGSuite.Theming
             
             // Apply to all controls recursively
             ApplyThemeToControl(form);
+
+            // Force dark scrollbars via Win32 API
+            ApplyDarkScrollbars(form);
+        }
+
+        public void ApplyDarkScrollbars(Control control)
+        {
+            if (control.IsHandleCreated)
+            {
+                SetWindowTheme(control.Handle, "DarkMode_Explorer", null);
+            }
+
+            foreach (Control child in control.Controls)
+            {
+                ApplyDarkScrollbars(child);
+            }
         }
         
         /// <summary>

@@ -40,6 +40,8 @@ namespace VAGSuite
                 // Use a mode that provides a clear header/handle
                 e.Cell.NavigatorMode = NavigatorMode.HeaderGroupTab;
                 e.Cell.Header.HeaderStylePrimary = HeaderStyle.DockActive;
+                e.Cell.Palette = VAGEDCThemeManager.Instance.CustomPalette;
+                e.Cell.PaletteMode = PaletteMode.Custom;
                 
                 // Ensure the cell is not forced to fill if we want to see multiple
                 e.Cell.MinimumSize = new Size(200, 200);
