@@ -68,19 +68,22 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="ComponentFactory.Krypton.Toolkit">
-      <HintPath>C:\krypton\Krypton\Bin\ComponentFactory.Krypton.Toolkit.dll</HintPath>
+      <HintPath>lib\Krypton\ComponentFactory.Krypton.Toolkit.dll</HintPath>
     </Reference>
     <Reference Include="ComponentFactory.Krypton.Ribbon">
-      <HintPath>C:\krypton\Krypton\Bin\ComponentFactory.Krypton.Ribbon.dll</HintPath>
+      <HintPath>lib\Krypton\ComponentFactory.Krypton.Ribbon.dll</HintPath>
     </Reference>
     <Reference Include="ComponentFactory.Krypton.Navigator">
-      <HintPath>C:\krypton\Krypton\Bin\ComponentFactory.Krypton.Navigator.dll</HintPath>
+      <HintPath>lib\Krypton\ComponentFactory.Krypton.Navigator.dll</HintPath>
     </Reference>
     <Reference Include="ComponentFactory.Krypton.Docking">
-      <HintPath>C:\krypton\Krypton\Bin\ComponentFactory.Krypton.Docking.dll</HintPath>
+      <HintPath>lib\Krypton\ComponentFactory.Krypton.Docking.dll</HintPath>
     </Reference>
     <Reference Include="ComponentFactory.Krypton.Workspace">
-      <HintPath>C:\krypton\Krypton\Bin\ComponentFactory.Krypton.Workspace.dll</HintPath>
+      <HintPath>lib\Krypton\ComponentFactory.Krypton.Workspace.dll</HintPath>
+    </Reference>
+    <Reference Include="ComponentFactory.Krypton.Design">
+      <HintPath>lib\Krypton\ComponentFactory.Krypton.Design.dll</HintPath>
     </Reference>
     <Reference Include="AdvancedDataGridView">
       <HintPath>packages\DG.AdvancedDataGridView.1.2.30115.18\lib\net40\AdvancedDataGridView.dll</HintPath>
