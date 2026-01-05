@@ -161,6 +161,9 @@ namespace VAGSuite
             this.statusMapDescriptions.DisplayStyle = ToolStripItemDisplayStyle.Text;
             this.statusMapDescriptions.CheckOnClick = false; // Manual control to avoid sync issues
             this.statusMapDescriptions.Click += new System.EventHandler(this.statusMapDescriptions_Click);
+            
+            // Initialize the checked appearance for visual feedback when toggled
+            UpdateMapDescriptionsButtonAppearance();
         }
 
         private void statusMapDescriptions_Click(object sender, EventArgs e)
@@ -172,7 +175,37 @@ namespace VAGSuite
             btnToggleMapDescriptions_ItemClick(this.statusMapDescriptions, null);
             
             // Ensure the Krypton UI reflects the new state
-            UpdateMapDescriptionsButtonAppearance();
+            UpdateStatusMapDescriptionsAppearance();
+        }
+        
+        /// <summary>
+        /// Updates the visual appearance of the Map Descriptions toggle button based on its checked state.
+        /// When toggled ON, uses a distinct background color to provide visual feedback.
+        /// </summary>
+        private void UpdateStatusMapDescriptionsAppearance()
+        {
+            if (this.statusMapDescriptions != null)
+            {
+                // VAGEDC Dark skin colors for visual feedback
+                Color activeBackColor = Color.FromArgb(14, 99, 156); // #0E639C - VAGEDC Dark blue
+                Color inactiveBackColor = Color.FromArgb(30, 30, 30); // Status strip background
+                Color textColor = Color.FromArgb(220, 220, 220);
+                
+                // Apply distinct visual feedback when toggled on
+                if (this.statusMapDescriptions.Checked)
+                {
+                    this.statusMapDescriptions.BackColor = activeBackColor;
+                    this.statusMapDescriptions.ForeColor = Color.White;
+                }
+                else
+                {
+                    this.statusMapDescriptions.BackColor = inactiveBackColor;
+                    this.statusMapDescriptions.ForeColor = textColor;
+                }
+                
+                // Force refresh to apply changes immediately
+                this.statusMapDescriptions.Invalidate();
+            }
         }
     }
 }

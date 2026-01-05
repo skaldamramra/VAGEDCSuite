@@ -2906,12 +2906,27 @@ namespace VAGSuite
         private void UpdateMapDescriptionsButtonAppearance()
         {
             // Sync Krypton Status Button
-            if (statusMapDescriptions != null)
+            if (statusMapDescriptions != null && m_appSettings != null)
             {
                 statusMapDescriptions.Checked = m_appSettings.ShowMapDescriptions;
-                // Visual feedback: use a different color when active if the checkmark isn't obvious
-                statusMapDescriptions.BackColor = m_appSettings.ShowMapDescriptions ?
-                    Color.FromArgb(60, 60, 60) : Color.Transparent;
+                
+                // Visual feedback: use a distinct background color when active (VAGEDC Dark blue #0E639C)
+                Color activeBackColor = Color.FromArgb(14, 99, 156); // #0E639C - VAGEDC Dark blue
+                Color inactiveBackColor = Color.FromArgb(30, 30, 30); // Status strip background
+                
+                if (m_appSettings.ShowMapDescriptions)
+                {
+                    statusMapDescriptions.BackColor = activeBackColor;
+                    statusMapDescriptions.ForeColor = Color.White;
+                }
+                else
+                {
+                    statusMapDescriptions.BackColor = inactiveBackColor;
+                    statusMapDescriptions.ForeColor = Color.FromArgb(220, 220, 220);
+                }
+                
+                // Force refresh to apply changes immediately
+                statusMapDescriptions.Invalidate();
             }
         }
 
