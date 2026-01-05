@@ -15,6 +15,7 @@ namespace VAGSuite
         public frmBrowseFiles()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         private void btnBrowse_Click(object sender, EventArgs e)

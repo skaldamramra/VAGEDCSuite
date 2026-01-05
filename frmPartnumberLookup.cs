@@ -48,6 +48,7 @@ namespace VAGSuite
         public frmPartnumberLookup()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         private void ConvertPartNumber()

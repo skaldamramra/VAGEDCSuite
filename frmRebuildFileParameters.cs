@@ -14,6 +14,7 @@ namespace VAGSuite
         public frmRebuildFileParameters()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
             dateEdit1.Value = DateTime.Now;
         }
 

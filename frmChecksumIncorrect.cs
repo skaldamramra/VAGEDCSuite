@@ -14,6 +14,7 @@ namespace VAGSuite
         public frmChecksumIncorrect()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         public string ChecksumType

@@ -40,6 +40,7 @@ namespace VAGSuite
         public frmTransactionLog()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         public void SetTransactionLog(TransactionLog log)

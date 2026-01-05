@@ -16,13 +16,14 @@ namespace VAGSuite
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            // DevExpress skins removed for Krypton migration
             
             // Initialize VAGEDC Dark Theme for Krypton
             var themeManager = VAGEDCThemeManager.Instance;
             
+            // Activate the dark theme before applying to forms
+            // This sets _isCustomThemeActive = true so ApplyThemeToForm works
             frmMain mainForm = new frmMain();
-            themeManager.ApplyThemeToForm(mainForm);
+            themeManager.ActivateVAGEDCDark(mainForm);
             
             Application.Run(mainForm);
         }

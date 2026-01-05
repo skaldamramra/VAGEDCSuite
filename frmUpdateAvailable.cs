@@ -16,6 +16,7 @@ namespace VAGSuite
         public frmUpdateAvailable()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         private void simpleButton1_Click(object sender, EventArgs e)

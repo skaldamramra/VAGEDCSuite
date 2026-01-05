@@ -14,6 +14,7 @@ namespace VAGSuite
         public frmSettings()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         private void groupControl1_Paint(object sender, PaintEventArgs e)
@@ -298,7 +299,7 @@ namespace VAGSuite
 
         private void frmSettings_Load(object sender, EventArgs e)
         {
-
+            // Theme is applied in constructor
         }
 
         

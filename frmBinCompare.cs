@@ -34,6 +34,7 @@ namespace VAGSuite
         public frmBinCompare()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         private bool CheckOutsideSymbolRange(int address)

@@ -14,6 +14,7 @@ namespace VAGSuite
         public frmCodeBlocks()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         private void frmCodeBlocks_Load(object sender, EventArgs e)

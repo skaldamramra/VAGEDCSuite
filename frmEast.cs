@@ -14,6 +14,7 @@ namespace VAGSuite
         public frmEast()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         private void frmEast_Click(object sender, EventArgs e)

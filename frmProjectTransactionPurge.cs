@@ -14,6 +14,7 @@ namespace VAGSuite
         public frmProjectTransactionPurge()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         public void SetNumberOfTransactions(int transactionCount)

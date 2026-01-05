@@ -14,6 +14,7 @@ namespace VAGSuite
         public frmFirmwareInfo()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
 

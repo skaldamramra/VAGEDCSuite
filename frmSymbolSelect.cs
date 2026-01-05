@@ -32,6 +32,7 @@ namespace VAGSuite
         {
             m_symbols = symbols;
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         private void simpleButton1_Click(object sender, EventArgs e)

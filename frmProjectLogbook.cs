@@ -15,6 +15,7 @@ namespace VAGSuite
         public frmProjectLogbook()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         public void LoadLogbookForProject(string projectFolder, string project)

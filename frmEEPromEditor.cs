@@ -16,6 +16,7 @@ namespace VAGSuite
         public frmEEPromEditor()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
         internal void LoadFile(string filename)

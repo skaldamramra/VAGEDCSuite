@@ -24,6 +24,7 @@ namespace VAGSuite
         public frmPartNumberList()
         {
             InitializeComponent();
+            VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
             partnumbers.Columns.Add("FILENAME");
             partnumbers.Columns.Add("PARTNUMBER");
             partnumbers.Columns.Add("ECUTYPE");

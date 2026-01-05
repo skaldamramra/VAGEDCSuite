@@ -8,7 +8,7 @@ using System.Windows.Forms;
 namespace VAGSuite.Theming
 {
     /// <summary>
-    /// Manages application of VAGEDC custom themes
+    /// Manages application of VAGEDC custom themes - VS Code Dark+ inspired theme for Krypton/WinForms
     /// </summary>
     public class VAGEDCThemeManager
     {
@@ -30,7 +30,7 @@ namespace VAGSuite.Theming
                 return _instance;
             }
         }
-        
+
         private VAGEDCThemeManager()
         {
             LoadCustomFonts();
@@ -38,7 +38,7 @@ namespace VAGSuite.Theming
                 GetCustomFont(12f, FontStyle.Bold),
                 GetCustomFont(12f, FontStyle.Regular)
             );
-            
+
             // Initialize the palette that will be used by complex controls
             _customPalette = new ComponentFactory.Krypton.Toolkit.KryptonPalette();
             _customPalette.BasePaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Office2010Black;
@@ -47,103 +47,89 @@ namespace VAGSuite.Theming
 
         private void ConfigureCustomPalette()
         {
-            // Configure ButtonStandalone style directly on the palette to ensure consistency
-            // and override any system/base palette defaults that might cause visibility issues.
+            // ===== BUTTON STYLES =====
             
-            // Common State
-            _customPalette.ButtonStyles.ButtonStandalone.StateCommon.Content.ShortText.Color1 = Color.White;
-            _customPalette.ButtonStyles.ButtonStandalone.StateCommon.Content.ShortText.Color2 = Color.White;
-            _customPalette.ButtonStyles.ButtonStandalone.StateCommon.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.ButtonStyles.ButtonStandalone.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
+            // ButtonStandalone - Primary button style (VS Code Dark+ style)
+            var btnStandalone = _customPalette.ButtonStyles.ButtonStandalone;
+            btnStandalone.StateCommon.Content.ShortText.Color1 = Color.White;
+            btnStandalone.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
 
-            // Disabled State - Force White Text (VS Code Dark+ style)
-            // Use a slightly warmer dark gray for disabled backgrounds for better contrast with white text
-            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Back.Color1 = Color.FromArgb(58, 61, 65); // #3A3D41
-            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Content.ShortText.Color1 = Color.White;
-            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Content.ShortText.Color2 = Color.White;
-            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Border.Color1 = Color.FromArgb(64, 64, 64);
-            _customPalette.ButtonStyles.ButtonStandalone.StateDisabled.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
+            // Disabled State - VS Code disabled appearance
+            btnStandalone.StateDisabled.Back.Color1 = VAGEDCColorPalette.Gray500;
+            btnStandalone.StateDisabled.Content.ShortText.Color1 = Color.White;
 
             // Tracking (Hover) State - VS Code hover blue
-            _customPalette.ButtonStyles.ButtonStandalone.StateTracking.Back.Color1 = Color.FromArgb(17, 119, 187); // #1177BB
-            _customPalette.ButtonStyles.ButtonStandalone.StateTracking.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.ButtonStyles.ButtonStandalone.StateTracking.Content.ShortText.Color1 = Color.White;
-            _customPalette.ButtonStyles.ButtonStandalone.StateTracking.Content.ShortText.Color2 = Color.White;
-            _customPalette.ButtonStyles.ButtonStandalone.StateTracking.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            btnStandalone.StateTracking.Back.Color1 = VAGEDCColorPalette.Primary600;
+            btnStandalone.StateTracking.Content.ShortText.Color1 = Color.White;
 
-            // Pressed State - VS Code accent (stronger blue)
-            _customPalette.ButtonStyles.ButtonStandalone.StatePressed.Back.Color1 = Color.FromArgb(0, 122, 204); // #007ACC
-            _customPalette.ButtonStyles.ButtonStandalone.StatePressed.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.ButtonStyles.ButtonStandalone.StatePressed.Content.ShortText.Color1 = Color.White;
-            _customPalette.ButtonStyles.ButtonStandalone.StatePressed.Content.ShortText.Color2 = Color.White;
-            _customPalette.ButtonStyles.ButtonStandalone.StatePressed.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            // Pressed State - VS Code accent
+            btnStandalone.StatePressed.Back.Color1 = VAGEDCColorPalette.Primary500;
+            btnStandalone.StatePressed.Content.ShortText.Color1 = Color.White;
 
-            // Normal State - primary button color similar to VS Code (Dark+)
-            _customPalette.ButtonStyles.ButtonStandalone.StateNormal.Back.Color1 = Color.FromArgb(14, 99, 156); // #0E639C
-            _customPalette.ButtonStyles.ButtonStandalone.StateNormal.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.ButtonStyles.ButtonStandalone.StateNormal.Content.ShortText.Color1 = Color.White;
+            // Normal State - VS Code button blue
+            btnStandalone.StateNormal.Back.Color1 = VAGEDCColorPalette.Primary600;
+            btnStandalone.StateNormal.Content.ShortText.Color1 = Color.White;
 
-            // Duplicate configuration to Custom1 style to bypass Office theme images if needed
-            _customPalette.ButtonStyles.ButtonCustom1.StateCommon.Content.ShortText.Color1 = Color.White;
-            _customPalette.ButtonStyles.ButtonCustom1.StateCommon.Content.ShortText.Color2 = Color.White;
-            _customPalette.ButtonStyles.ButtonCustom1.StateCommon.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.ButtonStyles.ButtonCustom1.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
+            // ===== COMBOBOX STYLES =====
+            var comboStyle = _customPalette.InputControlStyles.InputControlStandalone;
+            comboStyle.StateCommon.Back.Color1 = _currentTheme.ControlBackground;
+            comboStyle.StateCommon.Content.ShortText.Color1 = _currentTheme.TextPrimary;
+            comboStyle.StateCommon.Border.Color1 = VAGEDCColorPalette.Gray600;
 
-            _customPalette.ButtonStyles.ButtonCustom1.StateDisabled.Back.Color1 = Color.FromArgb(58, 61, 65); // #3A3D41
-            _customPalette.ButtonStyles.ButtonCustom1.StateDisabled.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.ButtonStyles.ButtonCustom1.StateDisabled.Content.ShortText.Color1 = Color.White;
-            _customPalette.ButtonStyles.ButtonCustom1.StateDisabled.Content.ShortText.Color2 = Color.White;
-            _customPalette.ButtonStyles.ButtonCustom1.StateDisabled.Border.Color1 = Color.FromArgb(64, 64, 64);
-            _customPalette.ButtonStyles.ButtonCustom1.StateDisabled.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
+            // ===== TEXTBOX STYLES =====
+            var textBoxStyle = _customPalette.InputControlStyles.InputControlStandalone;
+            textBoxStyle.StateCommon.Back.Color1 = _currentTheme.ControlBackground;
+            textBoxStyle.StateCommon.Content.ShortText.Color1 = _currentTheme.TextPrimary;
+            textBoxStyle.StateCommon.Border.Color1 = VAGEDCColorPalette.Gray600;
 
-            _customPalette.ButtonStyles.ButtonCustom1.StateTracking.Back.Color1 = Color.FromArgb(17, 119, 187); // #1177BB
-            _customPalette.ButtonStyles.ButtonCustom1.StateTracking.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.ButtonStyles.ButtonCustom1.StateTracking.Content.ShortText.Color1 = Color.White;
-            _customPalette.ButtonStyles.ButtonCustom1.StateTracking.Content.ShortText.Color2 = Color.White;
+            // ===== GROUPBOX STYLES =====
+            var groupStyle = _customPalette.ControlStyles.ControlGroupBox;
+            groupStyle.StateCommon.Back.Color1 = _currentTheme.PanelBackground;
+            groupStyle.StateCommon.Border.Color1 = VAGEDCColorPalette.Gray600;
 
-            _customPalette.ButtonStyles.ButtonCustom1.StatePressed.Back.Color1 = Color.FromArgb(0, 122, 204); // #007ACC
-            _customPalette.ButtonStyles.ButtonCustom1.StatePressed.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.ButtonStyles.ButtonCustom1.StatePressed.Content.ShortText.Color1 = Color.White;
-            _customPalette.ButtonStyles.ButtonCustom1.StatePressed.Content.ShortText.Color2 = Color.White;
+            // ===== PANEL STYLES =====
+            var panelClient = _customPalette.PanelStyles.PanelClient;
+            panelClient.StateCommon.Color1 = _currentTheme.PanelBackground;
 
-            _customPalette.ButtonStyles.ButtonCustom1.StateNormal.Back.Color1 = Color.FromArgb(14, 99, 156); // #0E639C
-            _customPalette.ButtonStyles.ButtonCustom1.StateNormal.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.ButtonStyles.ButtonCustom1.StateNormal.Content.ShortText.Color1 = Color.White;
-            _customPalette.ButtonStyles.ButtonCustom1.StateNormal.Content.ShortText.Color2 = Color.White;
-            _customPalette.ButtonStyles.ButtonStandalone.StateNormal.Content.ShortText.Color2 = Color.White;
-            _customPalette.ButtonStyles.ButtonStandalone.StateNormal.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            var panelCommon = _customPalette.PanelStyles.PanelAlternate;
+            panelCommon.StateCommon.Color1 = _currentTheme.PanelBackground;
 
-            // Configure GroupBox/Panel Backgrounds to eliminate white flashes
-            // Use ControlClient for general backgrounds (KryptonGroup uses this by default)
-            _customPalette.ControlStyles.ControlClient.StateCommon.Back.Color1 = _currentTheme.WindowBackground;
-            _customPalette.ControlStyles.ControlClient.StateCommon.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            
-            // Configure PanelStyles (KryptonPanel uses PanelClient by default)
-            _customPalette.PanelStyles.PanelClient.StateCommon.Color1 = _currentTheme.PanelBackground;
-            _customPalette.PanelStyles.PanelClient.StateCommon.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.PanelStyles.PanelCommon.StateCommon.Color1 = _currentTheme.PanelBackground;
-            _customPalette.PanelStyles.PanelCommon.StateCommon.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
+            // ===== TAB STYLES (for Docking/Navigator) =====
+            var tabStyle = _customPalette.TabStyles.TabStandardProfile;
+            tabStyle.StateCommon.Back.Color1 = VAGEDCColorPalette.Gray700;
+            tabStyle.StateCommon.Content.ShortText.Color1 = _currentTheme.TextSecondary;
+            tabStyle.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
 
-            // Use Common state as a fallback for other controls
+            tabStyle.StateSelected.Back.Color1 = _currentTheme.WindowBackground;
+            tabStyle.StateSelected.Content.ShortText.Color1 = Color.White;
+            tabStyle.StateSelected.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
+
+            // Tab hover state
+            tabStyle.StateTracking.Back.Color1 = VAGEDCColorPalette.Gray600;
+
+            // ===== LABEL STYLES =====
+            var labelStyle = _customPalette.LabelStyles.LabelNormalControl;
+            labelStyle.StateCommon.ShortText.Color1 = _currentTheme.TextPrimary;
+            labelStyle.StateCommon.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
+
+            // ===== SEPARATOR STYLES =====
+            var sepStyle = _customPalette.SeparatorStyles.SeparatorLowProfile;
+            sepStyle.StateCommon.Back.Color1 = VAGEDCColorPalette.Gray600;
+
+            // ===== CHECKBOX STYLES (using CheckBoxStandalone) =====
+            var checkBoxStyle = _customPalette.ButtonStyles.ButtonStandalone;
+            checkBoxStyle.StateCommon.Content.ShortText.Color1 = _currentTheme.TextPrimary;
+            checkBoxStyle.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
+            checkBoxStyle.StateCheckedNormal.Back.Color1 = VAGEDCColorPalette.Primary500;
+
+            // ===== RADIO BUTTON STYLES (using RadioButtonStandalone) =====
+            var radioStyle = _customPalette.ButtonStyles.ButtonStandalone;
+            radioStyle.StateCommon.Content.ShortText.Color1 = _currentTheme.TextPrimary;
+            radioStyle.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
+            radioStyle.StateCheckedNormal.Back.Color1 = VAGEDCColorPalette.Primary500;
+
+            // ===== COMMON FALLBACK =====
             _customPalette.Common.StateCommon.Back.Color1 = _currentTheme.PanelBackground;
-            _customPalette.Common.StateCommon.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-
-            // Configure Tab Styles (for Docking/Navigator) - align with VS Code Dark+
-            _customPalette.TabStyles.TabCommon.StateCommon.Back.Color1 = Color.FromArgb(45, 45, 45); // inactive tab background (~#2D2D2D)
-            _customPalette.TabStyles.TabCommon.StateCommon.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.TabStyles.TabCommon.StateCommon.Content.ShortText.Color1 = Color.FromArgb(187, 187, 187); // inactive tab text (~#BBBBBB)
-            _customPalette.TabStyles.TabCommon.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
-
-            _customPalette.TabStyles.TabCommon.StateSelected.Back.Color1 = _currentTheme.WindowBackground; // active tab uses window background (#1E1E1E)
-            _customPalette.TabStyles.TabCommon.StateSelected.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-            _customPalette.TabStyles.TabCommon.StateSelected.Content.ShortText.Color1 = Color.White;
-            _customPalette.TabStyles.TabCommon.StateSelected.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
-            
-            // Configure Input Controls (TextBox, etc) to avoid white backgrounds
-            _customPalette.InputControlStyles.InputControlCommon.StateCommon.Back.Color1 = _currentTheme.ControlBackground;
-            _customPalette.InputControlStyles.InputControlCommon.StateCommon.Content.ShortText.Color1 = Color.White;
         }
 
         private void LoadCustomFonts()
@@ -296,18 +282,17 @@ namespace VAGSuite.Theming
 
                 kForm.StateCommon.Back.Color1 = _currentTheme.WindowBackground;
                 kForm.StateCommon.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-                
-                // Header (Title Bar) - VS Code style
-                // We use StateCommon to ensure it applies to both active and inactive states
-                kForm.StateCommon.Header.Back.Color1 = Color.FromArgb(60, 60, 60); // VS Code-like Title Bar (#3C3C3C is commonly used; use a close match)
+
+                // Header (Title Bar) - VS Code Dark+ style
+                kForm.StateCommon.Header.Back.Color1 = VAGEDCColorPalette.Gray700; // #2D2D2D
                 kForm.StateCommon.Header.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kForm.StateCommon.Header.Content.ShortText.Color1 = _currentTheme.TextPrimary;
                 kForm.StateCommon.Header.Content.ShortText.Font = GetCustomFont(10f, FontStyle.Bold);
-                
+
                 // Border - VS Code style subtle border
                 kForm.StateCommon.Border.Draw = ComponentFactory.Krypton.Toolkit.InheritBool.True;
                 kForm.StateCommon.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
-                kForm.StateCommon.Border.Color1 = Color.FromArgb(51, 51, 51); // slightly lighter subtle border
+                kForm.StateCommon.Border.Color1 = VAGEDCColorPalette.Gray600; // #333333
                 kForm.StateCommon.Border.Width = 1;
             }
             
@@ -344,7 +329,7 @@ namespace VAGSuite.Theming
                 kButton.StateCommon.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
                 kButton.StateCommon.Border.Width = 1;
                 kButton.StateCommon.Border.Rounding = 2;
-                kButton.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
+                kButton.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
                 
                 // Force StateCommon text to white to ensure visibility in all states (including disabled fallback)
                 kButton.StateCommon.Content.ShortText.Color1 = Color.White;
@@ -352,26 +337,26 @@ namespace VAGSuite.Theming
                 kButton.StateCommon.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
 
                 // Normal State - primary accent similar to VS Code Dark+
-                kButton.StateNormal.Back.Color1 = Color.FromArgb(14, 99, 156); // #0E639C
+                kButton.StateNormal.Back.Color1 = VAGEDCColorPalette.Primary600; // #0E639C
                 kButton.StateNormal.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StateNormal.Content.ShortText.Color1 = Color.White;
 
                 // StateDisabled - VS Code-like disabled appearance
-                kButton.StateDisabled.Back.Color1 = Color.FromArgb(58, 61, 65); // #3A3D41
+                kButton.StateDisabled.Back.Color1 = VAGEDCColorPalette.Gray500; // #3A3D41
                 kButton.StateDisabled.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StateDisabled.Content.ShortText.Color1 = Color.White; // Pure white for maximum contrast
                 kButton.StateDisabled.Content.ShortText.Color2 = Color.White;
                 kButton.StateDisabled.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-                kButton.StateDisabled.Border.Color1 = Color.FromArgb(64, 64, 64);
+                kButton.StateDisabled.Border.Color1 = VAGEDCColorPalette.Gray600;
 
                 // OverrideDefault - This handles the "AcceptButton" state which often stays white
-                kButton.OverrideDefault.Back.Color1 = Color.FromArgb(14, 99, 156); // #0E639C
+                kButton.OverrideDefault.Back.Color1 = VAGEDCColorPalette.Primary600; // #0E639C
                 kButton.OverrideDefault.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
-                kButton.OverrideDefault.Border.Color1 = Color.FromArgb(0, 122, 204); // #007ACC
+                kButton.OverrideDefault.Border.Color1 = VAGEDCColorPalette.Primary500; // #007ACC
                 kButton.OverrideDefault.Content.ShortText.Color1 = Color.White;
 
                 // Tracking (Hover) - VS Code hover blue
-                kButton.StateTracking.Back.Color1 = Color.FromArgb(17, 119, 187); // #1177BB
+                kButton.StateTracking.Back.Color1 = VAGEDCColorPalette.Primary600; // #0E639C
                 kButton.StateTracking.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StateTracking.Border.Color1 = Color.White;
                 kButton.StateTracking.Content.ShortText.Color1 = Color.White;
@@ -379,14 +364,14 @@ namespace VAGSuite.Theming
                 kButton.StateTracking.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
 
                 // Pressed - VS Code accent
-                kButton.StatePressed.Back.Color1 = Color.FromArgb(0, 122, 204); // #007ACC
+                kButton.StatePressed.Back.Color1 = VAGEDCColorPalette.Primary500; // #007ACC
                 kButton.StatePressed.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.StatePressed.Content.ShortText.Color1 = Color.White;
                 kButton.StatePressed.Content.ShortText.Color2 = Color.White;
                 kButton.StatePressed.Content.ShortText.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
 
                 // OverrideFocus - Ensure focused buttons don't revert to system style
-                kButton.OverrideFocus.Back.Color1 = Color.FromArgb(14, 99, 156); // #0E639C
+                kButton.OverrideFocus.Back.Color1 = VAGEDCColorPalette.Primary600; // #0E639C
                 kButton.OverrideFocus.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
                 kButton.OverrideFocus.Content.ShortText.Color1 = Color.White;
                 kButton.OverrideFocus.Content.ShortText.Color2 = Color.White;
@@ -395,19 +380,42 @@ namespace VAGSuite.Theming
             }
             else if (control is ComponentFactory.Krypton.Toolkit.KryptonLinkLabel kLink)
             {
-                kLink.StateCommon.ShortText.Color1 = Color.FromArgb(0, 122, 204); // VS Code Blue
+                kLink.StateCommon.ShortText.Color1 = VAGEDCColorPalette.Primary500; // VS Code Blue
                 kLink.StateCommon.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
                 // Use overrides for link states in Krypton 4.5.9
-                kLink.OverrideNotVisited.ShortText.Color1 = Color.FromArgb(0, 122, 204);
-                kLink.OverridePressed.ShortText.Color1 = Color.FromArgb(20, 142, 224);
+                kLink.OverrideNotVisited.ShortText.Color1 = VAGEDCColorPalette.Primary500;
+                kLink.OverridePressed.ShortText.Color1 = Color.FromArgb(20, 142, 224); // Lighter blue
             }
             else if (control is ComponentFactory.Krypton.Toolkit.KryptonGroupBox kGroup)
             {
                 kGroup.StateCommon.Back.Color1 = _currentTheme.PanelBackground;
                 kGroup.StateCommon.Content.ShortText.Color1 = _currentTheme.TextPrimary;
-                kGroup.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Bold);
-                kGroup.StateCommon.Border.Color1 = _currentTheme.BorderPrimary;
+                kGroup.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
+                kGroup.StateCommon.Border.Color1 = VAGEDCColorPalette.Gray600;
                 kGroup.StateCommon.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
+            }
+            else if (control is ComponentFactory.Krypton.Toolkit.KryptonComboBox kCombo)
+            {
+                kCombo.StateCommon.ComboBox.Back.Color1 = _currentTheme.ControlBackground;
+                kCombo.StateCommon.ComboBox.Content.Color1 = _currentTheme.TextPrimary;
+                kCombo.StateCommon.ComboBox.Border.Color1 = VAGEDCColorPalette.Gray600;
+                kCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+            }
+            else if (control is ComponentFactory.Krypton.Toolkit.KryptonTextBox kTextBox)
+            {
+                kTextBox.StateCommon.Back.Color1 = _currentTheme.ControlBackground;
+                kTextBox.StateCommon.Content.Color1 = _currentTheme.TextPrimary;
+                kTextBox.StateCommon.Border.Color1 = VAGEDCColorPalette.Gray600;
+            }
+            else if (control is ComponentFactory.Krypton.Toolkit.KryptonCheckBox kCheckBox)
+            {
+                kCheckBox.StateCommon.ShortText.Color1 = _currentTheme.TextPrimary;
+                kCheckBox.StateCommon.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
+            }
+            else if (control is ComponentFactory.Krypton.Toolkit.KryptonTrackBar kTrackBar)
+            {
+                kTrackBar.StateCommon.Tick.Color1 = _currentTheme.TextSecondary;
+                kTrackBar.StateCommon.Track.Color1 = VAGEDCColorPalette.Primary500;
             }
 
             // Standard Panel
@@ -454,10 +462,10 @@ namespace VAGSuite.Theming
                 treeView.BackColor = _currentTheme.WindowBackground;  // Use Gray900 (true black/onyx) for better contrast
                 treeView.ForeColor = _currentTheme.TextPrimary;
                 treeView.BorderStyle = BorderStyle.FixedSingle;
-                treeView.LineColor = _currentTheme.BorderPrimary;
-                
+                treeView.LineColor = VAGEDCColorPalette.Gray600;
+
                 // Note: TreeView selection colors are set via DrawMode in individual forms
-                // Selected items should use Navy blue (#1E3A8A) with white text
+                // Selected items should use VS Code selection blue (#264F78) with white text
             }
             // Standard ListView
             else if (control is ListView)
@@ -466,6 +474,29 @@ namespace VAGSuite.Theming
                 listView.BackColor = _currentTheme.GridBackground;
                 listView.ForeColor = _currentTheme.TextPrimary;
                 listView.BorderStyle = BorderStyle.FixedSingle;
+            }
+            // DataGridView (used by ADGV in MapViewerEx)
+            else if (control is DataGridView dataGridView)
+            {
+                ApplyThemeToDataGridView(dataGridView);
+            }
+            // ContextMenuStrip
+            else if (control is ContextMenuStrip contextMenuStrip)
+            {
+                contextMenuStrip.Renderer = GetToolStripRenderer();
+                contextMenuStrip.BackColor = _currentTheme.ToolbarBackground;
+            }
+            // MenuStrip
+            else if (control is MenuStrip menuStrip)
+            {
+                menuStrip.Renderer = GetToolStripRenderer();
+                menuStrip.BackColor = _currentTheme.ToolbarBackground;
+            }
+            // StatusStrip
+            else if (control is StatusStrip statusStrip)
+            {
+                statusStrip.Renderer = GetToolStripRenderer();
+                statusStrip.BackColor = _currentTheme.StatusBarBackground;
             }
             
             // Recursively apply to children
@@ -477,6 +508,42 @@ namespace VAGSuite.Theming
         
         
         /// <summary>
+        /// Applies VS Code Dark+ theme to a DataGridView control
+        /// </summary>
+        private void ApplyThemeToDataGridView(DataGridView dgv)
+        {
+            dgv.BackgroundColor = _currentTheme.GridBackground;
+            dgv.ForeColor = _currentTheme.TextPrimary;
+            dgv.BorderStyle = BorderStyle.FixedSingle;
+            dgv.GridColor = VAGEDCColorPalette.Gray600;
+            
+            // Alternating row color
+            dgv.AlternatingRowsDefaultCellStyle.BackColor = _currentTheme.GridAlternateRow;
+            dgv.AlternatingRowsDefaultCellStyle.ForeColor = _currentTheme.TextPrimary;
+            
+            // Default row style
+            dgv.RowsDefaultCellStyle.BackColor = _currentTheme.GridBackground;
+            dgv.RowsDefaultCellStyle.ForeColor = _currentTheme.TextPrimary;
+            
+            // Selection style - VS Code selection blue
+            dgv.SelectionMode = DataGridViewSelectionMode.CellSelect;
+            dgv.DefaultCellStyle.SelectionBackColor = VAGEDCColorPalette.Primary500;
+            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
+            
+            // Header styles
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = _currentTheme.GridHeaderBackground;
+            dgv.ColumnHeadersDefaultCellStyle.ForeColor = _currentTheme.GridHeaderText;
+            dgv.ColumnHeadersDefaultCellStyle.Font = GetCustomFont(9f, FontStyle.Bold);
+            
+            dgv.RowHeadersDefaultCellStyle.BackColor = _currentTheme.GridHeaderBackground;
+            dgv.RowHeadersDefaultCellStyle.ForeColor = _currentTheme.GridHeaderText;
+            
+            // Border
+            dgv.CellBorderStyle = DataGridViewCellBorderStyle.Single;
+            // dgv.BorderColor = VAGEDCColorPalette.Gray600; // This property does not exist in DataGridView
+        }
+
+        /// <summary>
         /// Gets a ToolStripProfessionalRenderer configured for the current theme
         /// </summary>
         public ToolStripProfessionalRenderer GetToolStripRenderer()
@@ -487,26 +554,28 @@ namespace VAGSuite.Theming
     }
     
     /// <summary>
-    /// Custom color table for ToolStrip controls
+    /// Custom color table for ToolStrip controls - VS Code Dark+ style
     /// </summary>
     internal class VAGEDCToolStripColorTable : ProfessionalColorTable
     {
         private VAGEDCTheme _theme;
-        
+
         public VAGEDCToolStripColorTable(VAGEDCTheme theme)
         {
             _theme = theme;
         }
-        
+
         public override Color ToolStripGradientBegin => _theme.ToolbarBackground;
         public override Color ToolStripGradientMiddle => _theme.ToolbarBackground;
         public override Color ToolStripGradientEnd => _theme.ToolbarBackground;
         public override Color MenuStripGradientBegin => _theme.ToolbarBackground;
         public override Color MenuStripGradientEnd => _theme.ToolbarBackground;
-        public override Color MenuItemSelected => _theme.ToolbarHover;
-        public override Color MenuItemBorder => _theme.BorderPrimary;
-        public override Color MenuBorder => _theme.BorderPrimary;
+        public override Color MenuItemSelected => VAGEDCColorPalette.Gray600;
+        public override Color MenuItemBorder => VAGEDCColorPalette.Gray600;
+        public override Color MenuBorder => VAGEDCColorPalette.Gray600;
         public override Color StatusStripGradientBegin => _theme.StatusBarBackground;
         public override Color StatusStripGradientEnd => _theme.StatusBarBackground;
+        public override Color SeparatorLight => VAGEDCColorPalette.Gray600;
+        public override Color SeparatorDark => VAGEDCColorPalette.Gray700;
     }
 }
