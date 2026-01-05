@@ -46,53 +46,83 @@ namespace VAGSuite
         public void UpdateSymbolList(System.Collections.IEnumerable symbols)
         {
             Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: Building hierarchical tree...");
-            if (symbols == null) return;
-
-            tvSymbols.BeginUpdate();
-            tvSymbols.Nodes.Clear();
-
-            var categories = new Dictionary<string, TreeNode>();
-
-            foreach (SymbolHelper sh in symbols)
+            if (symbols == null)
             {
-                string catName = string.IsNullOrEmpty(sh.Category) ? "Undocumented" : sh.Category;
-                string subCatName = string.IsNullOrEmpty(sh.Subcategory) ? "General" : sh.Subcategory;
+                Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: symbols collection is null.");
+                return;
+            }
 
-                if (!categories.ContainsKey(catName))
+            if (tvSymbols == null)
+            {
+                Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: tvSymbols is null. Initializing now...");
+                InitializeSymbolGrid();
+            }
+
+            try
+            {
+                tvSymbols.BeginUpdate();
+                Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: Clearing existing nodes...");
+                tvSymbols.Nodes.Clear();
+
+                var categories = new Dictionary<string, TreeNode>();
+                int symbolCount = 0;
+
+                foreach (SymbolHelper sh in symbols)
                 {
-                    var catNode = new TreeNode(catName);
-                    catNode.NodeFont = new Font(tvSymbols.Font, FontStyle.Bold);
-                    tvSymbols.Nodes.Add(catNode);
-                    categories.Add(catName, catNode);
-                }
-
-                TreeNode parentNode = categories[catName];
-                TreeNode subNode = null;
-
-                foreach (TreeNode node in parentNode.Nodes)
-                {
-                    if (node.Text == subCatName)
+                    symbolCount++;
+                    try
                     {
-                        subNode = node;
-                        break;
+                        string catName = string.IsNullOrEmpty(sh.Category) ? "Undocumented" : sh.Category;
+                        string subCatName = string.IsNullOrEmpty(sh.Subcategory) ? "General" : sh.Subcategory;
+
+                        if (!categories.ContainsKey(catName))
+                        {
+                            var catNode = new TreeNode(catName);
+                            catNode.NodeFont = new Font(tvSymbols.Font, FontStyle.Bold);
+                            tvSymbols.Nodes.Add(catNode);
+                            categories.Add(catName, catNode);
+                        }
+
+                        TreeNode parentNode = categories[catName];
+                        TreeNode subNode = null;
+
+                        foreach (TreeNode node in parentNode.Nodes)
+                        {
+                            if (node.Text == subCatName)
+                            {
+                                subNode = node;
+                                break;
+                            }
+                        }
+
+                        if (subNode == null)
+                        {
+                            subNode = new TreeNode(subCatName);
+                            parentNode.Nodes.Add(subNode);
+                        }
+
+                        string addressString = m_appSettings.ShowAddressesInHex ? sh.Flash_start_address.ToString("X6") : sh.Flash_start_address.ToString();
+                        var symbolNode = new TreeNode(string.Format("{0} [{1}]", sh.Varname, addressString));
+                        symbolNode.Tag = sh;
+                        subNode.Nodes.Add(symbolNode);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(string.Format("🧑🔬 [DEBUG] UpdateSymbolList: Error processing symbol {0}: {1}", symbolCount, ex.Message));
                     }
                 }
 
-                if (subNode == null)
-                {
-                    subNode = new TreeNode(subCatName);
-                    parentNode.Nodes.Add(subNode);
-                }
-
-                string addressString = m_appSettings.ShowAddressesInHex ? sh.Flash_start_address.ToString("X6") : sh.Flash_start_address.ToString();
-                var symbolNode = new TreeNode(string.Format("{0} [{1}]", sh.Varname, addressString));
-                symbolNode.Tag = sh;
-                subNode.Nodes.Add(symbolNode);
+                Console.WriteLine(string.Format("🧑🔬 [DEBUG] UpdateSymbolList: Processed {0} symbols. Expanding tree...", symbolCount));
+                tvSymbols.ExpandAll();
+                Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: Ending update...");
+                tvSymbols.EndUpdate();
+                Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: Tree built successfully.");
             }
-
-            tvSymbols.ExpandAll();
-            tvSymbols.EndUpdate();
-            Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: Tree built successfully.");
+            catch (Exception ex)
+            {
+                Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: CRITICAL ERROR: " + ex.Message);
+                Console.WriteLine("🧑🔬 [DEBUG] StackTrace: " + ex.StackTrace);
+            }
         }
 
         private void OpenSelectedSymbol()

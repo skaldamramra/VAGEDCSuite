@@ -17,6 +17,7 @@ namespace VAGSuite
         private ToolStripStatusLabel statusUpdate;
         private ToolStripStatusLabel statusSpring;
         private ToolStripButton statusMapDescriptions;
+        private object btnToggleMapDescriptions; // Stub for legacy references
 
         private void InitializeKryptonStatusBar()
         {
@@ -168,7 +169,7 @@ namespace VAGSuite
             
             // Shim to the original DevExpress handler logic
             // We call the existing method in frmMain.cs
-            btnToggleMapDescriptions_ItemClick(this.btnToggleMapDescriptions, null);
+            btnToggleMapDescriptions_ItemClick(this.statusMapDescriptions, null);
             
             // Ensure the Krypton UI reflects the new state
             UpdateMapDescriptionsButtonAppearance();

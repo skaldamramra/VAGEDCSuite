@@ -5,12 +5,12 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 using System.IO;
 
 namespace VAGSuite
 {
-    public partial class frmPartNumberList : DevExpress.XtraEditors.XtraForm
+    public partial class frmPartNumberList : KryptonForm
     {
         
         private string m_selectedpartnumber = "";
@@ -32,7 +32,6 @@ namespace VAGSuite
             partnumbers.Columns.Add("STAGE");
             partnumbers.Columns.Add("INFO");
             partnumbers.Columns.Add("SPEED");
-            //backgroundWorker1.RunWorkerAsync();
         }
 
         private void LoadPartNumbersFromFiles()
@@ -44,7 +43,6 @@ namespace VAGSuite
                 foreach (string binfile in binfiles)
                 {
                     string speed = "20";
-                    //if (Find20MhzSequence(binfile)) speed = "20";
                     string binfilename = Path.GetFileNameWithoutExtension(binfile);
                     string partnumber = "";
 
@@ -60,7 +58,6 @@ namespace VAGSuite
                         string[] values = binfilename.Split(sep);
                         if (values.Length == 1)
                         {
-                            // assume partnumber
                             partnumber = (string)binfilename;
                             partnumbers.Rows.Add(binfile, partnumber, enginetype, cartype, tuner, stage, additionalinfo, speed);
                         }
@@ -104,11 +101,9 @@ namespace VAGSuite
                     }
                     else
                     {
-                        // assume partnumber
                         partnumber = (string)binfilename;
                         partnumbers.Rows.Add(binfile, partnumber, enginetype, cartype, tuner, stage, additionalinfo, speed);
                     }
-                   // backgroundWorker1.ReportProgress(0);
                     Application.DoEvents();
                 }
             }
@@ -123,23 +118,19 @@ namespace VAGSuite
             LoadPartNumbersFromFiles();
 
             gridControl1.DataSource = dt;
-            gridView1.Columns["Carmodel"].Group();
-            gridView1.Columns["Model"].Group();
-            gridView1.Columns["ECU type"].Group();
-            gridView1.BestFitColumns();
         }
 
         private void gridView1_DoubleClick(object sender, EventArgs e)
         {
-            int[] rows = gridView1.GetSelectedRows();
-            if(rows.Length > 0)
+            if (gridControl1.SelectedRows.Count > 0)
             {
-                m_selectedpartnumber = (string)gridView1.GetRowCellValue((int)rows.GetValue(0), "Partnumber");
-                if (m_selectedpartnumber != null)
+                DataGridViewRow row = gridControl1.SelectedRows[0];
+                DataRowView dv = (DataRowView)row.DataBoundItem;
+                if (dv != null)
                 {
-                    if (m_selectedpartnumber != string.Empty)
+                    m_selectedpartnumber = dv.Row["Partnumber"].ToString();
+                    if (!string.IsNullOrEmpty(m_selectedpartnumber))
                     {
-
                         this.Close();
                     }
                 }
@@ -148,10 +139,14 @@ namespace VAGSuite
 
         private void simpleButton1_Click(object sender, EventArgs e)
         {
-            int[] rows = gridView1.GetSelectedRows();
-            if (rows.Length > 0)
+            if (gridControl1.SelectedRows.Count > 0)
             {
-                m_selectedpartnumber = (string)gridView1.GetRowCellValue((int)rows.GetValue(0), "Partnumber");
+                DataGridViewRow row = gridControl1.SelectedRows[0];
+                DataRowView dv = (DataRowView)row.DataBoundItem;
+                if (dv != null)
+                {
+                    m_selectedpartnumber = dv.Row["Partnumber"].ToString();
+                }
             }
             this.Close();
         }
@@ -173,79 +168,19 @@ namespace VAGSuite
             return retval;
         }
 
-        private void gridView1_CustomDrawCell(object sender, DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e)
+        private void gridControl1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.Column.FieldName == "Partnumber")
+            if (gridControl1.Columns[e.ColumnIndex].Name == "Partnumber" || gridControl1.Columns[e.ColumnIndex].DataPropertyName == "Partnumber")
             {
-                if (e.CellValue != null)
+                if (e.Value != null && e.Value != DBNull.Value)
                 {
-                    if (e.CellValue != DBNull.Value)
+                    int type = CheckInAvailableLibrary(e.Value.ToString());
+                    if (type == 1)
                     {
-                        int type = CheckInAvailableLibrary(e.CellValue.ToString());
-                        if (type == 1)
-                        {
-                            e.Graphics.FillRectangle(Brushes.YellowGreen, e.Bounds);
-                        }
-                        if (type == 2)
-                        {
-                            e.Graphics.FillRectangle(Brushes.YellowGreen, e.Bounds);
-                        }
+                        e.CellStyle.BackColor = Color.YellowGreen;
                     }
                 }
             }
-        }
-
-        private bool Find20MhzSequence(string filename)
-        {
-            bool retval = false;
-            FileInfo fi = new FileInfo(filename);
-            using (FileStream a_fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
-            {
-                byte[] sequence = new byte[32] {0x02, 0x39, 0x00, 0xBF, 0x00, 0xFF, 0xFA, 0x04,
-                                            0x00, 0x39, 0x00, 0x80, 0x00, 0xFF, 0xFA, 0x04,
-                                            0x02, 0x39, 0x00, 0xC0, 0x00, 0xFF, 0xFA, 0x04,
-                                            0x00, 0x39, 0x00, 0x13, 0x00, 0xFF, 0xFA, 0x04};
-                /*byte[] seq_mask = new byte[32] {1, 1, 1, 1, 1, 1, 1, 1,
-                                            0, 0, 1, 1, 1, 0, 0, 0,   
-                                            1, 1, 1, 1, 0, 0, 1, 1,
-                                            1, 1, 1, 1, 0, 0, 1, 1};*/
-                byte data;
-                int i;
-                i = 0;
-                while (a_fileStream.Position < fi.Length -1)
-                {
-                    data = (byte)a_fileStream.ReadByte();
-                    if (data == sequence[i])
-                    {
-                        i++;
-                    }
-                    else
-                    {
-                        i = 0;
-                    }
-                    if (i == sequence.Length) break;
-                }
-                if (i == sequence.Length)
-                {
-                    retval = true;
-                }
-            }
-            return retval;
-        }
-
-        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
-        {
-            
-        }
-
-        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-
-        }
-
-        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-
         }
 
         private void simpleButton2_Click(object sender, EventArgs e)
@@ -254,7 +189,22 @@ namespace VAGSuite
             sfd.Filter = "Text files|*.txt";
             if(sfd.ShowDialog() == DialogResult.OK)
             {
-                gridControl1.ExportToText(sfd.FileName);
+                // Simple text export for DataGridView
+                StringBuilder sb = new StringBuilder();
+                foreach (DataGridViewColumn col in gridControl1.Columns)
+                {
+                    sb.Append(col.HeaderText + "\t");
+                }
+                sb.AppendLine();
+                foreach (DataGridViewRow row in gridControl1.Rows)
+                {
+                    foreach (DataGridViewCell cell in row.Cells)
+                    {
+                        sb.Append(cell.Value?.ToString() + "\t");
+                    }
+                    sb.AppendLine();
+                }
+                File.WriteAllText(sfd.FileName, sb.ToString());
             }
         }
     }

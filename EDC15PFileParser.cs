@@ -7,7 +7,6 @@ using System.Text;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Net;
-using DevExpress.Internal;
 using System.Drawing;
 using VAGSuite.MapViewerEventArgs;
 

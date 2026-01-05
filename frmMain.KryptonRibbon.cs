@@ -21,6 +21,9 @@ namespace VAGSuite
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonOpenProject;
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonCloseProject;
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonCreateProject;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonTransactionLog;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonRollback;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonRollforward;
         
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonGeneralActions;
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple rbpgKryptonGeneralActionsTriple;
@@ -83,9 +86,8 @@ namespace VAGSuite
             this.kryptonRibbon1.PaletteMode = PaletteMode.Custom;
             this.kryptonRibbon1.AllowFormIntegrate = false;
             
-            // Enable the new Ribbon and hide the old DevExpress one
+            // Enable the new Ribbon
             this.kryptonRibbon1.Visible = true;
-            this.ribbonControl1.Visible = false;
 
 
             //
@@ -266,14 +268,14 @@ namespace VAGSuite
             rbpgKryptonProjectActionsTriple.MaximumSize = GroupItemSize.Large;
             rbpgKryptonProjectActionsTriple.MinimumSize = GroupItemSize.Large;
 
-            KryptonRibbonGroupButton btnKryptonTransactionLog = new KryptonRibbonGroupButton { TextLine1 = "Transaction", TextLine2 = "Log", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonTransactionLog.Click += (s, e) => btnShowTransactionLog_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonRollback = new KryptonRibbonGroupButton { TextLine1 = "Rollback", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonRollback.Click += (s, e) => btnRollback_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonRollforward = new KryptonRibbonGroupButton { TextLine1 = "Roll", TextLine2 = "Forward", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonRollforward.Click += (s, e) => btnRollforward_ItemClick(s, null);
+            this.btnKryptonTransactionLog = new KryptonRibbonGroupButton { TextLine1 = "Transaction", TextLine2 = "Log", ImageLarge = GetResourceImage("vagedc.ico") };
+            this.btnKryptonTransactionLog.Click += (s, e) => btnShowTransactionLog_ItemClick(s, null);
+            this.btnKryptonRollback = new KryptonRibbonGroupButton { TextLine1 = "Rollback", ImageLarge = GetResourceImage("vagedc.ico") };
+            this.btnKryptonRollback.Click += (s, e) => btnRollback_ItemClick(s, null);
+            this.btnKryptonRollforward = new KryptonRibbonGroupButton { TextLine1 = "Roll", TextLine2 = "Forward", ImageLarge = GetResourceImage("vagedc.ico") };
+            this.btnKryptonRollforward.Click += (s, e) => btnRollforward_ItemClick(s, null);
 
-            rbpgKryptonProjectActionsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonTransactionLog, btnKryptonRollback, btnKryptonRollforward });
+            rbpgKryptonProjectActionsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { this.btnKryptonTransactionLog, this.btnKryptonRollback, this.btnKryptonRollforward });
             this.rbpgKryptonGeneralActions.Items.Add(rbpgKryptonProjectActionsTriple);
 
             // Tools Group
@@ -576,7 +578,7 @@ namespace VAGSuite
             {
                 if (btn.Tag.ToString() == "CUSTOM_VAGEDC_DARK")
                 {
-                    ApplyVAGEDCDarkTheme();
+                    VAGEDCThemeManager.Instance.ActivateVAGEDCDark(this);
                     m_appSettings.UseVAGEDCDarkTheme = true;
                     m_appSettings.Skinname = "VAGEDC Dark";
                 }

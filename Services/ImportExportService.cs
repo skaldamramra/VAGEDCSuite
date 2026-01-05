@@ -30,15 +30,13 @@ namespace VAGSuite.Services
         public void StartExcelExport(object gridView, string currentFile, SymbolCollection symbols, bool showTablesUpsideDown)
         {
             ExcelInterface excelInterface = new ExcelInterface();
-            if (gridView != null && gridView is DevExpress.XtraGrid.Views.Grid.GridView)
+            if (gridView != null && gridView is System.Windows.Forms.DataGridView gv)
             {
-                DevExpress.XtraGrid.Views.Grid.GridView gv = (DevExpress.XtraGrid.Views.Grid.GridView)gridView;
-                if (gv.SelectedRowsCount > 0)
+                if (gv.SelectedRows.Count > 0)
                 {
-                    int[] selrows = gv.GetSelectedRows();
-                    if (selrows.Length > 0)
+                    SymbolHelper sh = (SymbolHelper)gv.SelectedRows[0].DataBoundItem;
+                    if (sh != null)
                     {
-                        SymbolHelper sh = (SymbolHelper)gv.GetRow((int)selrows.GetValue(0));
                         string Map_name = sh.Varname;
                         if ((Map_name.StartsWith("2D") || Map_name.StartsWith("3D")) && sh.Userdescription != "") Map_name = sh.Userdescription;
                     }

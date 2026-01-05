@@ -28,122 +28,115 @@ namespace VAGSuite
         /// </summary>
         private void InitializeComponent()
         {
-            this.spinEdit1 = new DevExpress.XtraEditors.SpinEdit();
-            this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
-            this.textEdit1 = new DevExpress.XtraEditors.TextEdit();
-            this.checkEdit4 = new DevExpress.XtraEditors.CheckEdit();
-            this.checkEdit3 = new DevExpress.XtraEditors.CheckEdit();
-            this.checkEdit2 = new DevExpress.XtraEditors.CheckEdit();
-            this.checkEdit1 = new DevExpress.XtraEditors.CheckEdit();
-            this.simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
-            this.simpleButton2 = new DevExpress.XtraEditors.SimpleButton();
-            ((System.ComponentModel.ISupportInitialize)(this.spinEdit1.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
-            this.groupControl1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit1.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.checkEdit4.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.checkEdit3.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.checkEdit2.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.checkEdit1.Properties)).BeginInit();
+            this.kryptonNumericUpDown1 = new ComponentFactory.Krypton.Toolkit.KryptonNumericUpDown();
+            this.kryptonGroupBox1 = new ComponentFactory.Krypton.Toolkit.KryptonGroupBox();
+            this.kryptonTextBox1 = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.kryptonCheckBox4 = new ComponentFactory.Krypton.Toolkit.KryptonCheckBox();
+            this.kryptonCheckBox3 = new ComponentFactory.Krypton.Toolkit.KryptonCheckBox();
+            this.kryptonCheckBox2 = new ComponentFactory.Krypton.Toolkit.KryptonCheckBox();
+            this.kryptonCheckBox1 = new ComponentFactory.Krypton.Toolkit.KryptonCheckBox();
+            this.kryptonButtonOk = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.kryptonButtonCancel = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            ((System.ComponentModel.ISupportInitialize)(this.kryptonGroupBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.kryptonGroupBox1.Panel)).BeginInit();
+            this.kryptonGroupBox1.Panel.SuspendLayout();
+            this.kryptonGroupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // spinEdit1
+            // kryptonNumericUpDown1
             // 
-            this.spinEdit1.EditValue = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.spinEdit1.Location = new System.Drawing.Point(174, 40);
-            this.spinEdit1.Name = "spinEdit1";
-            this.spinEdit1.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton()});
-            this.spinEdit1.Size = new System.Drawing.Size(207, 20);
-            this.spinEdit1.TabIndex = 0;
+            this.kryptonNumericUpDown1.Location = new System.Drawing.Point(174, 40);
+            this.kryptonNumericUpDown1.Name = "kryptonNumericUpDown1";
+            this.kryptonNumericUpDown1.Size = new System.Drawing.Size(207, 22);
+            this.kryptonNumericUpDown1.TabIndex = 0;
             // 
-            // groupControl1
+            // kryptonGroupBox1
             // 
-            this.groupControl1.Controls.Add(this.textEdit1);
-            this.groupControl1.Controls.Add(this.checkEdit4);
-            this.groupControl1.Controls.Add(this.checkEdit3);
-            this.groupControl1.Controls.Add(this.checkEdit2);
-            this.groupControl1.Controls.Add(this.checkEdit1);
-            this.groupControl1.Controls.Add(this.spinEdit1);
-            this.groupControl1.Location = new System.Drawing.Point(12, 12);
-            this.groupControl1.Name = "groupControl1";
-            this.groupControl1.Size = new System.Drawing.Size(407, 187);
-            this.groupControl1.TabIndex = 2;
-            this.groupControl1.Text = "Search options";
+            this.kryptonGroupBox1.Location = new System.Drawing.Point(12, 12);
+            this.kryptonGroupBox1.Name = "kryptonGroupBox1";
             // 
-            // textEdit1
+            // kryptonGroupBox1.Panel
             // 
-            this.textEdit1.Location = new System.Drawing.Point(174, 75);
-            this.textEdit1.Name = "textEdit1";
-            this.textEdit1.Size = new System.Drawing.Size(207, 20);
-            this.textEdit1.TabIndex = 6;
+            this.kryptonGroupBox1.Panel.Controls.Add(this.kryptonTextBox1);
+            this.kryptonGroupBox1.Panel.Controls.Add(this.kryptonCheckBox4);
+            this.kryptonGroupBox1.Panel.Controls.Add(this.kryptonCheckBox3);
+            this.kryptonGroupBox1.Panel.Controls.Add(this.kryptonCheckBox2);
+            this.kryptonGroupBox1.Panel.Controls.Add(this.kryptonCheckBox1);
+            this.kryptonGroupBox1.Panel.Controls.Add(this.kryptonNumericUpDown1);
+            this.kryptonGroupBox1.Size = new System.Drawing.Size(407, 187);
+            this.kryptonGroupBox1.TabIndex = 2;
+            this.kryptonGroupBox1.Values.Heading = "Search options";
             // 
-            // checkEdit4
+            // kryptonTextBox1
             // 
-            this.checkEdit4.Location = new System.Drawing.Point(15, 75);
-            this.checkEdit4.Name = "checkEdit4";
-            this.checkEdit4.Properties.Caption = "Search for string value";
-            this.checkEdit4.Size = new System.Drawing.Size(153, 19);
-            this.checkEdit4.TabIndex = 5;
+            this.kryptonTextBox1.Location = new System.Drawing.Point(174, 75);
+            this.kryptonTextBox1.Name = "kryptonTextBox1";
+            this.kryptonTextBox1.Size = new System.Drawing.Size(207, 23);
+            this.kryptonTextBox1.TabIndex = 6;
             // 
-            // checkEdit3
+            // kryptonCheckBox4
             // 
-            this.checkEdit3.EditValue = true;
-            this.checkEdit3.Location = new System.Drawing.Point(15, 40);
-            this.checkEdit3.Name = "checkEdit3";
-            this.checkEdit3.Properties.Caption = "Search for numeric value";
-            this.checkEdit3.Size = new System.Drawing.Size(153, 19);
-            this.checkEdit3.TabIndex = 4;
+            this.kryptonCheckBox4.Location = new System.Drawing.Point(15, 75);
+            this.kryptonCheckBox4.Name = "kryptonCheckBox4";
+            this.kryptonCheckBox4.Size = new System.Drawing.Size(148, 20);
+            this.kryptonCheckBox4.TabIndex = 5;
+            this.kryptonCheckBox4.Values.Text = "Search for string value";
             // 
-            // checkEdit2
+            // kryptonCheckBox3
             // 
-            this.checkEdit2.Location = new System.Drawing.Point(15, 148);
-            this.checkEdit2.Name = "checkEdit2";
-            this.checkEdit2.Properties.Caption = "Include symbol descriptions";
-            this.checkEdit2.Size = new System.Drawing.Size(185, 19);
-            this.checkEdit2.TabIndex = 3;
+            this.kryptonCheckBox3.Checked = true;
+            this.kryptonCheckBox3.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.kryptonCheckBox3.Location = new System.Drawing.Point(15, 40);
+            this.kryptonCheckBox3.Name = "kryptonCheckBox3";
+            this.kryptonCheckBox3.Size = new System.Drawing.Size(161, 20);
+            this.kryptonCheckBox3.TabIndex = 4;
+            this.kryptonCheckBox3.Values.Text = "Search for numeric value";
             // 
-            // checkEdit1
+            // kryptonCheckBox2
             // 
-            this.checkEdit1.Location = new System.Drawing.Point(15, 118);
-            this.checkEdit1.Name = "checkEdit1";
-            this.checkEdit1.Properties.Caption = "Include symbol names";
-            this.checkEdit1.Size = new System.Drawing.Size(185, 19);
-            this.checkEdit1.TabIndex = 2;
+            this.kryptonCheckBox2.Location = new System.Drawing.Point(15, 148);
+            this.kryptonCheckBox2.Name = "kryptonCheckBox2";
+            this.kryptonCheckBox2.Size = new System.Drawing.Size(175, 20);
+            this.kryptonCheckBox2.TabIndex = 3;
+            this.kryptonCheckBox2.Values.Text = "Include symbol descriptions";
             // 
-            // simpleButton1
+            // kryptonCheckBox1
             // 
-            this.simpleButton1.Location = new System.Drawing.Point(345, 205);
-            this.simpleButton1.Name = "simpleButton1";
-            this.simpleButton1.Size = new System.Drawing.Size(75, 23);
-            this.simpleButton1.TabIndex = 3;
-            this.simpleButton1.Text = "Ok";
-            this.simpleButton1.Click += new System.EventHandler(this.simpleButton1_Click);
+            this.kryptonCheckBox1.Location = new System.Drawing.Point(15, 118);
+            this.kryptonCheckBox1.Name = "kryptonCheckBox1";
+            this.kryptonCheckBox1.Size = new System.Drawing.Size(145, 20);
+            this.kryptonCheckBox1.TabIndex = 2;
+            this.kryptonCheckBox1.Values.Text = "Include symbol names";
             // 
-            // simpleButton2
+            // kryptonButtonOk
             // 
-            this.simpleButton2.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.simpleButton2.Location = new System.Drawing.Point(264, 205);
-            this.simpleButton2.Name = "simpleButton2";
-            this.simpleButton2.Size = new System.Drawing.Size(75, 23);
-            this.simpleButton2.TabIndex = 4;
-            this.simpleButton2.Text = "Cancel";
-            this.simpleButton2.Click += new System.EventHandler(this.simpleButton2_Click);
+            this.kryptonButtonOk.Location = new System.Drawing.Point(345, 205);
+            this.kryptonButtonOk.Name = "kryptonButtonOk";
+            this.kryptonButtonOk.Size = new System.Drawing.Size(75, 25);
+            this.kryptonButtonOk.TabIndex = 3;
+            this.kryptonButtonOk.Values.Text = "Ok";
+            this.kryptonButtonOk.Click += new System.EventHandler(this.simpleButton1_Click);
+            // 
+            // kryptonButtonCancel
+            // 
+            this.kryptonButtonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.kryptonButtonCancel.Location = new System.Drawing.Point(264, 205);
+            this.kryptonButtonCancel.Name = "kryptonButtonCancel";
+            this.kryptonButtonCancel.Size = new System.Drawing.Size(75, 25);
+            this.kryptonButtonCancel.TabIndex = 4;
+            this.kryptonButtonCancel.Values.Text = "Cancel";
+            this.kryptonButtonCancel.Click += new System.EventHandler(this.simpleButton2_Click);
             // 
             // frmSearchMaps
             // 
-            this.AcceptButton = this.simpleButton1;
+            this.AcceptButton = this.kryptonButtonOk;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.simpleButton2;
+            this.CancelButton = this.kryptonButtonCancel;
             this.ClientSize = new System.Drawing.Size(432, 238);
-            this.Controls.Add(this.simpleButton2);
-            this.Controls.Add(this.simpleButton1);
-            this.Controls.Add(this.groupControl1);
+            this.Controls.Add(this.kryptonButtonCancel);
+            this.Controls.Add(this.kryptonButtonOk);
+            this.Controls.Add(this.kryptonGroupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -151,28 +144,25 @@ namespace VAGSuite
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Search maps for value...";
-            ((System.ComponentModel.ISupportInitialize)(this.spinEdit1.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();
-            this.groupControl1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit1.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.checkEdit4.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.checkEdit3.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.checkEdit2.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.checkEdit1.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.kryptonGroupBox1.Panel)).EndInit();
+            this.kryptonGroupBox1.Panel.ResumeLayout(false);
+            this.kryptonGroupBox1.Panel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.kryptonGroupBox1)).EndInit();
+            this.kryptonGroupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private DevExpress.XtraEditors.SpinEdit spinEdit1;
-        private DevExpress.XtraEditors.GroupControl groupControl1;
-        private DevExpress.XtraEditors.CheckEdit checkEdit2;
-        private DevExpress.XtraEditors.CheckEdit checkEdit1;
-        private DevExpress.XtraEditors.SimpleButton simpleButton1;
-        private DevExpress.XtraEditors.SimpleButton simpleButton2;
-        private DevExpress.XtraEditors.TextEdit textEdit1;
-        private DevExpress.XtraEditors.CheckEdit checkEdit4;
-        private DevExpress.XtraEditors.CheckEdit checkEdit3;
+        private ComponentFactory.Krypton.Toolkit.KryptonNumericUpDown kryptonNumericUpDown1;
+        private ComponentFactory.Krypton.Toolkit.KryptonGroupBox kryptonGroupBox1;
+        private ComponentFactory.Krypton.Toolkit.KryptonCheckBox kryptonCheckBox2;
+        private ComponentFactory.Krypton.Toolkit.KryptonCheckBox kryptonCheckBox1;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton kryptonButtonOk;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton kryptonButtonCancel;
+        private ComponentFactory.Krypton.Toolkit.KryptonTextBox kryptonTextBox1;
+        private ComponentFactory.Krypton.Toolkit.KryptonCheckBox kryptonCheckBox4;
+        private ComponentFactory.Krypton.Toolkit.KryptonCheckBox kryptonCheckBox3;
     }
 }

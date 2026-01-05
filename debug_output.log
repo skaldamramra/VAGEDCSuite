@@ -1,0 +1,205 @@
+DEBUG: InitializeKryptonStatusBar called
+DEBUG: StatusStrip RenderMode: ManagerRenderMode
+DEBUG: StatusStrip BackColor: Color [A=255, R=30, G=30, B=30]
+DEBUG: StatusStrip Parent: frmMain
+DEBUG: StatusStrip Item Count: 9
+???? [DEBUG] InitializeSymbolGrid: Starting KryptonTreeView initialization...
+???? [DEBUG] InitializeSymbolGrid: Adding TreeView to pageSymbols container.
+Unknown map id: D5D4 len 0002 at address 0000088E
+Unknown map id: D5D4 len 0002 at address 000008E0
+Added 16 because of z axis 0004DBF6
+Added 16 because of z axis 0006DBF6
+???? [DEBUG] UpdateSymbolList: Building hierarchical tree...
+???? [DEBUG] UpdateSymbolList: Clearing existing nodes...
+???? [DEBUG] UpdateSymbolList: Processed 816 symbols. Expanding tree...
+???? [DEBUG] UpdateSymbolList: Ending update...
+???? [DEBUG] UpdateSymbolList: Tree built successfully.
+tdi41_chkfixed: 0 / 11
+tdi41_chkmatch: 8 / 11
+Checksum V4.1 matched
+???? [DEBUG] StartTableViewer: Attempting to open PID map - I amplification (ldwIRfakKL) [codeblock 2, manual] at 0x567AE
+MapViewerEx: Constructor started
+MapViewerEx: Initializing Phase 5 Components...
+Chart3DComponent: SetChartControl called
+MapViewerEx: nChartControl1 size: 864x264
+MapViewerEx: Phase 5 Components initialized.
+???? [DEBUG] MapViewerEx.ShowTable: Width=1, 16bit=True, Name=PID map - I amplification (ldwIRfakKL) [codeblock 2, manual]
+Chart3DComponent: LoadData called for map: PID map - I amplification (ldwIRfakKL) [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: PID map - I amplification (ldwIRfakKL) [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+???? [DEBUG] MapViewerEx.ShowTable: Data bound. Rows=16
+???? [DEBUG] StartTableViewer: Adding page Symbol: PID map - I amplification (ldwIRfakKL) [codeblock 2, manual] [audiA3vevedump2025] to Workspace...
+Chart3DComponent: OnGLLoad fired
+Chart3DComponent: Initializing OpenGL state...
+Chart3DComponent: OpenGL initialized successfully
+Chart3DComponent: Buffers Calculated - Vertices: 32, Indices: 90
+Chart3DComponent: Mesh bounds - Min: (-2.5, -4.6875, 0), Max: (2.5, 4.6875, 6), Center: (0, 0, 3)
+MapViewerEx: Load event fired
+???? [DEBUG] StartTableViewer: Page added and brought to front.
+Chart3DComponent: First Paint - BuffersInit: True, VertexCount: 90, Shader: 3
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+Chart3DComponent: LoadData called for map: PID map - I amplification (ldwIRfakKL) [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: PID map - I amplification (ldwIRfakKL) [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: Initializing OpenGL state...
+OpenGL Error at Init:MakeCurrent: OutOfMemory
+Chart3DComponent: OpenGL initialized successfully
+Chart3DComponent: Buffers Calculated - Vertices: 32, Indices: 90
+Chart3DComponent: Mesh bounds - Min: (-2.5, -4.6875, 0), Max: (2.5, 4.6875, 6), Center: (0, 0, 3)
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+OpenGL Error at MakeCurrent: OutOfMemory
+Chart3DComponent: RenderAxisLabels error: Attempted to divide by zero.
+???? [DEBUG] StartTableViewer: Attempting to open Boost target map [codeblock 2, manual] at 0x56926
+MapViewerEx: Constructor started
+MapViewerEx: Initializing Phase 5 Components...
+Chart3DComponent: SetChartControl called
+MapViewerEx: nChartControl1 size: 864x264
+MapViewerEx: Phase 5 Components initialized.
+???? [DEBUG] MapViewerEx.ShowTable: Width=10, 16bit=True, Name=Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData called for map: Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: Boost target map [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+Chart3DComponent: LoadData called for map: Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: Boost target map [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+Chart3DComponent: LoadData called for map: Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: Boost target map [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+Chart3DComponent: LoadData called for map: Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: Boost target map [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+Chart3DComponent: LoadData called for map: Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: Boost target map [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+Chart3DComponent: LoadData called for map: Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: Boost target map [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+Chart3DComponent: LoadData called for map: Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: Boost target map [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+Chart3DComponent: LoadData called for map: Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: Boost target map [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+Chart3DComponent: LoadData called for map: Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: Boost target map [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+Chart3DComponent: LoadData called for map: Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: Boost target map [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+???? [DEBUG] MapViewerEx.ShowTable: Data bound. Rows=16
+Chart3DComponent: LoadData called for map: Boost target map [codeblock 2, manual]
+Chart3DComponent: LoadData - Map: Boost target map [codeblock 2, manual], UpsideDown: True
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+Chart3DComponent: UpdateBuffers aborted - Handle not created
+Chart3DComponent: InitializeChart3D aborted - Handle not created
+???? [DEBUG] StartTableViewer: Adding page Symbol: Boost target map [codeblock 2, manual] [audiA3vevedump2025] to Workspace...
+Chart3DComponent: OnGLLoad fired
+Chart3DComponent: Initializing OpenGL state...
+Chart3DComponent: OpenGL initialized successfully
+Chart3DComponent: Buffers Calculated - Vertices: 160, Indices: 810
+Chart3DComponent: Mesh bounds - Min: (-4.5, -4.6875, 0), Max: (4.5, 4.6875, 6), Center: (0, 0, 3)
+MapViewerEx: Load event fired
+???? [DEBUG] StartTableViewer: Page added and brought to front.
+Chart3DComponent: First Paint - BuffersInit: True, VertexCount: 810, Shader: 3

@@ -5,11 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmSearchMaps : DevExpress.XtraEditors.XtraForm
+    public partial class frmSearchMaps : KryptonForm
     {
         public frmSearchMaps()
         {
@@ -32,14 +32,14 @@ namespace VAGSuite
         {
             get
             {
-                return checkEdit3.Checked;
+                return kryptonCheckBox3.Checked;
             }
         }
         public bool SearchForStringValues
         {
             get
             {
-                return checkEdit4.Checked;
+                return kryptonCheckBox4.Checked;
             }
         }
 
@@ -47,7 +47,7 @@ namespace VAGSuite
         {
             get
             {
-                return checkEdit1.Checked;
+                return kryptonCheckBox1.Checked;
             }
         }
 
@@ -55,7 +55,7 @@ namespace VAGSuite
         {
             get
             {
-                return checkEdit2.Checked;
+                return kryptonCheckBox2.Checked;
             }
         }
 
@@ -63,7 +63,7 @@ namespace VAGSuite
         {
             get
             {
-                return spinEdit1.Value;
+                return kryptonNumericUpDown1.Value;
             }
         }
 
@@ -71,7 +71,7 @@ namespace VAGSuite
         {
             get
             {
-                return textEdit1.Text;
+                return kryptonTextBox1.Text;
             }
         }
 

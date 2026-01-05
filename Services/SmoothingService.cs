@@ -1,8 +1,6 @@
 using System;
 using System.Data;
 using System.Windows.Forms;
-using DevExpress.XtraGrid.Views.Base;
-using DevExpress.XtraGrid.Views.Grid;
 using VAGSuite.Models;
 
 namespace VAGSuite.Services
@@ -63,14 +61,13 @@ namespace VAGSuite.Services
                 int max_row = 0;
                 int min_row = 0xFFFF;
                 
-                // Parse cell positions from GridCell objects (cells are DevExpress.XtraGrid.Views.Base.GridCell)
+                // Parse cell positions from DataGridViewCell objects
                 for (int i = 0; i < cells.Length; i++)
                 {
-                    if (cells[i] is GridCell)
+                    if (cells[i] is DataGridViewCell gc)
                     {
-                        GridCell gc = (GridCell)cells[i];
-                        int colindex = gc.Column.AbsoluteIndex;
-                        int rowhandle = gc.RowHandle;
+                        int colindex = gc.ColumnIndex;
+                        int rowhandle = gc.RowIndex;
                         
                         if (colindex > max_column) max_column = colindex;
                         if (colindex < min_column) min_column = colindex;
@@ -90,10 +87,9 @@ namespace VAGSuite.Services
                     
                     for (int q = 0; q < yaxisvalues.Length; q++)
                     {
-                        if (cells[q] is GridCell && yAxis != null)
+                        if (cells[q] is DataGridViewCell gc && yAxis != null)
                         {
-                            GridCell gc = (GridCell)cells[q];
-                            int rowHandle = gc.RowHandle;
+                            int rowHandle = gc.RowIndex;
                             if (rowHandle < yAxis.Length)
                             {
                                 yaxisvalues[q] = Convert.ToDouble(yAxis[yAxis.Length - min_row - q - 1]);
@@ -125,10 +121,9 @@ namespace VAGSuite.Services
                     
                     for (int q = 0; q < xaxisvalues.Length; q++)
                     {
-                        if (cells[q] is GridCell && xAxis != null)
+                        if (cells[q] is DataGridViewCell gc && xAxis != null)
                         {
-                            GridCell gc = (GridCell)cells[q];
-                            int colIndex = gc.Column.AbsoluteIndex;
+                            int colIndex = gc.ColumnIndex;
                             if (colIndex < xAxis.Length)
                             {
                                 xaxisvalues[q] = Convert.ToDouble(xAxis[xAxis.Length - min_column - q - 1]);
@@ -202,10 +197,9 @@ namespace VAGSuite.Services
                             // Find the cell at (min_row + tely, min_column + telx)
                             for (int i = 0; i < cells.Length; i++)
                             {
-                                if (cells[i] is GridCell)
+                                if (cells[i] is DataGridViewCell gc)
                                 {
-                                    GridCell gc = (GridCell)cells[i];
-                                    if (gc.RowHandle == min_row + tely && gc.Column.AbsoluteIndex == min_column + telx)
+                                    if (gc.RowIndex == min_row + tely && gc.ColumnIndex == min_column + telx)
                                     {
                                         SetCellValue(cells[i], (int)Math.Round(newvalue), gridView);
                                         break;
@@ -240,12 +234,12 @@ namespace VAGSuite.Services
 
                 for (int i = 0; i < cells.Length; i++)
                 {
-                    if (cells[i] is GridCell gc)
+                    if (cells[i] is DataGridViewCell gc)
                     {
-                        if (gc.Column.AbsoluteIndex > max_column) max_column = gc.Column.AbsoluteIndex;
-                        if (gc.Column.AbsoluteIndex < min_column) min_column = gc.Column.AbsoluteIndex;
-                        if (gc.RowHandle > max_row) max_row = gc.RowHandle;
-                        if (gc.RowHandle < min_row) min_row = gc.RowHandle;
+                        if (gc.ColumnIndex > max_column) max_column = gc.ColumnIndex;
+                        if (gc.ColumnIndex < min_column) min_column = gc.ColumnIndex;
+                        if (gc.RowIndex > max_row) max_row = gc.RowIndex;
+                        if (gc.RowIndex < min_row) min_row = gc.RowIndex;
                     }
                 }
 
@@ -323,7 +317,7 @@ namespace VAGSuite.Services
                             // Find the cell at (min_row + tely, min_column + telx)
                             for (int i = 0; i < cells.Length; i++)
                             {
-                                if (cells[i] is GridCell gc && gc.RowHandle == min_row + tely && gc.Column.AbsoluteIndex == min_column + telx)
+                                if (cells[i] is DataGridViewCell gc && gc.RowIndex == min_row + tely && gc.ColumnIndex == min_column + telx)
                                 {
                                     SetCellValue(cells[i], (int)Math.Round(newvalue), gridView);
                                     break;
@@ -346,13 +340,10 @@ namespace VAGSuite.Services
                 
             try
             {
-                // Handle GridCell objects from MapViewerEx
-                if (cell is GridCell && gridView is GridView)
+                // Handle DataGridViewCell objects from MapViewerEx
+                if (cell is DataGridViewCell gc && gridView is DataGridView gv)
                 {
-                    GridCell gc = (GridCell)cell;
-                    GridView gv = (GridView)gridView;
-                    
-                    object value = gv.GetRowCellValue(gc.RowHandle, gc.Column);
+                    object value = gv.Rows[gc.RowIndex].Cells[gc.ColumnIndex].Value;
                     return int.Parse(value.ToString());
                 }
                 return int.Parse(cell.ToString());
@@ -367,16 +358,13 @@ namespace VAGSuite.Services
         {
             try
             {
-                // Handle GridCell objects from MapViewerEx
-                if (cell is GridCell && gridView is GridView)
+                // Handle DataGridViewCell objects from MapViewerEx
+                if (cell is DataGridViewCell gc && gridView is DataGridView gv)
                 {
-                    GridCell gc = (GridCell)cell;
-                    GridView gv = (GridView)gridView;
-                    
                     // Determine format based on view type - use simple string format for now
                     string formattedValue = value.ToString();
                     
-                    gv.SetRowCellValue(gc.RowHandle, gc.Column, formattedValue);
+                    gv.Rows[gc.RowIndex].Cells[gc.ColumnIndex].Value = formattedValue;
                 }
             }
             catch (Exception ex)

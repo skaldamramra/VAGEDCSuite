@@ -5,11 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmProjectSelection : DevExpress.XtraEditors.XtraForm
+    public partial class frmProjectSelection : KryptonForm
     {
         public frmProjectSelection()
         {
@@ -31,7 +31,7 @@ namespace VAGSuite
         private void gridView1_DoubleClick(object sender, EventArgs e)
         {
             // selected row = ok
-            if (gridView1.SelectedRowsCount > 0)
+            if (gridControl1.SelectedRows.Count > 0)
             {
                 DialogResult = DialogResult.OK;
                 this.Close();
@@ -49,20 +49,19 @@ namespace VAGSuite
         public string GetProjectName()
         {
             string retval = string.Empty;
-            if (gridView1.SelectedRowsCount > 0)
+            if (gridControl1.SelectedRows.Count > 0)
             {
-                int[] rows = gridView1.GetSelectedRows();
-                if (rows.Length > 0)
+                DataGridViewRow row = gridControl1.SelectedRows[0];
+                if (row != null)
                 {
-                    DataRowView dv = (DataRowView)gridView1.GetRow(Convert.ToInt32(rows.GetValue(0)));
-                     if (dv != null)
-                     {
-                         //sh.Varname = dv.Row["SYMBOLNAME"].ToString();
-                         if (dv.Row["Projectname"] != DBNull.Value)
-                         {
-                             retval = dv.Row["Projectname"].ToString();
-                         }
-                     }
+                    DataRowView dv = (DataRowView)row.DataBoundItem;
+                    if (dv != null)
+                    {
+                        if (dv.Row["Projectname"] != DBNull.Value)
+                        {
+                            retval = dv.Row["Projectname"].ToString();
+                        }
+                    }
                 }
             }
             return retval;

@@ -5,12 +5,12 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 using System.IO;
 
 namespace VAGSuite
 {
-    public partial class frmPartnumberLookup : DevExpress.XtraEditors.XtraForm
+    public partial class frmPartnumberLookup : KryptonForm
     {
         private string m_fileNameToSave = string.Empty;
 
@@ -53,7 +53,7 @@ namespace VAGSuite
         private void ConvertPartNumber()
         {
             partNumberConverter pnc = new partNumberConverter();
-            ECUInfo ecuinfo = pnc.ConvertPartnumber(buttonEdit1.Text, 0);
+            ECUInfo ecuinfo = pnc.ConvertPartnumber(kryptonTextBoxPartNumber.Text, 0);
             
             lblCarModel.Text = "---";
             lblECUType.Text = "---";
@@ -79,7 +79,7 @@ namespace VAGSuite
                     lblRating.Text = "";
                 }
 
-                if (System.IO.File.Exists(Path.Combine(Application.StartupPath, "Binaries\\" + buttonEdit1.Text + ".BIN")))
+                if (System.IO.File.Exists(Path.Combine(Application.StartupPath, "Binaries\\" + kryptonTextBoxPartNumber.Text + ".BIN")))
                 {
                     simpleButton2.Enabled = true;
                     simpleButton3.Enabled = true;
@@ -98,7 +98,7 @@ namespace VAGSuite
             }
         }
 
-        private void buttonEdit1_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
+        private void buttonEdit1_ButtonClick(object sender, EventArgs e)
         {
             //ConvertPartNumber();
             frmPartNumberList pnl = new frmPartNumberList();
@@ -107,10 +107,10 @@ namespace VAGSuite
             {
                 if (pnl.Selectedpartnumber != string.Empty)
                 {
-                    buttonEdit1.Text = pnl.Selectedpartnumber;
+                    kryptonTextBoxPartNumber.Text = pnl.Selectedpartnumber;
                 }
             }
-            if (buttonEdit1.Text != "")
+            if (kryptonTextBoxPartNumber.Text != "")
             {
                 ConvertPartNumber();
             }
@@ -138,18 +138,18 @@ namespace VAGSuite
 
         internal void LookUpPartnumber(string p)
         {
-            buttonEdit1.Text = p;
+            kryptonTextBoxPartNumber.Text = p;
             ConvertPartNumber();
         }
 
         public string GetFileToOpen()
         {
             string retval = string.Empty;
-            if (buttonEdit1.Text != string.Empty)
+            if (kryptonTextBoxPartNumber.Text != string.Empty)
             {
-                if (System.IO.File.Exists(Path.Combine(Application.StartupPath, "Binaries\\" + buttonEdit1.Text + ".BIN")))
+                if (System.IO.File.Exists(Path.Combine(Application.StartupPath, "Binaries\\" + kryptonTextBoxPartNumber.Text + ".BIN")))
                 {
-                    retval = Path.Combine(Application.StartupPath, "Binaries\\" + buttonEdit1.Text + ".BIN");
+                    retval = Path.Combine(Application.StartupPath, "Binaries\\" + kryptonTextBoxPartNumber.Text + ".BIN");
                 }
             }
             return retval;

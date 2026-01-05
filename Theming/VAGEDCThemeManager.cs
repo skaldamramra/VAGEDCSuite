@@ -4,9 +4,6 @@ using System.Drawing.Text;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
-using DevExpress.XtraGrid;
-using DevExpress.XtraGrid.Views.Grid;
-using DevExpress.XtraBars.Ribbon;
 
 namespace VAGSuite.Theming
 {
@@ -243,26 +240,8 @@ namespace VAGSuite.Theming
         /// </summary>
         private void ResetControlAppearance(Control control)
         {
-            // Reset DevExpress GridControl
-            if (control is GridControl)
-            {
-                GridControl grid = (GridControl)control;
-                if (grid.MainView is GridView)
-                {
-                    GridView gridView = (GridView)grid.MainView;
-                    
-                    // Reset all appearance properties to defaults
-                    gridView.Appearance.Row.Reset();
-                    gridView.Appearance.SelectedRow.Reset();
-                    gridView.Appearance.FocusedRow.Reset();
-                    gridView.Appearance.HeaderPanel.Reset();
-                    gridView.Appearance.GroupRow.Reset();
-                    gridView.Appearance.OddRow.Reset();
-                    gridView.OptionsView.EnableAppearanceOddRow = false;
-                }
-            }
             // Reset standard controls
-            else if (control is Panel || control is GroupBox || control is Label)
+            if (control is Panel || control is GroupBox || control is Label)
             {
                 control.BackColor = Color.Empty;
                 control.ForeColor = Color.Empty;
@@ -306,9 +285,8 @@ namespace VAGSuite.Theming
             form.ForeColor = _currentTheme.TextPrimary;
             form.Font = GetCustomFont(9f, FontStyle.Regular);
 
-            // Apply global DevExpress font
+            // Apply global font
             Font customFont = GetCustomFont(9f, FontStyle.Regular);
-            DevExpress.Utils.AppearanceObject.DefaultFont = customFont;
 
             if (form is ComponentFactory.Krypton.Toolkit.KryptonForm kForm)
             {
@@ -432,18 +410,8 @@ namespace VAGSuite.Theming
                 kGroup.StateCommon.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
             }
 
-            // DevExpress RibbonControl
-            if (control is RibbonControl)
-            {
-                ApplyThemeToRibbon((RibbonControl)control);
-            }
-            // DevExpress GridControl
-            else if (control is GridControl)
-            {
-                ApplyThemeToGrid((GridControl)control);
-            }
             // Standard Panel
-            else if (control is Panel && !(control is ComponentFactory.Krypton.Toolkit.KryptonPanel))
+            if (control is Panel && !(control is ComponentFactory.Krypton.Toolkit.KryptonPanel))
             {
                 Panel panel = (Panel)control;
                 panel.BackColor = _currentTheme.PanelBackground;
@@ -507,92 +475,6 @@ namespace VAGSuite.Theming
             }
         }
         
-        /// <summary>
-        /// Applies theme to DevExpress RibbonControl
-        /// </summary>
-        private void ApplyThemeToController(DevExpress.XtraBars.BarAndDockingController controller)
-        {
-            Font customFont = GetCustomFont(9f, FontStyle.Regular);
-            
-            // Apply to Bars (Menus)
-            controller.AppearancesBar.Bar.Font = customFont;
-            controller.AppearancesBar.ItemsFont = customFont;
-            
-            // Apply to Ribbon
-            controller.AppearancesRibbon.Item.Font = customFont;
-            controller.AppearancesRibbon.PageGroupCaption.Font = customFont;
-            controller.AppearancesRibbon.PageHeader.Font = customFont;
-        }
-
-        private void ApplyThemeToRibbon(RibbonControl ribbon)
-        {
-            Font customFont = GetCustomFont(9f, FontStyle.Regular);
-            
-            // Use reflection to set appearances to avoid compile-time errors with version-specific property names
-            string[] appearanceNames = { "AppearancePageHeader", "AppearancePageGroupCaption", "AppearanceItem", "AppearanceMenuCaption" };
-            foreach (string name in appearanceNames)
-            {
-                try
-                {
-                    PropertyInfo prop = ribbon.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
-                    if (prop != null)
-                    {
-                        object appearance = prop.GetValue(ribbon, null);
-                        if (appearance != null)
-                        {
-                            PropertyInfo fontProp = appearance.GetType().GetProperty("Font", BindingFlags.Instance | BindingFlags.Public);
-                            fontProp?.SetValue(appearance, customFont, null);
-                        }
-                    }
-                }
-                catch { }
-            }
-        }
-        
-        /// <summary>
-        /// Applies theme to DevExpress GridControl
-        /// </summary>
-        private void ApplyThemeToGrid(GridControl grid)
-        {
-            if (grid.MainView is GridView gridView)
-            {
-                // Row appearance settings
-                gridView.Appearance.Row.BackColor = _currentTheme.GridBackground;
-                gridView.Appearance.Row.ForeColor = _currentTheme.TextPrimary;
-                gridView.Appearance.Row.Font = _currentTheme.GridCellFont;
-                
-                gridView.Appearance.SelectedRow.BackColor = _currentTheme.GridSelection;
-                gridView.Appearance.SelectedRow.ForeColor = Color.White;
-                
-                gridView.Appearance.FocusedRow.BackColor = _currentTheme.GridSelection;
-                gridView.Appearance.FocusedRow.ForeColor = Color.White;
-                
-                // Header appearance with improved typography
-                gridView.Appearance.HeaderPanel.BackColor = _currentTheme.GridHeaderBackground;
-                gridView.Appearance.HeaderPanel.ForeColor = _currentTheme.GridHeaderText;
-                gridView.Appearance.HeaderPanel.Font = _currentTheme.GridHeaderFont;
-                gridView.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-                
-                gridView.Appearance.GroupRow.BackColor = _currentTheme.GridHeaderBackground;
-                gridView.Appearance.GroupRow.ForeColor = _currentTheme.TextPrimary;
-                
-                // Enable alternating row colors
-                gridView.OptionsView.EnableAppearanceOddRow = true;
-                gridView.Appearance.OddRow.BackColor = _currentTheme.GridAlternateRow;
-                
-                // Hover state appearance
-                gridView.Appearance.HideSelectionRow.BackColor = _currentTheme.GridHoverRow;
-                gridView.Appearance.HideSelectionRow.ForeColor = _currentTheme.TextPrimary;
-                
-                // Reduce border opacity for subtle appearance
-                gridView.Appearance.VertLine.BackColor = Color.FromArgb(51, _currentTheme.GridBorder);  // 20% opacity
-                gridView.Appearance.HorzLine.BackColor = Color.FromArgb(51, _currentTheme.GridBorder);  // 20% opacity
-                
-                // Selected cell with navy border (2px)
-                gridView.Appearance.FocusedCell.BackColor = Color.Transparent;
-                gridView.Appearance.FocusedCell.BorderColor = _currentTheme.AccentPrimary;
-            }
-        }
         
         /// <summary>
         /// Gets a ToolStripProfessionalRenderer configured for the current theme

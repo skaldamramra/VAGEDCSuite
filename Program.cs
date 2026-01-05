@@ -16,8 +16,7 @@ namespace VAGSuite
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            DevExpress.UserSkins.OfficeSkins.Register();
-            DevExpress.UserSkins.BonusSkins.Register();
+            // DevExpress skins removed for Krypton migration
             
             // Initialize VAGEDC Dark Theme for Krypton
             var themeManager = VAGEDCThemeManager.Instance;
