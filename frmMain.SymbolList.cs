@@ -46,6 +46,29 @@ namespace VAGSuite
             this.tvSymbols.BringToFront();
         }
 
+        /// <summary>
+        /// Suspends the tracking timer to improve performance during docking/floating operations.
+        /// Call this before starting any operation that may cause layout recalculations.
+        /// </summary>
+        public void SuspendTrackingTimer()
+        {
+            if (trackingTimer != null && trackingTimer.Enabled)
+            {
+                trackingTimer.Stop();
+            }
+        }
+
+        /// <summary>
+        /// Resumes the tracking timer after docking/floating operations complete.
+        /// </summary>
+        public void ResumeTrackingTimer()
+        {
+            if (trackingTimer != null && !trackingTimer.Enabled)
+            {
+                trackingTimer.Start();
+            }
+        }
+
         public void UpdateSymbolList(System.Collections.IEnumerable symbols)
         {
             Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: Building hierarchical tree...");
@@ -63,9 +86,15 @@ namespace VAGSuite
 
             try
             {
+                // Suspend tracking timer during tree update to avoid interference
+                SuspendTrackingTimer();
+
                 tvSymbols.BeginUpdate();
                 Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: Clearing existing nodes...");
                 tvSymbols.Nodes.Clear();
+
+                // Pre-compute format string outside the loop for better performance
+                string addressFormat = m_appSettings.ShowAddressesInHex ? "X6" : string.Empty;
 
                 // First pass: collect all symbols grouped by category and subcategory
                 var categorySubcatMap = new Dictionary<string, Dictionary<string, List<SymbolHelper>>>();
@@ -79,17 +108,21 @@ namespace VAGSuite
                         string catName = string.IsNullOrEmpty(sh.Category) ? "Undocumented" : sh.Category;
                         string subCatName = string.IsNullOrEmpty(sh.Subcategory) ? "General" : sh.Subcategory;
 
-                        if (!categorySubcatMap.ContainsKey(catName))
+                        Dictionary<string, List<SymbolHelper>> subcatMap;
+                        if (!categorySubcatMap.TryGetValue(catName, out subcatMap))
                         {
-                            categorySubcatMap[catName] = new Dictionary<string, List<SymbolHelper>>();
+                            subcatMap = new Dictionary<string, List<SymbolHelper>>();
+                            categorySubcatMap[catName] = subcatMap;
                         }
 
-                        if (!categorySubcatMap[catName].ContainsKey(subCatName))
+                        List<SymbolHelper> symbolList;
+                        if (!subcatMap.TryGetValue(subCatName, out symbolList))
                         {
-                            categorySubcatMap[catName][subCatName] = new List<SymbolHelper>();
+                            symbolList = new List<SymbolHelper>();
+                            subcatMap[subCatName] = symbolList;
                         }
 
-                        categorySubcatMap[catName][subCatName].Add(sh);
+                        symbolList.Add(sh);
                     }
                     catch (Exception ex)
                     {
@@ -106,11 +139,14 @@ namespace VAGSuite
                     return string.Compare(a, b, StringComparison.OrdinalIgnoreCase);
                 });
 
+                // Pre-create bold font once
+                Font boldFont = new Font(tvSymbols.Font, FontStyle.Bold);
+
                 // Second pass: build tree nodes in sorted category order
                 foreach (string catName in sortedCategories)
                 {
                     var catNode = new TreeNode(catName);
-                    catNode.NodeFont = new Font(tvSymbols.Font, FontStyle.Bold);
+                    catNode.NodeFont = boldFont;
                     tvSymbols.Nodes.Add(catNode);
 
                     // Sort subcategories alphabetically
@@ -124,8 +160,11 @@ namespace VAGSuite
 
                         foreach (SymbolHelper sh in categorySubcatMap[catName][subCatName])
                         {
-                            string addressString = m_appSettings.ShowAddressesInHex ? sh.Flash_start_address.ToString("X6") : sh.Flash_start_address.ToString();
-                            var symbolNode = new TreeNode(string.Format("{0} [{1}]", sh.Varname, addressString));
+                            // Use cached format string for address formatting
+                            string addressString = !string.IsNullOrEmpty(addressFormat)
+                                ? sh.Flash_start_address.ToString(addressFormat)
+                                : sh.Flash_start_address.ToString();
+                            var symbolNode = new TreeNode(sh.Varname + " [" + addressString + "]");
                             symbolNode.Tag = sh;
                             subNode.Nodes.Add(symbolNode);
                         }
@@ -133,15 +172,29 @@ namespace VAGSuite
                 }
 
                 Console.WriteLine(string.Format("🧑🔬 [DEBUG] UpdateSymbolList: Processed {0} symbols. Expanding tree...", symbolCount));
-                tvSymbols.ExpandAll();
+                
+                // OPTIMIZATION: Only expand categories, not all subcategories
+                // This significantly reduces layout calculations while still showing structure
+                foreach (TreeNode catNode in tvSymbols.Nodes)
+                {
+                    catNode.Expand();
+                }
+                
                 Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: Ending update...");
                 tvSymbols.EndUpdate();
+
+                // Resume tracking timer after tree update is complete
+                ResumeTrackingTimer();
+                
                 Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: Tree built successfully.");
             }
             catch (Exception ex)
             {
                 Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: CRITICAL ERROR: " + ex.Message);
                 Console.WriteLine("🧑🔬 [DEBUG] StackTrace: " + ex.StackTrace);
+                
+                // Ensure timer is resumed even on error
+                ResumeTrackingTimer();
             }
         }
 
