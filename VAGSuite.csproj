@@ -589,7 +589,9 @@
     <Compile Include="Tests\MapViewerExIntegrationTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="vagedc.ico" />
+    <Content Include="vagedc.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Theming\SourceSansPro\SourceSansPro-Black.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

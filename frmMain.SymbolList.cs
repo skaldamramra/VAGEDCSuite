@@ -64,7 +64,8 @@ namespace VAGSuite
                 Console.WriteLine("🧑🔬 [DEBUG] UpdateSymbolList: Clearing existing nodes...");
                 tvSymbols.Nodes.Clear();
 
-                var categories = new Dictionary<string, TreeNode>();
+                // First pass: collect all symbols grouped by category and subcategory
+                var categorySubcatMap = new Dictionary<string, Dictionary<string, List<SymbolHelper>>>();
                 int symbolCount = 0;
 
                 foreach (SymbolHelper sh in symbols)
@@ -75,40 +76,56 @@ namespace VAGSuite
                         string catName = string.IsNullOrEmpty(sh.Category) ? "Undocumented" : sh.Category;
                         string subCatName = string.IsNullOrEmpty(sh.Subcategory) ? "General" : sh.Subcategory;
 
-                        if (!categories.ContainsKey(catName))
+                        if (!categorySubcatMap.ContainsKey(catName))
                         {
-                            var catNode = new TreeNode(catName);
-                            catNode.NodeFont = new Font(tvSymbols.Font, FontStyle.Bold);
-                            tvSymbols.Nodes.Add(catNode);
-                            categories.Add(catName, catNode);
+                            categorySubcatMap[catName] = new Dictionary<string, List<SymbolHelper>>();
                         }
 
-                        TreeNode parentNode = categories[catName];
-                        TreeNode subNode = null;
-
-                        foreach (TreeNode node in parentNode.Nodes)
+                        if (!categorySubcatMap[catName].ContainsKey(subCatName))
                         {
-                            if (node.Text == subCatName)
-                            {
-                                subNode = node;
-                                break;
-                            }
+                            categorySubcatMap[catName][subCatName] = new List<SymbolHelper>();
                         }
 
-                        if (subNode == null)
-                        {
-                            subNode = new TreeNode(subCatName);
-                            parentNode.Nodes.Add(subNode);
-                        }
-
-                        string addressString = m_appSettings.ShowAddressesInHex ? sh.Flash_start_address.ToString("X6") : sh.Flash_start_address.ToString();
-                        var symbolNode = new TreeNode(string.Format("{0} [{1}]", sh.Varname, addressString));
-                        symbolNode.Tag = sh;
-                        subNode.Nodes.Add(symbolNode);
+                        categorySubcatMap[catName][subCatName].Add(sh);
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(string.Format("🧑🔬 [DEBUG] UpdateSymbolList: Error processing symbol {0}: {1}", symbolCount, ex.Message));
+                    }
+                }
+
+                // Sort categories: "Detected maps" first, then others alphabetically
+                var sortedCategories = new List<string>(categorySubcatMap.Keys);
+                sortedCategories.Sort((a, b) =>
+                {
+                    if (a == "Detected maps") return -1;
+                    if (b == "Detected maps") return 1;
+                    return string.Compare(a, b, StringComparison.OrdinalIgnoreCase);
+                });
+
+                // Second pass: build tree nodes in sorted category order
+                foreach (string catName in sortedCategories)
+                {
+                    var catNode = new TreeNode(catName);
+                    catNode.NodeFont = new Font(tvSymbols.Font, FontStyle.Bold);
+                    tvSymbols.Nodes.Add(catNode);
+
+                    // Sort subcategories alphabetically
+                    var sortedSubcats = new List<string>(categorySubcatMap[catName].Keys);
+                    sortedSubcats.Sort(StringComparer.OrdinalIgnoreCase);
+
+                    foreach (string subCatName in sortedSubcats)
+                    {
+                        var subNode = new TreeNode(subCatName);
+                        catNode.Nodes.Add(subNode);
+
+                        foreach (SymbolHelper sh in categorySubcatMap[catName][subCatName])
+                        {
+                            string addressString = m_appSettings.ShowAddressesInHex ? sh.Flash_start_address.ToString("X6") : sh.Flash_start_address.ToString();
+                            var symbolNode = new TreeNode(string.Format("{0} [{1}]", sh.Varname, addressString));
+                            symbolNode.Tag = sh;
+                            subNode.Nodes.Add(symbolNode);
+                        }
                     }
                 }
 
