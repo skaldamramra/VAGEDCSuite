@@ -104,12 +104,13 @@ namespace VAGSuite
         public void SetFilterMode(bool IsHexMode)
         {
             string format = IsHexMode ? "X6" : "";
-            gridColumn2.DefaultCellStyle.Format = format;
+            // Flash address (gridColumn3) should show in hex/dec based on setting
             gridColumn3.DefaultCellStyle.Format = format;
-            gridColumn4.DefaultCellStyle.Format = format;
-            gridColumn5.DefaultCellStyle.Format = format;
-            gridColumn12.DefaultCellStyle.Format = format;
-            gridColumn13.DefaultCellStyle.Format = format;
+            // Length columns should always display in decimal (no formatting)
+            gridColumn4.DefaultCellStyle.Format = "";
+            gridColumn5.DefaultCellStyle.Format = "";
+            // SRAM address (gridColumn2) - optional, can be hidden or shown
+            gridColumn2.DefaultCellStyle.Format = format;
         }
 
 
@@ -180,6 +181,45 @@ namespace VAGSuite
         public void OpenGridViewGroups(object ctrl, int groupleveltoexpand)
         {
             // ADGV does not support grouping in the same way as XtraGrid
+        }
+
+        /// <summary>
+        /// Sorts the grid data so that known maps (non-empty category) appear first
+        /// </summary>
+        public void SortByCategory()
+        {
+            if (gridControl1.DataSource is DataTable dt)
+            {
+                // Create a DataView and sort by CATEGORYNAME (empty strings last)
+                DataView dv = new DataView(dt);
+                dv.Sort = "CATEGORYNAME ASC";
+                
+                // Reorder rows: known maps first, then unknown
+                DataTable sortedDt = dv.ToTable();
+                
+                // Move rows with non-empty category to top
+                DataTable resultDt = dt.Clone();
+                
+                // First add rows with non-empty category
+                foreach (DataRow row in sortedDt.Rows)
+                {
+                    if (!string.IsNullOrEmpty(row["CATEGORYNAME"]?.ToString()))
+                    {
+                        resultDt.ImportRow(row);
+                    }
+                }
+                
+                // Then add rows with empty category
+                foreach (DataRow row in sortedDt.Rows)
+                {
+                    if (string.IsNullOrEmpty(row["CATEGORYNAME"]?.ToString()))
+                    {
+                        resultDt.ImportRow(row);
+                    }
+                }
+                
+                gridControl1.DataSource = resultDt;
+            }
         }
 
         private void StartTableViewer()

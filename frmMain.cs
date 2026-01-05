@@ -705,6 +705,7 @@ namespace VAGSuite
                     tabdet.CompareFilename = filename;
                     tabdet.OpenGridViewGroups(tabdet.gridControl1, 1);
                     tabdet.gridControl1.DataSource = dt.Copy();
+                    tabdet.SortByCategory(); // Sort so known maps (non-empty category) appear first
                 }
                 catch (Exception E)
                 {

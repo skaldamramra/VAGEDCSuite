@@ -59,21 +59,22 @@ namespace VAGSuite
             this.gridControl1.AllowUserToAddRows = false;
             this.gridControl1.AllowUserToDeleteRows = false;
             this.gridControl1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            // Columns reordered: Flash address first, then Map, SRAM address, Length(bytes), Length(values), Description, etc.
             this.gridControl1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.gridColumn1,
-            this.gridColumn2,
-            this.gridColumn3,
-            this.gridColumn4,
-            this.gridColumn5,
-            this.gridColumn6,
-            this.gridColumn7,
-            this.gridColumn8,
-            this.gridColumn9,
-            this.gridColumn10,
-            this.gridColumn11,
-            this.gridColumn12,
-            this.gridColumn13,
-            this.gridColumn14,
+            this.gridColumn3,  // Flash address - now first
+            this.gridColumn1,  // Map (renamed from Symbol)
+            this.gridColumn2,  // SRAM address
+            this.gridColumn4,  // Length (bytes)
+            this.gridColumn5,  // Length (values)
+            this.gridColumn6,  // Description
+            this.gridColumn7,  // % Different
+            this.gridColumn8,  // Values Different
+            this.gridColumn9,  // Avg Difference
+            this.gridColumn10, // Category
+            this.gridColumn11, // Subcategory
+            this.gridColumn12, // Symbol #1 (hidden)
+            this.gridColumn13, // Symbol #2 (hidden)
+            this.gridColumn14, // User Description (hidden)
             this.gcMissingInOriFile,
             this.gcMissingInCompareFile});
             this.gridControl1.ContextMenuStrip = this.contextMenuStrip1;
@@ -120,49 +121,50 @@ namespace VAGSuite
             this.saveLayoutToolStripMenuItem.Text = "Save layout";
             this.saveLayoutToolStripMenuItem.Click += new System.EventHandler(this.saveLayoutToolStripMenuItem_Click);
             // 
-            // gridColumn1
-            // 
-            this.gridColumn1.HeaderText = "Symbol";
-            this.gridColumn1.Name = "gridColumn1";
-            this.gridColumn1.ReadOnly = true;
-            this.gridColumn1.DataPropertyName = "SYMBOLNAME";
-            this.gridColumn1.Width = 300;
-            // 
-            // gridColumn2
-            // 
-            this.gridColumn2.HeaderText = "SRAM address";
-            this.gridColumn2.Name = "gridColumn2";
-            this.gridColumn2.ReadOnly = true;
-            this.gridColumn2.DataPropertyName = "SRAMADDRESS";
-            // 
-            // gridColumn3
-            // 
+            // gridColumn3 (Flash address - now first column)
+            //
             this.gridColumn3.HeaderText = "Flash address";
             this.gridColumn3.Name = "gridColumn3";
             this.gridColumn3.ReadOnly = true;
             this.gridColumn3.DataPropertyName = "FLASHADDRESS";
-            // 
+            //
+            // gridColumn1 (renamed from Symbol to Map)
+            //
+            this.gridColumn1.HeaderText = "Map";
+            this.gridColumn1.Name = "gridColumn1";
+            this.gridColumn1.ReadOnly = true;
+            this.gridColumn1.DataPropertyName = "SYMBOLNAME";
+            this.gridColumn1.Width = 300;
+            //
+            // gridColumn2
+            //
+            this.gridColumn2.HeaderText = "SRAM address";
+            this.gridColumn2.Name = "gridColumn2";
+            this.gridColumn2.ReadOnly = true;
+            this.gridColumn2.DataPropertyName = "SRAMADDRESS";
+            //
             // gridColumn4
-            // 
+            //
             this.gridColumn4.HeaderText = "Length (bytes)";
             this.gridColumn4.Name = "gridColumn4";
             this.gridColumn4.ReadOnly = true;
             this.gridColumn4.DataPropertyName = "LENGTHBYTES";
-            // 
+            //
             // gridColumn5
-            // 
+            //
             this.gridColumn5.HeaderText = "Length (values)";
             this.gridColumn5.Name = "gridColumn5";
             this.gridColumn5.ReadOnly = true;
             this.gridColumn5.DataPropertyName = "LENGTHVALUES";
-            // 
-            // gridColumn6
-            // 
+            //
+            // gridColumn6 (Description - hidden as redundant with Map column)
+            //
             this.gridColumn6.HeaderText = "Description";
             this.gridColumn6.Name = "gridColumn6";
             this.gridColumn6.ReadOnly = true;
             this.gridColumn6.DataPropertyName = "DESCRIPTION";
             this.gridColumn6.Width = 200;
+            this.gridColumn6.Visible = false;
             // 
             // gridColumn7
             // 
@@ -185,40 +187,45 @@ namespace VAGSuite
             this.gridColumn9.ReadOnly = true;
             this.gridColumn9.DataPropertyName = "DIFFAVERAGE";
             // 
-            // gridColumn10
-            // 
+            // gridColumn10 (Category - now visible)
+            //
             this.gridColumn10.HeaderText = "Category";
             this.gridColumn10.Name = "gridColumn10";
             this.gridColumn10.ReadOnly = true;
             this.gridColumn10.DataPropertyName = "CATEGORYNAME";
-            // 
-            // gridColumn11
-            // 
+            this.gridColumn10.Visible = true;
+            //
+            // gridColumn11 (Subcategory - now visible)
+            //
             this.gridColumn11.HeaderText = "Subcategory";
             this.gridColumn11.Name = "gridColumn11";
             this.gridColumn11.ReadOnly = true;
             this.gridColumn11.DataPropertyName = "SUBCATEGORYNAME";
-            // 
-            // gridColumn12
-            // 
+            this.gridColumn11.Visible = true;
+            //
+            // gridColumn12 (Symbol #1 - hidden as redundant)
+            //
             this.gridColumn12.HeaderText = "Symbol #1";
             this.gridColumn12.Name = "gridColumn12";
             this.gridColumn12.ReadOnly = true;
             this.gridColumn12.DataPropertyName = "SymbolNumber1";
-            // 
-            // gridColumn13
-            // 
+            this.gridColumn12.Visible = false;
+            //
+            // gridColumn13 (Symbol #2 - hidden as redundant)
+            //
             this.gridColumn13.HeaderText = "Symbol #2";
             this.gridColumn13.Name = "gridColumn13";
             this.gridColumn13.ReadOnly = true;
             this.gridColumn13.DataPropertyName = "SymbolNumber2";
-            // 
-            // gridColumn14
-            // 
+            this.gridColumn13.Visible = false;
+            //
+            // gridColumn14 (User Description - hidden as redundant)
+            //
             this.gridColumn14.HeaderText = "User Description";
             this.gridColumn14.Name = "gridColumn14";
             this.gridColumn14.ReadOnly = true;
             this.gridColumn14.DataPropertyName = "Userdescription";
+            this.gridColumn14.Visible = false;
             // 
             // gcMissingInOriFile
             // 

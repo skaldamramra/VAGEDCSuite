@@ -47,7 +47,7 @@ namespace VAGSuite.Services
             dt.Columns.Add("LENGTHBYTES", typeof(System.Int32));
             dt.Columns.Add("LENGTHVALUES", typeof(System.Int32));
             dt.Columns.Add("DESCRIPTION");
-            dt.Columns.Add("ISCHANGED", typeof(System.Boolean));
+            dt.Columns.Add("MODIFIED", typeof(System.Boolean)); // Renamed from ISCHANGED
             dt.Columns.Add("CATEGORY", typeof(System.Int32));
             dt.Columns.Add("DIFFPERCENTAGE", typeof(System.Double));
             dt.Columns.Add("DIFFABSOLUTE", typeof(System.Int32));
@@ -71,16 +71,18 @@ namespace VAGSuite.Services
                     int diffabs = 0;
                     double diffavg = 0;
                     
-                    if (!CompareSymbolToCurrentFile(sh.Varname, 
-                        (int)sh.Flash_start_address, sh.Length, filename, 
+                    if (!CompareSymbolToCurrentFile(sh.Varname,
+                        (int)sh.Flash_start_address, sh.Length, filename,
                         out diffperc, out diffabs, out diffavg, sh.Correction))
                     {
-                        string category = "";
+                        // Populate category and subcategory from SymbolHelper
+                        string categoryName = sh.Category ?? "";
+                        string subcategoryName = sh.Subcategory ?? "";
                         
-                        dt.Rows.Add(sh.Varname, sh.Start_address, 
-                            sh.Flash_start_address, sh.Length, sh.Length, 
-                            sh.Varname, false, 0, diffperc, diffabs, diffavg, 
-                            category, "", sh.Symbol_number, sh.Symbol_number, 
+                        dt.Rows.Add(sh.Varname, sh.Start_address,
+                            sh.Flash_start_address, sh.Length, sh.Length,
+                            sh.Varname, false, 0, diffperc, diffabs, diffavg,
+                            categoryName, subcategoryName, sh.Symbol_number, sh.Symbol_number,
                             "", false, false, sh.CodeBlock, sh.CodeBlock);
                     }
                 }

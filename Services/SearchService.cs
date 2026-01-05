@@ -135,7 +135,7 @@ namespace VAGSuite.Services
                 dt.Columns.Add("LENGTHBYTES", typeof(System.Int32));
                 dt.Columns.Add("LENGTHVALUES", typeof(System.Int32));
                 dt.Columns.Add("DESCRIPTION");
-                dt.Columns.Add("ISCHANGED", typeof(System.Boolean));
+                dt.Columns.Add("MODIFIED", typeof(System.Boolean)); // Renamed from ISCHANGED
                 dt.Columns.Add("CATEGORY"); //0
                 dt.Columns.Add("DIFFPERCENTAGE", typeof(System.Double));
                 dt.Columns.Add("DIFFABSOLUTE", typeof(System.Int32));
@@ -162,7 +162,10 @@ namespace VAGSuite.Services
                             Console.WriteLine("Failed to assign category to symbol: " + shfound.Varname + " err: " + cE.Message);
                         }
                     }
-                    dt.Rows.Add(shfound.Varname, shfound.Start_address, shfound.Flash_start_address, shfound.Length, shfound.Length, helptext, false, 0, 0, 0, 0, shfound.Category, "", shfound.Symbol_number, shfound.Symbol_number, shfound.CodeBlock, shfound.CodeBlock);
+                    // Populate category and subcategory from SymbolHelper
+                    string categoryName = shfound.Category ?? "";
+                    string subcategoryName = shfound.Subcategory ?? "";
+                    dt.Rows.Add(shfound.Varname, shfound.Start_address, shfound.Flash_start_address, shfound.Length, shfound.Length, helptext, false, 0, 0, 0, 0, categoryName, subcategoryName, shfound.Symbol_number, shfound.Symbol_number, shfound.CodeBlock, shfound.CodeBlock);
                 }
             }
 
@@ -202,6 +205,7 @@ namespace VAGSuite.Services
                 tabdet.CompareSymbolCollection = resultCollection;
                 tabdet.OpenGridViewGroups(tabdet.gridControl1, 1);
                 tabdet.gridControl1.DataSource = dt.Copy();
+                tabdet.SortByCategory(); // Sort so known maps (non-empty category) appear first
 
                 _kryptonDockingManager.AddDockspace("Control", DockingEdge.Left, new KryptonPage[] { page });
             }
