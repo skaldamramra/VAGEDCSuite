@@ -701,8 +701,8 @@ namespace VAGSuite
                     tabdet.OriginalSymbolCollection = Tools.Instance.m_symbols;
                     tabdet.OriginalFilename = Tools.Instance.m_currentfile;
                     tabdet.CompareFilename = filename;
-                    // tabdet.OpenGridViewGroups(tabdet.gridControl1, 1);
-                    // tabdet.gridControl1.DataSource = dt.Copy();
+                    tabdet.OpenGridViewGroups(tabdet.gridControl1, 1);
+                    tabdet.gridControl1.DataSource = dt.Copy();
                 }
                 catch (Exception E)
                 {
