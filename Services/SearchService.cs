@@ -189,6 +189,14 @@ namespace VAGSuite.Services
                 page.Text = title;
                 page.TextTitle = title;
                 page.UniqueName = "SearchResults_" + Guid.NewGuid().ToString("N");
+                
+                // Set flags to enable window position dropdown menu (float, dock, tabbed document, auto hide, close)
+                page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
+                                  KryptonPageFlags.DockingAllowFloating |
+                                  KryptonPageFlags.DockingAllowAutoHidden |
+                                  KryptonPageFlags.DockingAllowClose |
+                                  KryptonPageFlags.DockingAllowDropDown);
+                
                 page.Controls.Add(tabdet);
 
                 tabdet.CompareSymbolCollection = resultCollection;

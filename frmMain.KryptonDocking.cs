@@ -61,6 +61,13 @@ namespace VAGSuite
             pageSymbols.UniqueName = "SymbolsPage";
             pageSymbols.ImageSmall = GetResourceImage("vagedc.ico");
             
+            // Set flags to enable window position dropdown menu (float, dock, tabbed document, auto hide, close)
+            pageSymbols.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
+                                      KryptonPageFlags.DockingAllowFloating |
+                                      KryptonPageFlags.DockingAllowAutoHidden |
+                                      KryptonPageFlags.DockingAllowClose |
+                                      KryptonPageFlags.DockingAllowDropDown);
+            
             // Note: The new AdvancedDataGridView (adgvSymbols) is added to this page
             // during InitializeSymbolGrid() in frmMain.SymbolList.cs
 
@@ -145,7 +152,8 @@ namespace VAGSuite
             page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
                               KryptonPageFlags.DockingAllowFloating |
                               KryptonPageFlags.DockingAllowAutoHidden |
-                              KryptonPageFlags.DockingAllowClose);
+                              KryptonPageFlags.DockingAllowClose |
+                              KryptonPageFlags.DockingAllowDropDown);
             
             control.Dock = DockStyle.Fill;
             page.Controls.Add(control);

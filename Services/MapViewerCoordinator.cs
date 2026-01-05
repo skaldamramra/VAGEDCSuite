@@ -170,6 +170,13 @@ namespace VAGSuite.Services
             page.Tag = parameters.Filename;
             page.Text = $"Symbol: {viewer.Map_name} [{Path.GetFileName(parameters.Filename)}]";
             page.UniqueName = "SymbolViewer_" + viewer.Map_name + "_" + Guid.NewGuid().ToString("N");
+            
+            // Set flags to enable window position dropdown menu (float, dock, tabbed document, auto hide, close)
+            page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
+                              KryptonPageFlags.DockingAllowFloating |
+                              KryptonPageFlags.DockingAllowAutoHidden |
+                              KryptonPageFlags.DockingAllowClose |
+                              KryptonPageFlags.DockingAllowDropDown);
 
             // Set width based on columns
             int width = CalculatePanelWidth(viewer.X_axisvalues.Length);

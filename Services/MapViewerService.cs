@@ -125,7 +125,8 @@ namespace VAGSuite.Services
                         page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
                                           KryptonPageFlags.DockingAllowFloating |
                                           KryptonPageFlags.DockingAllowAutoHidden |
-                                          KryptonPageFlags.DockingAllowClose);
+                                          KryptonPageFlags.DockingAllowClose |
+                                          KryptonPageFlags.DockingAllowDropDown);
                         tabdet.Dock = DockStyle.Fill;
                         page.Controls.Add(tabdet);
                         
@@ -273,7 +274,8 @@ namespace VAGSuite.Services
                             page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
                                               KryptonPageFlags.DockingAllowFloating |
                                               KryptonPageFlags.DockingAllowAutoHidden |
-                                              KryptonPageFlags.DockingAllowClose);
+                                              KryptonPageFlags.DockingAllowClose |
+                                              KryptonPageFlags.DockingAllowDropDown);
                             tabdet.Dock = DockStyle.Fill;
                             page.Controls.Add(tabdet);
 
@@ -398,7 +400,8 @@ namespace VAGSuite.Services
                             page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
                                               KryptonPageFlags.DockingAllowFloating |
                                               KryptonPageFlags.DockingAllowAutoHidden |
-                                              KryptonPageFlags.DockingAllowClose);
+                                              KryptonPageFlags.DockingAllowClose |
+                                              KryptonPageFlags.DockingAllowDropDown);
                             tabdet.Dock = DockStyle.Fill;
                             page.Controls.Add(tabdet);
 
@@ -449,9 +452,10 @@ namespace VAGSuite.Services
                     pageX.ImageSmall = GetResourceImage("vagedc.ico");
                     pageX.UniqueName = "AxisEditorX_" + symbol.Varname + "_" + Guid.NewGuid().ToString("N");
                     pageX.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
-                                       KryptonPageFlags.DockingAllowFloating |
-                                       KryptonPageFlags.DockingAllowAutoHidden |
-                                       KryptonPageFlags.DockingAllowClose);
+                                         KryptonPageFlags.DockingAllowFloating |
+                                         KryptonPageFlags.DockingAllowAutoHidden |
+                                         KryptonPageFlags.DockingAllowClose |
+                                         KryptonPageFlags.DockingAllowDropDown);
                     tabdet.Dock = DockStyle.Fill;
                     pageX.Controls.Add(tabdet);
                     _kryptonDockingManager.AddDockspace("Control", DockingEdge.Right, new KryptonPage[] { pageX });
@@ -478,9 +482,10 @@ namespace VAGSuite.Services
                     pageY.ImageSmall = GetResourceImage("vagedc.ico");
                     pageY.UniqueName = "AxisEditorY_" + symbol.Varname + "_" + Guid.NewGuid().ToString("N");
                     pageY.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
-                                       KryptonPageFlags.DockingAllowFloating |
-                                       KryptonPageFlags.DockingAllowAutoHidden |
-                                       KryptonPageFlags.DockingAllowClose);
+                                         KryptonPageFlags.DockingAllowFloating |
+                                         KryptonPageFlags.DockingAllowAutoHidden |
+                                         KryptonPageFlags.DockingAllowClose |
+                                         KryptonPageFlags.DockingAllowDropDown);
                     tabdet.Dock = DockStyle.Fill;
                     pageY.Controls.Add(tabdet);
                     _kryptonDockingManager.AddDockspace("Control", DockingEdge.Right, new KryptonPage[] { pageY });
@@ -712,7 +717,8 @@ namespace VAGSuite.Services
                 page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
                                   KryptonPageFlags.DockingAllowFloating |
                                   KryptonPageFlags.DockingAllowAutoHidden |
-                                  KryptonPageFlags.DockingAllowClose);
+                                  KryptonPageFlags.DockingAllowClose |
+                                  KryptonPageFlags.DockingAllowDropDown);
                 page.Controls.Add(airmassResult);
                 _kryptonDockingManager.AddDockspace("Control", DockingEdge.Right, new KryptonPage[] { page });
 
@@ -759,7 +765,8 @@ namespace VAGSuite.Services
                     page.Flags = (int)(KryptonPageFlags.DockingAllowDocked |
                                       KryptonPageFlags.DockingAllowFloating |
                                       KryptonPageFlags.DockingAllowAutoHidden |
-                                      KryptonPageFlags.DockingAllowClose);
+                                      KryptonPageFlags.DockingAllowClose |
+                                      KryptonPageFlags.DockingAllowDropDown);
                     page.Controls.Add(hv);
 
                     if (!_appSettings.NewPanelsFloating)
