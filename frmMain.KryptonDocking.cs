@@ -158,15 +158,10 @@ namespace VAGSuite
             control.Dock = DockStyle.Fill;
             page.Controls.Add(control);
 
-            // If it's a map viewer or hex viewer, we usually want it in the central workspace
-            if (uniqueName.Contains("Viewer") || uniqueName.Contains("Hex"))
-            {
-                kryptonDockingManager1.AddToWorkspace("Workspace", new KryptonPage[] { page });
-            }
-            else
-            {
-                kryptonDockingManager1.AddDockspace("Control", edge, new KryptonPage[] { page });
-            }
+            // All windows should follow the same dockable style (Symbol/Search style).
+            // By adding them to a Dockspace instead of forcing them into the Workspace,
+            // they become draggable tool windows that can still be tabbed into the workspace manually.
+            kryptonDockingManager1.AddDockspace("Control", edge, new KryptonPage[] { page });
         }
     }
 }

@@ -130,9 +130,9 @@ namespace VAGSuite.Services
                         tabdet.Dock = DockStyle.Fill;
                         page.Controls.Add(tabdet);
                         
-                        // Add to workspace so it stays below the ribbon
-                        Console.WriteLine($"🧑🔬 [DEBUG] StartTableViewer: Adding page {title} to Workspace...");
-                        _kryptonDockingManager.AddToWorkspace("Workspace", new KryptonPage[] { page });
+                        // Add as a dockable tool window (Symbol/Search style)
+                        Console.WriteLine($"🧑🔬 [DEBUG] StartTableViewer: Adding page {title} to Dockspace...");
+                        _kryptonDockingManager.AddDockspace("Control", DockingEdge.Right, new KryptonPage[] { page });
                         tabdet.Visible = true;
                         tabdet.BringToFront();
                         Console.WriteLine($"🧑🔬 [DEBUG] StartTableViewer: Page added and brought to front.");
@@ -279,8 +279,8 @@ namespace VAGSuite.Services
                             tabdet.Dock = DockStyle.Fill;
                             page.Controls.Add(tabdet);
 
-                            // Add to workspace
-                            _kryptonDockingManager.AddToWorkspace("Workspace", new KryptonPage[] { page });
+                            // Add as a dockable tool window
+                            _kryptonDockingManager.AddDockspace("Control", DockingEdge.Right, new KryptonPage[] { page });
                         }
                     }
                     catch (Exception E)
@@ -405,8 +405,8 @@ namespace VAGSuite.Services
                             tabdet.Dock = DockStyle.Fill;
                             page.Controls.Add(tabdet);
 
-                            // Add to workspace
-                            _kryptonDockingManager.AddToWorkspace("Workspace", new KryptonPage[] { page });
+                            // Add as a dockable tool window
+                            _kryptonDockingManager.AddDockspace("Control", DockingEdge.Right, new KryptonPage[] { page });
                         }
                         else
                         {
@@ -771,7 +771,7 @@ namespace VAGSuite.Services
 
                     if (!_appSettings.NewPanelsFloating)
                     {
-                        _kryptonDockingManager.AddToWorkspace("Workspace", new KryptonPage[] { page });
+                        _kryptonDockingManager.AddDockspace("Control", DockingEdge.Right, new KryptonPage[] { page });
                     }
                     else
                     {

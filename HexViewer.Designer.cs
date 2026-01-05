@@ -44,7 +44,7 @@ namespace VAGSuite
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.panel1 = new ComponentFactory.Krypton.Toolkit.KryptonPanel();
             this.hexBox1 = new Be.Windows.Forms.HexBox();
             this.toolStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -161,12 +161,13 @@ namespace VAGSuite
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             resources.ApplyResources(this.toolStripSeparator2, "toolStripSeparator2");
-            // 
+            //
             // panel1
-            // 
+            //
             this.panel1.Controls.Add(this.hexBox1);
             resources.ApplyResources(this.panel1, "panel1");
             this.panel1.Name = "panel1";
+            this.panel1.PaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Custom;
             // 
             // hexBox1
             // 
@@ -219,7 +220,7 @@ namespace VAGSuite
         private System.Windows.Forms.ToolStripButton miCopy;
         private System.Windows.Forms.ToolStripButton miPaste;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.Panel panel1;
+        private ComponentFactory.Krypton.Toolkit.KryptonPanel panel1;
         private Be.Windows.Forms.HexBox hexBox1;
         private System.Windows.Forms.ToolStripButton miFind;
         private System.Windows.Forms.ToolStripButton miFindNext;

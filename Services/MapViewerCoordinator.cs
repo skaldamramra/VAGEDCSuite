@@ -67,7 +67,7 @@ namespace VAGSuite.Services
 
                 if (!_appSettings.NewPanelsFloating)
                 {
-                    _dockingManager.AddToWorkspace("Workspace", new KryptonPage[] { page });
+                    _dockingManager.AddDockspace("Control", DockingEdge.Right, new KryptonPage[] { page });
                 }
                 else
                 {

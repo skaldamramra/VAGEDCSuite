@@ -57,6 +57,10 @@ namespace VAGSuite
         public HexViewer()
         {
             InitializeComponent();
+            if (this.panel1 != null)
+            {
+                this.panel1.Palette = VAGEDCThemeManager.Instance.CustomPalette;
+            }
             ApplyThemeToHexViewer();
         }
 
