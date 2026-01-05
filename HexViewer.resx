@@ -533,7 +533,4 @@
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>HexViewer</value>
   </data>
-  <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.XtraUserControl, DevExpress.Utils.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
-  </data>
 </root>

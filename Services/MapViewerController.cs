@@ -24,7 +24,7 @@ namespace VAGSuite.Services
             // which manages the pages.
             if (parent is KryptonPage page)
             {
-                // KryptonPage doesn't have MakeFloat/Restore directly like DevExpress DockPanel.
+                // KryptonPage doesn't have MakeFloat/Restore directly like legacy DockPanel.
                 // These actions are performed via the KryptonDockingManager.
                 // For now, we neutralize this as the bulk of docking logic is in frmMain.KryptonDocking.cs
                 floatAction();

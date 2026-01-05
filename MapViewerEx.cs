@@ -2403,8 +2403,9 @@ namespace VAGSuite
 
         private void timer4_Tick(object sender, EventArgs e)
         {
-            // Logic for highlighting grid cells from graph selection removed
-            // as it was tied to DevExpress SeriesPoint.
+            // Logic for highlighting grid cells from graph selection
+            // This is now handled via the Chart2DComponent and Chart3DComponent
+            // which use standard WinForms/OpenTK events instead of DevExpress SeriesPoint.
         }
 
         // private void popupContainerEdit1_CustomDisplayText(object sender, EventArgs e)

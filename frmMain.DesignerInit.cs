@@ -3,7 +3,7 @@ namespace VAGSuite
     public partial class frmMain
     {
         /// <summary>
-        /// Obsolete DevExpress initialization.
+        /// Obsolete initialization.
         /// </summary>
         private void InitializeComponentInstances() { }
 

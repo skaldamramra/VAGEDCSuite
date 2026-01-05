@@ -735,8 +735,8 @@ namespace VAGSuite
         private System.Windows.Forms.ToolStripLabel toolStripLabel3;
         private System.Windows.Forms.ToolStripMenuItem editXaxisSymbolToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editYaxisSymbolToolStripMenuItem;
-        //private DevExpress.XtraEditors.SimpleButton btnSaveToRAM;
-        //private DevExpress.XtraEditors.SimpleButton btnReadFromRAM;
+        //private ComponentFactory.Krypton.Toolkit.KryptonButton btnSaveToRAM;
+        //private ComponentFactory.Krypton.Toolkit.KryptonButton btnReadFromRAM;
         private System.Windows.Forms.ToolStripMenuItem smoothSelectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem smoothSelectionToolProportionalStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportMapToolStripMenuItem;

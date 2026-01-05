@@ -121,10 +121,6 @@
   <data name="buttonEdit1.Location" type="System.Drawing.Point, System.Drawing">
     <value>91, 12</value>
   </data>
-  <assembly alias="DevExpress.Utils.v11.2" name="DevExpress.Utils.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-  <data name="buttonEdit1.Properties.Buttons" type="DevExpress.XtraEditors.Controls.ButtonPredefines, DevExpress.Utils.v11.2">
-    <value>Glyph</value>
-  </data>
   <data name="buttonEdit1.Properties.Buttons1" xml:space="preserve">
     <value />
   </data>
@@ -140,10 +136,6 @@
   </data>
   <data name="buttonEdit1.Properties.Buttons5" type="System.Boolean, mscorlib">
     <value>False</value>
-  </data>
-  <assembly alias="DevExpress.XtraEditors.v11.2" name="DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-  <data name="buttonEdit1.Properties.Buttons6" type="DevExpress.XtraEditors.ImageLocation, DevExpress.XtraEditors.v11.2">
-    <value>MiddleCenter</value>
   </data>
   <data name="buttonEdit1.Properties.Buttons7" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -175,9 +167,6 @@
   <data name="&gt;&gt;buttonEdit1.Name" xml:space="preserve">
     <value>buttonEdit1</value>
   </data>
-  <data name="&gt;&gt;buttonEdit1.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.ButtonEdit, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
-  </data>
   <data name="&gt;&gt;buttonEdit1.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
@@ -202,9 +191,6 @@
   <data name="&gt;&gt;lblSoftwareID.Name" xml:space="preserve">
     <value>lblSoftwareID</value>
   </data>
-  <data name="&gt;&gt;lblSoftwareID.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
-  </data>
   <data name="&gt;&gt;lblSoftwareID.Parent" xml:space="preserve">
     <value>groupControl1</value>
   </data>
@@ -225,9 +211,6 @@
   </data>
   <data name="&gt;&gt;labelControl10.Name" xml:space="preserve">
     <value>labelControl10</value>
-  </data>
-  <data name="&gt;&gt;labelControl10.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
   </data>
   <data name="&gt;&gt;labelControl10.Parent" xml:space="preserve">
     <value>groupControl1</value>
@@ -253,9 +236,6 @@
   <data name="&gt;&gt;lblRating.Name" xml:space="preserve">
     <value>lblRating</value>
   </data>
-  <data name="&gt;&gt;lblRating.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
-  </data>
   <data name="&gt;&gt;lblRating.Parent" xml:space="preserve">
     <value>groupControl1</value>
   </data>
@@ -276,9 +256,6 @@
   </data>
   <data name="&gt;&gt;labelControl8.Name" xml:space="preserve">
     <value>labelControl8</value>
-  </data>
-  <data name="&gt;&gt;labelControl8.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
   </data>
   <data name="&gt;&gt;labelControl8.Parent" xml:space="preserve">
     <value>groupControl1</value>
@@ -304,9 +281,6 @@
   <data name="&gt;&gt;lblCarType.Name" xml:space="preserve">
     <value>lblCarType</value>
   </data>
-  <data name="&gt;&gt;lblCarType.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
-  </data>
   <data name="&gt;&gt;lblCarType.Parent" xml:space="preserve">
     <value>groupControl1</value>
   </data>
@@ -327,9 +301,6 @@
   </data>
   <data name="&gt;&gt;labelControl5.Name" xml:space="preserve">
     <value>labelControl5</value>
-  </data>
-  <data name="&gt;&gt;labelControl5.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
   </data>
   <data name="&gt;&gt;labelControl5.Parent" xml:space="preserve">
     <value>groupControl1</value>
@@ -355,9 +326,6 @@
   <data name="&gt;&gt;lblFuel.Name" xml:space="preserve">
     <value>lblFuel</value>
   </data>
-  <data name="&gt;&gt;lblFuel.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
-  </data>
   <data name="&gt;&gt;lblFuel.Parent" xml:space="preserve">
     <value>groupControl1</value>
   </data>
@@ -381,9 +349,6 @@
   </data>
   <data name="&gt;&gt;lblECUType.Name" xml:space="preserve">
     <value>lblECUType</value>
-  </data>
-  <data name="&gt;&gt;lblECUType.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
   </data>
   <data name="&gt;&gt;lblECUType.Parent" xml:space="preserve">
     <value>groupControl1</value>
@@ -409,9 +374,6 @@
   <data name="&gt;&gt;lblCarModel.Name" xml:space="preserve">
     <value>lblCarModel</value>
   </data>
-  <data name="&gt;&gt;lblCarModel.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
-  </data>
   <data name="&gt;&gt;lblCarModel.Parent" xml:space="preserve">
     <value>groupControl1</value>
   </data>
@@ -432,9 +394,6 @@
   </data>
   <data name="&gt;&gt;labelControl7.Name" xml:space="preserve">
     <value>labelControl7</value>
-  </data>
-  <data name="&gt;&gt;labelControl7.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
   </data>
   <data name="&gt;&gt;labelControl7.Parent" xml:space="preserve">
     <value>groupControl1</value>
@@ -457,9 +416,6 @@
   <data name="&gt;&gt;labelControl3.Name" xml:space="preserve">
     <value>labelControl3</value>
   </data>
-  <data name="&gt;&gt;labelControl3.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
-  </data>
   <data name="&gt;&gt;labelControl3.Parent" xml:space="preserve">
     <value>groupControl1</value>
   </data>
@@ -480,9 +436,6 @@
   </data>
   <data name="&gt;&gt;labelControl2.Name" xml:space="preserve">
     <value>labelControl2</value>
-  </data>
-  <data name="&gt;&gt;labelControl2.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
   </data>
   <data name="&gt;&gt;labelControl2.Parent" xml:space="preserve">
     <value>groupControl1</value>
@@ -505,9 +458,6 @@
   <data name="&gt;&gt;groupControl1.Name" xml:space="preserve">
     <value>groupControl1</value>
   </data>
-  <data name="&gt;&gt;groupControl1.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.GroupControl, DevExpress.Utils.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
-  </data>
   <data name="&gt;&gt;groupControl1.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
@@ -528,9 +478,6 @@
   </data>
   <data name="&gt;&gt;labelControl1.Name" xml:space="preserve">
     <value>labelControl1</value>
-  </data>
-  <data name="&gt;&gt;labelControl1.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.LabelControl, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
   </data>
   <data name="&gt;&gt;labelControl1.Parent" xml:space="preserve">
     <value>$this</value>
@@ -556,9 +503,6 @@
   </data>
   <data name="&gt;&gt;simpleButton1.Name" xml:space="preserve">
     <value>simpleButton1</value>
-  </data>
-  <data name="&gt;&gt;simpleButton1.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.SimpleButton, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
   </data>
   <data name="&gt;&gt;simpleButton1.Parent" xml:space="preserve">
     <value>$this</value>
@@ -587,9 +531,6 @@
   <data name="&gt;&gt;simpleButton2.Name" xml:space="preserve">
     <value>simpleButton2</value>
   </data>
-  <data name="&gt;&gt;simpleButton2.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.SimpleButton, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
-  </data>
   <data name="&gt;&gt;simpleButton2.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
@@ -617,9 +558,6 @@
   <data name="&gt;&gt;simpleButton3.Name" xml:space="preserve">
     <value>simpleButton3</value>
   </data>
-  <data name="&gt;&gt;simpleButton3.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.SimpleButton, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
-  </data>
   <data name="&gt;&gt;simpleButton3.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
@@ -646,9 +584,6 @@
   </data>
   <data name="&gt;&gt;simpleButton4.Name" xml:space="preserve">
     <value>simpleButton4</value>
-  </data>
-  <data name="&gt;&gt;simpleButton4.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.SimpleButton, DevExpress.XtraEditors.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
   </data>
   <data name="&gt;&gt;simpleButton4.Parent" xml:space="preserve">
     <value>$this</value>
@@ -697,8 +632,5 @@
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>frmPartnumberLookup</value>
-  </data>
-  <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>DevExpress.XtraEditors.XtraForm, DevExpress.Utils.v11.2, Version=11.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a</value>
   </data>
 </root>

@@ -6,7 +6,7 @@ namespace VAGSuite.Services
 {
     /// <summary>
     /// Simple static tooltip service that uses System.Windows.Forms.ToolTip internally.
-    /// Replaces DevExpress.ToolTipController usage for programmatic show/hide.
+    /// Replaces legacy tooltip controller usage for programmatic show/hide.
     /// Designed for .NET 4.0 and Windows Forms.
     /// 
     /// Usage (example):
