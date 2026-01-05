@@ -412,15 +412,25 @@ namespace VAGSuite
             // Handle missing symbol indicators (VAGEDC Dark skin compatible colors)
             DataGridViewRow dgvRow = gridControl1.Rows[e.RowIndex];
             DataRowView drv = (DataRowView)dgvRow.DataBoundItem;
-            if (drv.Row["MissingInOriFile"] != DBNull.Value && (bool)drv.Row["MissingInOriFile"])
+            
+            // Check if columns exist before accessing them (defensive check for search results)
+            if (drv.Row.Table.Columns.Contains("MissingInOriFile"))
             {
-                e.CellStyle.BackColor = VAGEDCColorPalette.Danger500; // Red for missing in original
-                e.CellStyle.ForeColor = Color.White;
+                if (drv.Row["MissingInOriFile"] != DBNull.Value && (bool)drv.Row["MissingInOriFile"])
+                {
+                    e.CellStyle.BackColor = VAGEDCColorPalette.Danger500; // Red for missing in original
+                    e.CellStyle.ForeColor = Color.White;
+                    return; // Exit early to avoid checking the other column
+                }
             }
-            else if (drv.Row["MissingInCompareFile"] != DBNull.Value && (bool)drv.Row["MissingInCompareFile"])
+            
+            if (drv.Row.Table.Columns.Contains("MissingInCompareFile"))
             {
-                e.CellStyle.BackColor = VAGEDCColorPalette.Primary500; // Blue for missing in compare
-                e.CellStyle.ForeColor = Color.White;
+                if (drv.Row["MissingInCompareFile"] != DBNull.Value && (bool)drv.Row["MissingInCompareFile"])
+                {
+                    e.CellStyle.BackColor = VAGEDCColorPalette.Primary500; // Blue for missing in compare
+                    e.CellStyle.ForeColor = Color.White;
+                }
             }
         }
 
