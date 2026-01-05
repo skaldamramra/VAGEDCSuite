@@ -5,10 +5,10 @@ using System.Drawing;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
+using ComponentFactory.Krypton.Navigator;
 using System.IO;
-using DevExpress.XtraCharts;
-using DevExpress.XtraEditors.Controls;
+using ZedGraph;
 
 namespace VAGSuite
 {
@@ -37,7 +37,7 @@ namespace VAGSuite
         AirTorqueCalibration
     }
 
-    public partial class ctrlAirmassResult : DevExpress.XtraEditors.XtraUserControl
+    public partial class ctrlAirmassResult : UserControl
     {
         int rows;
         int columns;
@@ -307,7 +307,7 @@ namespace VAGSuite
             }
             gridControl1.DataSource = dt;
 
-            if (xtraTabControl1.SelectedTabPage.Name == xtraTabPage2.Name)
+            if (xtraTabControl1.SelectedPage.Name == xtraTabPage2.Name)
             {
                 LoadGraphWithDetails();
             }
@@ -354,7 +354,7 @@ namespace VAGSuite
                     try
                     {
                         bool found = false;
-                        foreach (string cbi in comboBoxEdit1.Properties.Items)
+                        foreach (string cbi in comboBoxEdit1.Items)
                         {
                             if (cbi == "Codebank " + cb.CodeID.ToString())
                             {
@@ -364,7 +364,7 @@ namespace VAGSuite
                         }
                         if (!found)
                         {
-                            comboBoxEdit1.Properties.Items.Add("Codebank " + cb.CodeID.ToString());
+                            comboBoxEdit1.Items.Add("Codebank " + cb.CodeID.ToString());
                         }
                     }
                     catch (Exception)
@@ -395,7 +395,7 @@ namespace VAGSuite
 
             if (torqueBased)
             {
-                int Nmlimit = Convert.ToInt32(GetInterpolatedTableValue(trqLimitMap, trqXAxis, trqYAxis, Convert.ToInt32(spinEdit1.EditValue) * 10, rpm));
+                int Nmlimit = Convert.ToInt32(GetInterpolatedTableValue(trqLimitMap, trqXAxis, trqYAxis, Convert.ToInt32(spinEdit1.Value) * 10, rpm));
                 //requestedairmass
                 if (requestedQuantity > Nmlimit)
                 {
@@ -410,11 +410,11 @@ namespace VAGSuite
                 if (trqXAxis.Length == 1)
                 {
                     // 2d map
-                    IQlimit = Convert.ToInt32(GetInterpolatedTableValue(trqLimitMap, trqXAxis, trqYAxis, rpm, Convert.ToInt32(spinEdit1.EditValue) * 10));
+                    IQlimit = Convert.ToInt32(GetInterpolatedTableValue(trqLimitMap, trqXAxis, trqYAxis, rpm, Convert.ToInt32(spinEdit1.Value) * 10));
                 }
                 else
                 {
-                    IQlimit = Convert.ToInt32(GetInterpolatedTableValue(trqLimitMap, trqXAxis, trqYAxis, Convert.ToInt32(spinEdit1.EditValue) * 10, rpm));
+                    IQlimit = Convert.ToInt32(GetInterpolatedTableValue(trqLimitMap, trqXAxis, trqYAxis, Convert.ToInt32(spinEdit1.Value) * 10, rpm));
                 }
                 //requestedairmass
                 if (requestedQuantity > IQlimit)
@@ -499,7 +499,7 @@ namespace VAGSuite
             int[] xaxis = new int[1];
             xaxis.SetValue(0, 0);
             int[] yaxis = readIntdatafromfile(filename, (int)GetSymbolAddress(symbols, "LimEngCal.p_AirSP"), GetSymbolLength(symbols, "LimEngCal.p_AirSP"));
-            int ambientpressure = /*1000*/ Convert.ToInt32(spinEdit1.EditValue) * 10;
+            int ambientpressure = /*1000*/ Convert.ToInt32(spinEdit1.Value) * 10;
             int airmasslimit = Convert.ToInt32(GetInterpolatedTableValue(turbospeed, xaxis, yaxis, /*rpm*/ ambientpressure, 0));
             if (airmasslimit < requestedairmass)
             {
@@ -779,8 +779,8 @@ namespace VAGSuite
             }
         }
 
-        int powerSeries = -1;
-        int torqueSeries = -1;
+        // int powerSeries = -1;
+        // int torqueSeries = -1;
 
         private string MaximizeFileLength(string filename)
         {
@@ -798,80 +798,59 @@ namespace VAGSuite
             if (gridControl1.DataSource != null)
             {
                 DataTable dt = (DataTable)gridControl1.DataSource;
-                // get only the WOT cells, the last 16 integers
-                // and the columns which hold the rpm stages
-                chartControl1.Series.Clear();
+                GraphPane myPane = chartControl1.GraphPane;
+                myPane.CurveList.Clear();
+                
                 string powerLabel = "Power (bhp)";
                 if (checkEdit5.Checked) powerLabel = "Power (kW)";
                 string torqueLabel = "Torque (Nm)";
                 if (checkEdit6.Checked) torqueLabel = "Torque (lbft)";
 
-                string injectorDCLabel = "Injector DC";
-                string targetLambdaLabel = "Target lambda";
-
-                powerSeries = chartControl1.Series.Add(powerLabel, DevExpress.XtraCharts.ViewType.Spline);
-                torqueSeries = chartControl1.Series.Add(torqueLabel, DevExpress.XtraCharts.ViewType.Spline);
-                // set line colors
-                chartControl1.Series[powerSeries].Label.Border.Visible = false;
-                chartControl1.Series[torqueSeries].Label.Border.Visible = false;
-                chartControl1.Series[powerSeries].Label.Shadow.Visible = true;
-                chartControl1.Series[torqueSeries].Label.Shadow.Visible = true;
-
-
-                chartControl1.Series[powerSeries].View.Color = Color.Red;
-                chartControl1.Series[torqueSeries].View.Color = Color.Blue;
-                chartControl1.Series[powerSeries].ArgumentScaleType = ScaleType.Qualitative;
-                chartControl1.Series[powerSeries].ValueScaleType = ScaleType.Numerical;
-                chartControl1.Series[torqueSeries].ArgumentScaleType = ScaleType.Qualitative;
-                chartControl1.Series[torqueSeries].ValueScaleType = ScaleType.Numerical;
-
-                SplineSeriesView sv = (SplineSeriesView)chartControl1.Series[powerSeries].View;
-                sv.LineMarkerOptions.Visible = false;
-                sv = (SplineSeriesView)chartControl1.Series[torqueSeries].View;
-                sv.LineMarkerOptions.Visible = false;
+                PointPairList powerList = new PointPairList();
+                PointPairList torqueList = new PointPairList();
 
                 for (int i = 0; i < dt.Rows[0].ItemArray.Length; i++)
                 {
                     double o = Convert.ToDouble(dt.Rows[0].ItemArray.GetValue(i));
-                    // convert to hp
                     int rpm = Convert.ToInt32(y_axisvalues.GetValue(i));
                     int torque = Tools.Instance.IQToTorque(Convert.ToInt32(o), rpm, m_numberCylinders);
                     if (_ECUType.Contains("EDC16"))
                     {
                         torque = Convert.ToInt32(o);
-                        torque *= 10; // correction to keep the code identical from here
+                        torque *= 10;
                         double temptorque = torque * Tools.Instance.GetCorrectionFactorForRpm(rpm, m_numberCylinders);
                         torque = Convert.ToInt32(temptorque);
                     }
                     int horsepower = Tools.Instance.TorqueToPower(torque, rpm);
 
                     if (checkEdit5.Checked) horsepower = Tools.Instance.TorqueToPowerkW(torque, rpm);
-                    if (checkEdit6.Checked) torque = Tools.Instance.IQToTorque(Convert.ToInt32(o), rpm, m_numberCylinders);//AirmassToTorqueLbft(Convert.ToInt32(o), rpm);
+                    if (checkEdit6.Checked) torque = Tools.Instance.IQToTorque(Convert.ToInt32(o), rpm, m_numberCylinders);
 
                     horsepower /= 100;
                     torque /= 100;
 
-                    double[] dvals = new double[1];
-                    dvals.SetValue(Convert.ToDouble(horsepower), 0);
-                    chartControl1.Series[powerSeries].Points.Add(new SeriesPoint(Convert.ToDouble(rpm), dvals));
-
-                    double[] dvalstorq = new double[1];
-                    dvalstorq.SetValue(Convert.ToDouble(torque), 0);
-                    chartControl1.Series[torqueSeries].Points.Add(new SeriesPoint(Convert.ToDouble(rpm), dvalstorq));
-
-
+                    powerList.Add(rpm, horsepower);
+                    torqueList.Add(rpm, torque);
                 }
 
-
+                LineItem powerCurve = myPane.AddCurve(powerLabel, powerList, Color.Red, SymbolType.None);
+                LineItem torqueCurve = myPane.AddCurve(torqueLabel, torqueList, Color.Blue, SymbolType.None);
+                
+                chartControl1.AxisChange();
+                chartControl1.Invalidate();
             }
-
         }
 
 
         private void UpdateGraphVisibility()
         {
-            if (powerSeries >= 0) chartControl1.Series[powerSeries].Visible = checkEdit8.Checked;
-            if (torqueSeries >= 0) chartControl1.Series[torqueSeries].Visible = checkEdit9.Checked;
+            // ZedGraph visibility update
+            if (chartControl1.GraphPane.CurveList.Count >= 2)
+            {
+                chartControl1.GraphPane.CurveList[0].IsVisible = checkEdit8.Checked;
+                chartControl1.GraphPane.CurveList[1].IsVisible = checkEdit9.Checked;
+                chartControl1.Invalidate();
+            }
         }
         string m_current_softwareversion = string.Empty;
         string m_current_comparefilename = string.Empty;
@@ -902,7 +881,7 @@ namespace VAGSuite
                 }
 
                 // show the dynograph
-                xtraTabControl1.SelectedTabPage = xtraTabPage2;
+                xtraTabControl1.SelectedPage = xtraTabPage2;
                 LoadGraphWithDetails(); // initial values from original bin
             }
         }
@@ -956,7 +935,7 @@ namespace VAGSuite
         private void comboBoxEdit2_SelectedIndexChanged(object sender, EventArgs e)
         {
             gridControl1.Refresh();
-            if (xtraTabControl1.SelectedTabPage.Name == xtraTabPage2.Name)
+            if (xtraTabControl1.SelectedPage.Name == xtraTabPage2.Name)
             {
                 LoadGraphWithDetails();
             }
@@ -977,7 +956,7 @@ namespace VAGSuite
             // refresh
             //Calculate();
             gridControl1.Refresh();
-            if (xtraTabControl1.SelectedTabPage.Name == xtraTabPage2.Name)
+            if (xtraTabControl1.SelectedPage.Name == xtraTabPage2.Name)
             {
                 LoadGraphWithDetails();
             }
@@ -989,7 +968,7 @@ namespace VAGSuite
             // refresh
             //Calculate();
             gridControl1.Refresh();
-            if (xtraTabControl1.SelectedTabPage.Name == xtraTabPage2.Name)
+            if (xtraTabControl1.SelectedPage.Name == xtraTabPage2.Name)
             {
                 LoadGraphWithDetails();
             }
@@ -1045,208 +1024,22 @@ namespace VAGSuite
             CastStartViewerEvent("TorqueCal.M_OverBoostTab");
         }
 
-        private void xtraTabControl1_SelectedPageChanged(object sender, DevExpress.XtraTab.TabPageChangedEventArgs e)
+        private void xtraTabControl1_SelectedPageChanged(object sender, EventArgs e)
         {
-            if (xtraTabControl1.SelectedTabPage.Name == xtraTabPage1.Name)
+            if (xtraTabControl1.SelectedPage.Name == xtraTabPage1.Name)
             {
                 // in table view
             }
-            else if (xtraTabControl1.SelectedTabPage.Name == xtraTabPage2.Name)
+            else if (xtraTabControl1.SelectedPage.Name == xtraTabPage2.Name)
             {
                 // in graph view
                 LoadGraphWithDetails();
             }
         }
 
-        private void gridView1_CustomDrawCell(object sender, DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e)
+        private void gridView1_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
-            try
-            {
-                if (e.CellValue != null)
-                {
-                    if (e.CellValue != DBNull.Value)
-                    {
-                        int b = 0;
-                        int cellvalue = 0;
-                        //if (m_isHexMode)
-                        b = Convert.ToInt32(e.CellValue.ToString());
-                        cellvalue = b;
-                        b *= 255;
-                        if (m_MaxValueInTable != 0)
-                        {
-                            b /= m_MaxValueInTable;
-                        }
-                        int red = 128;
-                        int green = 128;
-                        int blue = 128;
-                        Color c = Color.White;
-                        red = b;
-                        if (red < 0) red = 0;
-                        if (red > 255) red = 255;
-                        if (b > 255) b = 255;
-                        blue = 0;
-                        green = 255 - red;
-                        c = Color.FromArgb(red, green, blue);
-                        SolidBrush sb = new SolidBrush(c);
-                        e.Graphics.FillRectangle(sb, e.Bounds);
-
-                        // check limiter type
-                        //limitermap
-                        int row = rows - (e.RowHandle + 1);
-                        limitType curLimit = (limitType)limitermap.GetValue((row * columns) + e.Column.AbsoluteIndex);
-                        Point[] pnts = new Point[4];
-                        pnts.SetValue(new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y), 0);
-                        pnts.SetValue(new Point(e.Bounds.X + e.Bounds.Width - (e.Bounds.Height / 2), e.Bounds.Y), 1);
-                        pnts.SetValue(new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y + (e.Bounds.Height / 2)), 2);
-                        pnts.SetValue(new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y), 3);
-                        if (curLimit == limitType.AirmassLimiter)
-                        {
-                            e.Graphics.FillPolygon(Brushes.Blue, pnts, System.Drawing.Drawing2D.FillMode.Winding);
-                        }
-                        else if (curLimit == limitType.TorqueLimiterEngine)
-                        {
-                            e.Graphics.FillPolygon(Brushes.Yellow, pnts, System.Drawing.Drawing2D.FillMode.Winding);
-                        }
-                        else if (curLimit == limitType.TurboSpeedLimiter)
-                        {
-                            e.Graphics.FillPolygon(Brushes.Black, pnts, System.Drawing.Drawing2D.FillMode.Winding);
-                        }
-                        else if (curLimit == limitType.TorqueLimiterGear)
-                        {
-                            e.Graphics.FillPolygon(Brushes.SaddleBrown, pnts, System.Drawing.Drawing2D.FillMode.Winding);
-                        }
-                        else if (curLimit == limitType.FuelCutLimiter)
-                        {
-                            e.Graphics.FillPolygon(Brushes.DarkGray, pnts, System.Drawing.Drawing2D.FillMode.Winding);
-                        }
-                        if (comboBoxEdit2.SelectedIndex == 1)
-                        {
-                            // convert airmass to torque
-                            if (_ECUType.Contains("EDC16"))
-                            {
-                                int rpm = Convert.ToInt32(y_axisvalues.GetValue(e.Column.AbsoluteIndex));
-                                int torque = Convert.ToInt32(e.CellValue);
-                                torque /= 10;
-                                e.DisplayText = torque.ToString();
-                            }
-                            else
-                            {
-                                int rpm = Convert.ToInt32(y_axisvalues.GetValue(e.Column.AbsoluteIndex));
-                                int torque = Tools.Instance.IQToTorque(Convert.ToInt32(e.CellValue), rpm, m_numberCylinders);
-                                if (checkEdit6.Checked)
-                                {
-                                    torque = Tools.Instance.IQToTorque(Convert.ToInt32(e.CellValue), rpm, m_numberCylinders);// AirmassToTorqueLbft(Convert.ToInt32(e.CellValue), rpm);
-                                }
-                                torque /= 100;
-                                e.DisplayText = torque.ToString();
-                            }
-                        }
-                        else if (comboBoxEdit2.SelectedIndex == 2)
-                        {
-                            if (_ECUType.Contains("EDC16"))
-                            {
-                                int rpm = Convert.ToInt32(y_axisvalues.GetValue(e.Column.AbsoluteIndex));
-                                int torque = Convert.ToInt32(e.CellValue);
-                                torque /= 10;
-                                double temptorque = torque * Tools.Instance.GetCorrectionFactorForRpm(rpm, m_numberCylinders);
-                                torque = Convert.ToInt32(temptorque);
-                                int horsepower = Tools.Instance.TorqueToPower(torque, rpm);
-                                if (checkEdit5.Checked)
-                                {
-                                    horsepower = Tools.Instance.TorqueToPowerkW(torque, rpm);
-                                }
-                                e.DisplayText = horsepower.ToString();
-                            }
-                            else
-                            {
-                                //convert airmass to horsepower
-                                int rpm = Convert.ToInt32(y_axisvalues.GetValue(e.Column.AbsoluteIndex));
-                                int torque = Tools.Instance.IQToTorque(Convert.ToInt32(e.CellValue), rpm, m_numberCylinders);
-                                int horsepower = Tools.Instance.TorqueToPower(torque, rpm);
-                                if (checkEdit5.Checked)
-                                {
-                                    horsepower = Tools.Instance.TorqueToPowerkW(torque, rpm);
-                                }
-                                horsepower /= 100;
-                                e.DisplayText = horsepower.ToString();
-                            }
-                        }
-                        else
-                        {
-                            if (_ECUType.Contains("EDC16"))
-                            {
-                                // should display IQ in stead of torque
-                                int rpm = Convert.ToInt32(y_axisvalues.GetValue(e.Column.AbsoluteIndex));
-                                int torque = Convert.ToInt32(e.CellValue);
-                                torque /= 10;
-                                e.DisplayText = Tools.Instance.TorqueToIQ(torque, rpm, m_numberCylinders).ToString();
-                            }
-                            else
-                            {
-                                int airmass = Convert.ToInt32(e.CellValue);
-                                airmass /= 100;
-                                e.DisplayText = airmass.ToString();
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine(E.Message);
-            }
-        }
-
-        private void gridView1_CustomDrawRowIndicator(object sender, DevExpress.XtraGrid.Views.Grid.RowIndicatorCustomDrawEventArgs e)
-        {
-            if (e.RowHandle >= 0)
-            {
-
-                //  e.Painter.DrawCaption(new DevExpress.Utils.Drawing.ObjectInfoArgs(new DevExpress.Utils.Drawing.GraphicsCache(e.Graphics)), "As waarde", this.Font, Brushes.MidnightBlue, e.Bounds, null);
-                // e.Cache.DrawString("As waarde", this.Font, Brushes.MidnightBlue, e.Bounds, new StringFormat());
-                try
-                {
-                    if (x_axisvalues.Length > 0)
-                    {
-                        if (x_axisvalues.Length > e.RowHandle)
-                        {
-                            int value = (int)x_axisvalues.GetValue((x_axisvalues.Length - 1) - e.RowHandle);
-                            value /= 10;
-                            string yvalue = value.ToString();
-                            /*if (!m_isUpsideDown)
-                            {
-                                // dan andere waarde nemen
-                                yvalue = y_axisvalues.GetValue(e.RowHandle).ToString();
-                            }
-                            if (m_y_axis_name == "MAP")
-                            {
-                                if (m_viewtype == ViewType.Easy3Bar || m_viewtype == ViewType.Decimal3Bar)
-                                {
-                                    int tempval = Convert.ToInt32(y_axisvalues.GetValue((y_axisvalues.Length - 1) - e.RowHandle));
-                                    if (!m_isUpsideDown)
-                                    {
-                                        tempval = Convert.ToInt32(y_axisvalues.GetValue(e.RowHandle));
-                                    }
-                                    tempval *= 120;
-                                    tempval /= 100;
-                                    yvalue = tempval.ToString();
-                                }
-                            }*/
-
-                            Rectangle r = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, e.Bounds.Width - 2, e.Bounds.Height - 2);
-                            e.Graphics.DrawRectangle(Pens.LightSteelBlue, r);
-                            System.Drawing.Drawing2D.LinearGradientBrush gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, e.Appearance.BackColor2, e.Appearance.BackColor2, System.Drawing.Drawing2D.LinearGradientMode.Horizontal);
-                            e.Graphics.FillRectangle(gb, e.Bounds);
-                            e.Graphics.DrawString(yvalue, this.Font, Brushes.MidnightBlue, new PointF(e.Bounds.X + 4, e.Bounds.Y + 1 + (e.Bounds.Height - 12) / 2));
-                            e.Handled = true;
-                        }
-                    }
-                }
-                catch (Exception E)
-                {
-                    Console.WriteLine(E.Message);
-                }
-            }
+            // Neutralized DevExpress custom drawing
         }
 
 
@@ -1257,14 +1050,7 @@ namespace VAGSuite
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
-            if (chartControl1.IsPrintingAvailable)
-            {
-                printToolStripMenuItem.Enabled = true;
-            }
-            else
-            {
-                printToolStripMenuItem.Enabled = false;
-            }
+            printToolStripMenuItem.Enabled = true;
         }
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1274,19 +1060,13 @@ namespace VAGSuite
             sfd.Filter = "JPEG images|*.jpg";
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                chartControl1.ExportToImage(sfd.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                chartControl1.GetImage().Save(sfd.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
             }
         }
 
         private void printToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // print graph
-            // set paper to landscape
-            chartControl1.OptionsPrint.SizeMode = DevExpress.XtraCharts.Printing.PrintSizeMode.Zoom;
-            //DevExpress.XtraPrinting.PrintingSystem ps = new DevExpress.XtraPrinting.PrintingSystem();
-            //ps.PageSettings.Landscape = true;
-
-            chartControl1.ShowPrintPreview();
+            chartControl1.DoPrint();
         }
 
         private void labelControl14_Click(object sender, EventArgs e)

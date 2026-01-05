@@ -5,11 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmDecodeVIN : DevExpress.XtraEditors.XtraForm
+    public partial class frmDecodeVIN : KryptonForm
     {
         public frmDecodeVIN()
         {
@@ -26,7 +26,6 @@ namespace VAGSuite
 
         private void DecodeVIN()
         {
-            
             lblCarMake.Text = "---";
             lblCarModel.Text = "---";
             lblMakeyear.Text = "---";
@@ -36,7 +35,6 @@ namespace VAGSuite
             
             VINDecoder decoder = new VINDecoder();
             VINCarInfo carinfo = decoder.DecodeVINNumber(textEdit1.Text);
-            //lblBody.Text = carinfo.Body;
 
             lblCarMake.Text = carinfo.Make;
             lblCarModel.Text = carinfo.Model;
@@ -44,18 +42,11 @@ namespace VAGSuite
             lblPlant.Text = carinfo.PlantInfo;
             lblChassis.Text = carinfo.Platform;
             lblEngineType.Text = carinfo.EngineType;
-            
         }
 
         private void simpleButton1_Click(object sender, EventArgs e)
         {
             DecodeVIN();
-            
-        }
-
-        private void frmDecodeVIN_Load(object sender, EventArgs e)
-        {
-            
         }
 
         internal void SetVinNumber(string vinnumber)

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Windows.Forms;
-using DevExpress.XtraBars.Docking;
 using ComponentFactory.Krypton.Docking;
 using ComponentFactory.Krypton.Navigator;
 using VAGSuite;
@@ -35,11 +34,10 @@ namespace VAGSuite.Services
         /// <param name="currentFile">Path to the current file</param>
         /// <param name="symbols">Current symbol collection</param>
         /// <param name="codeBlocks">Current code blocks</param>
-        /// <param name="dockManager">Dock manager for creating comparison panels</param>
         /// <param name="onSymbolSelect">Callback when symbol is selected</param>
         /// <returns>DataTable with comparison results</returns>
-        public DataTable CompareToFile(string filename, string currentFile, SymbolCollection symbols, 
-            List<CodeBlock> codeBlocks, DockManager dockManager, 
+        public DataTable CompareToFile(string filename, string currentFile, SymbolCollection symbols,
+            List<CodeBlock> codeBlocks,
             CompareResults.NotifySelectSymbol onSymbolSelect)
         {
             DataTable dt = new DataTable();
@@ -157,10 +155,10 @@ namespace VAGSuite.Services
         /// <summary>
         /// Starts a map viewer for comparing a symbol from the comparison file
         /// </summary>
-        public void StartCompareMapViewer(string SymbolName, string Filename, int SymbolAddress, 
-            int SymbolLength, SymbolCollection curSymbols, int symbolnumber, 
-            DockManager dockManager, AppSettings appSettings, 
-            MapViewerEx.NotifySaveSymbol onSymbolSave, 
+        public void StartCompareMapViewer(string SymbolName, string Filename, int SymbolAddress,
+            int SymbolLength, SymbolCollection curSymbols, int symbolnumber,
+            AppSettings appSettings,
+            MapViewerEx.NotifySaveSymbol onSymbolSave,
             MapViewerEx.NotifyReadSymbol onSymbolRead, 
             MapViewerEx.ViewerClose onClose,
             MapViewerEx.NotifySliderMove onSliderMove,
@@ -184,8 +182,8 @@ namespace VAGSuite.Services
         /// <summary>
         /// Starts a viewer showing the difference between two maps
         /// </summary>
-        public void StartCompareDifferenceViewer(SymbolHelper sh, string Filename, int SymbolAddress, 
-            string currentFile, SymbolCollection symbols, DockManager dockManager, 
+        public void StartCompareDifferenceViewer(SymbolHelper sh, string Filename, int SymbolAddress,
+            string currentFile, SymbolCollection symbols,
             AppSettings appSettings, MapViewerEx.ViewerClose onClose)
         {
             // This is a simplified implementation
@@ -202,7 +200,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Logs all dock panel names to console (for debugging)
         /// </summary>
-        public void DumpDockWindows(DockManager dockManager)
+        public void DumpDockWindows()
         {
             foreach(KryptonPage page in _kryptonDockingManager.Pages)
             {

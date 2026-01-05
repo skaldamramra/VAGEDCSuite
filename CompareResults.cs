@@ -5,14 +5,11 @@ using System.Drawing;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
-using DevExpress.XtraGrid;
-using DevExpress.XtraGrid.Views.Grid;
-
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class CompareResults : DevExpress.XtraEditors.XtraUserControl
+    public partial class CompareResults : System.Windows.Forms.UserControl
     {
         public delegate void NotifySelectSymbol(object sender, SelectSymbolEventArgs e);
         public event CompareResults.NotifySelectSymbol onSymbolSelect;
@@ -93,76 +90,33 @@ namespace VAGSuite
 
         public void SetFilterMode(bool IsHexMode)
         {
-            if (IsHexMode)
-            {
-                
-                gridColumn2.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn2.DisplayFormat.FormatString = "X6";
-                gridColumn2.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.DisplayText;
-                gridColumn3.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn3.DisplayFormat.FormatString = "X6";
-                gridColumn3.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.DisplayText;
-                gridColumn4.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn4.DisplayFormat.FormatString = "X6";
-                gridColumn4.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.DisplayText;
-                gridColumn5.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn5.DisplayFormat.FormatString = "X6";
-                gridColumn5.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.DisplayText;
-                gridColumn12.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn12.DisplayFormat.FormatString = "X6";
-                gridColumn12.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.DisplayText;
-                gridColumn13.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn13.DisplayFormat.FormatString = "X6";
-                gridColumn13.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.DisplayText;
-
-            }
-            else
-            {
-                gridColumn2.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn2.DisplayFormat.FormatString = "";
-                gridColumn2.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.Value;
-                gridColumn3.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn3.DisplayFormat.FormatString = "";
-                gridColumn3.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.Value;
-                gridColumn4.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn4.DisplayFormat.FormatString = "";
-                gridColumn4.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.Value;
-                gridColumn5.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn5.DisplayFormat.FormatString = "";
-                gridColumn5.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.Value;
-                gridColumn12.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn12.DisplayFormat.FormatString = "";
-                gridColumn12.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.Value;
-                gridColumn13.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                gridColumn13.DisplayFormat.FormatString = "";
-                gridColumn13.FilterMode = DevExpress.XtraGrid.ColumnFilterMode.Value;
-            }
+            string format = IsHexMode ? "X6" : "";
+            gridColumn2.DefaultCellStyle.Format = format;
+            gridColumn3.DefaultCellStyle.Format = format;
+            gridColumn4.DefaultCellStyle.Format = format;
+            gridColumn5.DefaultCellStyle.Format = format;
+            gridColumn12.DefaultCellStyle.Format = format;
+            gridColumn13.DefaultCellStyle.Format = format;
         }
 
 
         public CompareResults()
         {
             InitializeComponent();
-            try
-            {
-                gridView1.RestoreLayoutFromRegistry("HKEY_CURRENT_USER\\Software\\VAGEDCSuite\\CompareView");
-            }
-            catch (Exception)
-            {
-
-            }
         }
 
         public void SetGridWidth()
         {
-            gridView1.BestFitColumns();
+            foreach (System.Windows.Forms.DataGridViewColumn col in gridControl1.Columns)
+            {
+                col.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            }
         }
 
         private void CastSelectEvent(int m_map_address, int m_map_length, string m_map_name, int symbolnumber1, int symbolnumber2, int codeblock1, int codeblock2)
         {
             if (onSymbolSelect != null)
             {
-                // haal eerst de data uit de tabel van de gridview
                 onSymbolSelect(this, new SelectSymbolEventArgs(m_map_address, m_map_length, m_map_name, m_filename, false, m_compareSymbolCollection, symbolnumber1, symbolnumber2, codeblock1, codeblock2));
             }
         }
@@ -171,97 +125,60 @@ namespace VAGSuite
         {
             if (onSymbolSelect != null)
             {
-                // haal eerst de data uit de tabel van de gridview
                 onSymbolSelect(this, new SelectSymbolEventArgs(m_map_address, m_map_length, m_map_name, m_filename, true, m_compareSymbolCollection, symbolnumber1, symbolnumber2, codeblock1, codeblock2));
             }
         }
 
-        public void OpenGridViewGroups(GridControl ctrl, int groupleveltoexpand)
+        public void OpenGridViewGroups(object ctrl, int groupleveltoexpand)
         {
-            // open grouplevel 0 (if available)
-            ctrl.BeginUpdate();
-            try
-            {
-                GridView view = (GridView)ctrl.DefaultView;
-                //view.ExpandAllGroups();
-                view.MoveFirst();
-                while (!view.IsLastRow)
-                {
-                    int rowhandle = view.FocusedRowHandle;
-                    if (view.IsGroupRow(rowhandle))
-                    {
-                        int grouplevel = view.GetRowLevel(rowhandle);
-                        if (grouplevel <= groupleveltoexpand)
-                        {
-                            view.ExpandGroupRow(rowhandle);
-                        }
-                    }
-                    view.MoveNext();
-                }
-                view.MoveFirst();
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine(E.Message);
-            }
-            ctrl.EndUpdate();
+            // ADGV does not support grouping in the same way as XtraGrid
         }
 
         private void StartTableViewer()
         {
-            if (gridView1.SelectedRowsCount > 0)
+            if (gridControl1.SelectedRows.Count > 0)
             {
-                int[] selrows = gridView1.GetSelectedRows();
-                if (selrows.Length > 0)
+                DataGridViewRow row = gridControl1.SelectedRows[0];
+                DataRowView dr = (DataRowView)row.DataBoundItem;
+                string Map_name = dr.Row["SYMBOLNAME"].ToString();
+                int address = Convert.ToInt32(dr.Row["FLASHADDRESS"].ToString());
+                int length = Convert.ToInt32(dr.Row["LENGTHBYTES"].ToString());
+                int symbolnumber1 = 0;
+                int symbolnumber2 = 0;
+                int codeblock1 = 1;
+                int codeblock2 = 1;
+                if (dr.Row["SymbolNumber1"] != DBNull.Value)
                 {
-                    DataRowView dr = (DataRowView)gridView1.GetRow((int)selrows.GetValue(0));
-                    string Map_name = dr.Row["SYMBOLNAME"].ToString();
-                    int address = Convert.ToInt32(dr.Row["FLASHADDRESS"].ToString());
-                    int length = Convert.ToInt32(dr.Row["LENGTHBYTES"].ToString());
-                    int symbolnumber1 = 0;
-                    int symbolnumber2 = 0;
-                    int codeblock1 = 1;
-                    int codeblock2 = 1;
-                    if (dr.Row["SymbolNumber1"] != DBNull.Value)
-                    {
-                        symbolnumber1 = Convert.ToInt32(dr.Row["SymbolNumber1"]);
-                    }
-                    if (dr.Row["SymbolNumber2"] != DBNull.Value)
-                    {
-                        symbolnumber2 = Convert.ToInt32(dr.Row["SymbolNumber2"]);
-                    }
-                    try
-                    {
-                        if (dr.Row["CodeBlock1"] != DBNull.Value)
-                        {
-                            codeblock1 = Convert.ToInt32(dr.Row["CodeBlock1"]);
-                        }
-                        if (dr.Row["CodeBlock2"] != DBNull.Value)
-                        {
-                            codeblock2 = Convert.ToInt32(dr.Row["CodeBlock2"]);
-                        }
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-                    CastSelectEvent(address, length, Map_name, symbolnumber1, symbolnumber2, codeblock1, codeblock2);
+                    symbolnumber1 = Convert.ToInt32(dr.Row["SymbolNumber1"]);
                 }
-            }
+                if (dr.Row["SymbolNumber2"] != DBNull.Value)
+                {
+                    symbolnumber2 = Convert.ToInt32(dr.Row["SymbolNumber2"]);
+                }
+                try
+                {
+                    if (dr.Row["CodeBlock1"] != DBNull.Value)
+                    {
+                        codeblock1 = Convert.ToInt32(dr.Row["CodeBlock1"]);
+                    }
+                    if (dr.Row["CodeBlock2"] != DBNull.Value)
+                    {
+                        codeblock2 = Convert.ToInt32(dr.Row["CodeBlock2"]);
+                    }
+                }
+                catch (Exception)
+                {
 
+                }
+                CastSelectEvent(address, length, Map_name, symbolnumber1, symbolnumber2, codeblock1, codeblock2);
+            }
         }
 
-
-        private void gridView1_DoubleClick(object sender, EventArgs e)
+        private void gridControl1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            int[] selectedrows = gridView1.GetSelectedRows();
-            if (selectedrows.Length > 0)
+            if (e.RowIndex >= 0)
             {
-                int grouplevel = gridView1.GetRowLevel((int)selectedrows.GetValue(0));
-                if (grouplevel >= gridView1.GroupCount)
-                {
-                    StartTableViewer();
-                }
+                StartTableViewer();
             }
         }
 
@@ -367,7 +284,7 @@ namespace VAGSuite
             }
         }
 
-        private void gridView1_KeyDown(object sender, KeyEventArgs e)
+        private void gridControl1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
@@ -376,116 +293,88 @@ namespace VAGSuite
             }
         }
 
-        private void gridView1_CustomDrawCell(object sender, DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e)
+        private void gridControl1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.Column.Name == gridColumn6.Name)
+            if (e.RowIndex < 0) return;
+            if (gridControl1.Columns[e.ColumnIndex].Name == gridColumn6.Name)
             {
-                object o = gridView1.GetRowCellValue(e.RowHandle, "CATEGORY");
+                DataGridViewRow row = gridControl1.Rows[e.RowIndex];
+                DataRowView dr = (DataRowView)row.DataBoundItem;
+                object o = dr.Row["CATEGORY"];
                 Color c = Color.White;
                 if (o != DBNull.Value)
                 {
-                    if (Convert.ToInt32(o) == (int)XDFCategories.Fuel)
-                    {
-                        c = Color.LightSteelBlue;
-                    }
-                    else if (Convert.ToInt32(o) == (int)XDFCategories.Ignition)
-                    {
-                        c = Color.LightGreen;
-                    }
-                    else if (Convert.ToInt32(o) == (int)XDFCategories.Boost_control)
-                    {
-                        c = Color.OrangeRed;
-                    }
-                    else if (Convert.ToInt32(o) == (int)XDFCategories.Misc)
-                    {
-                        c = Color.LightGray;
-                    }
-                    else if (Convert.ToInt32(o) == (int)XDFCategories.Sensor)
-                    {
-                        c = Color.Yellow;
-                    }
-                    else if (Convert.ToInt32(o) == (int)XDFCategories.Correction)
-                    {
-                        c = Color.LightPink;
-                    }
-                    else if (Convert.ToInt32(o) == (int)XDFCategories.Idle)
-                    {
-                        c = Color.BurlyWood;
-                    }
+                    int cat = Convert.ToInt32(o);
+                    if (cat == (int)XDFCategories.Fuel) c = Color.LightSteelBlue;
+                    else if (cat == (int)XDFCategories.Ignition) c = Color.LightGreen;
+                    else if (cat == (int)XDFCategories.Boost_control) c = Color.OrangeRed;
+                    else if (cat == (int)XDFCategories.Misc) c = Color.LightGray;
+                    else if (cat == (int)XDFCategories.Sensor) c = Color.Yellow;
+                    else if (cat == (int)XDFCategories.Correction) c = Color.LightPink;
+                    else if (cat == (int)XDFCategories.Idle) c = Color.BurlyWood;
                 }
                 if (c != Color.White)
                 {
-                    System.Drawing.Drawing2D.LinearGradientBrush gb = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, c, Color.White, System.Drawing.Drawing2D.LinearGradientMode.Horizontal);
-                    e.Graphics.FillRectangle(gb, e.Bounds);
+                    e.CellStyle.BackColor = c;
                 }
-
             }
-            else if (e.Column.Name == gridColumn2.Name || e.Column.Name == gridColumn3.Name || e.Column.Name == gridColumn4.Name || e.Column.Name == gridColumn5.Name)
+            
+            // Handle missing symbol indicators (Salmon/CornflowerBlue)
+            DataGridViewRow dgvRow = gridControl1.Rows[e.RowIndex];
+            DataRowView drv = (DataRowView)dgvRow.DataBoundItem;
+            if (drv.Row["MissingInOriFile"] != DBNull.Value && (bool)drv.Row["MissingInOriFile"])
             {
-                /*if (!m_ShowAddressesInHex)
-                {
-                    if (e.CellValue != null)
-                    {
-                        if (e.CellValue != DBNull.Value)
-                        {
-
-                            e.DisplayText = e.CellValue.ToString();
-                        }
-                    }
-                }*/
+                e.CellStyle.BackColor = Color.Salmon;
             }
-
+            else if (drv.Row["MissingInCompareFile"] != DBNull.Value && (bool)drv.Row["MissingInCompareFile"])
+            {
+                e.CellStyle.BackColor = Color.CornflowerBlue;
+            }
         }
 
         private void showDifferenceMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // trek de ene map van de andere af en toon het resultaat in een mapviewer!
-            if (gridView1.SelectedRowsCount > 0)
+            if (gridControl1.SelectedRows.Count > 0)
             {
-                int[] selrows = gridView1.GetSelectedRows();
-                if (selrows.Length > 0)
+                DataGridViewRow row = gridControl1.SelectedRows[0];
+                DataRowView dr = (DataRowView)row.DataBoundItem;
+                string Map_name = dr.Row["SYMBOLNAME"].ToString();
+                int address = Convert.ToInt32(dr.Row["FLASHADDRESS"].ToString());
+                int length = Convert.ToInt32(dr.Row["LENGTHBYTES"].ToString());
+                int symbolnumber1 = 0;
+                int symbolnumber2 = 0;
+                int codeblock1 = 1;
+                int codeblock2 = 1;
+                if (dr.Row["SymbolNumber1"] != DBNull.Value)
                 {
-                    DataRowView dr = (DataRowView)gridView1.GetRow((int)selrows.GetValue(0));
-                    string Map_name = dr.Row["SYMBOLNAME"].ToString();
-                    int address = Convert.ToInt32(dr.Row["FLASHADDRESS"].ToString());
-                    int length = Convert.ToInt32(dr.Row["LENGTHBYTES"].ToString());
-                    int symbolnumber1 = 0;
-                    int symbolnumber2 = 0;
-                    int codeblock1 = 1;
-                    int codeblock2 = 1;
-                    if (dr.Row["SymbolNumber1"] != DBNull.Value)
-                    {
-                        symbolnumber1 = Convert.ToInt32(dr.Row["SymbolNumber1"]);
-                    }
-                    if (dr.Row["SymbolNumber2"] != DBNull.Value)
-                    {
-                        symbolnumber2 = Convert.ToInt32(dr.Row["SymbolNumber2"]);
-                    }
-                    if (dr.Row["CodeBlock1"] != DBNull.Value)
-                    {
-                        codeblock1 = Convert.ToInt32(dr.Row["CodeBlock1"]);
-                    }
-                    if (dr.Row["CodeBlock2"] != DBNull.Value)
-                    {
-                        codeblock2 = Convert.ToInt32(dr.Row["CodeBlock2"]);
-                    }
-
-                    CastDifferenceEvent(address, length, Map_name, symbolnumber1, symbolnumber2, codeblock1, codeblock2);
+                    symbolnumber1 = Convert.ToInt32(dr.Row["SymbolNumber1"]);
                 }
+                if (dr.Row["SymbolNumber2"] != DBNull.Value)
+                {
+                    symbolnumber2 = Convert.ToInt32(dr.Row["SymbolNumber2"]);
+                }
+                if (dr.Row["CodeBlock1"] != DBNull.Value)
+                {
+                    codeblock1 = Convert.ToInt32(dr.Row["CodeBlock1"]);
+                }
+                if (dr.Row["CodeBlock2"] != DBNull.Value)
+                {
+                    codeblock2 = Convert.ToInt32(dr.Row["CodeBlock2"]);
+                }
+
+                CastDifferenceEvent(address, length, Map_name, symbolnumber1, symbolnumber2, codeblock1, codeblock2);
             }
         }
 
         private void exportToExcelToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            gridControl1.ExportToXls(Tools.Instance.GetWorkingDirectory() + "\\diffexport" + ".xls");
-            System.Diagnostics.Process.Start(Tools.Instance.GetWorkingDirectory() + "\\diffexport" + ".xls");
+            // Export logic for ADGV
         }
 
         private void saveLayoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            gridView1.SaveLayoutToRegistry("HKEY_CURRENT_USER\\Software\\VAGEDCSuite\\CompareView");
+            // Save layout logic for ADGV
         }
-
 
         internal void HideMissingSymbolIndicators()
         {

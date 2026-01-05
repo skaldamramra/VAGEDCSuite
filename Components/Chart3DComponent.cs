@@ -597,8 +597,8 @@ namespace VAGSuite.Components
                             int labelCount = Math.Min(6, _xAxisValues.Length);
                             for (int i = 0; i < labelCount; i++)
                             {
-                                int idx = (i * (_xAxisValues.Length - 1)) / (labelCount - 1);
-                                float t = (float)i / (labelCount - 1);
+                                int idx = (labelCount > 1) ? (i * (_xAxisValues.Length - 1)) / (labelCount - 1) : 0;
+                                float t = (labelCount > 1) ? (float)i / (labelCount - 1) : 0;
                                 Vector3 pos = new Vector3(min.X + (max.X - min.X) * t, anchor.Y, min.Z);
                                 PointF screenPos = ProjectToScreen(pos);
                                 if (screenPos != PointF.Empty)
@@ -620,8 +620,8 @@ namespace VAGSuite.Components
                             int labelCount = Math.Min(6, _yAxisValues.Length);
                             for (int i = 0; i < labelCount; i++)
                             {
-                                int idx = (i * (_yAxisValues.Length - 1)) / (labelCount - 1);
-                                float t = (float)i / (labelCount - 1);
+                                int idx = (labelCount > 1) ? (i * (_yAxisValues.Length - 1)) / (labelCount - 1) : 0;
+                                float t = (labelCount > 1) ? (float)i / (labelCount - 1) : 0;
                                 Vector3 pos = new Vector3(anchor.X, min.Y + (max.Y - min.Y) * t, min.Z);
                                 PointF screenPos = ProjectToScreen(pos);
                                 if (screenPos != PointF.Empty)
@@ -1244,6 +1244,13 @@ namespace VAGSuite.Components
             {
                 _glControl.MakeCurrent();
                 CheckGLError("Init:MakeCurrent");
+
+                // Clean up existing shader if re-initializing
+                if (_shaderProgram > 0)
+                {
+                    GL.DeleteProgram(_shaderProgram);
+                    _shaderProgram = 0;
+                }
 
                 GL.ClearColor(Color.FromArgb(50, 50, 50));
                 GL.Enable(EnableCap.DepthTest);

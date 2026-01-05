@@ -5,11 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmSymbolSelect : DevExpress.XtraEditors.XtraForm
+    public partial class frmSymbolSelect : KryptonForm
     {
         SymbolCollection m_symbols;
 
@@ -17,9 +17,9 @@ namespace VAGSuite
         {
             get
             {
-                if (lookUpEdit1.EditValue != null)
+                if (lookUpEdit1.SelectedItem != null)
                 {
-                    return (string)lookUpEdit1.EditValue;
+                    return lookUpEdit1.SelectedItem.ToString();
                 }
                 else
                 {
@@ -48,9 +48,14 @@ namespace VAGSuite
 
         private void frmSymbolSelect_Load(object sender, EventArgs e)
         {
-            lookUpEdit1.Properties.ValueMember = "Varname";
-            lookUpEdit1.Properties.DisplayMember = "Varname";
-            lookUpEdit1.Properties.DataSource = m_symbols;
+            lookUpEdit1.Items.Clear();
+            if (m_symbols != null)
+            {
+                foreach (SymbolHelper sh in m_symbols)
+                {
+                    lookUpEdit1.Items.Add(sh.Varname);
+                }
+            }
         }
     }
 }

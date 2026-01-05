@@ -5,11 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmProjectProperties : DevExpress.XtraEditors.XtraForm
+    public partial class frmProjectProperties : KryptonForm
     {
         public frmProjectProperties()
         {
@@ -108,7 +108,7 @@ namespace VAGSuite
             }
         }
 
-        private void buttonEdit1_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
+        private void btnBrowse_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "Binary files|*.bin";

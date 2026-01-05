@@ -5,12 +5,12 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 using System.IO;
 
 namespace VAGSuite
 {
-    public partial class frmProjectLogbook : DevExpress.XtraEditors.XtraForm
+    public partial class frmProjectLogbook : KryptonForm
     {
         public frmProjectLogbook()
         {

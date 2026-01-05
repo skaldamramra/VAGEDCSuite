@@ -6,11 +6,11 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmBinmerger : DevExpress.XtraEditors.XtraForm
+    public partial class frmBinmerger : KryptonForm
     {
         public frmBinmerger()
         {
@@ -37,34 +37,26 @@ namespace VAGSuite
                             FileInfo fi2 = new FileInfo(buttonEdit2.Text);
                             if (fi.Length == fi2.Length)
                             {
-                                FileStream fs = File.Create(saveFileDialog1.FileName);
-                                BinaryWriter bw = new BinaryWriter(fs);
-
-                                FileStream fsi1 = File.OpenRead(buttonEdit1.Text);
-                                BinaryReader br1 = new BinaryReader(fsi1);
-
-                                FileStream fsi2 = File.OpenRead(buttonEdit2.Text);
-                                BinaryReader br2 = new BinaryReader(fsi2);
-
-                                for (int tel = 0; tel < fi.Length; tel++)
+                                using (FileStream fs = File.Create(saveFileDialog1.FileName))
+                                using (BinaryWriter bw = new BinaryWriter(fs))
+                                using (FileStream fsi1 = File.OpenRead(buttonEdit1.Text))
+                                using (BinaryReader br1 = new BinaryReader(fsi1))
+                                using (FileStream fsi2 = File.OpenRead(buttonEdit2.Text))
+                                using (BinaryReader br2 = new BinaryReader(fsi2))
                                 {
-                                    Byte ib1 = br1.ReadByte();
-                                    Byte ib2 = br2.ReadByte();
-                                    bw.Write(ib2);
-                                    bw.Write(ib1);
+                                    for (int tel = 0; tel < fi.Length; tel++)
+                                    {
+                                        Byte ib1 = br1.ReadByte();
+                                        Byte ib2 = br2.ReadByte();
+                                        bw.Write(ib2);
+                                        bw.Write(ib1);
+                                    }
                                 }
-
-                                bw.Close();
-                                fs.Close();
-                                fsi1.Close();
-                                br1.Close();
-                                fsi2.Close();
-                                br2.Close();
-                                MessageBox.Show("Files merged successfully");
+                                KryptonMessageBox.Show("Files merged successfully", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             }
                             else
                             {
-                                MessageBox.Show("File lengths don't match, unable to merge!");
+                                KryptonMessageBox.Show("File lengths don't match, unable to merge!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                             
                         }
@@ -73,12 +65,12 @@ namespace VAGSuite
             }
             catch (Exception E)
             {
-                MessageBox.Show(E.Message);
+                KryptonMessageBox.Show(E.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             this.Close();
         }
 
-        private void buttonEdit1_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
+        private void btnBrowse1_Click(object sender, EventArgs e)
         {
             openFileDialog1.FileName = "";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
@@ -87,7 +79,7 @@ namespace VAGSuite
             }
         }
 
-        private void buttonEdit2_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
+        private void btnBrowse2_Click(object sender, EventArgs e)
         {
             openFileDialog1.FileName = "";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
@@ -95,6 +87,5 @@ namespace VAGSuite
                 buttonEdit2.Text = openFileDialog1.FileName;
             }
         }
-    
     }
 }

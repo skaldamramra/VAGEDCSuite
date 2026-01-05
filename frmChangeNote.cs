@@ -5,11 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmChangeNote : DevExpress.XtraEditors.XtraForm
+    public partial class frmChangeNote : KryptonForm
     {
         public frmChangeNote()
         {

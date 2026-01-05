@@ -3,15 +3,15 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
-
 using Be.Windows.Forms;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
 	/// <summary>
 	/// Summary description for FormFind.
 	/// </summary>
-    public class FormFind : DevExpress.XtraEditors.XtraForm
+    public class FormFind : KryptonForm
 	{
 		private Be.Windows.Forms.HexBox hexBox;
 		private System.Windows.Forms.TextBox txtString;
@@ -130,7 +130,6 @@ namespace VAGSuite
             // btnOK
             // 
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOK.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnOK.Location = new System.Drawing.Point(245, 211);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
@@ -160,8 +159,6 @@ namespace VAGSuite
             // FormFind
             // 
             this.AcceptButton = this.btnOK;
-            this.Appearance.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Appearance.Options.UseFont = true;
             this.AutoScaleBaseSize = new System.Drawing.Size(5, 14);
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(336, 246);
@@ -199,22 +196,22 @@ namespace VAGSuite
 			}
 		}
 
-        private byte[] CollectionToArray(System.Collections.Generic.List<byte> list)
-        {
-            byte[] retval = new byte[list.Count];
-            int i = 0;
-            try
-            {
-                foreach (byte b in list)
-                {
-                    retval[i++] = b;
-                }
-            }
-            catch (Exception)
-            {
-            }
-            return retval;
-        }
+		private byte[] CollectionToArray(System.Collections.Generic.List<byte> list)
+		{
+			byte[] retval = new byte[list.Count];
+			int i = 0;
+			try
+			{
+				foreach (byte b in list)
+				{
+					retval[i++] = b;
+				}
+			}
+			catch (Exception)
+			{
+			}
+			return retval;
+		}
 
 		private void rb_CheckedChanged(object sender, System.EventArgs e)
 		{

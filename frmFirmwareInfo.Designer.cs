@@ -28,264 +28,247 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
-            this.labelControl8 = new DevExpress.XtraEditors.LabelControl();
-            this.labelControl7 = new DevExpress.XtraEditors.LabelControl();
-            this.textEdit7 = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl6 = new DevExpress.XtraEditors.LabelControl();
-            this.textEdit6 = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl5 = new DevExpress.XtraEditors.LabelControl();
-            this.textEdit5 = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl4 = new DevExpress.XtraEditors.LabelControl();
-            this.textEdit4 = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
-            this.textEdit3 = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
-            this.textEdit2 = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
-            this.textEdit1 = new DevExpress.XtraEditors.TextEdit();
-            this.simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
-            this.buttonEdit1 = new DevExpress.XtraEditors.ButtonEdit();
+            this.groupControl1 = new ComponentFactory.Krypton.Toolkit.KryptonGroupBox();
+            this.labelControl8 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.labelControl7 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.textEdit7 = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.labelControl6 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.textEdit6 = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.labelControl5 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.textEdit5 = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.labelControl4 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.textEdit4 = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.labelControl3 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.textEdit3 = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.labelControl2 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.textEdit2 = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.labelControl1 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.textEdit1 = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.simpleButton1 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.buttonEdit1 = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.btnBrowse = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.groupControl1.Panel)).BeginInit();
+            this.groupControl1.Panel.SuspendLayout();
             this.groupControl1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit7.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit6.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit5.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit4.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit3.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit2.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit1.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.buttonEdit1.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // groupControl1
             // 
-            this.groupControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupControl1.Controls.Add(this.buttonEdit1);
-            this.groupControl1.Controls.Add(this.labelControl8);
-            this.groupControl1.Controls.Add(this.labelControl7);
-            this.groupControl1.Controls.Add(this.textEdit7);
-            this.groupControl1.Controls.Add(this.labelControl6);
-            this.groupControl1.Controls.Add(this.textEdit6);
-            this.groupControl1.Controls.Add(this.labelControl5);
-            this.groupControl1.Controls.Add(this.textEdit5);
-            this.groupControl1.Controls.Add(this.labelControl4);
-            this.groupControl1.Controls.Add(this.textEdit4);
-            this.groupControl1.Controls.Add(this.labelControl3);
-            this.groupControl1.Controls.Add(this.textEdit3);
-            this.groupControl1.Controls.Add(this.labelControl2);
-            this.groupControl1.Controls.Add(this.textEdit2);
-            this.groupControl1.Controls.Add(this.labelControl1);
-            this.groupControl1.Controls.Add(this.textEdit1);
             this.groupControl1.Location = new System.Drawing.Point(12, 12);
             this.groupControl1.Name = "groupControl1";
-            this.groupControl1.Size = new System.Drawing.Size(495, 273);
+            // 
+            // groupControl1.Panel
+            // 
+            this.groupControl1.Panel.Controls.Add(this.labelControl8);
+            this.groupControl1.Panel.Controls.Add(this.labelControl7);
+            this.groupControl1.Panel.Controls.Add(this.textEdit7);
+            this.groupControl1.Panel.Controls.Add(this.labelControl6);
+            this.groupControl1.Panel.Controls.Add(this.textEdit6);
+            this.groupControl1.Panel.Controls.Add(this.labelControl5);
+            this.groupControl1.Panel.Controls.Add(this.textEdit5);
+            this.groupControl1.Panel.Controls.Add(this.labelControl4);
+            this.groupControl1.Panel.Controls.Add(this.textEdit4);
+            this.groupControl1.Panel.Controls.Add(this.labelControl3);
+            this.groupControl1.Panel.Controls.Add(this.textEdit3);
+            this.groupControl1.Panel.Controls.Add(this.labelControl2);
+            this.groupControl1.Panel.Controls.Add(this.textEdit2);
+            this.groupControl1.Panel.Controls.Add(this.labelControl1);
+            this.groupControl1.Panel.Controls.Add(this.textEdit1);
+            this.groupControl1.Panel.Controls.Add(this.buttonEdit1);
+            this.groupControl1.Panel.Controls.Add(this.btnBrowse);
+            this.groupControl1.Size = new System.Drawing.Size(460, 280);
             this.groupControl1.TabIndex = 0;
-            this.groupControl1.Text = "Details";
+            this.groupControl1.Values.Heading = "Firmware details";
             // 
             // labelControl8
             // 
-            this.labelControl8.Location = new System.Drawing.Point(28, 225);
+            this.labelControl8.Location = new System.Drawing.Point(10, 225);
             this.labelControl8.Name = "labelControl8";
-            this.labelControl8.Size = new System.Drawing.Size(54, 13);
-            this.labelControl8.TabIndex = 15;
-            this.labelControl8.Text = "Codeblocks";
+            this.labelControl8.Size = new System.Drawing.Size(80, 20);
+            this.labelControl8.TabIndex = 14;
+            this.labelControl8.Values.Text = "Code blocks:";
             // 
             // labelControl7
             // 
-            this.labelControl7.Location = new System.Drawing.Point(28, 199);
+            this.labelControl7.Location = new System.Drawing.Point(10, 195);
             this.labelControl7.Name = "labelControl7";
-            this.labelControl7.Size = new System.Drawing.Size(73, 13);
-            this.labelControl7.TabIndex = 13;
-            this.labelControl7.Text = "Checksum type";
+            this.labelControl7.Size = new System.Drawing.Size(95, 20);
+            this.labelControl7.TabIndex = 12;
+            this.labelControl7.Values.Text = "Checksum type:";
             // 
             // textEdit7
             // 
-            this.textEdit7.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textEdit7.Location = new System.Drawing.Point(173, 194);
+            this.textEdit7.Location = new System.Drawing.Point(120, 195);
             this.textEdit7.Name = "textEdit7";
-            this.textEdit7.Properties.ReadOnly = true;
-            this.textEdit7.Size = new System.Drawing.Size(276, 20);
-            this.textEdit7.TabIndex = 12;
+            this.textEdit7.ReadOnly = true;
+            this.textEdit7.Size = new System.Drawing.Size(320, 23);
+            this.textEdit7.TabIndex = 13;
             // 
             // labelControl6
             // 
-            this.labelControl6.Location = new System.Drawing.Point(28, 173);
+            this.labelControl6.Location = new System.Drawing.Point(10, 165);
             this.labelControl6.Name = "labelControl6";
-            this.labelControl6.Size = new System.Drawing.Size(45, 13);
-            this.labelControl6.TabIndex = 11;
-            this.labelControl6.Text = "ECU type";
+            this.labelControl6.Size = new System.Drawing.Size(74, 20);
+            this.labelControl6.TabIndex = 10;
+            this.labelControl6.Values.Text = "ECU details:";
             // 
             // textEdit6
             // 
-            this.textEdit6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textEdit6.Location = new System.Drawing.Point(173, 168);
+            this.textEdit6.Location = new System.Drawing.Point(120, 165);
             this.textEdit6.Name = "textEdit6";
-            this.textEdit6.Properties.ReadOnly = true;
-            this.textEdit6.Size = new System.Drawing.Size(276, 20);
-            this.textEdit6.TabIndex = 10;
+            this.textEdit6.ReadOnly = true;
+            this.textEdit6.Size = new System.Drawing.Size(320, 23);
+            this.textEdit6.TabIndex = 11;
             // 
             // labelControl5
             // 
-            this.labelControl5.Location = new System.Drawing.Point(28, 121);
+            this.labelControl5.Location = new System.Drawing.Point(10, 135);
             this.labelControl5.Name = "labelControl5";
-            this.labelControl5.Size = new System.Drawing.Size(51, 13);
-            this.labelControl5.TabIndex = 9;
-            this.labelControl5.Text = "Car details";
+            this.labelControl5.Size = new System.Drawing.Size(71, 20);
+            this.labelControl5.TabIndex = 8;
+            this.labelControl5.Values.Text = "Car details:";
             // 
             // textEdit5
             // 
-            this.textEdit5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textEdit5.Location = new System.Drawing.Point(173, 116);
+            this.textEdit5.Location = new System.Drawing.Point(120, 135);
             this.textEdit5.Name = "textEdit5";
-            this.textEdit5.Properties.ReadOnly = true;
-            this.textEdit5.Size = new System.Drawing.Size(276, 20);
-            this.textEdit5.TabIndex = 8;
+            this.textEdit5.ReadOnly = true;
+            this.textEdit5.Size = new System.Drawing.Size(320, 23);
+            this.textEdit5.TabIndex = 9;
             // 
             // labelControl4
             // 
-            this.labelControl4.Location = new System.Drawing.Point(28, 147);
+            this.labelControl4.Location = new System.Drawing.Point(10, 105);
             this.labelControl4.Name = "labelControl4";
-            this.labelControl4.Size = new System.Drawing.Size(57, 13);
-            this.labelControl4.TabIndex = 7;
-            this.labelControl4.Text = "Engine type";
+            this.labelControl4.Size = new System.Drawing.Size(79, 20);
+            this.labelControl4.TabIndex = 6;
+            this.labelControl4.Values.Text = "Engine type:";
             // 
             // textEdit4
             // 
-            this.textEdit4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textEdit4.Location = new System.Drawing.Point(173, 142);
+            this.textEdit4.Location = new System.Drawing.Point(120, 105);
             this.textEdit4.Name = "textEdit4";
-            this.textEdit4.Properties.ReadOnly = true;
-            this.textEdit4.Size = new System.Drawing.Size(276, 20);
-            this.textEdit4.TabIndex = 6;
+            this.textEdit4.ReadOnly = true;
+            this.textEdit4.Size = new System.Drawing.Size(320, 23);
+            this.textEdit4.TabIndex = 7;
             // 
             // labelControl3
             // 
-            this.labelControl3.Location = new System.Drawing.Point(28, 95);
+            this.labelControl3.Location = new System.Drawing.Point(10, 75);
             this.labelControl3.Name = "labelControl3";
-            this.labelControl3.Size = new System.Drawing.Size(50, 13);
-            this.labelControl3.TabIndex = 5;
-            this.labelControl3.Text = "Info string";
+            this.labelControl3.Size = new System.Drawing.Size(71, 20);
+            this.labelControl3.TabIndex = 4;
+            this.labelControl3.Values.Text = "Info string:";
             // 
             // textEdit3
             // 
-            this.textEdit3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textEdit3.Location = new System.Drawing.Point(173, 90);
+            this.textEdit3.Location = new System.Drawing.Point(120, 75);
             this.textEdit3.Name = "textEdit3";
-            this.textEdit3.Properties.ReadOnly = true;
-            this.textEdit3.Size = new System.Drawing.Size(276, 20);
-            this.textEdit3.TabIndex = 4;
+            this.textEdit3.ReadOnly = true;
+            this.textEdit3.Size = new System.Drawing.Size(320, 23);
+            this.textEdit3.TabIndex = 5;
             // 
             // labelControl2
             // 
-            this.labelControl2.Location = new System.Drawing.Point(28, 69);
+            this.labelControl2.Location = new System.Drawing.Point(10, 45);
             this.labelControl2.Name = "labelControl2";
-            this.labelControl2.Size = new System.Drawing.Size(58, 13);
-            this.labelControl2.TabIndex = 3;
-            this.labelControl2.Text = "Software ID";
+            this.labelControl2.Size = new System.Drawing.Size(75, 20);
+            this.labelControl2.TabIndex = 2;
+            this.labelControl2.Values.Text = "Software ID:";
             // 
             // textEdit2
             // 
-            this.textEdit2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textEdit2.Location = new System.Drawing.Point(173, 64);
+            this.textEdit2.Location = new System.Drawing.Point(120, 45);
             this.textEdit2.Name = "textEdit2";
-            this.textEdit2.Properties.ReadOnly = true;
-            this.textEdit2.Size = new System.Drawing.Size(276, 20);
-            this.textEdit2.TabIndex = 2;
+            this.textEdit2.ReadOnly = true;
+            this.textEdit2.Size = new System.Drawing.Size(320, 23);
+            this.textEdit2.TabIndex = 3;
             // 
             // labelControl1
             // 
-            this.labelControl1.Location = new System.Drawing.Point(28, 43);
+            this.labelControl1.Location = new System.Drawing.Point(10, 15);
             this.labelControl1.Name = "labelControl1";
-            this.labelControl1.Size = new System.Drawing.Size(87, 13);
-            this.labelControl1.TabIndex = 1;
-            this.labelControl1.Text = "Bosch partnumber";
+            this.labelControl1.Size = new System.Drawing.Size(82, 20);
+            this.labelControl1.TabIndex = 0;
+            this.labelControl1.Values.Text = "Part number:";
             // 
             // textEdit1
             // 
-            this.textEdit1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textEdit1.Location = new System.Drawing.Point(173, 38);
+            this.textEdit1.Location = new System.Drawing.Point(120, 15);
             this.textEdit1.Name = "textEdit1";
-            this.textEdit1.Properties.ReadOnly = true;
-            this.textEdit1.Size = new System.Drawing.Size(276, 20);
-            this.textEdit1.TabIndex = 0;
+            this.textEdit1.ReadOnly = true;
+            this.textEdit1.Size = new System.Drawing.Size(320, 23);
+            this.textEdit1.TabIndex = 1;
             // 
             // simpleButton1
             // 
-            this.simpleButton1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.simpleButton1.Location = new System.Drawing.Point(432, 291);
+            this.simpleButton1.Location = new System.Drawing.Point(397, 300);
             this.simpleButton1.Name = "simpleButton1";
-            this.simpleButton1.Size = new System.Drawing.Size(75, 23);
+            this.simpleButton1.Size = new System.Drawing.Size(75, 25);
             this.simpleButton1.TabIndex = 1;
-            this.simpleButton1.Text = "Ok";
+            this.simpleButton1.Values.Text = "Ok";
             this.simpleButton1.Click += new System.EventHandler(this.simpleButton1_Click);
             // 
             // buttonEdit1
             // 
-            this.buttonEdit1.Location = new System.Drawing.Point(173, 222);
+            this.buttonEdit1.Location = new System.Drawing.Point(120, 225);
             this.buttonEdit1.Name = "buttonEdit1";
-            this.buttonEdit1.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton()});
-            this.buttonEdit1.Size = new System.Drawing.Size(276, 20);
-            this.buttonEdit1.TabIndex = 16;
-            this.buttonEdit1.ButtonClick += new DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(this.buttonEdit1_ButtonClick);
+            this.buttonEdit1.ReadOnly = true;
+            this.buttonEdit1.Size = new System.Drawing.Size(285, 23);
+            this.buttonEdit1.TabIndex = 15;
+            // 
+            // btnBrowse
+            // 
+            this.btnBrowse.Location = new System.Drawing.Point(410, 225);
+            this.btnBrowse.Name = "btnBrowse";
+            this.btnBrowse.Size = new System.Drawing.Size(30, 23);
+            this.btnBrowse.TabIndex = 16;
+            this.btnBrowse.Values.Text = "...";
+            this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
             // 
             // frmFirmwareInfo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(519, 326);
-            this.ControlBox = false;
+            this.ClientSize = new System.Drawing.Size(484, 335);
             this.Controls.Add(this.simpleButton1);
             this.Controls.Add(this.groupControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "frmFirmwareInfo";
-            this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Firmware information";
+            this.Text = "Firmware Information";
+            ((System.ComponentModel.ISupportInitialize)(this.groupControl1.Panel)).EndInit();
+            this.groupControl1.Panel.ResumeLayout(false);
+            this.groupControl1.Panel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();
             this.groupControl1.ResumeLayout(false);
-            this.groupControl1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit7.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit6.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit5.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit4.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit3.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit2.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.textEdit1.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.buttonEdit1.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private DevExpress.XtraEditors.GroupControl groupControl1;
-        private DevExpress.XtraEditors.SimpleButton simpleButton1;
-        private DevExpress.XtraEditors.LabelControl labelControl4;
-        private DevExpress.XtraEditors.TextEdit textEdit4;
-        private DevExpress.XtraEditors.LabelControl labelControl3;
-        private DevExpress.XtraEditors.TextEdit textEdit3;
-        private DevExpress.XtraEditors.LabelControl labelControl2;
-        private DevExpress.XtraEditors.TextEdit textEdit2;
-        private DevExpress.XtraEditors.LabelControl labelControl1;
-        private DevExpress.XtraEditors.TextEdit textEdit1;
-        private DevExpress.XtraEditors.LabelControl labelControl5;
-        private DevExpress.XtraEditors.TextEdit textEdit5;
-        private DevExpress.XtraEditors.LabelControl labelControl6;
-        private DevExpress.XtraEditors.TextEdit textEdit6;
-        private DevExpress.XtraEditors.LabelControl labelControl7;
-        private DevExpress.XtraEditors.TextEdit textEdit7;
-        private DevExpress.XtraEditors.LabelControl labelControl8;
-        private DevExpress.XtraEditors.ButtonEdit buttonEdit1;
+        private ComponentFactory.Krypton.Toolkit.KryptonGroupBox groupControl1;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl8;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl7;
+        private ComponentFactory.Krypton.Toolkit.KryptonTextBox textEdit7;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl6;
+        private ComponentFactory.Krypton.Toolkit.KryptonTextBox textEdit6;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl5;
+        private ComponentFactory.Krypton.Toolkit.KryptonTextBox textEdit5;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl4;
+        private ComponentFactory.Krypton.Toolkit.KryptonTextBox textEdit4;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl3;
+        private ComponentFactory.Krypton.Toolkit.KryptonTextBox textEdit3;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl2;
+        private ComponentFactory.Krypton.Toolkit.KryptonTextBox textEdit2;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl1;
+        private ComponentFactory.Krypton.Toolkit.KryptonTextBox textEdit1;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton1;
+        private ComponentFactory.Krypton.Toolkit.KryptonTextBox buttonEdit1;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton btnBrowse;
     }
 }

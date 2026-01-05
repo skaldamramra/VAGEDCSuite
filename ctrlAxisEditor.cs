@@ -5,11 +5,11 @@ using System.Drawing;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class ctrlAxisEditor : DevExpress.XtraEditors.XtraUserControl
+    public partial class ctrlAxisEditor : System.Windows.Forms.UserControl
     {
         public delegate void ViewerClose(object sender, EventArgs e);
         public event ctrlAxisEditor.ViewerClose onClose;
@@ -109,27 +109,14 @@ namespace VAGSuite
 
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
-            // cast save event
-            gridView1.CloseEditor();
+            gridControl1.EndEdit();
             CastSaveEvent();
         }
 
-        private void gridControl1_Click(object sender, EventArgs e)
+        private void gridControl1_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
-
-        }
-
-        private void gridView1_ValidatingEditor(object sender, DevExpress.XtraEditors.Controls.BaseContainerValidateEditorEventArgs e)
-        {
-            try
-            {
-                float tesvalue = (float)Convert.ToDouble(e.Value);
-            }
-            catch (Exception E)
-            {
-                e.ErrorText = "Invalid input value";
-                e.Valid = false;
-            }
+            KryptonMessageBox.Show("Invalid input value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            e.ThrowException = false;
         }
     }
 }

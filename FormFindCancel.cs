@@ -3,19 +3,19 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
-
 using Be.Windows.Forms;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
 	/// <summary>
 	/// Summary description for FormFindCancel.
 	/// </summary>
-    public class FormFindCancel : DevExpress.XtraEditors.XtraForm
+    public class FormFindCancel : KryptonForm
 	{
 		HexBox _hexBox;
 
-		private DevExpress.XtraEditors.SimpleButton btnCancel;
+		private ComponentFactory.Krypton.Toolkit.KryptonButton btnCancel;
 		private System.Windows.Forms.Label lblFinding;
 		private System.Windows.Forms.Timer timer;
 		private System.Windows.Forms.GroupBox groupBox1;
@@ -56,7 +56,7 @@ namespace VAGSuite
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-            this.btnCancel = new DevExpress.XtraEditors.SimpleButton();
+            this.btnCancel = new ComponentFactory.Krypton.Toolkit.KryptonButton();
 			this.lblFinding = new System.Windows.Forms.Label();
 			this.timer = new System.Windows.Forms.Timer(this.components);
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -68,18 +68,17 @@ namespace VAGSuite
 			// btnCancel
 			// 
 			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			//this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.btnCancel.Location = new System.Drawing.Point(208, 40);
 			this.btnCancel.Name = "btnCancel";
-			this.btnCancel.Size = new System.Drawing.Size(72, 23);
+			this.btnCancel.Size = new System.Drawing.Size(72, 25);
 			this.btnCancel.TabIndex = 0;
-			this.btnCancel.Text = "Cancel";
+			this.btnCancel.Values.Text = "Cancel";
 			this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
 			// 
 			// lblFinding
 			// 
 			this.lblFinding.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.lblFinding.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.lblFinding.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.lblFinding.ForeColor = System.Drawing.Color.Blue;
 			this.lblFinding.Location = new System.Drawing.Point(128, 40);
 			this.lblFinding.Name = "lblFinding";
@@ -134,7 +133,7 @@ namespace VAGSuite
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.lblFinding);
 			this.Controls.Add(this.btnCancel);
-			this.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;

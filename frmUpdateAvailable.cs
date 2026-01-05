@@ -5,22 +5,16 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 using System.IO;
 
 
 namespace VAGSuite
 {
-    public partial class frmUpdateAvailable : DevExpress.XtraEditors.XtraForm
+    public partial class frmUpdateAvailable : KryptonForm
     {
-
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
-        
         public frmUpdateAvailable()
         {
-            // Required for Windows Form Designer support
             InitializeComponent();
         }
 
@@ -57,8 +51,6 @@ namespace VAGSuite
         private void simpleButton3_Click(object sender, EventArgs e)
         {
             AddDebugLog("Starting explorer");
-            //ShowRSSFeeds();
-            //Application.DoEvents();
             System.Diagnostics.Process.Start("IEXPLORE.EXE","http://trionic.mobixs.eu/vagedcsuite/Notes.xml" );
         }
 

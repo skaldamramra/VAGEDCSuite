@@ -5,7 +5,6 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraBars.Docking;
 using ComponentFactory.Krypton.Docking;
 using ComponentFactory.Krypton.Navigator;
 using VAGSuite.Helpers;
@@ -15,12 +14,10 @@ namespace VAGSuite.Services
     public class SearchService
     {
         private AppSettings _appSettings;
-        private DockManager _dockManager;
         private KryptonDockingManager _kryptonDockingManager;
 
-        public SearchService(DockManager dockManager, KryptonDockingManager kryptonDockingManager, AppSettings appSettings)
+        public SearchService(KryptonDockingManager kryptonDockingManager, AppSettings appSettings)
         {
-            _dockManager = dockManager;
             _kryptonDockingManager = kryptonDockingManager;
             _appSettings = appSettings;
         }

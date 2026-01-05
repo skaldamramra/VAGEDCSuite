@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using DevExpress.XtraBars.Docking;
 using ComponentFactory.Krypton.Docking;
 using ComponentFactory.Krypton.Navigator;
 using VAGSuite.Helpers;
@@ -14,12 +13,10 @@ namespace VAGSuite.Services
     public class MapViewerService
     {
         private AppSettings _appSettings;
-        private DockManager _dockManager;
         private KryptonDockingManager _kryptonDockingManager;
 
-        public MapViewerService(DockManager dockManager, KryptonDockingManager kryptonDockingManager, AppSettings appSettings)
+        public MapViewerService(KryptonDockingManager kryptonDockingManager, AppSettings appSettings)
         {
-            _dockManager = dockManager;
             _kryptonDockingManager = kryptonDockingManager;
             _appSettings = appSettings;
         }
@@ -585,7 +582,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Checks if the symbol display is at the same address
         /// </summary>
-        public bool IsSymbolDisplaySameAddress(SymbolHelper sh, DockPanel pnl)
+        public bool IsSymbolDisplaySameAddress(SymbolHelper sh, KryptonPage pnl)
         {
             bool retval = false;
             try

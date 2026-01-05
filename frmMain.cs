@@ -121,8 +121,10 @@ namespace VAGSuite
         private AppSettings m_appSettings;
         private int lastHoverRowHandle = -1;
         private msiupdater m_msiUpdater;
+
         public DelegateStartReleaseNotePanel m_DelegateStartReleaseNotePanel;
         private frmSplash splash;
+
 
         // Refactored services
         private FileOperationsManager _fileOperationsManager;
@@ -171,7 +173,7 @@ namespace VAGSuite
             _fileComparisonService = new FileComparisonService(kryptonDockingManager1, m_appSettings);
             _viewSyncService = new ViewSynchronizationService(m_appSettings);
             _transactionService = new TransactionService(m_appSettings);
-            _mapViewerService = new MapViewerService(null, kryptonDockingManager1, m_appSettings);
+            _mapViewerService = new MapViewerService(kryptonDockingManager1, m_appSettings);
             
             // Wire the MouseMove event for tooltips
             // tvSymbols.MouseMove += new System.Windows.Forms.MouseEventHandler(this.adgvSymbols_MouseMove);
@@ -181,7 +183,7 @@ namespace VAGSuite
             _exportService = new ExportService(m_appSettings);
             _quickAccessService = new QuickAccessService(_mapViewerService);
             _layoutService = new LayoutService(m_appSettings);
-            _searchService = new SearchService(null, kryptonDockingManager1, m_appSettings);
+            _searchService = new SearchService(kryptonDockingManager1, m_appSettings);
             _firmwareService = new FirmwareService(m_appSettings);
             _launchControlService = new LaunchControlService(m_appSettings);
             _smokeLimiterService = new SmokeLimiterService(m_appSettings);
@@ -196,8 +198,15 @@ namespace VAGSuite
             mv.Dock = DockStyle.Fill;
             
             string title = "Release notes: " + version;
-            AddControlToDocking(mv, title, "ReleaseNotes", DockingEdge.Right);
+            AddControlToDocking(mv, title, "ReleaseNotes", ComponentFactory.Krypton.Docking.DockingEdge.Right);
         }
+
+        /// <summary>
+        /// Helper to add a control to the docking system.
+        /// This implementation is now redundant as it is defined in frmMain.KryptonDocking.cs
+        /// but we keep it here if the compiler requires it for this partial class file's scope
+        /// or we remove it if it causes CS0111.
+        /// </summary>
 
         private void btnBinaryCompare_ItemClick(object sender, EventArgs e)
         {
@@ -400,7 +409,7 @@ namespace VAGSuite
             return _mapViewerService.CheckMapViewerActive(sh, Tools.Instance.m_currentfile);
         }
 
-        private bool isSymbolDisplaySameAddress(SymbolHelper sh, KryptonPage pnl)
+        private bool isSymbolDisplaySameAddress(SymbolHelper sh, ComponentFactory.Krypton.Navigator.KryptonPage pnl)
         {
             // The service still expects DockPanel, we need to update the service or bypass for now
             // For now, we'll return false to allow compilation while we migrate the service
@@ -430,7 +439,7 @@ namespace VAGSuite
                 MapViewerEx tabdet = (MapViewerEx)sender;
                 string dockpanelname = "Symbol: " + tabdet.Map_name + " [" + Path.GetFileName(tabdet.Filename) + "]";
                 string dockpanelname3 = "Symbol difference: " + tabdet.Map_name + " [" + Path.GetFileName(tabdet.Filename) + "]";
-                foreach (var page in kryptonDockingManager1.Pages.ToArray())
+                foreach (ComponentFactory.Krypton.Navigator.KryptonPage page in kryptonDockingManager1.Pages.ToArray())
                 {
                     if (page.Text == dockpanelname || page.Text == dockpanelname3)
                     {
@@ -669,7 +678,7 @@ namespace VAGSuite
                     tabdet.onSymbolSelect += new CompareResults.NotifySelectSymbol(tabdet_onSymbolSelect);
                     
                     string title = "Compare results: " + Path.GetFileName(filename);
-                    AddControlToDocking(tabdet, title, "CompareResults", DockingEdge.Left);
+                    AddControlToDocking(tabdet, title, "CompareResults", ComponentFactory.Krypton.Docking.DockingEdge.Left);
                     
                     // Detect maps in comparison file
                     List<CodeBlock> compare_blocks = new List<CodeBlock>();
@@ -686,7 +695,6 @@ namespace VAGSuite
                         Tools.Instance.m_currentfile,
                         Tools.Instance.m_symbols,
                         compare_blocks,
-                        null,
                         tabdet_onSymbolSelect);
                     
                     tabdet.CompareSymbolCollection = compare_symbols;
@@ -2153,10 +2161,7 @@ namespace VAGSuite
                     airmassResult.Dock = DockStyle.Fill;
                     
                     string title = "Airmass result viewer: " + Path.GetFileName(Tools.Instance.m_currentfile);
-                    KryptonPage page = new KryptonPage(title);
-                    page.UniqueName = title;
-                    page.Controls.Add(airmassResult);
-                    kryptonDockingManager1.AddToWorkspace("Workspace", new KryptonPage[] { page });
+                    AddControlToDocking(airmassResult, title, "AirmassResult", ComponentFactory.Krypton.Docking.DockingEdge.Right);
 
                     airmassResult.onStartTableViewer += new ctrlAirmassResult.StartTableViewer(airmassResult_onStartTableViewer);
                     airmassResult.onClose += new ctrlAirmassResult.ViewerClose(airmassResult_onClose);
@@ -2232,7 +2237,7 @@ namespace VAGSuite
 
         private void SetMapSliderPosition(string filename, string symbolname, int sliderposition)
         {
-            foreach (var pnl in kryptonDockingManager1.Pages)
+            foreach (ComponentFactory.Krypton.Navigator.KryptonPage pnl in kryptonDockingManager1.Pages)
             {
                 foreach (Control c in pnl.Controls)
                 {
@@ -2257,7 +2262,7 @@ namespace VAGSuite
 
         private void SetMapScale(string filename, string symbolname, int axismax, int lockmode)
         {
-            foreach (var pnl in kryptonDockingManager1.Pages)
+            foreach (ComponentFactory.Krypton.Navigator.KryptonPage pnl in kryptonDockingManager1.Pages)
             {
                 foreach (Control c in pnl.Controls)
                 {
@@ -2280,7 +2285,7 @@ namespace VAGSuite
         private int FindMaxTableValue(string symbolname, int orgvalue)
         {
             int retval = orgvalue;
-            foreach (var pnl in kryptonDockingManager1.Pages)
+            foreach (ComponentFactory.Krypton.Navigator.KryptonPage pnl in kryptonDockingManager1.Pages)
             {
                 foreach (Control c in pnl.Controls)
                 {

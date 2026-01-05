@@ -5,11 +5,11 @@ using System.Drawing;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class ctrlCompressorMap : DevExpress.XtraEditors.XtraUserControl
+    public partial class ctrlCompressorMap : UserControl
     {
         public delegate void RefreshData(object sender, EventArgs e);
         public event ctrlCompressorMap.RefreshData onRefreshData;
@@ -472,7 +472,7 @@ namespace VAGSuite
 
         private double ConvertToFahrenheit(double celcius)
         {
-            //F =  C × 1.8 + 32
+            //F =  C ï¿½ 1.8 + 32
             double retval = (celcius * 1.8) + 32;
             return retval;
         }

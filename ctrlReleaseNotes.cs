@@ -5,12 +5,12 @@ using System.Drawing;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 using System.Globalization;
 
 namespace VAGSuite
 {
-    public partial class ctrlReleaseNotes : DevExpress.XtraEditors.XtraUserControl
+    public partial class ctrlReleaseNotes : UserControl
     {
         private DateTime m_LatestReleaseDate = DateTime.MinValue;
         public ctrlReleaseNotes()
@@ -101,8 +101,6 @@ namespace VAGSuite
                     }
 
                     gridControl1.DataSource = ds.Tables[2];
-                    //gridView1.SetMasterRowExpanded(0, true);
-                    gridView1.ExpandAllGroups();
                 }
             }
             catch (Exception E)
@@ -114,8 +112,7 @@ namespace VAGSuite
 
         private void printPreviewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            gridControl1.ShowPrintPreview();
-
+            // gridControl1.ShowPrintPreview();
         }
 
 

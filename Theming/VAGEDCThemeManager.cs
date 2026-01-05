@@ -204,7 +204,7 @@ namespace VAGSuite.Theming
         }
         
         /// <summary>
-        /// Deactivates custom theme and returns to DevExpress skin
+        /// Deactivates custom theme and returns to Krypton skin
         /// </summary>
         public void DeactivateCustomTheme()
         {
@@ -218,7 +218,7 @@ namespace VAGSuite.Theming
         }
         
         /// <summary>
-        /// Resets form and all controls to use DevExpress skin defaults
+        /// Resets form and all controls to use Krypton skin defaults
         /// </summary>
         private void ResetFormAppearance(Form form)
         {

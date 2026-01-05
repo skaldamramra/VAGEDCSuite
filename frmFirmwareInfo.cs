@@ -5,11 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmFirmwareInfo : DevExpress.XtraEditors.XtraForm
+    public partial class frmFirmwareInfo : KryptonForm
     {
         public frmFirmwareInfo()
         {
@@ -117,7 +117,7 @@ namespace VAGSuite
             this.Close();
         }
 
-        private void buttonEdit1_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
+        private void btnBrowse_Click(object sender, EventArgs e)
         {
             // open a codeblock browser screen
             frmCodeBlocks blocks = new frmCodeBlocks();

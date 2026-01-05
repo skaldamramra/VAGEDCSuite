@@ -5,11 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmEEPromEditor : DevExpress.XtraEditors.XtraForm
+    public partial class frmEEPromEditor : KryptonForm
     {
         EDC15P_EEPROM eeprom = new EDC15P_EEPROM();
         private string _filename = string.Empty;
@@ -35,7 +35,11 @@ namespace VAGSuite
             eeprom.Vin = textEdit3.Text;
             eeprom.Immo = textEdit1.Text;
             eeprom.ImmoActive = checkEdit1.Checked;
-            eeprom.Key = Convert.ToInt32(textEdit4.Text);
+            try
+            {
+                eeprom.Key = Convert.ToInt32(textEdit4.Text);
+            }
+            catch (Exception) { }
             eeprom.UpdateFile(_filename);
             DialogResult = DialogResult.OK;
             this.Close();

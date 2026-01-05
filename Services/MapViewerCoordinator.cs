@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using DevExpress.XtraBars.Docking;
+using ComponentFactory.Krypton.Docking;
+using ComponentFactory.Krypton.Navigator;
 using VAGSuite.Helpers;
 using VAGSuite.MapViewerEventArgs;
 
@@ -15,12 +16,12 @@ namespace VAGSuite.Services
     /// </summary>
     public class MapViewerCoordinator
     {
-        private readonly DockManager _dockManager;
+        private readonly KryptonDockingManager _dockingManager;
         private readonly AppSettings _appSettings;
 
-        public MapViewerCoordinator(DockManager dockManager, AppSettings appSettings)
+        public MapViewerCoordinator(KryptonDockingManager dockingManager, AppSettings appSettings)
         {
-            _dockManager = dockManager;
+            _dockingManager = dockingManager;
             _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
         }
 
@@ -39,7 +40,7 @@ namespace VAGSuite.Services
         /// <summary>
         /// Shows a map viewer for the specified symbol.
         /// </summary>
-        public DockPanel ShowMapViewer(MapViewerParams parameters)
+        public KryptonPage ShowMapViewer(MapViewerParams parameters)
         {
             if (parameters.Symbol == null)
                 throw new ArgumentNullException(nameof(parameters.Symbol));
@@ -51,30 +52,34 @@ namespace VAGSuite.Services
             if (CheckMapViewerActive(parameters.Symbol, parameters.Filename))
                 return null;
 
-            _dockManager.BeginUpdate();
-            DockPanel dockPanel = null;
+            KryptonPage page = null;
 
             try
             {
                 MapViewerEx viewer = CreateMapViewer(parameters);
-                dockPanel = CreateDockPanel(parameters, viewer);
+                page = CreateDockPage(parameters, viewer);
                 
                 // Subscribe to axis editor event - FIX: was missing after refactor
                 viewer.onAxisEditorRequested += tabdet_onAxisEditorRequested;
 
-                dockPanel.Controls.Add(viewer);
+                page.Controls.Add(viewer);
                 viewer.Visible = true;
+
+                if (!_appSettings.NewPanelsFloating)
+                {
+                    _dockingManager.AddToWorkspace("Workspace", new KryptonPage[] { page });
+                }
+                else
+                {
+                    _dockingManager.AddFloatingWindow("Floating", new KryptonPage[] { page });
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error creating map viewer: {ex.Message}");
             }
-            finally
-            {
-                _dockManager.EndUpdate();
-            }
 
-            return dockPanel;
+            return page;
         }
 
         /// <summary>
@@ -157,32 +162,22 @@ namespace VAGSuite.Services
         }
 
         /// <summary>
-        /// Creates and configures the dock panel for the viewer.
+        /// Creates and configures the dock page for the viewer.
         /// </summary>
-        private DockPanel CreateDockPanel(MapViewerParams parameters, MapViewerEx viewer)
+        private KryptonPage CreateDockPage(MapViewerParams parameters, MapViewerEx viewer)
         {
-            DockPanel dockPanel;
-
-            if (!_appSettings.NewPanelsFloating)
-            {
-                dockPanel = _dockManager.AddPanel(DockingStyle.Right);
-            }
-            else
-            {
-                dockPanel = _dockManager.AddPanel(new Point(-500, -500));
-            }
-
-            dockPanel.Tag = parameters.Filename;
-            dockPanel.Text = $"Symbol: {viewer.Map_name} [{Path.GetFileName(parameters.Filename)}]";
+            KryptonPage page = new KryptonPage();
+            page.Tag = parameters.Filename;
+            page.Text = $"Symbol: {viewer.Map_name} [{Path.GetFileName(parameters.Filename)}]";
+            page.UniqueName = "SymbolViewer_" + viewer.Map_name + "_" + Guid.NewGuid().ToString("N");
 
             // Set width based on columns
             int width = CalculatePanelWidth(viewer.X_axisvalues.Length);
-            dockPanel.Width = width;
-            dockPanel.FloatSize = new Size(width, 900);
-
+            // KryptonPage doesn't have Width/FloatSize directly, these are managed by the docking system
+            
             viewer.Dock = DockStyle.Fill;
 
-            return dockPanel;
+            return page;
         }
 
         /// <summary>
@@ -210,15 +205,15 @@ namespace VAGSuite.Services
         {
             try
             {
-                foreach (DockPanel panel in _dockManager.Panels)
+                foreach (KryptonPage page in _dockingManager.Pages)
                 {
-                    if (panel.Text == $"Symbol: {symbol.Varname} [{Path.GetFileName(filename)}]")
+                    if (page.Text == $"Symbol: {symbol.Varname} [{Path.GetFileName(filename)}]")
                     {
-                        if (panel.Tag?.ToString() == filename)
+                        if (page.Tag?.ToString() == filename)
                         {
-                            if (IsSymbolDisplaySameAddress(symbol, panel))
+                            if (IsSymbolDisplaySameAddress(symbol, page))
                             {
-                                panel.Show();
+                                // In Krypton, we'd need to find the cell and select the page
                                 return true;
                             }
                         }
@@ -234,42 +229,20 @@ namespace VAGSuite.Services
         }
 
         /// <summary>
-        /// Checks if a panel displays a symbol at the same address.
+        /// Checks if a page displays a symbol at the same address.
         /// </summary>
-        private bool IsSymbolDisplaySameAddress(SymbolHelper symbol, DockPanel panel)
+        private bool IsSymbolDisplaySameAddress(SymbolHelper symbol, KryptonPage page)
         {
             try
             {
-                if (panel.Text.StartsWith("Symbol: "))
+                if (page.Text.StartsWith("Symbol: "))
                 {
-                    foreach (Control c in panel.Controls)
+                    foreach (Control c in page.Controls)
                     {
                         if (c is MapViewerEx viewer)
                         {
                             if (viewer.Map_address == symbol.Flash_start_address)
                                 return true;
-                        }
-                        else if (c is DockPanel childPanel)
-                        {
-                            foreach (Control c2 in childPanel.Controls)
-                            {
-                                if (c2 is MapViewerEx viewer2)
-                                {
-                                    if (viewer2.Map_address == symbol.Flash_start_address)
-                                        return true;
-                                }
-                            }
-                        }
-                        else if (c is ControlContainer container)
-                        {
-                            foreach (Control c3 in container.Controls)
-                            {
-                                if (c3 is MapViewerEx viewer3)
-                                {
-                                    if (viewer3.Map_address == symbol.Flash_start_address)
-                                        return true;
-                                }
-                            }
                         }
                     }
                 }
@@ -289,11 +262,11 @@ namespace VAGSuite.Services
         {
             try
             {
-                foreach (DockPanel panel in _dockManager.Panels)
+                foreach (KryptonPage page in _dockingManager.Pages)
                 {
-                    if (panel.Text.StartsWith("Symbol: "))
+                    if (page.Text.StartsWith("Symbol: "))
                     {
-                        UpdateViewersInPanel(panel, filename);
+                        UpdateViewersInPage(page, filename);
                     }
                 }
             }
@@ -304,29 +277,15 @@ namespace VAGSuite.Services
         }
 
         /// <summary>
-        /// Updates viewers within a dock panel.
+        /// Updates viewers within a dock page.
         /// </summary>
-        private void UpdateViewersInPanel(DockPanel panel, string filename)
+        private void UpdateViewersInPage(KryptonPage page, string filename)
         {
-            foreach (Control c in panel.Controls)
+            foreach (Control c in page.Controls)
             {
                 if (c is MapViewerEx viewer && (viewer.Filename == filename || filename == string.Empty))
                 {
                     UpdateViewer(viewer);
-                }
-                else if (c is DockPanel childPanel)
-                {
-                    UpdateViewersInPanel(childPanel, filename);
-                }
-                else if (c is ControlContainer container)
-                {
-                    foreach (Control c3 in container.Controls)
-                    {
-                        if (c3 is MapViewerEx viewer3 && (viewer3.Filename == filename || filename == string.Empty))
-                        {
-                            UpdateViewer(viewer3);
-                        }
-                    }
                 }
             }
         }
@@ -364,11 +323,11 @@ namespace VAGSuite.Services
             string panelName = $"Symbol: {symbolName} [{Path.GetFileName(filename)}]";
             string panelName2 = $"Symbol difference: {symbolName} [{Path.GetFileName(filename)}]";
 
-            foreach (DockPanel panel in _dockManager.Panels)
+            foreach (KryptonPage page in _dockingManager.Pages)
             {
-                if (panel.Text == panelName || panel.Text == panelName2)
+                if (page.Text == panelName || page.Text == panelName2)
                 {
-                    _dockManager.RemovePanel(panel);
+                    page.Dispose();
                     break;
                 }
             }

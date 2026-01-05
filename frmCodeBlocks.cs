@@ -5,11 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmCodeBlocks : DevExpress.XtraEditors.XtraForm
+    public partial class frmCodeBlocks : KryptonForm
     {
         public frmCodeBlocks()
         {
@@ -21,22 +21,22 @@ namespace VAGSuite
             gridControl1.DataSource = Tools.Instance.codeBlockList;
         }
 
-        private void gridView1_CustomDrawCell(object sender, DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e)
+        private void gridControl1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.Column.Name == "colStartAddress" || e.Column.Name == "colEndAddress" || e.Column.Name == "colAddressID")
+            if (e.RowIndex < 0) return;
+            string colName = gridControl1.Columns[e.ColumnIndex].Name;
+            if (colName == "colStartAddress" || colName == "colEndAddress" || colName == "colAddressID")
             {
                 try
                 {
-                    if (e.CellValue != null)
+                    if (e.Value != null)
                     {
-                        int addr = Convert.ToInt32(e.CellValue);
-                        e.DisplayText = addr.ToString("X8");
+                        int addr = Convert.ToInt32(e.Value);
+                        e.Value = addr.ToString("X8");
+                        e.FormattingApplied = true;
                     }
                 }
-                catch(Exception)
-                {
-
-                }
+                catch(Exception) { }
             }
         }
 

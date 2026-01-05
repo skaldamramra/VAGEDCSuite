@@ -5,14 +5,13 @@ using System.Drawing;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
 using System.IO;
 using Be.Windows.Forms;
-
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class HexViewer : DevExpress.XtraEditors.XtraUserControl
+    public partial class HexViewer : System.Windows.Forms.UserControl
     {
         public delegate void ViewerClose(object sender, EventArgs e);
         public event HexViewer.ViewerClose onClose;
@@ -53,14 +52,10 @@ namespace VAGSuite
         public HexViewer()
         {
             InitializeComponent();
-            
         }
 
         public void SelectText(string symbolname, int fileoffset, int length)
         {
-           /* richTextBox1.SelectionStart = fileoffset;
-            richTextBox1.SelectionLength = length;
-            richTextBox1.ScrollToCaret();*/
             hexBox1.SelectionStart = fileoffset;
             hexBox1.SelectionLength = length;
             hexBox1.ScrollByteIntoView(fileoffset + length + 64); // scroll 4 lines extra for viewing purposes
@@ -76,7 +71,7 @@ namespace VAGSuite
             {
                 if (hexBox1.ByteProvider != null && hexBox1.ByteProvider.HasChanges())
                 {
-                    DialogResult res = MessageBox.Show("Do you want to save changes?",
+                    DialogResult res = KryptonMessageBox.Show("Do you want to save changes?",
                         "VAGEDCSuite",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Warning);
@@ -146,7 +141,7 @@ namespace VAGSuite
             }
             catch (Exception ex1)
             {
-                MessageBox.Show(ex1.Message, "EDC15P Suite", MessageBoxButtons.OK,
+                KryptonMessageBox.Show(ex1.Message, "VAG EDC Suite", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
             finally
@@ -168,7 +163,6 @@ namespace VAGSuite
             }
             _fileName = null;
             CastCloseEvent();
-            //DisplayText(null);
         }
 
 
@@ -176,7 +170,7 @@ namespace VAGSuite
         {
             if (!File.Exists(fileName))
             {
-                MessageBox.Show("File does not exist!");
+                KryptonMessageBox.Show("File does not exist!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -188,21 +182,15 @@ namespace VAGSuite
 
             try
             {
-                //hexBox1.ByteProvider = IByte
                 DynamicByteProvider dynamicByteProvider = new DynamicByteProvider(File.ReadAllBytes(fileName));
-
-                //FileByteProvider fileByteProvider = new FileByteProvider(fileName);
-                //fileByteProvider.Changed += new EventHandler(byteProvider_Changed);
                 dynamicByteProvider.Changed += new EventHandler(byteProvider_Changed);
-                //hexBox1.ByteProvider = fileByteProvider;
                 hexBox1.ByteProvider = dynamicByteProvider;
                 _fileName = fileName;
                 _lastFilename = _fileName;
-               // DisplayText(fileName);
             }
             catch (Exception ex1)
             {
-                MessageBox.Show(ex1.Message, "HexEditor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                KryptonMessageBox.Show(ex1.Message, "HexEditor", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             finally
@@ -234,7 +222,6 @@ namespace VAGSuite
 
                 miFind.Enabled = true;
                 miFindNext.Enabled = true;
-                //miGoTo.Enabled = true;
             }
 
             ManageAbilityForCopyAndPaste();
@@ -258,49 +245,6 @@ namespace VAGSuite
             FileInfo fi = new FileInfo(filename);
             m_currentfile_size = (int)fi.Length;
             OpenFile(filename);
-            
-            // ??? 
-//            CloseFile();
-
-            /*
-            FileInfo fi = new FileInfo(filename);
-            long numberoflines = fi.Length/16;
-            StringBuilder sb = new StringBuilder();
-            StringBuilder sbascii = new StringBuilder();
-            using (BinaryReader br = new BinaryReader(new FileStream(filename, FileMode.Open)))
-            {
-                int current_address = 0;
-                for (int lcount = 0; lcount < numberoflines; lcount++)
-                {
-                    byte[] readbytes = br.ReadBytes(16);
-                    string line = current_address.ToString("X6") + " ";
-                    for (int bcount = 0; bcount < readbytes.Length; bcount++)
-                    {
-                        byte b = (byte)readbytes.GetValue(bcount);
-                        line += b.ToString("X2") + " ";
-                    }
-                    string line_ascii = string.Empty;
-                    for (int bcount = 0; bcount < readbytes.Length; bcount++)
-                    {
-                        byte b = (byte)readbytes.GetValue(bcount);
-                        if (b >= 0x20 && b <= 0x7f)
-                        {
-                            line_ascii += Convert.ToChar( b);
-                        }
-                        else
-                        {
-                            line_ascii += ".";
-                        }
-                    }
-                    sb.AppendLine(line);
-                    sbascii.AppendLine(line_ascii);
-                    current_address += 16;
-                }
-            }
-            richTextBox1.Text = sb.ToString();
-            richTextBox2.Text = sbascii.ToString();
-           
-            //MessageBox.Show(richTextBox1.Find("ox1_filt_coef").ToString());*/
         }
 
         void Find()
@@ -326,25 +270,18 @@ namespace VAGSuite
             _formFindCancel.Closed += new EventHandler(FormFindCancel_Closed);
             _formFindCancel.Show();
 
-            // block activation of main form
-            //Activated += new EventHandler(FocusToFormFindCancel);
-
             // start find process
             FindOptions fo = new FindOptions();
             fo.Hex = _findBuffer;
             fo.Type = FindType.Hex;
             
-            //long res = hexBox1.Find(_findBuffer, hexBox1.SelectionStart + hexBox1.SelectionLength);
             long res = hexBox1.Find(fo);
 
             _formFindCancel.Dispose();
 
-            // unblock activation of main form
-            //Activated -= new EventHandler(FocusToFormFindCancel);
-
             if (res == -1) // -1 = no match
             {
-                MessageBox.Show("Find reached end of file", "EDC15P Suite",
+                KryptonMessageBox.Show("Find reached end of file", "VAG EDC Suite",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else if (res == -2) // -2 = find was aborted
@@ -404,7 +341,6 @@ namespace VAGSuite
         private void miClose_Click(object sender, EventArgs e)
         {
             CloseFile();
-            //CastCloseEvent();
         }
         private void CastCloseEvent()
         {

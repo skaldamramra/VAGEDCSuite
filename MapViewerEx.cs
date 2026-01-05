@@ -1881,7 +1881,7 @@ namespace VAGSuite
             }
 
             // Delegate to MapGridComponent for key handling (Add/Subtract/PageUp/PageDown/Home/End)
-            _mapGridComponent.GridView1_KeyDown(sender, e);
+            _mapGridComponent.GridControl1_KeyDown(sender, e);
         }
 
 
@@ -2407,7 +2407,7 @@ namespace VAGSuite
             // as it was tied to DevExpress SeriesPoint.
         }
 
-        // private void popupContainerEdit1_CustomDisplayText(object sender, DevExpress.XtraEditors.Controls.ConvertEditValueEventArgs e)
+        // private void popupContainerEdit1_CustomDisplayText(object sender, EventArgs e)
         // {
         //    e.Value = System.IO.Path.GetFileName(m_filename) + " : " + m_map_name + " flash address : " + m_map_address.ToString("X6") + " sram address : " + m_map_sramaddress.ToString("X4");
         // }
@@ -2493,7 +2493,7 @@ namespace VAGSuite
             }
         }
 
-        // private void popupContainerEdit1_CustomDisplayText(object sender, DevExpress.XtraEditors.Controls.CustomDisplayTextEventArgs e)
+        // private void popupContainerEdit1_CustomDisplayText(object sender, EventArgs e)
         // {
         //    e.DisplayText = System.IO.Path.GetFileName(m_filename) + " : " + m_map_name + " flash address : " + m_map_address.ToString("X6") + " sram address : " + m_map_sramaddress.ToString("X4");
         // }

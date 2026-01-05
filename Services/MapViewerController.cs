@@ -1,6 +1,6 @@
 using System;
 using System.Windows.Forms;
-using DevExpress.XtraBars.Docking;
+using ComponentFactory.Krypton.Navigator;
 using VAGSuite.Models;
 
 namespace VAGSuite.Services
@@ -19,35 +19,15 @@ namespace VAGSuite.Services
 
         public void HandleDockingAction(Control parent, Action restoreAction, Action floatAction)
         {
-            if (parent is DockPanel pnl)
+            // In Krypton, the dockable unit is a KryptonPage.
+            // Floating/Restoring is typically handled by the KryptonDockingManager
+            // which manages the pages.
+            if (parent is KryptonPage page)
             {
-                if (pnl.FloatForm == null)
-                {
-                    pnl.FloatSize = new System.Drawing.Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-                    pnl.FloatLocation = new System.Drawing.Point(1, 1);
-                    pnl.MakeFloat();
-                    floatAction();
-                }
-                else
-                {
-                    pnl.Restore();
-                    restoreAction();
-                }
-            }
-            else if (parent is ControlContainer container)
-            {
-                if (container.Panel.FloatForm == null)
-                {
-                    container.Panel.FloatSize = new System.Drawing.Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-                    container.Panel.FloatLocation = new System.Drawing.Point(1, 1);
-                    container.Panel.MakeFloat();
-                    floatAction();
-                }
-                else
-                {
-                    container.Panel.Restore();
-                    restoreAction();
-                }
+                // KryptonPage doesn't have MakeFloat/Restore directly like DevExpress DockPanel.
+                // These actions are performed via the KryptonDockingManager.
+                // For now, we neutralize this as the bulk of docking logic is in frmMain.KryptonDocking.cs
+                floatAction();
             }
         }
 

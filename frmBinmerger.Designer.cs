@@ -29,148 +29,149 @@ namespace VAGSuite
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmBinmerger));
-            this.buttonEdit1 = new DevExpress.XtraEditors.ButtonEdit();
-            this.buttonEdit2 = new DevExpress.XtraEditors.ButtonEdit();
-            this.simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
-            this.simpleButton2 = new DevExpress.XtraEditors.SimpleButton();
-            this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
-            this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
-            this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
+            this.buttonEdit1 = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.btnBrowse1 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.buttonEdit2 = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.btnBrowse2 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.simpleButton1 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.simpleButton2 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.groupControl1 = new ComponentFactory.Krypton.Toolkit.KryptonGroupBox();
+            this.labelControl2 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.labelControl1 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            ((System.ComponentModel.ISupportInitialize)(this.buttonEdit1.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.buttonEdit2.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.groupControl1.Panel)).BeginInit();
+            this.groupControl1.Panel.SuspendLayout();
             this.groupControl1.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonEdit1
             // 
-            resources.ApplyResources(this.buttonEdit1, "buttonEdit1");
-            this.buttonEdit1.BackgroundImage = null;
-            this.buttonEdit1.EditValue = null;
+            this.buttonEdit1.Location = new System.Drawing.Point(100, 15);
             this.buttonEdit1.Name = "buttonEdit1";
-            this.buttonEdit1.Properties.AccessibleDescription = null;
-            this.buttonEdit1.Properties.AccessibleName = null;
-            this.buttonEdit1.Properties.AutoHeight = ((bool)(resources.GetObject("buttonEdit1.Properties.AutoHeight")));
-            this.buttonEdit1.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton()});
-            this.buttonEdit1.Properties.Mask.AutoComplete = ((DevExpress.XtraEditors.Mask.AutoCompleteType)(resources.GetObject("buttonEdit1.Properties.Mask.AutoComplete")));
-            this.buttonEdit1.Properties.Mask.BeepOnError = ((bool)(resources.GetObject("buttonEdit1.Properties.Mask.BeepOnError")));
-            this.buttonEdit1.Properties.Mask.EditMask = resources.GetString("buttonEdit1.Properties.Mask.EditMask");
-            this.buttonEdit1.Properties.Mask.IgnoreMaskBlank = ((bool)(resources.GetObject("buttonEdit1.Properties.Mask.IgnoreMaskBlank")));
-            this.buttonEdit1.Properties.Mask.MaskType = ((DevExpress.XtraEditors.Mask.MaskType)(resources.GetObject("buttonEdit1.Properties.Mask.MaskType")));
-            this.buttonEdit1.Properties.Mask.PlaceHolder = ((char)(resources.GetObject("buttonEdit1.Properties.Mask.PlaceHolder")));
-            this.buttonEdit1.Properties.Mask.SaveLiteral = ((bool)(resources.GetObject("buttonEdit1.Properties.Mask.SaveLiteral")));
-            this.buttonEdit1.Properties.Mask.ShowPlaceHolders = ((bool)(resources.GetObject("buttonEdit1.Properties.Mask.ShowPlaceHolders")));
-            this.buttonEdit1.Properties.Mask.UseMaskAsDisplayFormat = ((bool)(resources.GetObject("buttonEdit1.Properties.Mask.UseMaskAsDisplayFormat")));
-            this.buttonEdit1.ButtonClick += new DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(this.buttonEdit1_ButtonClick);
+            this.buttonEdit1.Size = new System.Drawing.Size(250, 23);
+            this.buttonEdit1.TabIndex = 0;
+            // 
+            // btnBrowse1
+            // 
+            this.btnBrowse1.Location = new System.Drawing.Point(355, 15);
+            this.btnBrowse1.Name = "btnBrowse1";
+            this.btnBrowse1.Size = new System.Drawing.Size(30, 23);
+            this.btnBrowse1.TabIndex = 1;
+            this.btnBrowse1.Values.Text = "...";
+            this.btnBrowse1.Click += new System.EventHandler(this.btnBrowse1_Click);
             // 
             // buttonEdit2
             // 
-            resources.ApplyResources(this.buttonEdit2, "buttonEdit2");
-            this.buttonEdit2.BackgroundImage = null;
-            this.buttonEdit2.EditValue = null;
+            this.buttonEdit2.Location = new System.Drawing.Point(100, 45);
             this.buttonEdit2.Name = "buttonEdit2";
-            this.buttonEdit2.Properties.AccessibleDescription = null;
-            this.buttonEdit2.Properties.AccessibleName = null;
-            this.buttonEdit2.Properties.AutoHeight = ((bool)(resources.GetObject("buttonEdit2.Properties.AutoHeight")));
-            this.buttonEdit2.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton()});
-            this.buttonEdit2.Properties.Mask.AutoComplete = ((DevExpress.XtraEditors.Mask.AutoCompleteType)(resources.GetObject("buttonEdit2.Properties.Mask.AutoComplete")));
-            this.buttonEdit2.Properties.Mask.BeepOnError = ((bool)(resources.GetObject("buttonEdit2.Properties.Mask.BeepOnError")));
-            this.buttonEdit2.Properties.Mask.EditMask = resources.GetString("buttonEdit2.Properties.Mask.EditMask");
-            this.buttonEdit2.Properties.Mask.IgnoreMaskBlank = ((bool)(resources.GetObject("buttonEdit2.Properties.Mask.IgnoreMaskBlank")));
-            this.buttonEdit2.Properties.Mask.MaskType = ((DevExpress.XtraEditors.Mask.MaskType)(resources.GetObject("buttonEdit2.Properties.Mask.MaskType")));
-            this.buttonEdit2.Properties.Mask.PlaceHolder = ((char)(resources.GetObject("buttonEdit2.Properties.Mask.PlaceHolder")));
-            this.buttonEdit2.Properties.Mask.SaveLiteral = ((bool)(resources.GetObject("buttonEdit2.Properties.Mask.SaveLiteral")));
-            this.buttonEdit2.Properties.Mask.ShowPlaceHolders = ((bool)(resources.GetObject("buttonEdit2.Properties.Mask.ShowPlaceHolders")));
-            this.buttonEdit2.Properties.Mask.UseMaskAsDisplayFormat = ((bool)(resources.GetObject("buttonEdit2.Properties.Mask.UseMaskAsDisplayFormat")));
-            this.buttonEdit2.ButtonClick += new DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(this.buttonEdit2_ButtonClick);
+            this.buttonEdit2.Size = new System.Drawing.Size(250, 23);
+            this.buttonEdit2.TabIndex = 2;
+            // 
+            // btnBrowse2
+            // 
+            this.btnBrowse2.Location = new System.Drawing.Point(355, 45);
+            this.btnBrowse2.Name = "btnBrowse2";
+            this.btnBrowse2.Size = new System.Drawing.Size(30, 23);
+            this.btnBrowse2.TabIndex = 3;
+            this.btnBrowse2.Values.Text = "...";
+            this.btnBrowse2.Click += new System.EventHandler(this.btnBrowse2_Click);
             // 
             // simpleButton1
             // 
-            this.simpleButton1.AccessibleDescription = null;
-            this.simpleButton1.AccessibleName = null;
-            resources.ApplyResources(this.simpleButton1, "simpleButton1");
-            this.simpleButton1.BackgroundImage = null;
+            this.simpleButton1.Location = new System.Drawing.Point(230, 120);
             this.simpleButton1.Name = "simpleButton1";
+            this.simpleButton1.Size = new System.Drawing.Size(80, 25);
+            this.simpleButton1.TabIndex = 4;
+            this.simpleButton1.Values.Text = "Merge";
             this.simpleButton1.Click += new System.EventHandler(this.simpleButton1_Click);
             // 
             // simpleButton2
             // 
-            this.simpleButton2.AccessibleDescription = null;
-            this.simpleButton2.AccessibleName = null;
-            resources.ApplyResources(this.simpleButton2, "simpleButton2");
-            this.simpleButton2.BackgroundImage = null;
+            this.simpleButton2.Location = new System.Drawing.Point(315, 120);
             this.simpleButton2.Name = "simpleButton2";
+            this.simpleButton2.Size = new System.Drawing.Size(80, 25);
+            this.simpleButton2.TabIndex = 5;
+            this.simpleButton2.Values.Text = "Close";
             this.simpleButton2.Click += new System.EventHandler(this.simpleButton2_Click);
             // 
             // groupControl1
             // 
-            this.groupControl1.AccessibleDescription = null;
-            this.groupControl1.AccessibleName = null;
-            resources.ApplyResources(this.groupControl1, "groupControl1");
-            this.groupControl1.Controls.Add(this.labelControl2);
-            this.groupControl1.Controls.Add(this.labelControl1);
-            this.groupControl1.Controls.Add(this.buttonEdit1);
-            this.groupControl1.Controls.Add(this.buttonEdit2);
+            this.groupControl1.Location = new System.Drawing.Point(10, 10);
             this.groupControl1.Name = "groupControl1";
+            // 
+            // groupControl1.Panel
+            // 
+            this.groupControl1.Panel.Controls.Add(this.labelControl2);
+            this.groupControl1.Panel.Controls.Add(this.labelControl1);
+            this.groupControl1.Panel.Controls.Add(this.buttonEdit1);
+            this.groupControl1.Panel.Controls.Add(this.btnBrowse1);
+            this.groupControl1.Panel.Controls.Add(this.buttonEdit2);
+            this.groupControl1.Panel.Controls.Add(this.btnBrowse2);
+            this.groupControl1.Size = new System.Drawing.Size(395, 100);
+            this.groupControl1.TabIndex = 6;
+            this.groupControl1.Values.Heading = "Files to merge";
             // 
             // labelControl2
             // 
-            this.labelControl2.AccessibleDescription = null;
-            this.labelControl2.AccessibleName = null;
-            resources.ApplyResources(this.labelControl2, "labelControl2");
+            this.labelControl2.Location = new System.Drawing.Point(10, 45);
             this.labelControl2.Name = "labelControl2";
+            this.labelControl2.Size = new System.Drawing.Size(80, 20);
+            this.labelControl2.TabIndex = 7;
+            this.labelControl2.Values.Text = "Second file:";
             // 
             // labelControl1
             // 
-            this.labelControl1.AccessibleDescription = null;
-            this.labelControl1.AccessibleName = null;
-            resources.ApplyResources(this.labelControl1, "labelControl1");
+            this.labelControl1.Location = new System.Drawing.Point(10, 15);
             this.labelControl1.Name = "labelControl1";
+            this.labelControl1.Size = new System.Drawing.Size(80, 20);
+            this.labelControl1.TabIndex = 8;
+            this.labelControl1.Values.Text = "First file:";
             // 
             // saveFileDialog1
             // 
             this.saveFileDialog1.DefaultExt = "bin";
-            resources.ApplyResources(this.saveFileDialog1, "saveFileDialog1");
+            this.saveFileDialog1.Filter = "Binary files|*.bin|All files|*.*";
             // 
             // openFileDialog1
             // 
-            resources.ApplyResources(this.openFileDialog1, "openFileDialog1");
+            this.openFileDialog1.Filter = "Binary files|*.bin|All files|*.*";
             // 
             // frmBinmerger
             // 
-            this.AccessibleDescription = null;
-            this.AccessibleName = null;
-            resources.ApplyResources(this, "$this");
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(415, 155);
             this.Controls.Add(this.groupControl1);
             this.Controls.Add(this.simpleButton2);
             this.Controls.Add(this.simpleButton1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Icon = null;
             this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "frmBinmerger";
-            ((System.ComponentModel.ISupportInitialize)(this.buttonEdit1.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.buttonEdit2.Properties)).EndInit();
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Binary Merger";
+            ((System.ComponentModel.ISupportInitialize)(this.groupControl1.Panel)).EndInit();
+            this.groupControl1.Panel.ResumeLayout(false);
+            this.groupControl1.Panel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();
             this.groupControl1.ResumeLayout(false);
-            this.groupControl1.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private DevExpress.XtraEditors.ButtonEdit buttonEdit1;
-        private DevExpress.XtraEditors.ButtonEdit buttonEdit2;
-        private DevExpress.XtraEditors.SimpleButton simpleButton1;
-        private DevExpress.XtraEditors.SimpleButton simpleButton2;
-        private DevExpress.XtraEditors.GroupControl groupControl1;
-        private DevExpress.XtraEditors.LabelControl labelControl2;
-        private DevExpress.XtraEditors.LabelControl labelControl1;
+        private ComponentFactory.Krypton.Toolkit.KryptonTextBox buttonEdit1;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton btnBrowse1;
+        private ComponentFactory.Krypton.Toolkit.KryptonTextBox buttonEdit2;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton btnBrowse2;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton1;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton2;
+        private ComponentFactory.Krypton.Toolkit.KryptonGroupBox groupControl1;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl2;
+        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }

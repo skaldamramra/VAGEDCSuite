@@ -28,59 +28,60 @@ namespace VAGSuite
         /// </summary>
         private void InitializeComponent()
         {
-            this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
-            this.lookUpEdit1 = new DevExpress.XtraEditors.LookUpEdit();
-            this.simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
-            this.simpleButton2 = new DevExpress.XtraEditors.SimpleButton();
+            this.groupControl1 = new ComponentFactory.Krypton.Toolkit.KryptonGroupBox();
+            this.lookUpEdit1 = new ComponentFactory.Krypton.Toolkit.KryptonComboBox();
+            this.simpleButton1 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.simpleButton2 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.groupControl1.Panel)).BeginInit();
+            this.groupControl1.Panel.SuspendLayout();
             this.groupControl1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.lookUpEdit1.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lookUpEdit1)).BeginInit();
             this.SuspendLayout();
             // 
             // groupControl1
             // 
-            this.groupControl1.Controls.Add(this.lookUpEdit1);
-            this.groupControl1.Location = new System.Drawing.Point(15, 16);
+            this.groupControl1.Location = new System.Drawing.Point(12, 12);
             this.groupControl1.Name = "groupControl1";
-            this.groupControl1.Size = new System.Drawing.Size(579, 88);
+            // 
+            // groupControl1.Panel
+            // 
+            this.groupControl1.Panel.Controls.Add(this.lookUpEdit1);
+            this.groupControl1.Size = new System.Drawing.Size(360, 80);
             this.groupControl1.TabIndex = 0;
-            this.groupControl1.Text = "Symbol list";
+            this.groupControl1.Values.Heading = "Select symbol";
             // 
             // lookUpEdit1
             // 
-            this.lookUpEdit1.Location = new System.Drawing.Point(15, 43);
+            this.lookUpEdit1.DropDownWidth = 320;
+            this.lookUpEdit1.Location = new System.Drawing.Point(10, 15);
             this.lookUpEdit1.Name = "lookUpEdit1";
-            this.lookUpEdit1.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.lookUpEdit1.Properties.DisplayMember = "Varname";
-            this.lookUpEdit1.Properties.NullText = "Please select a symbol to import the data to...";
-            this.lookUpEdit1.Properties.ValueMember = "Varname";
-            this.lookUpEdit1.Size = new System.Drawing.Size(544, 20);
+            this.lookUpEdit1.Size = new System.Drawing.Size(320, 21);
             this.lookUpEdit1.TabIndex = 0;
             // 
             // simpleButton1
             // 
-            this.simpleButton1.Location = new System.Drawing.Point(519, 110);
+            this.simpleButton1.Location = new System.Drawing.Point(216, 105);
             this.simpleButton1.Name = "simpleButton1";
-            this.simpleButton1.Size = new System.Drawing.Size(75, 23);
+            this.simpleButton1.Size = new System.Drawing.Size(75, 25);
             this.simpleButton1.TabIndex = 1;
-            this.simpleButton1.Text = "OK";
+            this.simpleButton1.Values.Text = "Ok";
             this.simpleButton1.Click += new System.EventHandler(this.simpleButton1_Click);
             // 
             // simpleButton2
             // 
-            this.simpleButton2.Location = new System.Drawing.Point(438, 110);
+            this.simpleButton2.Location = new System.Drawing.Point(297, 105);
             this.simpleButton2.Name = "simpleButton2";
-            this.simpleButton2.Size = new System.Drawing.Size(75, 23);
+            this.simpleButton2.Size = new System.Drawing.Size(75, 25);
             this.simpleButton2.TabIndex = 2;
-            this.simpleButton2.Text = "Cancel";
+            this.simpleButton2.Values.Text = "Cancel";
             this.simpleButton2.Click += new System.EventHandler(this.simpleButton2_Click);
             // 
             // frmSymbolSelect
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(606, 146);
+            this.ClientSize = new System.Drawing.Size(384, 145);
             this.Controls.Add(this.simpleButton2);
             this.Controls.Add(this.simpleButton1);
             this.Controls.Add(this.groupControl1);
@@ -89,20 +90,22 @@ namespace VAGSuite
             this.MinimizeBox = false;
             this.Name = "frmSymbolSelect";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Select a symbol for the list... ";
+            this.Text = "Symbol Selection";
             this.Load += new System.EventHandler(this.frmSymbolSelect_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.groupControl1.Panel)).EndInit();
+            this.groupControl1.Panel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();
             this.groupControl1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.lookUpEdit1.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lookUpEdit1)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private DevExpress.XtraEditors.GroupControl groupControl1;
-        private DevExpress.XtraEditors.LookUpEdit lookUpEdit1;
-        private DevExpress.XtraEditors.SimpleButton simpleButton1;
-        private DevExpress.XtraEditors.SimpleButton simpleButton2;
+        private ComponentFactory.Krypton.Toolkit.KryptonGroupBox groupControl1;
+        private ComponentFactory.Krypton.Toolkit.KryptonComboBox lookUpEdit1;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton1;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton2;
     }
 }

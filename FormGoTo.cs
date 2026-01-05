@@ -3,13 +3,14 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
 	/// <summary>
 	/// Summary description for FormGoTo.
 	/// </summary>
-    public class FormGoTo : DevExpress.XtraEditors.XtraForm
+    public class FormGoTo : KryptonForm
 	{
         private System.Windows.Forms.Label label1;
         private Button btnCancel;
@@ -133,8 +134,6 @@ namespace VAGSuite
             // 
             // FormGoTo
             // 
-            this.Appearance.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Appearance.Options.UseFont = true;
             this.AutoScaleBaseSize = new System.Drawing.Size(5, 14);
             this.ClientSize = new System.Drawing.Size(248, 94);
             this.Controls.Add(this.groupBox1);

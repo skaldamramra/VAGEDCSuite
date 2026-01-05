@@ -5,31 +5,28 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
 using System.IO;
+using ComponentFactory.Krypton.Toolkit;
 
 namespace VAGSuite
 {
-    public partial class frmBrowseFiles : DevExpress.XtraEditors.XtraForm
+    public partial class frmBrowseFiles : KryptonForm
     {
         public frmBrowseFiles()
         {
             InitializeComponent();
         }
 
-        private void buttonEdit1_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
+        private void btnBrowse_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             fbd.ShowNewFolderButton = false;
             try
             {
                 fbd.SelectedPath = buttonEdit1.Text;
-
             }
-            catch (Exception)
-            {
-
-            }
+            catch (Exception) { }
+            
             if (fbd.ShowDialog() == DialogResult.OK)
             {
                 buttonEdit1.Text = fbd.SelectedPath;
@@ -44,7 +41,7 @@ namespace VAGSuite
         private void LoadFiles()
         {
             loading = true;
-            simpleButton1.Text = "Cancel";
+            simpleButton1.Values.Text = "Cancel";
             simpleButton2.Enabled = false;
             SetProgressVisibility(true);
             SetScanProgress("scanning...", 0);
@@ -79,7 +76,6 @@ namespace VAGSuite
                         List<AxisHelper> newAxisHelpers = new List<AxisHelper>();
                         if (boschPartnumber != string.Empty)
                         {
-                            //string additionalInfo = parser.ExtractInfo(allBytes);
                             SymbolCollection sc = parser.parseFile(file, out newCodeBlocks, out newAxisHelpers);
                             ECUInfo info = pnc.ConvertPartnumber(boschPartnumber, allBytes.Length);
 
@@ -95,74 +91,26 @@ namespace VAGSuite
                             newFile.SoftwareID = info.SoftwareID;
                             newFile.TQ = info.TQ;
 
-                            if (info.EcuType.Contains("EDC15P-6"))
-                            {
-                                newFile.Filetype = EDCFileType.EDC15P6;
-                            }
-                            else if (info.EcuType.Contains("EDC15P"))
-                            {
-                                newFile.Filetype = EDCFileType.EDC15P;
-                            }
-                            else if (info.EcuType.Contains("EDC15M"))
-                            {
-                                newFile.Filetype = EDCFileType.EDC15M;
-                            }
-                            else if (info.EcuType.Contains("EDC15V-5."))
-                            {
-                                newFile.Filetype = EDCFileType.MSA15;
-                            }
-                            else if (info.EcuType.Contains("EDC15V"))
-                            {
-                                newFile.Filetype = EDCFileType.EDC15V;
-                            }
-                            else if (info.EcuType.Contains("EDC15C"))
-                            {
-                                newFile.Filetype = EDCFileType.EDC15C;
-                            }
-                            else if (info.EcuType.Contains("EDC16"))
-                            {
-                                newFile.Filetype = EDCFileType.EDC16;
-                            }
-                            else if (info.EcuType.Contains("EDC17"))
-                            {
-                                newFile.Filetype = EDCFileType.EDC17;
-                            }
-                            else if (info.EcuType.Contains("MSA15"))
-                            {
-                                newFile.Filetype = EDCFileType.MSA15;
-                            }
-                            else if (info.EcuType.Contains("MSA12"))
-                            {
-                                newFile.Filetype = EDCFileType.MSA12;
-                            }
-                            else if (info.EcuType.Contains("MSA11"))
-                            {
-                                newFile.Filetype = EDCFileType.MSA11;
-                            }
-                            else if (info.EcuType.Contains("MSA6"))
-                            {
-                                newFile.Filetype = EDCFileType.MSA6;
-                            }
-
+                            if (info.EcuType.Contains("EDC15P-6")) newFile.Filetype = EDCFileType.EDC15P6;
+                            else if (info.EcuType.Contains("EDC15P")) newFile.Filetype = EDCFileType.EDC15P;
+                            else if (info.EcuType.Contains("EDC15M")) newFile.Filetype = EDCFileType.EDC15M;
+                            else if (info.EcuType.Contains("EDC15V-5.")) newFile.Filetype = EDCFileType.MSA15;
+                            else if (info.EcuType.Contains("EDC15V")) newFile.Filetype = EDCFileType.EDC15V;
+                            else if (info.EcuType.Contains("EDC15C")) newFile.Filetype = EDCFileType.EDC15C;
+                            else if (info.EcuType.Contains("EDC16")) newFile.Filetype = EDCFileType.EDC16;
+                            else if (info.EcuType.Contains("EDC17")) newFile.Filetype = EDCFileType.EDC17;
+                            else if (info.EcuType.Contains("MSA15")) newFile.Filetype = EDCFileType.MSA15;
+                            else if (info.EcuType.Contains("MSA12")) newFile.Filetype = EDCFileType.MSA12;
+                            else if (info.EcuType.Contains("MSA11")) newFile.Filetype = EDCFileType.MSA11;
+                            else if (info.EcuType.Contains("MSA6")) newFile.Filetype = EDCFileType.MSA6;
                             else if (boschPartnumber != string.Empty)
                             {
-                                if (fi.Length == 1024 * 1024 * 2)
-                                {
-                                    newFile.Filetype = EDCFileType.EDC17;
-                                }
-                                else if(boschPartnumber.StartsWith("EDC17"))
-                                {
-                                    newFile.Filetype = EDCFileType.EDC17;
-                                }
-                                else
-                                {
-                                    newFile.Filetype = EDCFileType.EDC15V;
-                                }
+                                if (fi.Length == 1024 * 1024 * 2) newFile.Filetype = EDCFileType.EDC17;
+                                else if(boschPartnumber.StartsWith("EDC17")) newFile.Filetype = EDCFileType.EDC17;
+                                else newFile.Filetype = EDCFileType.EDC15V;
                             }
-                            else
-                            {
-                                newFile.Filetype = EDCFileType.EDC16; // default to EDC16???
-                            }
+                            else newFile.Filetype = EDCFileType.EDC16;
+
                             newFile.Filename = file;
                             newFile.Filesize = (int)fi.Length;
 
@@ -202,18 +150,12 @@ namespace VAGSuite
                                 newFile.RealHP = pr.Horsepower;
                                 newFile.RealTQ = pr.Torque;
                             }
-                            catch (Exception)
-                            {
-
-                            }
+                            catch (Exception) { }
 
                             detectedFiles.Add(newFile);
-
                         }
                         else if (file.ToUpper().EndsWith(".BIN") || file.ToUpper().EndsWith(".ORI"))
                         {
-                            Console.WriteLine("Missed " + file);
-                            // add it as well
                             if (checkEdit1.Checked)
                             {
                                 ScannedFile newFile = new ScannedFile();
@@ -242,7 +184,6 @@ namespace VAGSuite
                                 detectedFiles.Add(newFile);
                             }
                         }
-
                     }
                 }
                 gridControl1.DataSource = detectedFiles;
@@ -251,7 +192,7 @@ namespace VAGSuite
             SetScanProgress("done", 100);
             SetProgressVisibility(false);
             this.Text = "Library builder";
-            simpleButton1.Text = "Close";
+            simpleButton1.Values.Text = "Close";
             simpleButton2.Enabled = true;
             Application.DoEvents();
         }
@@ -259,7 +200,7 @@ namespace VAGSuite
         private bool CheckMajorMapsPresent(SymbolCollection newSymbols, EDCFileType type, out string _message)
         {
             _message = string.Empty;
-            if (type == EDCFileType.EDC15C || type == EDCFileType.EDC15M || type == EDCFileType.EDC16 || type == EDCFileType.EDC17) return false; ;
+            if (type == EDCFileType.EDC15C || type == EDCFileType.EDC15M || type == EDCFileType.EDC16 || type == EDCFileType.EDC17) return false;
 
             if (type == EDCFileType.EDC15P || type == EDCFileType.EDC15P6)
             {
@@ -278,15 +219,13 @@ namespace VAGSuite
             if (MapsWithNameMissing("SVBL", newSymbols)) _message += "SVBL missing" + Environment.NewLine;
             if (MapsWithNameMissing("Torque limiter", newSymbols)) _message += "Torque limiter missing" + Environment.NewLine;
             if (MapsWithNameMissing("Smoke limiter", newSymbols)) _message += "Smoke limiter missing" + Environment.NewLine;
-            //if (MapsWithNameMissing("IQ by MAF limiter", newSymbols)) _message += "IQ by MAF limiter missing" + Environment.NewLine;
             if (MapsWithNameMissing("Start of injection", newSymbols)) _message += "Start of injection maps missing" + Environment.NewLine;
             if (MapsWithNameMissing("N75 duty cycle", newSymbols)) _message += "N75 duty cycle map missing" + Environment.NewLine;
             if (MapsWithNameMissing("Boost target map", newSymbols)) _message += "Boost target map missing" + Environment.NewLine;
             if (MapsWithNameMissing("Driver wish", newSymbols)) _message += "Driver wish map missing" + Environment.NewLine;
             if (MapsWithNameMissing("Boost limit map", newSymbols)) _message += "Boost limit map missing" + Environment.NewLine;
 
-            if (_message == "") return true;
-            return false;
+            return _message == "";
         }
 
         private bool MapsWithNameMissing(string varName, SymbolCollection newSymbols)
@@ -298,27 +237,16 @@ namespace VAGSuite
             return true;
         }
 
-
         private bool IsValidLength(long len)
         {
-            if (len == 0x8000) return true;
-            else if (len == 0x10000) return true;
-            else if (len == 0x20000) return true;
-            else if (len == 0x40000) return true;
-            else if (len == 0x80000) return true;
-            else if (len == 0x100000) return true;
-            else if (len == 0x200000) return true;
-            return false;
+            return len == 0x8000 || len == 0x10000 || len == 0x20000 || len == 0x40000 || len == 0x80000 || len == 0x100000 || len == 0x200000;
         }
 
         private void buttonEdit1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
-                if (!loading)
-                {
-                    LoadFiles();
-                }
+                if (!loading) LoadFiles();
             }
             else if (e.KeyCode == Keys.Escape)
             {
@@ -338,14 +266,7 @@ namespace VAGSuite
             sfd.Filter = "Excel worksheets|*.xlsx";
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                try
-                {
-                    gridControl1.ExportToXlsx(sfd.FileName);
-                }
-                catch (Exception)
-                {
-
-                }
+                // Export logic for ADGV
             }
         }
 
@@ -366,18 +287,14 @@ namespace VAGSuite
                     labelControl2.Text = text;
                     _update = true;
                 }
-                if (Convert.ToInt32(progressBarControl1.EditValue) != percentage)
+                if (progressBarControl1.Value != percentage)
                 {
-                    progressBarControl1.EditValue = percentage;
+                    progressBarControl1.Value = percentage;
                     _update = true;
                 }
                 if (_update) Application.DoEvents();
             }
-            catch (Exception)
-            {
-
-            }
-
+            catch (Exception) { }
         }
 
         private void simpleButton3_Click(object sender, EventArgs e)
@@ -385,65 +302,39 @@ namespace VAGSuite
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog() == DialogResult.OK)
             {
-                
-                if (gridControl1.DataSource != null)
+                if (gridControl1.DataSource is List<ScannedFile> detectedFiles)
                 {
-                    if (gridControl1.DataSource is List<ScannedFile>)
+                    foreach (ScannedFile sf in detectedFiles)
                     {
-                        List<ScannedFile> detectedFiles = (List<ScannedFile>)gridControl1.DataSource;
-
-                        foreach (ScannedFile sf in detectedFiles)
+                        string outputFolder = fbd.SelectedPath;            
+                        if (!string.IsNullOrEmpty(sf.Filetype.ToString()))
                         {
-                            string outputFolder = fbd.SelectedPath;            
-                            if (sf.Filetype.ToString() != string.Empty)
-                            {
-                                outputFolder = Path.Combine(outputFolder, sf.Filetype.ToString());
-                                if (!Directory.Exists(outputFolder))
-                                {
-                                    Directory.CreateDirectory(outputFolder);
-                                }
-                            }
-                            if (sf.CarMake != string.Empty)
-                            {
-                                outputFolder = Path.Combine(outputFolder, sf.CarMake);
-                                if (!Directory.Exists(outputFolder))
-                                {
-                                    Directory.CreateDirectory(outputFolder);
-                                }
-                            }
-                            if (sf.CarType != string.Empty)
-                            {
-                                outputFolder = Path.Combine(outputFolder, sf.CarType);
-                                if (!Directory.Exists(outputFolder))
-                                {
-                                    Directory.CreateDirectory(outputFolder);
-                                }
-                            }
-                            string filename = sf.PartNumber;
-                            if (filename == string.Empty) filename = Path.GetFileName(sf.Filename);
-                            if (sf.SoftwareID != string.Empty) filename += "_" + sf.SoftwareID;
-                            if (sf.EngineType != string.Empty) filename += "_" + sf.EngineType;
-                            if (sf.RealHP != 0) filename += "_" + sf.RealHP.ToString() +"hp";
-                            if (sf.RealTQ != 0) filename += "_" + sf.RealTQ.ToString() + "Nm";
-                            if (sf.NumberChecksumsFail > 0)
-                            {
-                                filename += "_CHKFAIL";
-                            }
-                            //if (sf.NumberChecksumsFail == 0)
-                            {
-                                // only valid checksummed files to the output
-                                try
-                                {
-                                    File.Copy(sf.Filename, Path.Combine(outputFolder, filename), false);
-                                }
-                                catch (Exception)
-                                {
-
-                                }
-                            }
-
-
+                            outputFolder = Path.Combine(outputFolder, sf.Filetype.ToString());
+                            if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
                         }
+                        if (!string.IsNullOrEmpty(sf.CarMake))
+                        {
+                            outputFolder = Path.Combine(outputFolder, sf.CarMake);
+                            if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
+                        }
+                        if (!string.IsNullOrEmpty(sf.CarType))
+                        {
+                            outputFolder = Path.Combine(outputFolder, sf.CarType);
+                            if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
+                        }
+                        string filename = sf.PartNumber;
+                        if (string.IsNullOrEmpty(filename)) filename = Path.GetFileName(sf.Filename);
+                        if (!string.IsNullOrEmpty(sf.SoftwareID)) filename += "_" + sf.SoftwareID;
+                        if (!string.IsNullOrEmpty(sf.EngineType)) filename += "_" + sf.EngineType;
+                        if (sf.RealHP != 0) filename += "_" + sf.RealHP.ToString() +"hp";
+                        if (sf.RealTQ != 0) filename += "_" + sf.RealTQ.ToString() + "Nm";
+                        if (sf.NumberChecksumsFail > 0) filename += "_CHKFAIL";
+                        
+                        try
+                        {
+                            File.Copy(sf.Filename, Path.Combine(outputFolder, filename), false);
+                        }
+                        catch (Exception) { }
                     }
                 }
             }
