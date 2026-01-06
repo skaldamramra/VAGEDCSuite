@@ -51,8 +51,8 @@ namespace VAGSuite
 
         private void simpleButton3_Click(object sender, EventArgs e)
         {
-            AddDebugLog("Starting explorer");
-            System.Diagnostics.Process.Start("IEXPLORE.EXE","http://trionic.mobixs.eu/vagedcsuite/Notes.xml" );
+            AddDebugLog("Opening GitHub releases page");
+            System.Diagnostics.Process.Start("https://github.com/skaldamramra/VAGEDCSuite/releases");
         }
 
 

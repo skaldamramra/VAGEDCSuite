@@ -11,14 +11,17 @@ namespace VAGSuite
     class msiupdater
     {
         private Version m_currentversion;
-        private string m_customer = "Global";
-        private string m_server = "http://trionic.mobixs.eu/vagedcsuite/";
-        private string m_username = "";
-        private string m_password = "";
         private Version m_NewVersion;
         private string m_apppath = "";
-        private bool m_fromFileLocation = false;
         private bool m_blockauto_updates = false;
+        private bool m_updateavailable = false;
+        
+        // Legacy fields kept for backward compatibility (old server is dead)
+        private string m_customer = "";
+        private string m_username = "";
+        private string m_password = "";
+        private string m_server = ""; // No longer used, kept for compilation
+        private bool m_fromFileLocation = false; // No longer used, kept for compilation
 
         public bool Blockauto_updates
         {
@@ -170,6 +173,169 @@ namespace VAGSuite
             m_NewVersion = new Version("1.0.0.0");
         }
 
+        /// <summary>
+        /// Check for updates using GitHub Releases API
+        /// Verifies against https://api.github.com/repos/skaldamramra/VAGEDCSuite/releases
+        /// </summary>
+        public void CheckForUpdatesGitHub()
+        {
+            if (!m_blockauto_updates)
+            {
+                System.Threading.Thread t = new System.Threading.Thread(GitHubUpdateCheck);
+                t.Start();
+            }
+        }
+
+        private void GitHubUpdateCheck()
+        {
+            string apiUrl = "https://api.github.com/repos/skaldamramra/VAGEDCSuite/releases";
+            string jsonResult = GetPageHTML(apiUrl, 15);
+
+            Console.WriteLine("GitHub API response length: " + (jsonResult?.Length ?? 0));
+            
+            if (!string.IsNullOrEmpty(jsonResult) && jsonResult.StartsWith("["))
+            {
+                try
+                {
+                    List<GitHubRelease> releases = ParseGitHubReleases(jsonResult);
+                    Console.WriteLine("Parsed " + releases.Count + " releases from GitHub");
+                    
+                    Version latestVersion = m_currentversion;
+                    GitHubRelease latestRelease = null;
+                    
+                    foreach (var release in releases)
+                    {
+                        // Include prereleases since there may be no full releases
+                        // if (release.prerelease) continue;
+
+                        Console.WriteLine("Processing release: tag=" + release.tag_name + ", name=" + release.name);
+                        
+                        // Try to parse version from tag_name first, then from name field
+                        string versionString = release.tag_name.TrimStart('v');
+                        Version releaseVersion;
+                        
+                        if (!Version.TryParse(versionString, out releaseVersion))
+                        {
+                            // Try parsing from the name field (e.g., "1.4.0.6" or "v1.4.0.5")
+                            versionString = release.name.TrimStart('v');
+                            if (!Version.TryParse(versionString, out releaseVersion))
+                            {
+                                Console.WriteLine("Could not parse version from: " + release.tag_name + " or " + release.name);
+                                continue;
+                            }
+                        }
+                        
+                        Console.WriteLine("Parsed version: " + releaseVersion + " from " + (versionString));
+                        
+                        // Track the latest version found (always, even if older than current)
+                        if (releaseVersion > latestVersion || latestRelease == null)
+                        {
+                            latestVersion = releaseVersion;
+                            latestRelease = release;
+                        }
+                        
+                        if (releaseVersion > m_currentversion)
+                        {
+                            m_updateavailable = true;
+                            m_NewVersion = releaseVersion;
+                            
+                            // Get release notes URL for the changelog
+                            string notesXmlPath = Apppath + "\\Notes.xml";
+                            WriteReleaseNotesXML(release);
+                            
+                            PumpString("Available version: " + (release.name ?? release.tag_name), true, false, releaseVersion, false, notesXmlPath);
+                            return;
+                        }
+                    }
+
+                    // No newer version found - show informative message with latest remote version
+                    Console.WriteLine("DEBUG: latestRelease=" + (latestRelease != null ? "SET" : "NULL") + ", releases.Count=" + releases.Count);
+                    if (latestRelease != null)
+                    {
+                        string remoteVersion = latestRelease.name ?? latestRelease.tag_name;
+                        Console.WriteLine("DEBUG: m_currentversion=" + m_currentversion + ", latestVersion=" + latestVersion);
+                        if (m_currentversion >= latestVersion)
+                        {
+                            PumpString("You are running the latest version. Remote: " + remoteVersion + ", Yours: " + m_currentversion.ToString(),
+                                false, false, new Version(), false, Apppath + "\\Notes.xml");
+                        }
+                        else
+                        {
+                            // This shouldn't happen since we return early when update found
+                            PumpString("Update available: " + remoteVersion, true, false, latestVersion, false, Apppath + "\\Notes.xml");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("DEBUG: All releases:");
+                        foreach (var r in releases)
+                        {
+                            Console.WriteLine("  - tag=" + r.tag_name + ", name=" + r.name);
+                        }
+                        PumpString("No parseable releases found on GitHub. (Parsed " + releases.Count + " releases)", false, false, new Version(), false, "");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("GitHub update check error: " + ex.Message);
+                    PumpString("Error checking for updates: " + ex.Message, false, false, new Version(), false, "");
+                }
+            }
+            else
+            {
+                // GitHub API failed - no fallback since old server is dead
+                PumpString("Could not connect to GitHub. Please check your internet connection.", false, false, new Version(), false, "");
+            }
+        }
+
+        private void WriteReleaseNotesXML(GitHubRelease release)
+        {
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                sb.AppendLine("<rss version=\"2.0\">");
+                sb.AppendLine("  <channel>");
+                sb.AppendLine("    <title>VAGEDCSuite Releases</title>");
+                sb.AppendLine("    <link>https://github.com/skaldamramra/VAGEDCSuite/releases</link>");
+                
+                string pubDate = release.published_at;
+                if (!string.IsNullOrEmpty(pubDate))
+                {
+                    try
+                    {
+                        DateTime dt = DateTime.ParseExact(pubDate, "yyyy-MM-dd'T'HH:mm:ss'Z'", System.Globalization.CultureInfo.InvariantCulture);
+                        pubDate = dt.ToString("ddd, dd MMM yyyy HH:mm:ss GMT", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+                    }
+                    catch
+                    {
+                        pubDate = DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss GMT", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+                    }
+                }
+
+                sb.AppendLine("    <item>");
+                sb.AppendLine("      <title>" + EscapeXml(release.name ?? release.tag_name) + "</title>");
+                sb.AppendLine("      <description>" + EscapeXml(release.body ?? "") + "</description>");
+                sb.AppendLine("      <link>" + EscapeXml(release.html_url) + "</link>");
+                sb.AppendLine("      <pubDate>" + pubDate + "</pubDate>");
+                sb.AppendLine("      <version>" + EscapeXml(release.tag_name) + "</version>");
+                sb.AppendLine("    </item>");
+                
+                sb.AppendLine("  </channel>");
+                sb.AppendLine("</rss>");
+
+                using (StreamWriter xmlfile = new StreamWriter(Apppath + "\\Notes.xml", false, System.Text.Encoding.UTF8, 2048))
+                {
+                    xmlfile.Write(sb.ToString());
+                    xmlfile.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error writing release notes: " + ex.Message);
+            }
+        }
+
         public void CheckForUpdates(string customer, string server, string username, string password, bool FromFile)
         {
             m_server = server;
@@ -186,14 +352,15 @@ namespace VAGSuite
 
         public void ExecuteUpdate(Version ver)
         {
-            string command = "http://trionic.mobixs.eu/vagedcsuite/" + ver.ToString() + "/VAGEDCSuite.msi";
+            // Open the GitHub releases page for manual download
+            string releaseUrl = "https://github.com/skaldamramra/VAGEDCSuite/releases/tag/" + ver.ToString();
             try
             {
-                System.Diagnostics.Process.Start(command);
+                System.Diagnostics.Process.Start(releaseUrl);
             }
             catch (Exception E)
             {
-                PumpString("Exception when checking new update(s): " + E.Message, false, false, new Version(), false, "");
+                PumpString("Exception when opening releases page: " + E.Message, false, false, new Version(), false, "");
             }
         }
 
@@ -411,7 +578,7 @@ namespace VAGSuite
 
         internal string GetReleaseNotes()
         {
-            // Try GitHub Releases API first
+            // Use GitHub Releases API
             string githubUrl = "https://api.github.com/repos/skaldamramra/VAGEDCSuite/releases";
             string jsonResult = GetPageHTML(githubUrl, 15);
             Console.WriteLine("GitHub JSON Result Length: " + (jsonResult != null ? jsonResult.Length.ToString() : "null"));
@@ -427,13 +594,12 @@ namespace VAGSuite
             else
             {
                 Console.WriteLine("GitHub JSON Result is invalid or empty. Starts with: " + (jsonResult != null && jsonResult.Length > 0 ? jsonResult[0].ToString() : "N/A"));
+                
+                // Return minimal XML if GitHub fails - no fallback since old server is dead
+                string errorXml = "<?xml version=\"1.0\"?><rss><channel><item><title>Could not load release notes</title><description>Please check your internet connection.</description></item></channel></rss>";
+                WriteNotesXML(errorXml);
+                return Apppath + "\\Notes.xml";
             }
-            
-            // Fallback to old server if GitHub fails
-            string URLString = "http://trionic.mobixs.eu/vagedcsuite/Notes.xml";
-            string XMLResult = GetPageHTML(URLString, 10);
-            WriteNotesXML(XMLResult);
-            return Apppath + "\\Notes.xml";
         }
 
         private void WriteNotesXML(string content)

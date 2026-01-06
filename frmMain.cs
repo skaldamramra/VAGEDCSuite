@@ -1080,7 +1080,8 @@ namespace VAGSuite
             {
                 if (m_msiUpdater != null)
                 {
-                    m_msiUpdater.CheckForUpdates("Global", "http://trionic.mobixs.eu/vagedcsuite/", "", "", false);
+                    // Use GitHub Releases API for version checking
+                    m_msiUpdater.CheckForUpdatesGitHub();
                 }
             }
             catch (Exception E)
@@ -1132,7 +1133,8 @@ namespace VAGSuite
                 m_msiUpdater.Apppath = System.Windows.Forms.Application.UserAppDataPath;
                 m_msiUpdater.onDataPump += new msiupdater.DataPump(m_msiUpdater_onDataPump);
                 m_msiUpdater.onUpdateProgressChanged += new msiupdater.UpdateProgressChanged(m_msiUpdater_onUpdateProgressChanged);
-                m_msiUpdater.CheckForUpdates("Global", "http://trionic.mobixs.eu/vagedcsuite/", "", "", false);
+                // Use GitHub Releases API for version checking
+                m_msiUpdater.CheckForUpdatesGitHub();
             }
             catch (Exception E)
             {
