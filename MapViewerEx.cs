@@ -520,13 +520,13 @@ namespace VAGSuite
                 if (m_OnlineMode)
                 {
                     RefreshMeshGraph();
-                    UpdateChartControlSlice(GetDataFromGridView(false));
+                    UpdateChartControlSlice(GetDataFromGridView(m_isUpsideDown));
                     ShowTable(m_TableWidth, m_issixteenbit);
                 }
                 else
                 {
                     RefreshMeshGraph();
-                    UpdateChartControlSlice(GetDataFromGridView(false));
+                    UpdateChartControlSlice(GetDataFromGridView(m_isUpsideDown));
                     ShowTable(m_TableWidth, m_issixteenbit);
                 }
             }
@@ -1909,7 +1909,7 @@ namespace VAGSuite
             {
                 if (m_TableWidth > 1)
                 {
-                    UpdateChartControlSlice(GetDataFromGridView(false));
+                    UpdateChartControlSlice(GetDataFromGridView(m_isUpsideDown));
                     timer4.Enabled = false;
                     CastSliderMoveEvent();
                 }
@@ -2766,7 +2766,7 @@ namespace VAGSuite
             btnGraph3D.Checked = false;
             btnGraph2D.Checked = true;
             
-            UpdateChartControlSlice(GetDataFromGridView(false));
+            UpdateChartControlSlice(GetDataFromGridView(m_isUpsideDown));
         }
 
     }

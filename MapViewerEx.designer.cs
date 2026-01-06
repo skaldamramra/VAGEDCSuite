@@ -328,9 +328,9 @@ namespace VAGSuite
             //
             this.trackBarControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.trackBarControl1.Location = new System.Drawing.Point(100, 5);
+            this.trackBarControl1.Location = new System.Drawing.Point(200, 5);
             this.trackBarControl1.Name = "trackBarControl1";
-            this.trackBarControl1.Size = new System.Drawing.Size(670, 30);
+            this.trackBarControl1.Size = new System.Drawing.Size(560, 30);
             this.trackBarControl1.TabIndex = 9;
             this.trackBarControl1.Visible = true;
             this.trackBarControl1.ValueChanged += new System.EventHandler(this.trackBarControl1_ValueChanged);
@@ -340,7 +340,7 @@ namespace VAGSuite
             //
             this.labelControl8.Location = new System.Drawing.Point(5, 10);
             this.labelControl8.Name = "labelControl8";
-            this.labelControl8.Size = new System.Drawing.Size(90, 20);
+            this.labelControl8.Size = new System.Drawing.Size(190, 20);
             this.labelControl8.TabIndex = 10;
             this.labelControl8.Values.Text = "MAP values";
             this.labelControl8.Visible = true;
