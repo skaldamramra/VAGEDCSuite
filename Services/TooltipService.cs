@@ -5,9 +5,9 @@ using System.Windows.Forms;
 namespace VAGSuite.Services
 {
     /// <summary>
-    /// Simple static tooltip service that uses System.Windows.Forms.ToolTip internally.
-    /// Replaces legacy tooltip controller usage for programmatic show/hide.
-    /// Designed for .NET 4.0 and Windows Forms.
+    /// Static tooltip service that uses a custom WrappedTooltipForm for text wrapping support.
+    /// Replaces legacy tooltip controller usage with a custom Form-based tooltip that supports
+    /// automatic word wrapping for long descriptions.
     /// 
     /// Usage (example):
     ///     // show near cursor relative to owner control
@@ -16,54 +16,40 @@ namespace VAGSuite.Services
     ///     TooltipService.Hide();
     /// 
     /// Rationale:
-    /// - Verified that WinForms.ToolTip supports programmatic Show(Control, Point, int).
-    /// - Using a simple wrapper centralizes behavior and lets us swap implementations later
-    ///   (for example a custom Form-based tooltip) without touching callers.
+    /// - WinForms.ToolTip doesn't support automatic text wrapping, causing long descriptions
+    ///   to extend beyond the screen width.
+    /// - Custom WrappedTooltipForm uses Label with AutoSize=false and MaxWidth to enable word wrapping.
+    /// - Uses TextRenderer.MeasureText with WordBreak flag for accurate sizing.
     /// </summary>
     public static class TooltipService
     {
-        // Single shared ToolTip instance
-        private static ToolTip s_tooltip;
+        // Single shared wrapped tooltip form instance (supports text wrapping)
+        private static WrappedTooltipForm s_wrappedTooltip;
         private static Control s_lastOwner;
         private static readonly object s_lock = new object();
 
-        // Default persistent duration in milliseconds when Show is used; we'll keep very large
-        // and rely on explicit Hide() to remove the tooltip.
-        private const int PersistentDurationMs = Int32.MaxValue / 1000; // reduce risk of overflow in some implementations
-
         private static void EnsureInitialized()
         {
-            if (s_tooltip != null) return;
+            if (s_wrappedTooltip != null) return;
 
             lock (s_lock)
             {
-                if (s_tooltip != null) return;
+                if (s_wrappedTooltip != null) return;
 
-                s_tooltip = new ToolTip();
-                // We will manage showing/hiding manually; keep delays reasonable for other usages.
-                try
-                {
-                    s_tooltip.AutoPopDelay = 60000; // fallback long duration; explicit Hide also used
-                    s_tooltip.InitialDelay = 200;
-                    s_tooltip.ReshowDelay = 100;
-                    s_tooltip.ShowAlways = true; // show even when parent form is inactive (subject to OS behavior)
-                }
-                catch
-                {
-                    // On older frameworks some properties might throw in rare cases; ignore and continue
-                }
+                // Create the custom wrapped tooltip form
+                s_wrappedTooltip = new WrappedTooltipForm();
             }
         }
 
         /// <summary>
         /// Show tooltip relative to the specified owner control at the specified client position.
-        /// Title is prepended to the text (joined with newline) because WinForms.ToolTip doesn't support separate captions.
+        /// Title is prepended to the text (joined with newline).
         /// This method marshals to the UI thread of the owner control automatically.
         /// </summary>
         /// <param name="owner">The control to anchor the tooltip to (must be non-null).</param>
         /// <param name="clientPosition">Point in owner.ClientCoordinates where the tooltip should appear (typically mouse location).</param>
         /// <param name="title">Short title/caption (can be null or empty).</param>
-        /// <param name="text">Tooltip text body.</param>
+        /// <param name="text">Tooltip text body - will wrap if longer than 600px.</param>
         public static void ShowForControl(Control owner, Point clientPosition, string title, string text)
         {
             if (owner == null) return;
@@ -106,24 +92,19 @@ namespace VAGSuite.Services
             if (owner == null || owner.IsDisposed) return;
             EnsureInitialized();
 
-            // Hide any previous tooltip on different control
-            if (s_lastOwner != null && s_lastOwner != owner)
-            {
-                try { s_tooltip.Hide(s_lastOwner); } catch { }
-                s_lastOwner = null;
-            }
-
-            // Offset so the tooltip doesn't overlap the cursor exactly
-            Point offsetPoint = new Point(clientPosition.X + 12, clientPosition.Y + 12);
-
             try
             {
                 // Store last owner for Hide call
                 s_lastOwner = owner;
 
-                // Show with a very long duration and rely on explicit Hide on mouse leave.
-                // The ToolTip.Show overload expects the point to be client coordinates relative to owner.
-                s_tooltip.Show(text, owner, offsetPoint, PersistentDurationMs);
+                // Set the content - WrappedTooltipForm handles word wrapping automatically
+                s_wrappedTooltip.Content = text;
+
+                // Convert client position to screen coordinates
+                Point screenLocation = owner.PointToScreen(clientPosition);
+
+                // Show at the calculated screen location
+                s_wrappedTooltip.ShowAt(owner, screenLocation);
             }
             catch
             {
@@ -140,17 +121,9 @@ namespace VAGSuite.Services
 
             try
             {
-                if (s_lastOwner != null && !s_lastOwner.IsDisposed)
+                if (s_wrappedTooltip != null && s_wrappedTooltip.Visible)
                 {
-                    if (s_lastOwner.InvokeRequired)
-                    {
-                        try { s_lastOwner.BeginInvoke(new Action(() => s_tooltip.Hide(s_lastOwner))); }
-                        catch { }
-                    }
-                    else
-                    {
-                        s_tooltip.Hide(s_lastOwner);
-                    }
+                    s_wrappedTooltip.HideAnimated();
                 }
             }
             catch
