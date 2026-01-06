@@ -4,8 +4,7 @@ using System.Text;
 using System.Xml;
 using System.IO;
 using System.Net.Cache;
-
-
+using System.Web;
 
 namespace VAGSuite
 {
@@ -215,8 +214,12 @@ namespace VAGSuite
 
             try
             {
+                // Enable TLS 1.2 for GitHub API
+                try { System.Net.ServicePointManager.SecurityProtocol = (System.Net.SecurityProtocolType)3072; } catch { }
+
                 // Setup our Web request
-                System.Net.WebRequest request = System.Net.WebRequest.Create(pageUrl);
+                System.Net.HttpWebRequest request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(pageUrl);
+                request.UserAgent = "VAGEDCSuite-Updater";
                 HttpRequestCachePolicy noCachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
                 request.CachePolicy = noCachePolicy;
                 try
@@ -243,6 +246,7 @@ namespace VAGSuite
             catch (Exception ex)
             {
                 // Error occured grabbing data, return empty string.
+                Console.WriteLine("GetPageHTML Error [" + pageUrl + "]: " + ex.Message);
                 PumpString("An error occurred while retrieving the HTML content. " + ex.Message, false, false, new Version(), false, "");
                 return "";
             }
@@ -407,14 +411,222 @@ namespace VAGSuite
 
         internal string GetReleaseNotes()
         {
+            // Try GitHub Releases API first
+            string githubUrl = "https://api.github.com/repos/skaldamramra/VAGEDCSuite/releases";
+            string jsonResult = GetPageHTML(githubUrl, 15);
+            Console.WriteLine("GitHub JSON Result Length: " + (jsonResult != null ? jsonResult.Length.ToString() : "null"));
+            
+            if (!string.IsNullOrEmpty(jsonResult) && jsonResult.StartsWith("["))
+            {
+                // Convert GitHub JSON to RSS-like XML format
+                string xmlResult = ConvertGitHubReleasesToXML(jsonResult);
+                Console.WriteLine("Generated XML (first 500 chars): " + (xmlResult.Length > 500 ? xmlResult.Substring(0, 500) : xmlResult));
+                WriteNotesXML(xmlResult);
+                return Apppath + "\\Notes.xml";
+            }
+            else
+            {
+                Console.WriteLine("GitHub JSON Result is invalid or empty. Starts with: " + (jsonResult != null && jsonResult.Length > 0 ? jsonResult[0].ToString() : "N/A"));
+            }
+            
+            // Fallback to old server if GitHub fails
             string URLString = "http://trionic.mobixs.eu/vagedcsuite/Notes.xml";
             string XMLResult = GetPageHTML(URLString, 10);
-            using (StreamWriter xmlfile = new StreamWriter(Apppath + "\\Notes.xml", false, System.Text.Encoding.ASCII, 2048))
-            {
-                xmlfile.Write(XMLResult);
-                xmlfile.Close();
-            }
+            WriteNotesXML(XMLResult);
             return Apppath + "\\Notes.xml";
         }
+
+        private void WriteNotesXML(string content)
+        {
+            using (StreamWriter xmlfile = new StreamWriter(Apppath + "\\Notes.xml", false, System.Text.Encoding.UTF8, 2048))
+            {
+                xmlfile.Write(content);
+                xmlfile.Close();
+            }
+        }
+
+        private string ConvertGitHubReleasesToXML(string json)
+        {
+            try
+            {
+                List<GitHubRelease> releases = ParseGitHubReleases(json);
+                
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                sb.AppendLine("<rss version=\"2.0\">");
+                sb.AppendLine("  <channel>");
+                sb.AppendLine("    <title>VAGEDCSuite Releases</title>");
+                sb.AppendLine("    <link>https://github.com/skaldamramra/VAGEDCSuite/releases</link>");
+                
+                foreach (var release in releases)
+                {
+                    string pubDate = release.published_at;
+                    if (!string.IsNullOrEmpty(pubDate))
+                    {
+                        try
+                        {
+                            DateTime dt = DateTime.ParseExact(pubDate, "yyyy-MM-dd'T'HH:mm:ss'Z'", System.Globalization.CultureInfo.InvariantCulture);
+                            pubDate = dt.ToString("ddd, dd MMM yyyy HH:mm:ss GMT", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+                        }
+                        catch
+                        {
+                            pubDate = DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss GMT", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+                        }
+                    }
+                    
+                    sb.AppendLine("    <item>");
+                    sb.AppendLine("      <title>" + EscapeXml(release.name ?? release.tag_name) + "</title>");
+                    sb.AppendLine("      <description>" + EscapeXml(release.body ?? "") + "</description>");
+                    sb.AppendLine("      <link>" + EscapeXml(release.html_url) + "</link>");
+                    sb.AppendLine("      <pubDate>" + pubDate + "</pubDate>");
+                    sb.AppendLine("      <version>" + EscapeXml(release.tag_name) + "</version>");
+                    sb.AppendLine("    </item>");
+                }
+                
+                sb.AppendLine("  </channel>");
+                sb.AppendLine("</rss>");
+                
+                return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error converting GitHub releases: " + ex.Message);
+                // Return minimal valid XML
+                return "<?xml version=\"1.0\"?><rss><channel><item><title>Error loading releases</title></item></channel></rss>";
+            }
+        }
+
+        private List<GitHubRelease> ParseGitHubReleases(string json)
+        {
+            List<GitHubRelease> releases = new List<GitHubRelease>();
+            
+            // Simple JSON parsing without external libraries
+            int pos = 0;
+            while (pos < json.Length)
+            {
+                // Find start of object
+                int objStart = json.IndexOf("{", pos);
+                if (objStart < 0) break;
+                
+                // Find matching closing brace
+                int braceCount = 1;
+                int objEnd = objStart + 1;
+                while (objEnd < json.Length && braceCount > 0)
+                {
+                    if (json[objEnd] == '{') braceCount++;
+                    else if (json[objEnd] == '}') braceCount--;
+                    objEnd++;
+                }
+                
+                if (braceCount == 0)
+                {
+                    string objJson = json.Substring(objStart, objEnd - objStart);
+                    GitHubRelease release = ParseGitHubReleaseObject(objJson);
+                    if (release != null)
+                    {
+                        releases.Add(release);
+                    }
+                    pos = objEnd;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            
+            return releases;
+        }
+
+        private GitHubRelease ParseGitHubReleaseObject(string json)
+        {
+            GitHubRelease release = new GitHubRelease();
+            
+            // Parse tag_name
+            release.tag_name = ExtractJsonString(json, "tag_name");
+            
+            // Parse name (fallback to tag_name if empty)
+            release.name = ExtractJsonString(json, "name");
+            if (string.IsNullOrEmpty(release.name))
+            {
+                release.name = release.tag_name;
+            }
+            
+            // Parse body
+            release.body = ExtractJsonString(json, "body");
+            
+            // Parse html_url
+            release.html_url = ExtractJsonString(json, "html_url");
+            
+            // Parse published_at
+            release.published_at = ExtractJsonString(json, "published_at");
+            
+            return release;
+        }
+
+        private string ExtractJsonString(string json, string key)
+        {
+            string searchKey = "\"" + key + "\"";
+            int keyPos = json.IndexOf(searchKey);
+            if (keyPos < 0) return "";
+
+            int colonPos = json.IndexOf(":", keyPos + searchKey.Length);
+            if (colonPos < 0) return "";
+
+            int valueStart = colonPos + 1;
+            while (valueStart < json.Length && (char.IsWhiteSpace(json[valueStart]) || json[valueStart] == '\r' || json[valueStart] == '\n')) valueStart++;
+
+            if (valueStart >= json.Length) return "";
+
+            if (json[valueStart] == '"')
+            {
+                int valueEnd = valueStart + 1;
+                StringBuilder sb = new StringBuilder();
+                while (valueEnd < json.Length)
+                {
+                    if (json[valueEnd] == '\\' && valueEnd + 1 < json.Length)
+                    {
+                        char escaped = json[valueEnd + 1];
+                        if (escaped == 'n') sb.Append('\n');
+                        else if (escaped == 'r') sb.Append('\r');
+                        else if (escaped == 't') sb.Append('\t');
+                        else sb.Append(escaped);
+                        valueEnd += 2;
+                    }
+                    else if (json[valueEnd] == '"') break;
+                    else
+                    {
+                        sb.Append(json[valueEnd]);
+                        valueEnd++;
+                    }
+                }
+                return sb.ToString();
+            }
+            else
+            {
+                int valueEnd = valueStart;
+                while (valueEnd < json.Length && json[valueEnd] != ',' && json[valueEnd] != '}' && json[valueEnd] != ']' && !char.IsWhiteSpace(json[valueEnd])) valueEnd++;
+                return json.Substring(valueStart, valueEnd - valueStart).Trim();
+            }
+        }
+
+        private string EscapeXml(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+            StringBuilder sb = new StringBuilder(text);
+            sb.Replace('&', '\0').Replace("&", "&"); // Temporary placeholder
+            // Properly escape XML characters
+            return System.Security.SecurityElement.Escape(text);
+        }
+    }
+
+    public class GitHubRelease
+    {
+        public string id { get; set; }
+        public string tag_name { get; set; }
+        public string name { get; set; }
+        public string body { get; set; }
+        public string html_url { get; set; }
+        public string published_at { get; set; }
+        public bool prerelease { get; set; }
     }
 }

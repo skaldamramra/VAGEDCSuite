@@ -13,6 +13,8 @@ namespace VAGSuite
     public partial class ctrlReleaseNotes : UserControl
     {
         private DateTime m_LatestReleaseDate = DateTime.MinValue;
+        private const string GITHUB_RELEASES_URL = "https://github.com/skaldamramra/VAGEDCSuite/releases";
+        
         public ctrlReleaseNotes()
         {
             InitializeComponent();
@@ -75,24 +77,29 @@ namespace VAGSuite
                 dt.ReadXml(filename);*/
                 ds.ReadXml(filename);
                 
-                if (ds.Tables.Count > 2)
+                DataTable itemTable = ds.Tables["item"];
+                if (itemTable != null)
                 {
-                    if (ds.Tables[1].Rows.Count > 0)
+                    DataTable channelTable = ds.Tables["channel"];
+                    if (channelTable != null && channelTable.Rows.Count > 0 && channelTable.Columns.Contains("pubDate"))
                     {
-                        // get the info from the channel table
-                        //System.Globalization.Calendar cal = System.Globalization.CultureInfo.CreateSpecificCulture("nl-NL").Calendar;
-                        //System.Globalization.CultureInfo.CreateSpecificCulture("nl-NL").DateTimeFormat
-
-
-                        m_LatestReleaseDate = StringToDateTime("en-US", ds.Tables[1].Rows[0]["pubDate"].ToString());
+                        m_LatestReleaseDate = StringToDateTime("en-US", channelTable.Rows[0]["pubDate"].ToString());
                         Console.WriteLine("Release date: " + m_LatestReleaseDate.ToString());
                     }
-                    ds.Tables[2].Columns.Add("Date", System.Type.GetType("System.DateTime"));
-                    foreach (DataRow dr in ds.Tables[2].Rows)
+
+                    if (!itemTable.Columns.Contains("Date"))
+                    {
+                        itemTable.Columns.Add("Date", System.Type.GetType("System.DateTime"));
+                    }
+
+                    foreach (DataRow dr in itemTable.Rows)
                     {
                         try
                         {
-                            dr["Date"] = StringToDateTime("en-US", dr["pubDate"].ToString()).Date;
+                            if (itemTable.Columns.Contains("pubDate") && dr["pubDate"] != DBNull.Value)
+                            {
+                                dr["Date"] = StringToDateTime("en-US", dr["pubDate"].ToString()).Date;
+                            }
                         }
                         catch (Exception convE)
                         {
@@ -100,7 +107,12 @@ namespace VAGSuite
                         }
                     }
 
-                    gridControl1.DataSource = ds.Tables[2];
+                    gridControl1.DataSource = itemTable;
+                }
+                else if (ds.Tables.Count > 0)
+                {
+                    // Fallback to first table if "item" not found
+                    gridControl1.DataSource = ds.Tables[0];
                 }
             }
             catch (Exception E)
@@ -113,6 +125,37 @@ namespace VAGSuite
         private void printPreviewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // gridControl1.ShowPrintPreview();
+        }
+
+        private void btnViewOnGitHub_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(GITHUB_RELEASES_URL);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to open GitHub releases page: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void gridControl1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex == gcLink.Index)
+            {
+                string link = gridControl1.Rows[e.RowIndex].Cells[gcLink.Index].Value as string;
+                if (!string.IsNullOrEmpty(link))
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(link);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Unable to open link: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
         }
 
 
