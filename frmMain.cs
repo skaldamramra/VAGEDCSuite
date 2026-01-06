@@ -1877,8 +1877,43 @@ namespace VAGSuite
                     }
                     else
                     {
-                        File.Copy(Tools.Instance.m_currentfile, Path.GetDirectoryName(Tools.Instance.m_currentfile) + "\\" + Path.GetFileNameWithoutExtension(Tools.Instance.m_currentfile) + DateTime.Now.ToString("yyyyMMddHHmmss") + ".binarybackup", true);
-                        frmInfoBox info = new frmInfoBox("Backup created: " + Path.GetDirectoryName(Tools.Instance.m_currentfile) + "\\" + Path.GetFileNameWithoutExtension(Tools.Instance.m_currentfile) + DateTime.Now.ToString("yyyyMMddHHmmss") + ".binarybackup");
+                        string sourceDirectory = Path.GetDirectoryName(Tools.Instance.m_currentfile);
+                        string backupFileName = Path.GetFileNameWithoutExtension(Tools.Instance.m_currentfile) + DateTime.Now.ToString("yyyyMMddHHmmss") + ".binarybackup";
+                        string primaryBackupPath = Path.Combine(sourceDirectory, backupFileName);
+                        
+                        bool backupCreated = false;
+                        string finalBackupPath = primaryBackupPath;
+                        
+                        // Try to create backup in the original file's directory first
+                        try
+                        {
+                            File.Copy(Tools.Instance.m_currentfile, primaryBackupPath, true);
+                            backupCreated = true;
+                        }
+                        catch (UnauthorizedAccessException)
+                        {
+                            // If writing to the original directory fails (e.g., protected directory like C:\),
+                            // fall back to a user-writable location
+                            string fallbackDirectory = Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                                "VAGEDCSuite",
+                                "Backups"
+                            );
+                            
+                            if (!Directory.Exists(fallbackDirectory))
+                            {
+                                Directory.CreateDirectory(fallbackDirectory);
+                            }
+                            
+                            finalBackupPath = Path.Combine(fallbackDirectory, backupFileName);
+                            File.Copy(Tools.Instance.m_currentfile, finalBackupPath, true);
+                            backupCreated = true;
+                        }
+                        
+                        if (backupCreated)
+                        {
+                            frmInfoBox info = new frmInfoBox("Backup created: " + finalBackupPath);
+                        }
                     }
                 }
             }
@@ -2432,36 +2467,68 @@ namespace VAGSuite
             {
                 if (File.Exists(Tools.Instance.m_currentfile))
                 {
-                    string path = Path.GetDirectoryName(Tools.Instance.m_currentfile);
+                    string sourceDirectory = Path.GetDirectoryName(Tools.Instance.m_currentfile);
                     FileInfo fi = new FileInfo(Tools.Instance.m_currentfile);
-                    FileStream fs = File.Create(path + "\\chip2.bin");
-                    BinaryWriter bw = new BinaryWriter(fs);
-                    FileStream fs2 = File.Create(path + "\\chip1.bin");
-                    BinaryWriter bw2 = new BinaryWriter(fs2);
-                    FileStream fsi1 = File.OpenRead(Tools.Instance.m_currentfile);
-                    BinaryReader br1 = new BinaryReader(fsi1);
-                    bool toggle = false;
-                    for (int tel = 0; tel < fi.Length; tel++)
+                    
+                    // Determine output directory - try source first, fall back to Documents
+                    string outputDirectory;
+                    string chip1Path;
+                    string chip2Path;
+                    
+                    try
                     {
-                        Byte ib1 = br1.ReadByte();
-                        if (!toggle)
+                        // Try to create files in the source directory first
+                        chip1Path = Path.Combine(sourceDirectory, "chip1.bin");
+                        chip2Path = Path.Combine(sourceDirectory, "chip2.bin");
+                        
+                        // Test write access by creating a temporary file
+                        string testFile = Path.Combine(sourceDirectory, ".write_test_" + Guid.NewGuid().ToString("N"));
+                        using (File.Create(testFile)) { }
+                        File.Delete(testFile);
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        // Fall back to Documents\VAGEDCSuite\SplitFiles
+                        outputDirectory = Path.Combine(
+                            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                            "VAGEDCSuite",
+                            "SplitFiles"
+                        );
+                        
+                        if (!Directory.Exists(outputDirectory))
                         {
-                            toggle = true;
-                            bw.Write(ib1);
+                            Directory.CreateDirectory(outputDirectory);
                         }
-                        else
+                        
+                        chip1Path = Path.Combine(outputDirectory, "chip1.bin");
+                        chip2Path = Path.Combine(outputDirectory, "chip2.bin");
+                    }
+                    
+                    using (FileStream fs = File.Create(chip2Path))
+                    using (BinaryWriter bw = new BinaryWriter(fs))
+                    using (FileStream fs2 = File.Create(chip1Path))
+                    using (BinaryWriter bw2 = new BinaryWriter(fs2))
+                    using (FileStream fsi1 = File.OpenRead(Tools.Instance.m_currentfile))
+                    using (BinaryReader br1 = new BinaryReader(fsi1))
+                    {
+                        bool toggle = false;
+                        for (int tel = 0; tel < fi.Length; tel++)
                         {
-                            toggle = false;
-                            bw2.Write(ib1);
+                            Byte ib1 = br1.ReadByte();
+                            if (!toggle)
+                            {
+                                toggle = true;
+                                bw.Write(ib1);
+                            }
+                            else
+                            {
+                                toggle = false;
+                                bw2.Write(ib1);
+                            }
                         }
                     }
-                    bw.Close();
-                    bw2.Close();
-                    fs.Close();
-                    fs2.Close();
-                    fsi1.Close();
-                    br1.Close();
-                    MessageBox.Show("File split to chip1.bin and chip2.bin");
+                    
+                    MessageBox.Show("File split to chip1.bin and chip2.bin\nLocation: " + Path.GetDirectoryName(chip1Path));
                 }
             }
         }
