@@ -3,9 +3,13 @@ namespace VAGSuite
     public partial class frmMain
     {
         /// <summary>
-        /// Obsolete initialization.
+        /// Initializes all component instances
         /// </summary>
-        private void InitializeComponentInstances() { }
+        private void InitializeComponentInstances()
+        {
+            // Core Krypton components
+            this.kryptonManager1 = new ComponentFactory.Krypton.Toolkit.KryptonManager(this.components);
+        }
 
         /// <summary>
         /// Obsolete DevExpress initialization.
