@@ -31,10 +31,10 @@ namespace VAGSuite
             this.panelControl1 = new ComponentFactory.Krypton.Toolkit.KryptonPanel();
             this.labelControl1 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
             this.simpleButton1 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
-            this.labelControl2 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.labelControl2 = new System.Windows.Forms.Label();
             this.labelControl3 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
-            this.labelControl5 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
-            this.labelControl6 = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.labelControl5 = new System.Windows.Forms.Label();
+            this.labelControl6 = new System.Windows.Forms.Label();
             this.hyperLinkEdit1 = new ComponentFactory.Krypton.Toolkit.KryptonLinkLabel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
@@ -97,14 +97,14 @@ namespace VAGSuite
             //
             // labelControl2
             //
-            this.labelControl2.AutoSize = true;
+            this.labelControl2.AutoSize = false;
             this.labelControl2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelControl2.Location = new System.Drawing.Point(3, 3);
             this.labelControl2.Name = "labelControl2";
             this.labelControl2.Size = new System.Drawing.Size(420, 40);
             this.labelControl2.TabIndex = 2;
-            this.labelControl2.Values.Text = "VAGEDCSuite was created with the help of lots of people on ecuconnections.com and" +
-                " chiptuners.org";
+            this.labelControl2.Text = "VAGEDCSuite was created with the help of lots of people on ecuconnections.com and chiptuners.org";
+            this.labelControl2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.labelControl2.DoubleClick += new System.EventHandler(this.labelControl2_DoubleClick);
             //
             // labelControl3
@@ -130,23 +130,25 @@ namespace VAGSuite
             //
             // labelControl6
             //
-            this.labelControl6.AutoSize = true;
+            this.labelControl6.AutoSize = false;
             this.labelControl6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelControl6.Location = new System.Drawing.Point(3, 101);
             this.labelControl6.Name = "labelControl6";
             this.labelControl6.Size = new System.Drawing.Size(420, 40);
             this.labelControl6.TabIndex = 6;
-            this.labelControl6.Values.Text = "rkam, Pixis5, othmar77, dieseljohnny, bazare, bondiblu, Relic, Macadam, dilemma";
+            this.labelControl6.Text = "rkam, Pixis5, othmar77, dieseljohnny, bazare, bondiblu, Relic, Macadam, dilemma";
+            this.labelControl6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // labelControl5
             //
-            this.labelControl5.AutoSize = true;
+            this.labelControl5.AutoSize = false;
             this.labelControl5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelControl5.Location = new System.Drawing.Point(3, 147);
             this.labelControl5.Name = "labelControl5";
             this.labelControl5.Size = new System.Drawing.Size(420, 40);
             this.labelControl5.TabIndex = 5;
-            this.labelControl5.Values.Text = "You can send an email for support to skaldamramra@yahoo.com";
+            this.labelControl5.Text = "You can send an email for support to skaldamramra@yahoo.com";
+            this.labelControl5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.labelControl5.DoubleClick += new System.EventHandler(this.labelControl5_DoubleClick);
             //
             // frmAbout
@@ -177,10 +179,10 @@ namespace VAGSuite
         private ComponentFactory.Krypton.Toolkit.KryptonPanel panelControl1;
         private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl1;
         private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton1;
-        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl2;
+        private System.Windows.Forms.Label labelControl2;
         private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl3;
-        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl5;
-        private ComponentFactory.Krypton.Toolkit.KryptonLabel labelControl6;
+        private System.Windows.Forms.Label labelControl5;
+        private System.Windows.Forms.Label labelControl6;
         private ComponentFactory.Krypton.Toolkit.KryptonLinkLabel hyperLinkEdit1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
