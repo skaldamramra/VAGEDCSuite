@@ -299,7 +299,17 @@ namespace VAGSuite
             set
             {
                 m_tableVisible = value;
-                splitContainer1.Panel1Collapsed = !m_tableVisible;
+                gridControl1.Visible = m_tableVisible;
+                if (m_tableVisible)
+                {
+                    mainLayout.RowStyles[0].Height = 50F;
+                    mainLayout.RowStyles[0].SizeType = SizeType.Percent;
+                }
+                else
+                {
+                    mainLayout.RowStyles[0].Height = 0F;
+                    mainLayout.RowStyles[0].SizeType = SizeType.Absolute;
+                }
             }
         }
 
@@ -387,11 +397,21 @@ namespace VAGSuite
         {
             get
             {
-                return !splitContainer1.Panel2Collapsed;
+                return graphPanel.Visible;
             }
             set
             {
-                splitContainer1.Panel2Collapsed = !value;
+                graphPanel.Visible = value;
+                if (value)
+                {
+                    mainLayout.RowStyles[1].Height = 50F;
+                    mainLayout.RowStyles[1].SizeType = SizeType.Percent;
+                }
+                else
+                {
+                    mainLayout.RowStyles[1].Height = 0F;
+                    mainLayout.RowStyles[1].SizeType = SizeType.Absolute;
+                }
             }
         }
         private void btnToggleOverlay_Click(object sender, EventArgs e)
@@ -567,7 +587,10 @@ namespace VAGSuite
 
         private void SetGroupText()
         {
-            groupControl1.Values.Heading = "X: " + m_x_axis_name + " Y: " + m_y_axis_name + " Z: " + m_z_axis_name;
+            if (infoLabel != null)
+            {
+                infoLabel.Values.Text = "X: " + m_x_axis_name + " Y: " + m_y_axis_name + " Z: " + m_z_axis_name;
+            }
         }
 
         private string m_map_descr = string.Empty;
@@ -665,9 +688,17 @@ namespace VAGSuite
         {
             Console.WriteLine("MapViewerEx: Constructor started");
             InitializeComponent();
-            // Set background color to match theme to avoid white flashes
-            this.BackColor = VAGEDCThemeManager.Instance.CurrentTheme.WindowBackground;
             
+            // Set background color to match theme to avoid white flashes
+            var theme = VAGEDCThemeManager.Instance.CurrentTheme;
+            this.BackColor = theme.WindowBackground;
+            
+            // Apply theme recursively to all controls
+            VAGEDCThemeManager.Instance.ApplyThemeToControl(this);
+            
+            // Ensure graph panel is visible by default
+            if (graphPanel != null) graphPanel.Visible = true;
+
             toolStripComboBox1.SelectedIndex = 0;
             toolStripComboBox2.SelectedIndex = 0;
 
@@ -749,8 +780,8 @@ namespace VAGSuite
                     CorrectionFactor = correction_factor,
                     CorrectionOffset = correction_offset,
                     LockMode = toolStripComboBox2.SelectedIndex,
-                    TableVisible = !splitContainer1.Panel1Collapsed,
-                    GraphVisible = !splitContainer1.Panel2Collapsed
+                    TableVisible = gridControl1.Visible,
+                    GraphVisible = graphPanel.Visible
                 },
                 IsDirty = m_datasourceMutated,
                 IsCompareMode = _isCompareViewer,
@@ -877,26 +908,7 @@ namespace VAGSuite
 
         private void ApplyThemeToNavigator()
         {
-            // Style Navigator tabs to match VAGEDC Dark skin
-            xtraTabControl1.PaletteMode = PaletteMode.Custom;
-            xtraTabControl1.Palette = VAGEDCThemeManager.Instance.CustomPalette;
-            
-            xtraTabControl1.StateCommon.Bar.CheckButtonGap = 2;
-            xtraTabControl1.StateCommon.Tab.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
-            
-            // Active Tab (VAGEDC Dark skin: Darker background, blue indicator/accent)
-            xtraTabControl1.StateSelected.Tab.Back.Color1 = Color.FromArgb(30, 30, 30);
-            xtraTabControl1.StateSelected.Tab.Back.ColorStyle = PaletteColorStyle.Solid;
-            xtraTabControl1.StateSelected.Tab.Content.ShortText.Color1 = Color.White;
-            
-            // Inactive Tab
-            // Align inactive tab background/text with VAGEDC Dark skin neutrals
-            xtraTabControl1.StateCommon.Tab.Back.Color1 = Color.FromArgb(37, 37, 38);
-            xtraTabControl1.StateCommon.Tab.Back.ColorStyle = PaletteColorStyle.Solid;
-            xtraTabControl1.StateCommon.Tab.Content.ShortText.Color1 = Color.FromArgb(187, 187, 187);
-
-            // Ensure the font is Source Sans Pro
-            xtraTabControl1.StateCommon.Tab.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(9f, FontStyle.Regular);
+            // Navigator removed
         }
 
         private void ApplyThemeToToolStrip()
@@ -926,18 +938,25 @@ namespace VAGSuite
                 }
             }
 
-            // Style the GroupBox (Top Ribbon/Label area)
-            // CRITICAL: Must set PaletteMode to Custom explicitly to override global manager
-            groupControl1.PaletteMode = PaletteMode.Custom;
-            groupControl1.Palette = VAGEDCThemeManager.Instance.CustomPalette;
-            
-            // Use StateNormal instead of StateCommon to ensure higher priority over global styles
-            groupControl1.StateNormal.Back.Color1 = theme.PanelBackground;
-            groupControl1.StateNormal.Back.ColorStyle = PaletteColorStyle.Solid;
-            groupControl1.StateNormal.Content.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(10f, FontStyle.Bold);
-            groupControl1.StateNormal.Content.ShortText.Color1 = theme.TextPrimary;
-            groupControl1.StateNormal.Border.Color1 = theme.BorderPrimary;
-            groupControl1.StateNormal.Border.DrawBorders = PaletteDrawBorders.All;
+            // Style TrackBar
+            if (trackBarControl1 != null)
+            {
+                trackBarControl1.PaletteMode = PaletteMode.Custom;
+                trackBarControl1.Palette = VAGEDCThemeManager.Instance.CustomPalette;
+                trackBarControl1.StateCommon.Tick.Color1 = theme.TextSecondary;
+                trackBarControl1.StateCommon.Track.Color1 = theme.AccentPrimary;
+                trackBarControl1.StateCommon.Track.Color2 = theme.AccentPrimary;
+                trackBarControl1.StateCommon.Track.Color3 = theme.AccentPrimary;
+                trackBarControl1.StateCommon.Track.Color4 = theme.AccentPrimary;
+                trackBarControl1.StateCommon.Track.Color5 = theme.AccentPrimary;
+            }
+
+            // Style the Info Label
+            if (infoLabel != null)
+            {
+                infoLabel.StateCommon.ShortText.Color1 = theme.TextPrimary;
+                infoLabel.StateCommon.ShortText.Font = VAGEDCThemeManager.Instance.GetCustomFont(10f, FontStyle.Bold);
+            }
 
             // Style Bottom Panel Buttons
             KryptonButton[] bottomButtons = new KryptonButton[] { simpleButton1, simpleButton2, simpleButton3, simpleButton8, simpleButton9, simpleButton10 };
@@ -1005,6 +1024,32 @@ namespace VAGSuite
 
                     // Force refresh to apply state changes
                     btn.Refresh();
+                }
+            }
+
+            // Style Graph Toggle Buttons
+            KryptonCheckButton[] toggleButtons = new KryptonCheckButton[] { btnGraph3D, btnGraph2D };
+            foreach (var btn in toggleButtons)
+            {
+                if (btn != null)
+                {
+                    btn.PaletteMode = PaletteMode.Custom;
+                    btn.Palette = VAGEDCThemeManager.Instance.CustomPalette;
+                    btn.ButtonStyle = ButtonStyle.Standalone;
+                    
+                    // Normal (Unchecked)
+                    btn.StateCommon.Back.Color1 = Color.FromArgb(51, 51, 51);
+                    btn.StateCommon.Back.ColorStyle = PaletteColorStyle.Solid;
+                    btn.StateCommon.Content.ShortText.Color1 = Color.White;
+                    btn.StateCommon.Border.Color1 = theme.BorderPrimary;
+                    btn.StateCommon.Border.DrawBorders = PaletteDrawBorders.All;
+                    
+                    // Checked
+                    btn.StateCheckedNormal.Back.Color1 = Color.FromArgb(0, 122, 204); // Active Blue
+                    btn.StateCheckedNormal.Content.ShortText.Color1 = Color.White;
+                    
+                    // Tracking
+                    btn.StateTracking.Back.Color1 = Color.FromArgb(80, 80, 80);
                 }
             }
 
@@ -1320,13 +1365,19 @@ namespace VAGSuite
 
             if (m_TableWidth > 1)
             {
-                xtraTabControl1.SelectedPage = xtraTabPage1;
-               
+                // Enable switching
+                btnGraph3D.Enabled = true;
+                btnGraph2D.Enabled = true;
+                
+                // Default to 3D view
+                btnGraph3D_Click(this, EventArgs.Empty);
+
                 SetViewTypeParams(m_vs);
                 trackBarControl1.Minimum = 0;
                 trackBarControl1.Maximum = x_axisvalues.Length - 1;
                 labelControl8.Values.Text = X_axis_name + " values";
                 trackBarControl1.Value = 0;
+                
                 // Initialize and configure the 3D chart using the component
                 if (_chart3DComponent != null)
                 {
@@ -1337,13 +1388,12 @@ namespace VAGSuite
             }
             else if (m_TableWidth == 1)
             {
-                xtraTabControl1.SelectedPage = xtraTabPage2;
+                // Force 2D view
+                btnGraph3D.Enabled = false;
+                btnGraph2D.Enabled = true;
+                btnGraph2D_Click(this, EventArgs.Empty);
                 
                 SetViewTypeParams(m_vs);
-                trackBarControl1.Minimum = 0;
-                trackBarControl1.Maximum = x_axisvalues.Length - 1;
-                labelControl8.Values.Text = X_axis_name + " values";
-                /*** end test ***/
                 trackBarControl1.Minimum = 0;
                 trackBarControl1.Maximum = 0;
                 trackBarControl1.Enabled = false;
@@ -1399,6 +1449,8 @@ namespace VAGSuite
                     _chart2DComponent.RefreshChart(state);
                 }
             }
+            // Ensure 2D chart is visible if we are in 2D mode
+            if (m_TableWidth == 1 && nChartControl2 != null) nChartControl2.Visible = true;
         }
 
         private void simpleButton1_Click(object sender, EventArgs e)
@@ -1765,33 +1817,9 @@ namespace VAGSuite
 
         public void SetSplitter(int panel1height, int panel2height, int splitdistance, bool panel1collapsed, bool panel2collapsed)
         {
-            try
-            {
-                m_prohibitsplitchange = true;
-                if (panel1collapsed)
-                {
-                    splitContainer1.Panel1Collapsed = true;
-                    splitContainer1.Panel2Collapsed = false;
-                }
-                else if (panel2collapsed)
-                {
-                    splitContainer1.Panel2Collapsed = true;
-                    splitContainer1.Panel1Collapsed = false;
-                }
-                else
-                {
-                    splitContainer1.Panel2Collapsed = false;
-                    splitContainer1.Panel1Collapsed = false;
-
-                    splitContainer1.SplitterDistance = splitdistance;
-                }
-
-                m_prohibitsplitchange = false;
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine(E.Message);
-            }
+            // Splitter removed, logic adapted to TableLayoutPanel visibility
+            TableVisible = !panel1collapsed;
+            GraphVisible = !panel2collapsed;
         }
 
 
@@ -1813,19 +1841,7 @@ namespace VAGSuite
 
         private void CastSplitterMovedEvent()
         {
-            if (onSplitterMoved != null)
-            {
-                // haal eerst de data uit de tabel van de gridview
-                if (!m_prohibitsplitchange)
-                {
-                    onSplitterMoved(this, new SplitterMovedEventArgs(splitContainer1.Panel1.Height, splitContainer1.Panel2.Height,splitContainer1.SplitterDistance ,splitContainer1.Panel1Collapsed, splitContainer1.Panel2Collapsed, m_map_name));
-                }
-            }
-            else
-            {
-                Console.WriteLine("onSplitterMoved not registered!");
-            }
-
+            // Splitter removed
         }
 
 
@@ -1950,8 +1966,7 @@ namespace VAGSuite
 
         public void SetSelectedTabPageIndex(int tabpageindex)
         {
-            xtraTabControl1.SelectedIndex = tabpageindex;
-            Invalidate();
+            // Tabs removed, ignore
         }
 
         private void CastViewTypeChangedEvent()
@@ -1967,37 +1982,11 @@ namespace VAGSuite
         {
             if (onGraphSelectionChanged != null)
             {
-                onGraphSelectionChanged(this, new GraphSelectionChangedEventArgs(xtraTabControl1.SelectedIndex, m_map_name));
+                onGraphSelectionChanged(this, new GraphSelectionChangedEventArgs(0, m_map_name));
             }
         }
 
-        private void xtraTabControl1_SelectedPageChanged(object sender, EventArgs e)
-        {
-            if (xtraTabControl1.SelectedPage == xtraTabPage1)
-            {
-                // 3d graph
-                if (nChartControl1 != null)
-                {
-                    nChartControl1.Visible = true;
-                    nChartControl1.BringToFront();
-                    
-                    // Ensure overlay buttons are on top of the 3D control
-                    if (simpleButton7 != null) simpleButton7.BringToFront();
-                    if (simpleButton6 != null) simpleButton6.BringToFront();
-                    if (simpleButton4 != null) simpleButton4.BringToFront();
-                    if (simpleButton5 != null) simpleButton5.BringToFront();
-                    if (btnToggleWireframe != null) btnToggleWireframe.BringToFront();
-                    if (btnToggleTooltips != null) btnToggleTooltips.BringToFront();
-                    if (btnToggleOverlay != null && btnToggleOverlay.Visible) btnToggleOverlay.BringToFront();
-                }
-                RefreshMeshGraph();
-            }
-            else
-            {
-                UpdateChartControlSlice(GetDataFromGridView(false));
-            }
-            CastGraphSelectionChangedEvent();
-        }
+        // xtraTabControl1_SelectedPageChanged removed as tabs are gone
 
 
         private void chartControl1_MouseUp(object sender, MouseEventArgs e)
@@ -2012,9 +2001,6 @@ namespace VAGSuite
         }
 
 
-        private void groupControl1_DoubleClick(object sender, EventArgs e)
-        {
-        }
 
         private void simpleButton7_Click(object sender, EventArgs e)
         {
@@ -2263,14 +2249,10 @@ namespace VAGSuite
             }
         }
 
-        private void groupControl1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
-            splitContainer1.Panel2Collapsed = !splitContainer1.Panel2Collapsed;
+            GraphVisible = !GraphVisible;
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
@@ -2331,63 +2313,42 @@ namespace VAGSuite
 
         private void toolStripButton4_Click(object sender, EventArgs e)
         {
-            _controller.HandleDockingAction(this.Parent,
-                () => {
-                    splitContainer1.Panel1Collapsed = false;
-                    splitContainer1.Panel2Collapsed = false;
-                },
-                () => {
-                    splitContainer1.Panel1Collapsed = true;
-                    splitContainer1.Panel2Collapsed = false;
-                });
-            CastSplitterMovedEvent();
+            // Maximize Graph
+            TableVisible = false;
+            GraphVisible = true;
         }
 
         private void toolStripButton5_Click(object sender, EventArgs e)
         {
-            _controller.HandleDockingAction(this.Parent,
-                () => {
-                    splitContainer1.Panel1Collapsed = false;
-                    splitContainer1.Panel2Collapsed = false;
-                },
-                () => {
-                    splitContainer1.Panel1Collapsed = false;
-                    splitContainer1.Panel2Collapsed = true;
-                });
-            CastSplitterMovedEvent();
+            // Maximize Table
+            TableVisible = true;
+            GraphVisible = false;
         }
 
         private void toolStripButton6_Click(object sender, EventArgs e)
         {
-            _controller.HandleDockingAction(this.Parent,
-                () => {
-                    splitContainer1.Panel1Collapsed = false;
-                    splitContainer1.Panel2Collapsed = false;
-                },
-                () => {
-                    splitContainer1.Panel1Collapsed = false;
-                    splitContainer1.Panel2Collapsed = false;
-                });
+            // Restore Both
+            TableVisible = true;
+            GraphVisible = true;
         }
 
         private void toolStripButton7_Click(object sender, EventArgs e)
         {
-            if (splitContainer1.Panel1Collapsed)
+            if (!TableVisible)
             {
-                splitContainer1.Panel1Collapsed = false;
-                splitContainer1.Panel2Collapsed = true;
+                TableVisible = true;
+                GraphVisible = false;
             }
-            else if (splitContainer1.Panel2Collapsed)
+            else if (!GraphVisible)
             {
-                splitContainer1.Panel1Collapsed = false;
-                splitContainer1.Panel2Collapsed = false;
+                TableVisible = true;
+                GraphVisible = true;
             }
             else
             {
-                splitContainer1.Panel1Collapsed = true;
-                splitContainer1.Panel2Collapsed = false;
+                TableVisible = false;
+                GraphVisible = true;
             }
-            CastSplitterMovedEvent();
         }
 
         bool tmr_toggle = false;
@@ -2422,30 +2383,6 @@ namespace VAGSuite
 
         private bool m_split_dragging = false;
 
-        private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
-        {
-            if (m_split_dragging)
-            {
-                m_split_dragging = false;
-                Console.WriteLine("Splitter moved: " + splitContainer1.Panel1.Height.ToString() + ":" + splitContainer1.Panel2.Height.ToString() + splitContainer1.Panel1Collapsed.ToString() + ":" + splitContainer1.Panel2Collapsed.ToString());
-                CastSplitterMovedEvent();
-            }
-        }
-
-        private void splitContainer1_MouseDown(object sender, MouseEventArgs e)
-        {
-            m_split_dragging = true;
-        }
-
-        private void splitContainer1_MouseUp(object sender, MouseEventArgs e)
-        {
-         
-        }
-
-        private void splitContainer1_MouseLeave(object sender, EventArgs e)
-        {
-
-        }
 
 
 
@@ -2783,6 +2720,53 @@ namespace VAGSuite
         private void simpleButton10_Click(object sender, EventArgs e)
         {
             CastReadEvent();
+        }
+
+        private void btnGraph3D_Click(object sender, EventArgs e)
+        {
+            if (m_TableWidth > 1)
+            {
+                nChartControl1.Visible = true;
+                nChartControl2.Visible = false;
+                sliderPanel.Visible = false;
+                
+                // Show 3D overlay buttons
+                simpleButton4.Visible = true;
+                simpleButton5.Visible = true;
+                simpleButton6.Visible = true;
+                simpleButton7.Visible = true;
+                btnToggleOverlay.Visible = true;
+                btnToggleWireframe.Visible = true;
+                btnToggleTooltips.Visible = true;
+                
+                btnGraph3D.Checked = true;
+                btnGraph2D.Checked = false;
+                
+                RefreshMeshGraph();
+            }
+        }
+
+        private void btnGraph2D_Click(object sender, EventArgs e)
+        {
+            nChartControl1.Visible = false;
+            nChartControl2.Visible = true;
+            
+            // Only show slider if it's a 3D map (TableWidth > 1)
+            sliderPanel.Visible = (m_TableWidth > 1);
+
+            // Hide 3D overlay buttons
+            simpleButton4.Visible = false;
+            simpleButton5.Visible = false;
+            simpleButton6.Visible = false;
+            simpleButton7.Visible = false;
+            btnToggleOverlay.Visible = false;
+            btnToggleWireframe.Visible = false;
+            btnToggleTooltips.Visible = false;
+            
+            btnGraph3D.Checked = false;
+            btnGraph2D.Checked = true;
+            
+            UpdateChartControlSlice(GetDataFromGridView(false));
         }
 
     }

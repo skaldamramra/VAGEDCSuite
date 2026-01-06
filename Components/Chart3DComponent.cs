@@ -139,6 +139,9 @@ namespace VAGSuite.Components
                 _glControl.MouseWheel += OnGLMouseWheel;
                 _glControl.KeyDown += OnGLKeyDown;
                 _glControl.Dock = DockStyle.Fill;
+                
+                // Set background color to match theme to avoid white flashes before first paint
+                _glControl.BackColor = Color.FromArgb(40, 40, 40);
 
                 // If the control is already loaded or handle created, initialize now
                 // Verified: OpenTK GLControl requires a handle to call MakeCurrent

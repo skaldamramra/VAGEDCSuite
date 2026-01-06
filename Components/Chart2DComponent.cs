@@ -224,6 +224,9 @@ namespace VAGSuite.Components
             Color gridColor = Color.FromArgb(100, 100, 100); // Subtle gray
             Color pastelBlue = ColorTranslator.FromHtml("#5B8FF9"); // From 3D gradient
 
+            // Ensure the control background matches the pane background to avoid white borders
+            chartControl.BackColor = darkBg;
+
             pane.Fill = new ZedGraph.Fill(darkBg);
             pane.Chart.Fill = new ZedGraph.Fill(darkBg);
             pane.Chart.Border.Color = gridColor;

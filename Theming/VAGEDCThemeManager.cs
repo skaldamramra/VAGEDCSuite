@@ -347,7 +347,7 @@ namespace VAGSuite.Theming
         /// <summary>
         /// Recursively applies theme to a control and its children
         /// </summary>
-        private void ApplyThemeToControl(Control control)
+        public void ApplyThemeToControl(Control control)
         {
             // Krypton Controls
             if (control is ComponentFactory.Krypton.Toolkit.KryptonPanel kPanel)
@@ -437,6 +437,13 @@ namespace VAGSuite.Theming
                 kGroup.StateCommon.Content.ShortText.Font = GetCustomFont(9f, FontStyle.Regular);
                 kGroup.StateCommon.Border.Color1 = VAGEDCColorPalette.Gray600;
                 kGroup.StateCommon.Border.DrawBorders = ComponentFactory.Krypton.Toolkit.PaletteDrawBorders.All;
+                // Ensure the internal panel is also themed if accessible via Controls
+                if (kGroup.Panel != null) kGroup.Panel.BackColor = _currentTheme.PanelBackground;
+            }
+            else if (control is ComponentFactory.Krypton.Navigator.KryptonPage kPage)
+            {
+                kPage.StateCommon.Back.Color1 = _currentTheme.PanelBackground;
+                kPage.StateCommon.Back.ColorStyle = ComponentFactory.Krypton.Toolkit.PaletteColorStyle.Solid;
             }
             else if (control is ComponentFactory.Krypton.Toolkit.KryptonComboBox kCombo)
             {
@@ -518,6 +525,13 @@ namespace VAGSuite.Theming
                 listView.BackColor = _currentTheme.GridBackground;
                 listView.ForeColor = _currentTheme.TextPrimary;
                 listView.BorderStyle = BorderStyle.FixedSingle;
+            }
+            // SplitContainer
+            else if (control is SplitContainer splitContainer)
+            {
+                splitContainer.BackColor = _currentTheme.WindowBackground;
+                splitContainer.Panel1.BackColor = _currentTheme.PanelBackground;
+                splitContainer.Panel2.BackColor = _currentTheme.PanelBackground;
             }
             // DataGridView (used by ADGV in MapViewerEx)
             else if (control is DataGridView dataGridView)
