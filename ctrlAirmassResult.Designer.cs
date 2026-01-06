@@ -31,7 +31,7 @@ namespace VAGSuite
             this.components = new System.ComponentModel.Container();
             this.xtraTabControl1 = new ComponentFactory.Krypton.Navigator.KryptonNavigator();
             this.xtraTabPage1 = new ComponentFactory.Krypton.Navigator.KryptonPage();
-            this.gridControl1 = new ComponentFactory.Krypton.Toolkit.KryptonDataGridView();
+            this.gridControl1 = new Zuby.ADGV.AdvancedDataGridView();
             this.xtraTabPage2 = new ComponentFactory.Krypton.Navigator.KryptonPage();
             this.checkEdit9 = new ComponentFactory.Krypton.Toolkit.KryptonCheckBox();
             this.checkEdit8 = new ComponentFactory.Krypton.Toolkit.KryptonCheckBox();
@@ -83,7 +83,7 @@ namespace VAGSuite
             this.xtraTabPage1,
             this.xtraTabPage2});
             this.xtraTabControl1.SelectedIndex = 0;
-            this.xtraTabControl1.Size = new System.Drawing.Size(815, 426);
+            this.xtraTabControl1.Size = new System.Drawing.Size(815, 420);
             this.xtraTabControl1.TabIndex = 2;
             this.xtraTabControl1.SelectedPageChanged += new System.EventHandler(this.xtraTabControl1_SelectedPageChanged);
             //
@@ -99,7 +99,7 @@ namespace VAGSuite
             this.gridControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridControl1.Location = new System.Drawing.Point(0, 0);
             this.gridControl1.Name = "gridControl1";
-            this.gridControl1.Size = new System.Drawing.Size(813, 399);
+            this.gridControl1.Size = new System.Drawing.Size(797, 353);
             this.gridControl1.TabIndex = 0;
             this.gridControl1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.gridControl1_CellFormatting);
             this.gridControl1.CellPainting += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.gridControl1_CellPainting);
@@ -174,7 +174,7 @@ namespace VAGSuite
             // groupControl2
             //
             this.groupControl2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.groupControl2.Location = new System.Drawing.Point(0, 426);
+            this.groupControl2.Location = new System.Drawing.Point(0, 420);
             this.groupControl2.Name = "groupControl2";
             //
             // groupControl2.Panel
@@ -195,7 +195,7 @@ namespace VAGSuite
             this.groupControl2.Panel.Controls.Add(this.labelControl1);
             this.groupControl2.Panel.Controls.Add(this.comboBoxEdit2);
             this.groupControl2.Panel.Controls.Add(this.checkEdit1);
-            this.groupControl2.Panel.StateCommon.Color1 = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.groupControl2.Panel.StateCommon.Color1 = System.Drawing.Color.Transparent;
             this.groupControl2.Size = new System.Drawing.Size(815, 156);
             this.groupControl2.TabIndex = 3;
             this.groupControl2.Values.Heading = "Options";
@@ -231,7 +231,7 @@ namespace VAGSuite
             //
             // labelControl13
             //
-            this.labelControl13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelControl13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelControl13.Location = new System.Drawing.Point(775, 79);
             this.labelControl13.Name = "labelControl13";
             this.labelControl13.Size = new System.Drawing.Size(15, 20);
@@ -245,7 +245,7 @@ namespace VAGSuite
             //
             // labelControl14
             //
-            this.labelControl14.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelControl14.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelControl14.Location = new System.Drawing.Point(703, 80);
             this.labelControl14.Name = "labelControl14";
             this.labelControl14.Size = new System.Drawing.Size(88, 20);
@@ -296,7 +296,7 @@ namespace VAGSuite
             //
             // labelControl7
             //
-            this.labelControl7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelControl7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelControl7.Location = new System.Drawing.Point(775, 22);
             this.labelControl7.Name = "labelControl7";
             this.labelControl7.Size = new System.Drawing.Size(15, 20);
@@ -306,7 +306,7 @@ namespace VAGSuite
             //
             // labelControl8
             //
-            this.labelControl8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelControl8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelControl8.Location = new System.Drawing.Point(681, 23);
             this.labelControl8.Name = "labelControl8";
             this.labelControl8.Size = new System.Drawing.Size(114, 20);
@@ -317,7 +317,7 @@ namespace VAGSuite
             //
             // labelControl4
             //
-            this.labelControl4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelControl4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelControl4.Location = new System.Drawing.Point(775, 60);
             this.labelControl4.Name = "labelControl4";
             this.labelControl4.Size = new System.Drawing.Size(15, 20);
@@ -326,7 +326,7 @@ namespace VAGSuite
             //
             // labelControl6
             //
-            this.labelControl6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelControl6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelControl6.Location = new System.Drawing.Point(775, 41);
             this.labelControl6.Name = "labelControl6";
             this.labelControl6.Size = new System.Drawing.Size(15, 20);
@@ -336,7 +336,7 @@ namespace VAGSuite
             //
             // labelControl3
             //
-            this.labelControl3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelControl3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelControl3.Location = new System.Drawing.Point(704, 61);
             this.labelControl3.Name = "labelControl3";
             this.labelControl3.Size = new System.Drawing.Size(86, 20);
@@ -346,7 +346,7 @@ namespace VAGSuite
             //
             // labelControl1
             //
-            this.labelControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelControl1.Location = new System.Drawing.Point(701, 42);
             this.labelControl1.Name = "labelControl1";
             this.labelControl1.Size = new System.Drawing.Size(91, 20);
@@ -441,7 +441,7 @@ namespace VAGSuite
 
         private ComponentFactory.Krypton.Navigator.KryptonNavigator xtraTabControl1;
         private ComponentFactory.Krypton.Navigator.KryptonPage xtraTabPage1;
-        private ComponentFactory.Krypton.Toolkit.KryptonDataGridView gridControl1;
+        private Zuby.ADGV.AdvancedDataGridView gridControl1;
         private ComponentFactory.Krypton.Navigator.KryptonPage xtraTabPage2;
         private ComponentFactory.Krypton.Toolkit.KryptonCheckBox checkEdit9;
         private ComponentFactory.Krypton.Toolkit.KryptonCheckBox checkEdit8;

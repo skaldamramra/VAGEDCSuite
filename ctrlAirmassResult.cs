@@ -9,6 +9,7 @@ using ComponentFactory.Krypton.Toolkit;
 using ComponentFactory.Krypton.Navigator;
 using System.IO;
 using ZedGraph;
+using System.Reflection;
 
 namespace VAGSuite
 {
@@ -89,46 +90,147 @@ namespace VAGSuite
         public ctrlAirmassResult()
         {
             InitializeComponent();
+            this.Load += new EventHandler(ctrlAirmassResult_Load);
+            EnableDoubleBuffering(gridControl1);
             ApplyVAGEDCDarkTheme();
+            chartControl1.PointValueEvent += new ZedGraphControl.PointValueHandler(chartControl1_PointValueEvent);
+            chartControl1.IsShowPointValues = true;
+        }
+
+        private string chartControl1_PointValueEvent(ZedGraphControl sender, GraphPane pane, CurveItem curve, int pointIndex)
+        {
+            PointPair pt = curve[pointIndex];
+            return string.Format("{0}: {1:F0} at {2:F0} RPM", curve.Label.Text, pt.Y, pt.X);
+        }
+
+        private void ctrlAirmassResult_Load(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(m_currentfile) && m_symbols != null)
+            {
+                Calculate(m_currentfile, m_symbols);
+            }
+        }
+
+        private void EnableDoubleBuffering(Control control)
+        {
+            try
+            {
+                typeof(Control).InvokeMember("DoubleBuffered",
+                    BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+                    null, control, new object[] { true });
+            }
+            catch { }
         }
 
         private void ApplyVAGEDCDarkTheme()
         {
             if (VAGSuite.Theming.VAGEDCThemeManager.Instance.IsCustomThemeActive)
             {
-                VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToControl(this);
-                gridControl1.Palette = VAGSuite.Theming.VAGEDCThemeManager.Instance.CustomPalette;
-                gridControl1.PaletteMode = PaletteMode.Custom;
+                var themeManager = VAGSuite.Theming.VAGEDCThemeManager.Instance;
+                var theme = themeManager.CurrentTheme;
+                
+                themeManager.ApplyThemeToControl(this);
+                EnableDoubleBuffering(gridControl1);
+                
+                // Grid Styling (ADGV Look)
                 gridControl1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
                 gridControl1.RowHeadersVisible = true;
                 gridControl1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+                gridControl1.FilterAndSortEnabled = false;
+                gridControl1.BackgroundColor = theme.GridBackground;
+                gridControl1.GridColor = theme.GridBorder;
+                gridControl1.DefaultCellStyle.BackColor = theme.GridBackground;
+                gridControl1.DefaultCellStyle.ForeColor = theme.TextPrimary;
+                gridControl1.DefaultCellStyle.SelectionBackColor = theme.GridSelection;
+                gridControl1.DefaultCellStyle.SelectionForeColor = Color.White;
                 
-                // ZedGraph Dark Theme
+                gridControl1.ColumnHeadersDefaultCellStyle.BackColor = theme.GridHeaderBackground;
+                gridControl1.ColumnHeadersDefaultCellStyle.ForeColor = theme.GridHeaderText;
+                gridControl1.ColumnHeadersDefaultCellStyle.Font = theme.GridHeaderFont;
+                gridControl1.EnableHeadersVisualStyles = false;
+
+                gridControl1.RowHeadersDefaultCellStyle.BackColor = theme.GridHeaderBackground;
+                gridControl1.RowHeadersDefaultCellStyle.ForeColor = theme.GridHeaderText;
+                
+                // Options Group Styling
+                groupControl2.StateCommon.Back.Color1 = theme.PanelBackground;
+                groupControl2.StateCommon.Back.ColorStyle = PaletteColorStyle.Solid;
+                
+                // CRITICAL: KryptonGroupBox.Panel is a KryptonPanel
+                groupControl2.Panel.StateCommon.Color1 = theme.PanelBackground;
+                groupControl2.Panel.StateCommon.ColorStyle = PaletteColorStyle.Solid;
+                groupControl2.Panel.BackColor = theme.PanelBackground; // Fallback for standard WinForms logic
+                
+                groupControl2.StateCommon.Content.ShortText.Color1 = theme.TextPrimary;
+                groupControl2.StateCommon.Content.ShortText.Font = themeManager.GetCustomFont(9f, FontStyle.Bold);
+                groupControl2.StateCommon.Border.Color1 = theme.BorderPrimary;
+                groupControl2.StateCommon.Border.DrawBorders = PaletteDrawBorders.All;
+
+                // Apply Source Sans Pro to all controls in the options panel
+                Font customFont = themeManager.GetCustomFont(9f, FontStyle.Regular);
+                foreach (Control ctrl in groupControl2.Panel.Controls)
+                {
+                    ctrl.Font = customFont;
+                    ctrl.BackColor = theme.PanelBackground;
+                    ctrl.ForeColor = theme.TextPrimary;
+
+                    if (ctrl is KryptonLabel kLabel)
+                    {
+                        kLabel.StateCommon.ShortText.Font = customFont;
+                        kLabel.StateCommon.ShortText.Color1 = theme.TextPrimary;
+                    }
+                    else if (ctrl is KryptonCheckBox kCheck)
+                    {
+                        kCheck.StateCommon.ShortText.Font = customFont;
+                        kCheck.StateCommon.ShortText.Color1 = theme.TextPrimary;
+                    }
+                    else if (ctrl is KryptonNumericUpDown kNum)
+                    {
+                        kNum.StateCommon.Back.Color1 = theme.ControlBackground;
+                        kNum.StateCommon.Content.Color1 = theme.TextPrimary;
+                    }
+                    else if (ctrl is KryptonComboBox kCombo)
+                    {
+                        kCombo.StateCommon.ComboBox.Back.Color1 = theme.ControlBackground;
+                        kCombo.StateCommon.ComboBox.Content.Color1 = theme.TextPrimary;
+                    }
+                }
+                
+                // ZedGraph Dark Theme (Modernized to match MapViewerEx)
                 GraphPane myPane = chartControl1.GraphPane;
-                Color darkBg = Color.FromArgb(30, 30, 30); // Gray900
-                Color gridColor = Color.FromArgb(51, 51, 51); // Gray600
-                Color offWhite = Color.FromArgb(212, 212, 212); // TextPrimaryDark
+                Color darkBg = theme.WindowBackground;
+                Color gridColor = theme.GridBorder;
+                Color offWhite = theme.TextPrimary;
 
                 chartControl1.BackColor = darkBg;
                 myPane.Fill = new Fill(darkBg);
                 myPane.Chart.Fill = new Fill(darkBg);
                 myPane.Chart.Border.Color = gridColor;
+                myPane.Legend.IsVisible = false;
                 
                 myPane.Title.FontSpec.FontColor = offWhite;
+                myPane.Title.FontSpec.Family = "Source Sans Pro";
+                myPane.Title.FontSpec.IsBold = true;
                 myPane.XAxis.Color = gridColor;
                 myPane.XAxis.Title.FontSpec.FontColor = offWhite;
+                myPane.XAxis.Title.FontSpec.Family = "Source Sans Pro";
                 myPane.XAxis.Scale.FontSpec.FontColor = offWhite;
+                myPane.XAxis.Scale.FontSpec.Family = "Source Sans Pro";
                 myPane.XAxis.Scale.FontSpec.Fill.IsVisible = false;
 
                 myPane.YAxis.Color = gridColor;
                 myPane.YAxis.Title.FontSpec.FontColor = offWhite;
+                myPane.YAxis.Title.FontSpec.Family = "Source Sans Pro";
                 myPane.YAxis.Scale.FontSpec.FontColor = offWhite;
+                myPane.YAxis.Scale.FontSpec.Family = "Source Sans Pro";
                 myPane.YAxis.Scale.FontSpec.Fill.IsVisible = false;
 
                 myPane.Y2Axis.IsVisible = true;
                 myPane.Y2Axis.Color = gridColor;
                 myPane.Y2Axis.Title.FontSpec.FontColor = offWhite;
+                myPane.Y2Axis.Title.FontSpec.Family = "Source Sans Pro";
                 myPane.Y2Axis.Scale.FontSpec.FontColor = offWhite;
+                myPane.Y2Axis.Scale.FontSpec.Family = "Source Sans Pro";
                 myPane.Y2Axis.Scale.FontSpec.Fill.IsVisible = false;
                 
                 myPane.XAxis.MajorGrid.IsVisible = true;
@@ -364,6 +466,7 @@ namespace VAGSuite
                 dt.Rows.Add(values);
             }
             gridControl1.DataSource = dt;
+            gridControl1.RowHeadersVisible = true;
 
             // Set Row Headers for Pedal % (pedalXAxis) - Matching inverted order
             if (gridControl1.Rows.Count > 0 && pedalXAxis != null)
@@ -378,6 +481,8 @@ namespace VAGSuite
                         gridControl1.Rows[i].HeaderCell.Value = pedalPercent.ToString("0.#") + "%";
                     }
                 }
+                gridControl1.AutoResizeRowHeadersWidth(DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders);
+                gridControl1.Refresh();
             }
 
             if (xtraTabControl1.SelectedPage.Name == xtraTabPage2.Name)
@@ -909,23 +1014,47 @@ namespace VAGSuite
                     torqueList.Add(rpm, torque);
                 }
 
-                LineItem powerCurve = myPane.AddCurve(powerLabel, powerList, Color.Red, SymbolType.Circle);
-                LineItem torqueCurve = myPane.AddCurve(torqueLabel, torqueList, Color.Blue, SymbolType.Circle);
+                // Modernized gradient stops from Chart2DComponent
+                Color[] gradientStops = new Color[] {
+                    ColorTranslator.FromHtml("#5B8FF9"),
+                    ColorTranslator.FromHtml("#61DDAA"),
+                    ColorTranslator.FromHtml("#91CC75"),
+                    ColorTranslator.FromHtml("#FAC858"),
+                    ColorTranslator.FromHtml("#FC8452"),
+                    ColorTranslator.FromHtml("#EE6666")
+                };
+
+                // Distinct colors for curves
+                Color torqueColor = Color.FromArgb(255, 117, 50); // Orange-Red
+                Color powerColor = Color.FromArgb(50, 197, 255);  // Cyan-Blue
+
+                LineItem powerCurve = myPane.AddCurve(powerLabel, powerList, powerColor, SymbolType.Circle);
+                LineItem torqueCurve = myPane.AddCurve(torqueLabel, torqueList, torqueColor, SymbolType.Circle);
 
                 powerCurve.IsY2Axis = true;
+
+                // Match Axis colors to curves
+                myPane.YAxis.Title.FontSpec.FontColor = torqueColor;
+                myPane.YAxis.Scale.FontSpec.FontColor = torqueColor;
+                myPane.Y2Axis.Title.FontSpec.FontColor = powerColor;
+                myPane.Y2Axis.Scale.FontSpec.FontColor = powerColor;
 
                 // Apply modern styling from Chart2DComponent
                 powerCurve.Line.IsSmooth = true;
                 powerCurve.Line.SmoothTension = 0.5f;
-                powerCurve.Symbol.Fill = new Fill(new Color[] { Color.Red, Color.DarkRed });
-                powerCurve.Symbol.Fill.Type = FillType.GradientByY;
+                powerCurve.Line.Width = 2.5f;
+                powerCurve.Symbol.Fill = new Fill(powerColor, Color.White, 45.0f);
                 powerCurve.Symbol.Size = 8.0f;
+                powerCurve.Symbol.Border.Color = chartControl1.BackColor;
+                powerCurve.Symbol.Border.Width = 1.0f;
 
                 torqueCurve.Line.IsSmooth = true;
                 torqueCurve.Line.SmoothTension = 0.5f;
-                torqueCurve.Symbol.Fill = new Fill(new Color[] { Color.Blue, Color.DarkBlue });
-                torqueCurve.Symbol.Fill.Type = FillType.GradientByY;
+                torqueCurve.Line.Width = 2.5f;
+                torqueCurve.Symbol.Fill = new Fill(torqueColor, Color.White, 45.0f);
                 torqueCurve.Symbol.Size = 8.0f;
+                torqueCurve.Symbol.Border.Color = chartControl1.BackColor;
+                torqueCurve.Symbol.Border.Width = 1.0f;
                 
                 chartControl1.AxisChange();
                 chartControl1.Invalidate();
@@ -985,6 +1114,34 @@ namespace VAGSuite
         private void simpleButton1_Click(object sender, EventArgs e)
         {
             CastCloseEvent();
+            
+            // Safer Fallback:
+            // 1. Check if we are in a KryptonPage (Navigator)
+            Control parent = this.Parent;
+            while (parent != null)
+            {
+                if (parent is ComponentFactory.Krypton.Navigator.KryptonPage page)
+                {
+                    // Find the navigator that owns this page
+                    Control navCandidate = page.Parent;
+                    while (navCandidate != null)
+                    {
+                        if (navCandidate is ComponentFactory.Krypton.Navigator.KryptonNavigator navigator)
+                        {
+                            navigator.Pages.Remove(page);
+                            return;
+                        }
+                        navCandidate = navCandidate.Parent;
+                    }
+                }
+                parent = parent.Parent;
+            }
+
+            // 2. If not in a navigator, just remove from parent controls
+            if (this.Parent != null)
+            {
+                this.Parent.Controls.Remove(this);
+            }
         }
 
         public delegate void ViewerClose(object sender, EventArgs e);
@@ -1025,7 +1182,7 @@ namespace VAGSuite
 
         private void comboBoxEdit2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            gridControl1.Refresh();
+            gridControl1.Invalidate();
             if (xtraTabControl1.SelectedPage.Name == xtraTabPage2.Name)
             {
                 LoadGraphWithDetails();
@@ -1120,6 +1277,7 @@ namespace VAGSuite
             if (xtraTabControl1.SelectedPage.Name == xtraTabPage1.Name)
             {
                 // in table view
+                gridControl1.Invalidate();
             }
             else if (xtraTabControl1.SelectedPage.Name == xtraTabPage2.Name)
             {
@@ -1130,29 +1288,73 @@ namespace VAGSuite
 
         private void gridControl1_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
-            if (e.RowIndex == -1 && e.ColumnIndex == -1)
+            // Optimization: Only handle the top-left header cell if it's actually visible and needs painting
+            if (e.RowIndex == -1 && e.ColumnIndex == -1 && e.CellBounds.Width > 0)
             {
-                e.PaintBackground(e.CellBounds, true);
-                using (Pen p = new Pen(Color.FromArgb(51, 51, 51), 1))
+                var theme = VAGSuite.Theming.VAGEDCThemeManager.Instance.CurrentTheme;
+                
+                // Clear background with theme color
+                using (var backBrush = new SolidBrush(theme.GridHeaderBackground))
                 {
-                    e.Graphics.DrawLine(p, e.CellBounds.Left, e.CellBounds.Top, e.CellBounds.Right, e.CellBounds.Bottom);
+                    e.Graphics.FillRectangle(backBrush, e.CellBounds);
+                }
+                
+                using (Pen p = new Pen(theme.GridBorder, 1))
+                {
+                    // Draw diagonal line
+                    e.Graphics.DrawLine(p, e.CellBounds.Left, e.CellBounds.Top, e.CellBounds.Right - 1, e.CellBounds.Bottom - 1);
+                    // Draw border lines to match ADGV look
+                    e.Graphics.DrawLine(p, e.CellBounds.Left, e.CellBounds.Bottom - 1, e.CellBounds.Right, e.CellBounds.Bottom - 1);
+                    e.Graphics.DrawLine(p, e.CellBounds.Right - 1, e.CellBounds.Top, e.CellBounds.Right - 1, e.CellBounds.Bottom);
                 }
                 
                 Font f = gridControl1.ColumnHeadersDefaultCellStyle.Font ?? this.Font;
-                Color foreColor = gridControl1.ColumnHeadersDefaultCellStyle.ForeColor;
-                if (foreColor.IsEmpty || foreColor == Color.Transparent) foreColor = Color.White;
+                Color foreColor = theme.GridHeaderText;
 
                 using (Brush b = new SolidBrush(foreColor))
                 {
-                    StringFormat sfNear = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
-                    StringFormat sfFar = new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Near };
-                    
-                    // Top-right: RPM (Columns), Bottom-left: Pedal % (Rows)
-                    e.Graphics.DrawString("RPM", f, b, e.CellBounds, sfFar);
-                    e.Graphics.DrawString("Pedal %", f, b, e.CellBounds, sfNear);
+                    // Use smaller font for the corner to avoid overlap
+                    using (Font smallFont = new Font(f.FontFamily, f.Size * 0.75f, f.Style))
+                    {
+                        // Top-right: RPM (Columns)
+                        StringFormat sfRPM = new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Near };
+                        // Bottom-left: Pedal % (Rows)
+                        StringFormat sfPedal = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
+                        
+                        // Add small padding
+                        RectangleF rect = e.CellBounds;
+                        rect.Inflate(-2, -2);
+
+                        e.Graphics.DrawString("RPM", smallFont, b, rect, sfRPM);
+                        e.Graphics.DrawString("Pedal %", smallFont, b, rect, sfPedal);
+                    }
                 }
                 
                 e.Handled = true;
+            }
+            else if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                // Optimization: Only custom paint if limited, otherwise let default paint handle it
+                // This reduces redrawing artifacts during resize
+                if (limitermap != null)
+                {
+                    int r = rows - 1 - e.RowIndex;
+                    int index = (e.ColumnIndex * rows) + r;
+                    if (index >= 0 && index < limitermap.Length)
+                    {
+                        limitType limiter = (limitType)limitermap.GetValue(index);
+                        if (limiter != limitType.None)
+                        {
+                            e.PaintBackground(e.CellBounds, true);
+                            using (var b = new SolidBrush(Color.FromArgb(80, 200, 100, 100)))
+                            {
+                                e.Graphics.FillRectangle(b, e.CellBounds);
+                            }
+                            e.PaintContent(e.CellBounds);
+                            e.Handled = true;
+                        }
+                    }
+                }
             }
         }
 
