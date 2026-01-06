@@ -89,6 +89,53 @@ namespace VAGSuite
         public ctrlAirmassResult()
         {
             InitializeComponent();
+            ApplyVAGEDCDarkTheme();
+        }
+
+        private void ApplyVAGEDCDarkTheme()
+        {
+            if (VAGSuite.Theming.VAGEDCThemeManager.Instance.IsCustomThemeActive)
+            {
+                VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToControl(this);
+                gridControl1.Palette = VAGSuite.Theming.VAGEDCThemeManager.Instance.CustomPalette;
+                gridControl1.PaletteMode = PaletteMode.Custom;
+                gridControl1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+                gridControl1.RowHeadersVisible = true;
+                gridControl1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+                
+                // ZedGraph Dark Theme
+                GraphPane myPane = chartControl1.GraphPane;
+                Color darkBg = Color.FromArgb(30, 30, 30); // Gray900
+                Color gridColor = Color.FromArgb(51, 51, 51); // Gray600
+                Color offWhite = Color.FromArgb(212, 212, 212); // TextPrimaryDark
+
+                chartControl1.BackColor = darkBg;
+                myPane.Fill = new Fill(darkBg);
+                myPane.Chart.Fill = new Fill(darkBg);
+                myPane.Chart.Border.Color = gridColor;
+                
+                myPane.Title.FontSpec.FontColor = offWhite;
+                myPane.XAxis.Color = gridColor;
+                myPane.XAxis.Title.FontSpec.FontColor = offWhite;
+                myPane.XAxis.Scale.FontSpec.FontColor = offWhite;
+                myPane.XAxis.Scale.FontSpec.Fill.IsVisible = false;
+
+                myPane.YAxis.Color = gridColor;
+                myPane.YAxis.Title.FontSpec.FontColor = offWhite;
+                myPane.YAxis.Scale.FontSpec.FontColor = offWhite;
+                myPane.YAxis.Scale.FontSpec.Fill.IsVisible = false;
+
+                myPane.Y2Axis.IsVisible = true;
+                myPane.Y2Axis.Color = gridColor;
+                myPane.Y2Axis.Title.FontSpec.FontColor = offWhite;
+                myPane.Y2Axis.Scale.FontSpec.FontColor = offWhite;
+                myPane.Y2Axis.Scale.FontSpec.Fill.IsVisible = false;
+                
+                myPane.XAxis.MajorGrid.IsVisible = true;
+                myPane.XAxis.MajorGrid.Color = Color.FromArgb(50, gridColor);
+                myPane.YAxis.MajorGrid.IsVisible = true;
+                myPane.YAxis.MajorGrid.Color = Color.FromArgb(50, gridColor);
+            }
         }
 
 
@@ -287,25 +334,51 @@ namespace VAGSuite
                 }
             }
             // now show resulttable
+            // now show resulttable
             DataTable dt = new DataTable();
+            // Columns are RPM (pedalYAxis)
             foreach (int xvalue in pedalYAxis)
             {
-                dt.Columns.Add(xvalue.ToString());
+                string colName = xvalue.ToString();
+                int duplicateCount = 1;
+                while (dt.Columns.Contains(colName))
+                {
+                    colName = xvalue.ToString() + " (" + duplicateCount++ + ")";
+                }
+                dt.Columns.Add(colName);
             }
-            // now fill the table rows
+
+            // Rows are Pedal % (pedalXAxis) - 100% at top, 0% at bottom
             m_MaxValueInTable = 0;
-            for (int r = 0; r < pedalXAxis.Length; r++)
+            for (int r = pedalXAxis.Length - 1; r >= 0; r--)
             {
                 object[] values = new object[columns];
                 for (int t = 0; t < pedalYAxis.Length; t++)
                 {
-                    int currValue = (int)resulttable.GetValue((((t + 1) * rows) - 1) - r);
+                    // resulttable indexing: (colcount * rows) + rowcount
+                    // colcount (t) is RPM, rowcount (r) is Pedal
+                    int currValue = (int)resulttable.GetValue((t * rows) + r);
                     if (currValue > m_MaxValueInTable) m_MaxValueInTable = currValue;
                     values.SetValue(currValue, t);
                 }
                 dt.Rows.Add(values);
             }
             gridControl1.DataSource = dt;
+
+            // Set Row Headers for Pedal % (pedalXAxis) - Matching inverted order
+            if (gridControl1.Rows.Count > 0 && pedalXAxis != null)
+            {
+                int rowCountToFill = Math.Min(gridControl1.Rows.Count, pedalXAxis.Length);
+                for (int i = 0; i < rowCountToFill; i++)
+                {
+                    int axisIndex = pedalXAxis.Length - 1 - i;
+                    if (axisIndex >= 0 && axisIndex < pedalXAxis.Length)
+                    {
+                        double pedalPercent = pedalXAxis[axisIndex] / 100.0;
+                        gridControl1.Rows[i].HeaderCell.Value = pedalPercent.ToString("0.#") + "%";
+                    }
+                }
+            }
 
             if (xtraTabControl1.SelectedPage.Name == xtraTabPage2.Name)
             {
@@ -806,6 +879,9 @@ namespace VAGSuite
                 string torqueLabel = "Torque (Nm)";
                 if (checkEdit6.Checked) torqueLabel = "Torque (lbft)";
 
+                myPane.YAxis.Title.Text = torqueLabel;
+                myPane.Y2Axis.Title.Text = powerLabel;
+
                 PointPairList powerList = new PointPairList();
                 PointPairList torqueList = new PointPairList();
 
@@ -833,8 +909,23 @@ namespace VAGSuite
                     torqueList.Add(rpm, torque);
                 }
 
-                LineItem powerCurve = myPane.AddCurve(powerLabel, powerList, Color.Red, SymbolType.None);
-                LineItem torqueCurve = myPane.AddCurve(torqueLabel, torqueList, Color.Blue, SymbolType.None);
+                LineItem powerCurve = myPane.AddCurve(powerLabel, powerList, Color.Red, SymbolType.Circle);
+                LineItem torqueCurve = myPane.AddCurve(torqueLabel, torqueList, Color.Blue, SymbolType.Circle);
+
+                powerCurve.IsY2Axis = true;
+
+                // Apply modern styling from Chart2DComponent
+                powerCurve.Line.IsSmooth = true;
+                powerCurve.Line.SmoothTension = 0.5f;
+                powerCurve.Symbol.Fill = new Fill(new Color[] { Color.Red, Color.DarkRed });
+                powerCurve.Symbol.Fill.Type = FillType.GradientByY;
+                powerCurve.Symbol.Size = 8.0f;
+
+                torqueCurve.Line.IsSmooth = true;
+                torqueCurve.Line.SmoothTension = 0.5f;
+                torqueCurve.Symbol.Fill = new Fill(new Color[] { Color.Blue, Color.DarkBlue });
+                torqueCurve.Symbol.Fill.Type = FillType.GradientByY;
+                torqueCurve.Symbol.Size = 8.0f;
                 
                 chartControl1.AxisChange();
                 chartControl1.Invalidate();
@@ -1037,9 +1128,55 @@ namespace VAGSuite
             }
         }
 
-        private void gridView1_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+        private void gridControl1_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
-            // Neutralized DevExpress custom drawing
+            if (e.RowIndex == -1 && e.ColumnIndex == -1)
+            {
+                e.PaintBackground(e.CellBounds, true);
+                using (Pen p = new Pen(Color.FromArgb(51, 51, 51), 1))
+                {
+                    e.Graphics.DrawLine(p, e.CellBounds.Left, e.CellBounds.Top, e.CellBounds.Right, e.CellBounds.Bottom);
+                }
+                
+                Font f = gridControl1.ColumnHeadersDefaultCellStyle.Font ?? this.Font;
+                Color foreColor = gridControl1.ColumnHeadersDefaultCellStyle.ForeColor;
+                if (foreColor.IsEmpty || foreColor == Color.Transparent) foreColor = Color.White;
+
+                using (Brush b = new SolidBrush(foreColor))
+                {
+                    StringFormat sfNear = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
+                    StringFormat sfFar = new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Near };
+                    
+                    // Top-right: RPM (Columns), Bottom-left: Pedal % (Rows)
+                    e.Graphics.DrawString("RPM", f, b, e.CellBounds, sfFar);
+                    e.Graphics.DrawString("Pedal %", f, b, e.CellBounds, sfNear);
+                }
+                
+                e.Handled = true;
+            }
+        }
+
+        private void gridControl1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && limitermap != null)
+            {
+                // index = (colcount * rows) + rowcount
+                // Adjusted for inverted row order (r = rows - 1 - e.RowIndex)
+                int r = rows - 1 - e.RowIndex;
+                int index = (e.ColumnIndex * rows) + r;
+                if (index >= 0 && index < limitermap.Length)
+                {
+                    limitType limiter = (limitType)limitermap.GetValue(index);
+                    if (limiter != limitType.None)
+                    {
+                        e.CellStyle.BackColor = Color.FromArgb(80, 200, 100, 100); // Reddish for limited
+                        e.CellStyle.ForeColor = Color.White;
+                        
+                        DataGridViewCell cell = gridControl1[e.ColumnIndex, e.RowIndex];
+                        cell.ToolTipText = "Limited by: " + limiter.ToString();
+                    }
+                }
+            }
         }
 
 

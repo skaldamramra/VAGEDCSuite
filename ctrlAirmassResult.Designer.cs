@@ -76,16 +76,14 @@ namespace VAGSuite
             //
             // xtraTabControl1
             //
-            this.xtraTabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.xtraTabControl1.Location = new System.Drawing.Point(8, 8);
+            this.xtraTabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.xtraTabControl1.Location = new System.Drawing.Point(0, 0);
             this.xtraTabControl1.Name = "xtraTabControl1";
             this.xtraTabControl1.Pages.AddRange(new ComponentFactory.Krypton.Navigator.KryptonPage[] {
             this.xtraTabPage1,
             this.xtraTabPage2});
             this.xtraTabControl1.SelectedIndex = 0;
-            this.xtraTabControl1.Size = new System.Drawing.Size(799, 378);
+            this.xtraTabControl1.Size = new System.Drawing.Size(815, 426);
             this.xtraTabControl1.TabIndex = 2;
             this.xtraTabControl1.SelectedPageChanged += new System.EventHandler(this.xtraTabControl1_SelectedPageChanged);
             //
@@ -101,9 +99,10 @@ namespace VAGSuite
             this.gridControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridControl1.Location = new System.Drawing.Point(0, 0);
             this.gridControl1.Name = "gridControl1";
-            this.gridControl1.Size = new System.Drawing.Size(797, 353);
+            this.gridControl1.Size = new System.Drawing.Size(813, 399);
             this.gridControl1.TabIndex = 0;
-            this.gridControl1.CellPainting += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.gridView1_CellPainting);
+            this.gridControl1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.gridControl1_CellFormatting);
+            this.gridControl1.CellPainting += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.gridControl1_CellPainting);
             //
             // xtraTabPage2
             //
@@ -174,9 +173,8 @@ namespace VAGSuite
             //
             // groupControl2
             //
-            this.groupControl2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupControl2.Location = new System.Drawing.Point(8, 390);
+            this.groupControl2.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.groupControl2.Location = new System.Drawing.Point(0, 426);
             this.groupControl2.Name = "groupControl2";
             //
             // groupControl2.Panel
@@ -197,7 +195,8 @@ namespace VAGSuite
             this.groupControl2.Panel.Controls.Add(this.labelControl1);
             this.groupControl2.Panel.Controls.Add(this.comboBoxEdit2);
             this.groupControl2.Panel.Controls.Add(this.checkEdit1);
-            this.groupControl2.Size = new System.Drawing.Size(799, 156);
+            this.groupControl2.Panel.StateCommon.Color1 = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.groupControl2.Size = new System.Drawing.Size(815, 156);
             this.groupControl2.TabIndex = 3;
             this.groupControl2.Values.Heading = "Options";
             //
@@ -383,7 +382,7 @@ namespace VAGSuite
             //
             this.simpleButton3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.simpleButton3.Enabled = false;
-            this.simpleButton3.Location = new System.Drawing.Point(8, 552);
+            this.simpleButton3.Location = new System.Drawing.Point(8, 120);
             this.simpleButton3.Name = "simpleButton3";
             this.simpleButton3.Size = new System.Drawing.Size(147, 25);
             this.simpleButton3.TabIndex = 7;
@@ -394,7 +393,7 @@ namespace VAGSuite
             // simpleButton2
             //
             this.simpleButton2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.simpleButton2.Location = new System.Drawing.Point(651, 552);
+            this.simpleButton2.Location = new System.Drawing.Point(651, 120);
             this.simpleButton2.Name = "simpleButton2";
             this.simpleButton2.Size = new System.Drawing.Size(75, 25);
             this.simpleButton2.TabIndex = 6;
@@ -404,7 +403,7 @@ namespace VAGSuite
             // simpleButton1
             //
             this.simpleButton1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.simpleButton1.Location = new System.Drawing.Point(732, 552);
+            this.simpleButton1.Location = new System.Drawing.Point(732, 120);
             this.simpleButton1.Name = "simpleButton1";
             this.simpleButton1.Size = new System.Drawing.Size(75, 25);
             this.simpleButton1.TabIndex = 5;
@@ -415,11 +414,11 @@ namespace VAGSuite
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.simpleButton3);
-            this.Controls.Add(this.simpleButton2);
-            this.Controls.Add(this.simpleButton1);
-            this.Controls.Add(this.groupControl2);
+            this.groupControl2.Panel.Controls.Add(this.simpleButton3);
+            this.groupControl2.Panel.Controls.Add(this.simpleButton2);
+            this.groupControl2.Panel.Controls.Add(this.simpleButton1);
             this.Controls.Add(this.xtraTabControl1);
+            this.Controls.Add(this.groupControl2);
             this.Name = "ctrlAirmassResult";
             this.Size = new System.Drawing.Size(815, 582);
             ((System.ComponentModel.ISupportInitialize)(this.xtraTabControl1)).EndInit();
