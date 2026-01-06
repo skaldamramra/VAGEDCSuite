@@ -2561,12 +2561,12 @@ namespace VAGSuite
         private void btnUserManual_ItemClick(object sender, EventArgs e)
         {
             // start user manual PDF file
-            StartPDFFile(Path.Combine(System.Windows.Forms.Application.StartupPath, "EDC15PSuite manual.pdf"), "EDC15P user manual could not be found or opened!");
+            StartPDFFile(Path.Combine(System.Windows.Forms.Application.StartupPath, "Docs", "EDC15PSuite manual.pdf"), "EDC15P user manual could not be found or opened!");
             
         }
         private void btnEDC15PDocumentation_ItemClick(object sender, EventArgs e)
         {
-            StartPDFFile(Path.Combine(System.Windows.Forms.Application.StartupPath, "VAG EDC15P.pdf"), "EDC15P documentation could not be found or opened!");
+            StartPDFFile(Path.Combine(System.Windows.Forms.Application.StartupPath, "Docs", "VAG EDC15P.pdf"), "EDC15P documentation could not be found or opened!");
         }
 
         
