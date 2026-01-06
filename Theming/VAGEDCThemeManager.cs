@@ -449,6 +449,7 @@ namespace VAGSuite.Theming
             {
                 kCombo.StateCommon.ComboBox.Back.Color1 = _currentTheme.ControlBackground;
                 kCombo.StateCommon.ComboBox.Content.Color1 = _currentTheme.TextPrimary;
+                kCombo.StateCommon.ComboBox.Content.Font = GetCustomFont(9f, FontStyle.Regular);
                 kCombo.StateCommon.ComboBox.Border.Color1 = VAGEDCColorPalette.Gray600;
                 kCombo.DropDownStyle = ComboBoxStyle.DropDownList;
             }
@@ -467,6 +468,13 @@ namespace VAGSuite.Theming
             {
                 kTrackBar.StateCommon.Tick.Color1 = _currentTheme.TextSecondary;
                 kTrackBar.StateCommon.Track.Color1 = VAGEDCColorPalette.Primary500;
+            }
+            else if (control is ComponentFactory.Krypton.Toolkit.KryptonNumericUpDown kNum)
+            {
+                kNum.StateCommon.Back.Color1 = _currentTheme.ControlBackground;
+                kNum.StateCommon.Content.Color1 = _currentTheme.TextPrimary;
+                kNum.StateCommon.Content.Font = GetCustomFont(9f, FontStyle.Regular);
+                kNum.StateCommon.Border.Color1 = VAGEDCColorPalette.Gray600;
             }
 
             // Standard Panel

@@ -129,14 +129,17 @@ namespace VAGSuite
                 var themeManager = VAGSuite.Theming.VAGEDCThemeManager.Instance;
                 var theme = themeManager.CurrentTheme;
                 
+                // Use the centralized theme manager to apply theme recursively
                 themeManager.ApplyThemeToControl(this);
                 EnableDoubleBuffering(gridControl1);
                 
-                // Grid Styling (ADGV Look)
+                // Grid Styling (ADGV Look) - Specific overrides for this grid
                 gridControl1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
                 gridControl1.RowHeadersVisible = true;
                 gridControl1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
                 gridControl1.FilterAndSortEnabled = false;
+                
+                // Ensure grid colors match theme (ApplyThemeToControl handles generic DGV, but we ensure specific properties here)
                 gridControl1.BackgroundColor = theme.GridBackground;
                 gridControl1.GridColor = theme.GridBorder;
                 gridControl1.DefaultCellStyle.BackColor = theme.GridBackground;
@@ -151,50 +154,6 @@ namespace VAGSuite
 
                 gridControl1.RowHeadersDefaultCellStyle.BackColor = theme.GridHeaderBackground;
                 gridControl1.RowHeadersDefaultCellStyle.ForeColor = theme.GridHeaderText;
-                
-                // Options Group Styling
-                groupControl2.StateCommon.Back.Color1 = theme.PanelBackground;
-                groupControl2.StateCommon.Back.ColorStyle = PaletteColorStyle.Solid;
-                
-                // CRITICAL: KryptonGroupBox.Panel is a KryptonPanel
-                groupControl2.Panel.StateCommon.Color1 = theme.PanelBackground;
-                groupControl2.Panel.StateCommon.ColorStyle = PaletteColorStyle.Solid;
-                groupControl2.Panel.BackColor = theme.PanelBackground; // Fallback for standard WinForms logic
-                
-                groupControl2.StateCommon.Content.ShortText.Color1 = theme.TextPrimary;
-                groupControl2.StateCommon.Content.ShortText.Font = themeManager.GetCustomFont(9f, FontStyle.Bold);
-                groupControl2.StateCommon.Border.Color1 = theme.BorderPrimary;
-                groupControl2.StateCommon.Border.DrawBorders = PaletteDrawBorders.All;
-
-                // Apply Source Sans Pro to all controls in the options panel
-                Font customFont = themeManager.GetCustomFont(9f, FontStyle.Regular);
-                foreach (Control ctrl in groupControl2.Panel.Controls)
-                {
-                    ctrl.Font = customFont;
-                    ctrl.BackColor = theme.PanelBackground;
-                    ctrl.ForeColor = theme.TextPrimary;
-
-                    if (ctrl is KryptonLabel kLabel)
-                    {
-                        kLabel.StateCommon.ShortText.Font = customFont;
-                        kLabel.StateCommon.ShortText.Color1 = theme.TextPrimary;
-                    }
-                    else if (ctrl is KryptonCheckBox kCheck)
-                    {
-                        kCheck.StateCommon.ShortText.Font = customFont;
-                        kCheck.StateCommon.ShortText.Color1 = theme.TextPrimary;
-                    }
-                    else if (ctrl is KryptonNumericUpDown kNum)
-                    {
-                        kNum.StateCommon.Back.Color1 = theme.ControlBackground;
-                        kNum.StateCommon.Content.Color1 = theme.TextPrimary;
-                    }
-                    else if (ctrl is KryptonComboBox kCombo)
-                    {
-                        kCombo.StateCommon.ComboBox.Back.Color1 = theme.ControlBackground;
-                        kCombo.StateCommon.ComboBox.Content.Color1 = theme.TextPrimary;
-                    }
-                }
                 
                 // ZedGraph Dark Theme (Modernized to match MapViewerEx)
                 GraphPane myPane = chartControl1.GraphPane;

@@ -40,6 +40,7 @@ namespace VAGSuite
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.printToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupControl2 = new ComponentFactory.Krypton.Toolkit.KryptonGroupBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.comboBoxEdit1 = new ComponentFactory.Krypton.Toolkit.KryptonComboBox();
             this.checkEdit6 = new ComponentFactory.Krypton.Toolkit.KryptonCheckBox();
             this.checkEdit5 = new ComponentFactory.Krypton.Toolkit.KryptonCheckBox();
@@ -69,6 +70,7 @@ namespace VAGSuite
             ((System.ComponentModel.ISupportInitialize)(this.groupControl2.Panel)).BeginInit();
             this.groupControl2.Panel.SuspendLayout();
             this.groupControl2.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit2)).BeginInit();
             // spinEdit1 (KryptonNumericUpDown) does not support ISupportInitialize
@@ -179,76 +181,93 @@ namespace VAGSuite
             //
             // groupControl2.Panel
             //
-            this.groupControl2.Panel.Controls.Add(this.comboBoxEdit1);
-            this.groupControl2.Panel.Controls.Add(this.checkEdit6);
-            this.groupControl2.Panel.Controls.Add(this.checkEdit5);
-            this.groupControl2.Panel.Controls.Add(this.labelControl13);
-            this.groupControl2.Panel.Controls.Add(this.labelControl14);
-            this.groupControl2.Panel.Controls.Add(this.labelControl10);
-            this.groupControl2.Panel.Controls.Add(this.labelControl9);
-            this.groupControl2.Panel.Controls.Add(this.spinEdit1);
-            this.groupControl2.Panel.Controls.Add(this.labelControl7);
-            this.groupControl2.Panel.Controls.Add(this.labelControl8);
-            this.groupControl2.Panel.Controls.Add(this.labelControl4);
-            this.groupControl2.Panel.Controls.Add(this.labelControl6);
-            this.groupControl2.Panel.Controls.Add(this.labelControl3);
-            this.groupControl2.Panel.Controls.Add(this.labelControl1);
-            this.groupControl2.Panel.Controls.Add(this.comboBoxEdit2);
-            this.groupControl2.Panel.Controls.Add(this.checkEdit1);
-            this.groupControl2.Panel.StateCommon.Color1 = System.Drawing.Color.Transparent;
-            this.groupControl2.Size = new System.Drawing.Size(815, 156);
+            this.groupControl2.Panel.Controls.Add(this.tableLayoutPanel1);
+            this.groupControl2.Size = new System.Drawing.Size(815, 180);
             this.groupControl2.TabIndex = 3;
             this.groupControl2.Values.Heading = "Options";
+            //
+            // tableLayoutPanel1
+            //
+            this.tableLayoutPanel1.ColumnCount = 4;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
+            this.tableLayoutPanel1.Controls.Add(this.labelControl9, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.spinEdit1, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.labelControl10, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.comboBoxEdit2, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.checkEdit5, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.checkEdit6, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.checkEdit1, 2, 2);
+            this.tableLayoutPanel1.Controls.Add(this.comboBoxEdit1, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.simpleButton3, 0, 4);
+            this.tableLayoutPanel1.Controls.Add(this.simpleButton2, 2, 4);
+            this.tableLayoutPanel1.Controls.Add(this.simpleButton1, 3, 4);
+            this.tableLayoutPanel1.Controls.Add(this.labelControl8, 3, 0);
+            this.tableLayoutPanel1.Controls.Add(this.labelControl1, 3, 1);
+            this.tableLayoutPanel1.Controls.Add(this.labelControl3, 3, 2);
+            this.tableLayoutPanel1.Controls.Add(this.labelControl14, 3, 3);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 5;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(811, 156);
+            this.tableLayoutPanel1.TabIndex = 0;
+            this.tableLayoutPanel1.BackColor = System.Drawing.Color.Transparent;
             //
             // comboBoxEdit1
             //
             this.comboBoxEdit1.Items.AddRange(new object[] {
             "Automatic banks selection"});
-            this.comboBoxEdit1.Location = new System.Drawing.Point(16, 113);
+            this.comboBoxEdit1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.SetColumnSpan(this.comboBoxEdit1, 2);
+            this.comboBoxEdit1.Location = new System.Drawing.Point(3, 93);
             this.comboBoxEdit1.Name = "comboBoxEdit1";
-            this.comboBoxEdit1.Size = new System.Drawing.Size(195, 21);
+            this.comboBoxEdit1.Size = new System.Drawing.Size(234, 21);
             this.comboBoxEdit1.TabIndex = 26;
             this.comboBoxEdit1.Text = "Automatic bank selection";
             this.comboBoxEdit1.SelectedIndexChanged += new System.EventHandler(this.comboBoxEdit1_SelectedIndexChanged_1);
             //
             // checkEdit6
             //
-            this.checkEdit6.Location = new System.Drawing.Point(125, 88);
+            this.checkEdit6.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkEdit6.Location = new System.Drawing.Point(123, 63);
             this.checkEdit6.Name = "checkEdit6";
-            this.checkEdit6.Size = new System.Drawing.Size(95, 20);
+            this.checkEdit6.Size = new System.Drawing.Size(114, 24);
             this.checkEdit6.TabIndex = 25;
             this.checkEdit6.Values.Text = "torque in lbft";
             this.checkEdit6.CheckedChanged += new System.EventHandler(this.checkEdit6_CheckedChanged);
             //
             // checkEdit5
             //
-            this.checkEdit5.Location = new System.Drawing.Point(14, 88);
+            this.checkEdit5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkEdit5.Location = new System.Drawing.Point(3, 63);
             this.checkEdit5.Name = "checkEdit5";
-            this.checkEdit5.Size = new System.Drawing.Size(92, 20);
+            this.checkEdit5.Size = new System.Drawing.Size(114, 24);
             this.checkEdit5.TabIndex = 24;
             this.checkEdit5.Values.Text = "power in kW";
             this.checkEdit5.CheckedChanged += new System.EventHandler(this.checkEdit5_CheckedChanged);
             //
             // labelControl13
             //
-            this.labelControl13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelControl13.Location = new System.Drawing.Point(775, 79);
+            this.labelControl13.Location = new System.Drawing.Point(0, 0);
             this.labelControl13.Name = "labelControl13";
-            this.labelControl13.Size = new System.Drawing.Size(15, 20);
-            this.labelControl13.StateCommon.ShortText.Color1 = System.Drawing.Color.Black;
-            this.labelControl13.StateCommon.ShortText.ImageStyle = ComponentFactory.Krypton.Toolkit.PaletteImageStyle.Inherit;
-            this.labelControl13.StateCommon.ShortText.Trim = ComponentFactory.Krypton.Toolkit.PaletteTextTrim.Inherit;
-            this.labelControl13.TabIndex = 19;
-            this.labelControl13.Values.Text = "     ";
+            this.labelControl13.Size = new System.Drawing.Size(100, 23);
+            this.labelControl13.TabIndex = 0;
             this.labelControl13.Visible = false;
-            this.labelControl13.Click += new System.EventHandler(this.labelControl13_Click);
             //
             // labelControl14
             //
-            this.labelControl14.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelControl14.Location = new System.Drawing.Point(703, 80);
+            this.labelControl14.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelControl14.Location = new System.Drawing.Point(664, 93);
             this.labelControl14.Name = "labelControl14";
-            this.labelControl14.Size = new System.Drawing.Size(88, 20);
+            this.labelControl14.Size = new System.Drawing.Size(144, 24);
             this.labelControl14.TabIndex = 18;
             this.labelControl14.Values.Text = "Fuelcut limiter";
             this.labelControl14.Visible = false;
@@ -257,23 +276,26 @@ namespace VAGSuite
             //
             // labelControl10
             //
-            this.labelControl10.Location = new System.Drawing.Point(217, 41);
+            this.labelControl10.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labelControl10.Location = new System.Drawing.Point(243, 3);
             this.labelControl10.Name = "labelControl10";
-            this.labelControl10.Size = new System.Drawing.Size(30, 20);
+            this.labelControl10.Size = new System.Drawing.Size(30, 24);
             this.labelControl10.TabIndex = 15;
             this.labelControl10.Values.Text = "kPa";
             //
             // labelControl9
             //
-            this.labelControl9.Location = new System.Drawing.Point(16, 41);
+            this.labelControl9.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelControl9.Location = new System.Drawing.Point(3, 3);
             this.labelControl9.Name = "labelControl9";
-            this.labelControl9.Size = new System.Drawing.Size(108, 20);
+            this.labelControl9.Size = new System.Drawing.Size(114, 24);
             this.labelControl9.TabIndex = 14;
             this.labelControl9.Values.Text = "Ambient pressure";
             //
             // spinEdit1
             //
-            this.spinEdit1.Location = new System.Drawing.Point(146, 36);
+            this.spinEdit1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.spinEdit1.Location = new System.Drawing.Point(123, 3);
             this.spinEdit1.Maximum = new decimal(new int[] {
             150,
             0,
@@ -285,7 +307,7 @@ namespace VAGSuite
             0,
             0});
             this.spinEdit1.Name = "spinEdit1";
-            this.spinEdit1.Size = new System.Drawing.Size(65, 22);
+            this.spinEdit1.Size = new System.Drawing.Size(114, 22);
             this.spinEdit1.TabIndex = 13;
             this.spinEdit1.Value = new decimal(new int[] {
             100,
@@ -296,20 +318,18 @@ namespace VAGSuite
             //
             // labelControl7
             //
-            this.labelControl7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelControl7.Location = new System.Drawing.Point(775, 22);
+            this.labelControl7.Location = new System.Drawing.Point(0, 0);
             this.labelControl7.Name = "labelControl7";
-            this.labelControl7.Size = new System.Drawing.Size(15, 20);
-            this.labelControl7.TabIndex = 12;
-            this.labelControl7.Values.Text = "     ";
+            this.labelControl7.Size = new System.Drawing.Size(100, 23);
+            this.labelControl7.TabIndex = 0;
             this.labelControl7.Visible = false;
             //
             // labelControl8
             //
-            this.labelControl8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelControl8.Location = new System.Drawing.Point(681, 23);
+            this.labelControl8.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelControl8.Location = new System.Drawing.Point(664, 3);
             this.labelControl8.Name = "labelControl8";
-            this.labelControl8.Size = new System.Drawing.Size(114, 20);
+            this.labelControl8.Size = new System.Drawing.Size(144, 24);
             this.labelControl8.TabIndex = 11;
             this.labelControl8.Values.Text = "Turbospeed limiter";
             this.labelControl8.Visible = false;
@@ -317,39 +337,36 @@ namespace VAGSuite
             //
             // labelControl4
             //
-            this.labelControl4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelControl4.Location = new System.Drawing.Point(775, 60);
+            this.labelControl4.Location = new System.Drawing.Point(0, 0);
             this.labelControl4.Name = "labelControl4";
-            this.labelControl4.Size = new System.Drawing.Size(15, 20);
-            this.labelControl4.TabIndex = 10;
-            this.labelControl4.Values.Text = "     ";
+            this.labelControl4.Size = new System.Drawing.Size(100, 23);
+            this.labelControl4.TabIndex = 0;
+            this.labelControl4.Visible = false;
             //
             // labelControl6
             //
-            this.labelControl6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelControl6.Location = new System.Drawing.Point(775, 41);
+            this.labelControl6.Location = new System.Drawing.Point(0, 0);
             this.labelControl6.Name = "labelControl6";
-            this.labelControl6.Size = new System.Drawing.Size(15, 20);
-            this.labelControl6.TabIndex = 8;
-            this.labelControl6.Values.Text = "     ";
+            this.labelControl6.Size = new System.Drawing.Size(100, 23);
+            this.labelControl6.TabIndex = 0;
             this.labelControl6.Visible = false;
             //
             // labelControl3
             //
-            this.labelControl3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelControl3.Location = new System.Drawing.Point(704, 61);
+            this.labelControl3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelControl3.Location = new System.Drawing.Point(664, 63);
             this.labelControl3.Name = "labelControl3";
-            this.labelControl3.Size = new System.Drawing.Size(86, 20);
+            this.labelControl3.Size = new System.Drawing.Size(144, 24);
             this.labelControl3.TabIndex = 7;
             this.labelControl3.Values.Text = "Torque limiter";
             this.labelControl3.DoubleClick += new System.EventHandler(this.labelControl3_DoubleClick);
             //
             // labelControl1
             //
-            this.labelControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelControl1.Location = new System.Drawing.Point(701, 42);
+            this.labelControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelControl1.Location = new System.Drawing.Point(664, 33);
             this.labelControl1.Name = "labelControl1";
-            this.labelControl1.Size = new System.Drawing.Size(91, 20);
+            this.labelControl1.Size = new System.Drawing.Size(144, 24);
             this.labelControl1.TabIndex = 5;
             this.labelControl1.Values.Text = "Airmass limiter";
             this.labelControl1.Visible = false;
@@ -361,18 +378,21 @@ namespace VAGSuite
             "Show IQ",
             "Show estimated torque",
             "Show estimated horsepower"});
-            this.comboBoxEdit2.Location = new System.Drawing.Point(16, 62);
+            this.tableLayoutPanel1.SetColumnSpan(this.comboBoxEdit2, 2);
+            this.comboBoxEdit2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.comboBoxEdit2.Location = new System.Drawing.Point(3, 33);
             this.comboBoxEdit2.Name = "comboBoxEdit2";
-            this.comboBoxEdit2.Size = new System.Drawing.Size(195, 21);
+            this.comboBoxEdit2.Size = new System.Drawing.Size(234, 21);
             this.comboBoxEdit2.TabIndex = 4;
             this.comboBoxEdit2.Text = "Show IQ";
             this.comboBoxEdit2.SelectedIndexChanged += new System.EventHandler(this.comboBoxEdit2_SelectedIndexChanged);
             //
             // checkEdit1
             //
-            this.checkEdit1.Location = new System.Drawing.Point(425, 87);
+            this.checkEdit1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkEdit1.Location = new System.Drawing.Point(243, 63);
             this.checkEdit1.Name = "checkEdit1";
-            this.checkEdit1.Size = new System.Drawing.Size(177, 20);
+            this.checkEdit1.Size = new System.Drawing.Size(415, 24);
             this.checkEdit1.TabIndex = 0;
             this.checkEdit1.Values.Text = "Car has automatic gearbox";
             this.checkEdit1.Visible = false;
@@ -380,11 +400,12 @@ namespace VAGSuite
             //
             // simpleButton3
             //
-            this.simpleButton3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.tableLayoutPanel1.SetColumnSpan(this.simpleButton3, 2);
+            this.simpleButton3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.simpleButton3.Enabled = false;
-            this.simpleButton3.Location = new System.Drawing.Point(8, 120);
+            this.simpleButton3.Location = new System.Drawing.Point(3, 123);
             this.simpleButton3.Name = "simpleButton3";
-            this.simpleButton3.Size = new System.Drawing.Size(147, 25);
+            this.simpleButton3.Size = new System.Drawing.Size(234, 29);
             this.simpleButton3.TabIndex = 7;
             this.simpleButton3.Values.Text = "Compare to another file";
             this.simpleButton3.Visible = false;
@@ -393,7 +414,7 @@ namespace VAGSuite
             // simpleButton2
             //
             this.simpleButton2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.simpleButton2.Location = new System.Drawing.Point(651, 120);
+            this.simpleButton2.Location = new System.Drawing.Point(583, 127);
             this.simpleButton2.Name = "simpleButton2";
             this.simpleButton2.Size = new System.Drawing.Size(75, 25);
             this.simpleButton2.TabIndex = 6;
@@ -403,7 +424,7 @@ namespace VAGSuite
             // simpleButton1
             //
             this.simpleButton1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.simpleButton1.Location = new System.Drawing.Point(732, 120);
+            this.simpleButton1.Location = new System.Drawing.Point(733, 127);
             this.simpleButton1.Name = "simpleButton1";
             this.simpleButton1.Size = new System.Drawing.Size(75, 25);
             this.simpleButton1.TabIndex = 5;
@@ -411,12 +432,9 @@ namespace VAGSuite
             this.simpleButton1.Click += new System.EventHandler(this.simpleButton1_Click);
             // 
             // ctrlAirmassResult
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.groupControl2.Panel.Controls.Add(this.simpleButton3);
-            this.groupControl2.Panel.Controls.Add(this.simpleButton2);
-            this.groupControl2.Panel.Controls.Add(this.simpleButton1);
             this.Controls.Add(this.xtraTabControl1);
             this.Controls.Add(this.groupControl2);
             this.Name = "ctrlAirmassResult";
@@ -469,5 +487,6 @@ namespace VAGSuite
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem printToolStripMenuItem;
         private ComponentFactory.Krypton.Toolkit.KryptonComboBox comboBoxEdit1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }
