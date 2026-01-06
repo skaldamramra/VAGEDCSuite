@@ -1598,6 +1598,10 @@ namespace VAGSuite
                 translog.SetTransactionLog(Tools.Instance.m_ProjectTransactionLog);
                 translog.Show();
             }
+            else
+            {
+                frmInfoBox info = new frmInfoBox("No project is currently loaded.\n\nPlease open a project first to view the transaction log.");
+            }
         }
 
 

@@ -79,18 +79,23 @@ namespace VAGSuite.Services
         /// <summary>
         /// Updates the enabled state of rollback/forward controls based on transaction state
         /// </summary>
-        public void UpdateRollbackForwardControls(TransactionLog transactionLog, 
+        public void UpdateRollbackForwardControls(TransactionLog transactionLog,
             ref bool rollbackEnabled, ref bool rollforwardEnabled, ref bool showTransactionLogEnabled)
         {
             rollbackEnabled = false;
             rollforwardEnabled = false;
             showTransactionLogEnabled = false;
             
+            // Enable transaction log button if a project is loaded (has transactions or not)
+            if (!string.IsNullOrEmpty(Tools.Instance.m_CurrentWorkingProject))
+            {
+                showTransactionLogEnabled = true;
+            }
+            
             if (transactionLog != null)
             {
                 for (int t = transactionLog.TransCollection.Count - 1; t >= 0; t--)
                 {
-                    if (!showTransactionLogEnabled) showTransactionLogEnabled = true;
                     if (transactionLog.TransCollection[t].IsRolledBack)
                     {
                         rollforwardEnabled = true;
