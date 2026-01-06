@@ -71,6 +71,7 @@ namespace VAGSuite
             this.groupControl2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit2)).BeginInit();
+            // spinEdit1 (KryptonNumericUpDown) does not support ISupportInitialize
             this.SuspendLayout();
             //
             // xtraTabControl1
@@ -432,7 +433,7 @@ namespace VAGSuite
             this.groupControl2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.spinEdit1)).EndInit();
+            // spinEdit1 (KryptonNumericUpDown) does not support ISupportInitialize
             this.ResumeLayout(false);
 
         }

@@ -2159,6 +2159,18 @@ namespace VAGSuite
 
         private void btnAirmassResult_ItemClick(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(Tools.Instance.m_currentfile))
+            {
+                frmInfoBox info = new frmInfoBox("Please open a file first before using the Airmass Result viewer.");
+                return;
+            }
+            
+            if (!File.Exists(Tools.Instance.m_currentfile))
+            {
+                frmInfoBox info = new frmInfoBox("The current file does not exist anymore.");
+                return;
+            }
+            
             if (CheckAllTablesAvailable())
             {
                 try
@@ -2188,9 +2200,52 @@ namespace VAGSuite
                 }
                 catch (Exception newdockE)
                 {
-                    Console.WriteLine(newdockE.Message);
+                    // Log the full error to the debug file
+                    System.Diagnostics.Debug.WriteLine("AirmassResult Error: " + newdockE.ToString());
+                    frmInfoBox info = new frmInfoBox("Error opening Airmass Result viewer:\n" + newdockE.Message);
                 }
             }
+            else
+            {
+                // Show user-friendly error message explaining which maps are missing
+                string missingMaps = GetMissingAirmassMaps();
+                if (!string.IsNullOrEmpty(missingMaps))
+                {
+                    frmInfoBox info = new frmInfoBox("Cannot open Airmass Result viewer.\n\nRequired maps are missing:\n" + missingMaps);
+                }
+                else
+                {
+                    frmInfoBox info = new frmInfoBox("Please open a file first before using the Airmass Result viewer.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns a string listing which required maps for Airmass Result are missing
+        /// </summary>
+        private string GetMissingAirmassMaps()
+        {
+            StringBuilder sb = new StringBuilder();
+            
+            if (Tools.Instance.m_symbols == null || Tools.Instance.m_symbols.Count == 0)
+            {
+                return "No symbols loaded.";
+            }
+            
+            if (MapsWithNameMissing("Driver wish", Tools.Instance.m_symbols))
+            {
+                sb.AppendLine("- Driver wish map");
+            }
+            if (MapsWithNameMissing("Torque limiter", Tools.Instance.m_symbols))
+            {
+                sb.AppendLine("- Torque limiter map");
+            }
+            if (MapsWithNameMissing("Smoke limiter", Tools.Instance.m_symbols))
+            {
+                sb.AppendLine("- Smoke limiter map");
+            }
+            
+            return sb.ToString();
         }
 
         void airmassResult_onClose(object sender, EventArgs e)
