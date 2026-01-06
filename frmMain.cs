@@ -2813,7 +2813,14 @@ namespace VAGSuite
 
         private void btnExportToExcel_ItemClick(object sender, EventArgs e)
         {
-            StartExcelExport();
+            if (tvSymbols.SelectedNode?.Tag is SymbolHelper sh)
+            {
+                StartExcelExport();
+            }
+            else
+            {
+                frmInfoBox info = new frmInfoBox("Please select a symbol in the tree view first, then click Export to Excel.");
+            }
         }
 
         private void btnExcelImport_ItemClick(object sender, EventArgs e)

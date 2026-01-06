@@ -19,14 +19,25 @@ namespace VAGSuite.Services
         /// </summary>
         public void StartExcelExport(string currentFile, SymbolCollection symbols, string mapName, int address, int length, byte[] mapdata, int columns, int rows, int[] xaxis, int[] yaxis, SymbolHelper sh)
         {
-            ExcelInterface excelInterface = new ExcelInterface();
-            if (xaxis != null && yaxis != null)
+            try
             {
-                string cleanMapName = mapName.Replace(",", "");
-                cleanMapName = cleanMapName.Replace("[", "");
-                cleanMapName = cleanMapName.Replace("]", "");
+                ExcelInterface excelInterface = new ExcelInterface();
+                if (xaxis != null && yaxis != null)
+                {
+                    string cleanMapName = mapName.Replace(",", "");
+                    cleanMapName = cleanMapName.Replace("[", "");
+                    cleanMapName = cleanMapName.Replace("]", "");
 
-                excelInterface.ExportToExcel(cleanMapName, address, length, mapdata, columns, rows, true, xaxis, yaxis, _appSettings.ShowTablesUpsideDown, sh.X_axis_descr, sh.Y_axis_descr, sh.Z_axis_descr);
+                    excelInterface.ExportToExcel(cleanMapName, address, length, mapdata, columns, rows, true, xaxis, yaxis, _appSettings.ShowTablesUpsideDown, sh.X_axis_descr, sh.Y_axis_descr, sh.Z_axis_descr);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    $"Failed to export to Excel: {ex.Message}\n\nNote: This feature requires Microsoft Excel to be installed.",
+                    "Export Error",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Error);
             }
         }
 
@@ -35,14 +46,25 @@ namespace VAGSuite.Services
         /// </summary>
         public void StartCSVExport(string currentFile, SymbolCollection symbols, string mapName, int address, int length, byte[] mapdata, int columns, int rows, int[] xaxis, int[] yaxis, SymbolHelper sh)
         {
-            ExcelInterface excelInterface = new ExcelInterface();
-            if (xaxis != null && yaxis != null)
+            try
             {
-                string cleanMapName = mapName.Replace(",", "");
-                cleanMapName = cleanMapName.Replace("[", "");
-                cleanMapName = cleanMapName.Replace("]", "");
+                ExcelInterface excelInterface = new ExcelInterface();
+                if (xaxis != null && yaxis != null)
+                {
+                    string cleanMapName = mapName.Replace(",", "");
+                    cleanMapName = cleanMapName.Replace("[", "");
+                    cleanMapName = cleanMapName.Replace("]", "");
 
-                excelInterface.ExportToCSV(cleanMapName, address, length, mapdata, columns, rows, true, xaxis, yaxis, _appSettings.ShowTablesUpsideDown, sh.X_axis_descr, sh.Y_axis_descr, sh.Z_axis_descr);
+                    excelInterface.ExportToCSV(cleanMapName, address, length, mapdata, columns, rows, true, xaxis, yaxis, _appSettings.ShowTablesUpsideDown, sh.X_axis_descr, sh.Y_axis_descr, sh.Z_axis_descr);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    $"Failed to export to CSV: {ex.Message}\n\nNote: This feature requires Microsoft Excel to be installed.",
+                    "Export Error",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Error);
             }
         }
 
@@ -51,14 +73,25 @@ namespace VAGSuite.Services
         /// </summary>
         public void StartXMLExport(string currentFile, SymbolCollection symbols, string mapName, int address, int length, byte[] mapdata, int columns, int rows, int[] xaxis, int[] yaxis, SymbolHelper sh)
         {
-            ExcelInterface excelInterface = new ExcelInterface();
-            if (xaxis != null && yaxis != null)
+            try
             {
-                string cleanMapName = mapName.Replace(",", "");
-                cleanMapName = cleanMapName.Replace("[", "");
-                cleanMapName = cleanMapName.Replace("]", "");
+                ExcelInterface excelInterface = new ExcelInterface();
+                if (xaxis != null && yaxis != null)
+                {
+                    string cleanMapName = mapName.Replace(",", "");
+                    cleanMapName = cleanMapName.Replace("[", "");
+                    cleanMapName = cleanMapName.Replace("]", "");
 
-                excelInterface.ExportToXML(cleanMapName, address, length, mapdata, columns, rows, true, xaxis, yaxis, _appSettings.ShowTablesUpsideDown, sh.X_axis_descr, sh.Y_axis_descr, sh.Z_axis_descr);
+                    excelInterface.ExportToXML(cleanMapName, address, length, mapdata, columns, rows, true, xaxis, yaxis, _appSettings.ShowTablesUpsideDown, sh.X_axis_descr, sh.Y_axis_descr, sh.Z_axis_descr);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    $"Failed to export to XML: {ex.Message}\n\nNote: This feature requires Microsoft Excel to be installed.",
+                    "Export Error",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Error);
             }
         }
 
