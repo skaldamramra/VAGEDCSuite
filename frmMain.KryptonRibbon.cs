@@ -308,6 +308,17 @@ namespace VAGSuite
             rbpgKryptonToolsTriple2.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonMerge, btnKryptonSplit, btnKryptonExcelExp });
             rbpgKryptonTools.Items.Add(rbpgKryptonToolsTriple2);
 
+            // Tools Triple 3 - EOI Calculator
+            KryptonRibbonGroupTriple rbpgKryptonToolsTriple3 = new KryptonRibbonGroupTriple();
+            rbpgKryptonToolsTriple3.MaximumSize = GroupItemSize.Large;
+            rbpgKryptonToolsTriple3.MinimumSize = GroupItemSize.Large;
+
+            KryptonRibbonGroupButton btnKryptonEOICalculator = new KryptonRibbonGroupButton { TextLine1 = "EOI", TextLine2 = "Calculator", ImageLarge = GetResourceImage("vagedc.ico") };
+            btnKryptonEOICalculator.Click += (s, e) => btnEOICalculator_ItemClick(s, null);
+
+            rbpgKryptonToolsTriple3.Items.Add(btnKryptonEOICalculator);
+            rbpgKryptonTools.Items.Add(rbpgKryptonToolsTriple3);
+
             // Settings Group
             KryptonRibbonGroup rbpgKryptonSettings = new KryptonRibbonGroup { TextLine1 = "Settings" };
             KryptonRibbonGroupTriple rbpgKryptonSettingsTriple = new KryptonRibbonGroupTriple();

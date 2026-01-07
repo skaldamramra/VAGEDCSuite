@@ -70,13 +70,33 @@ namespace VAGSuite.Services
         {
             if (owner == null || owner.IsDisposed) return;
 
-            // Position the form
-            this.Location = new Point(screenLocation.X + 15, screenLocation.Y + 15);
+            // Ensure the handle is created before showing
+            if (!this.IsHandleCreated)
+            {
+                this.CreateHandle();
+            }
+
+            // Position the form at the exact location specified
+            this.Location = screenLocation;
             
-            // Ensure form is visible and on top
-            this.Show();
-            this.BringToFront();
+            // First make sure the form is visible, then use SetWindowPos to ensure proper z-order
+            // without activation
+            this.Visible = true;
+            
+            // Use SetWindowPos with SWP_NOACTIVATE to bring to top without activating
+            SetWindowPos(this.Handle, HWND_TOPMOST,
+                this.Location.X, this.Location.Y,
+                this.Width, this.Height,
+                SWP_NOACTIVATE | SWP_SHOWWINDOW);
         }
+
+        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        private const uint SWP_NOACTIVATE = 0x0010;
+        private const uint SWP_SHOWWINDOW = 0x0040;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,
+            int X, int Y, int cx, int cy, uint uFlags);
 
         /// <summary>
         /// Adjusts the form size based on content.

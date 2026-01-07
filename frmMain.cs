@@ -68,6 +68,7 @@ using VAGSuite.Services;
 using VAGSuite.Helpers;
 using VAGSuite.Theming;
 using VAGSuite.MapViewerEventArgs;
+using VAGSuite.Models;
 
 namespace VAGSuite
 {
@@ -139,6 +140,7 @@ namespace VAGSuite
         private ExportService _exportService;
         private QuickAccessService _quickAccessService;
         private LayoutService _layoutService;
+        private EOICalculatorService _eoiCalculatorService;
         private SearchService _searchService;
         private FirmwareService _firmwareService;
         private LaunchControlService _launchControlService;
@@ -183,6 +185,7 @@ namespace VAGSuite
             _exportService = new ExportService(m_appSettings);
             _quickAccessService = new QuickAccessService(_mapViewerService);
             _layoutService = new LayoutService(m_appSettings);
+            _eoiCalculatorService = new EOICalculatorService(m_appSettings, kryptonDockingManager1, _mapViewerService);
             _searchService = new SearchService(kryptonDockingManager1, m_appSettings);
             _firmwareService = new FirmwareService(m_appSettings);
             _launchControlService = new LaunchControlService(m_appSettings);
@@ -2050,6 +2053,16 @@ namespace VAGSuite
         private void btnBoostPressureLimitSVBL_ItemClick(object sender, EventArgs e)
         {
             _quickAccessService.OpenSVBLBoostLimiter();
+        }
+
+        private void btnEOICalculator_ItemClick(object sender, EventArgs e)
+        {
+            if (Tools.Instance.m_currentfile == string.Empty)
+            {
+                frmInfoBox info = new frmInfoBox("Please open a binary file first.");
+                return;
+            }
+            _eoiCalculatorService.ShowEOICalculator();
         }
 
         private void btnN75Map_ItemClick(object sender, EventArgs e)

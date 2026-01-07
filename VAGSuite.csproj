@@ -110,6 +110,9 @@
     <Compile Include="MapViewerEventArgs\SurfaceGraphViewChangedEventArgs.cs" />
     <Compile Include="MapViewerEventArgs\SurfaceGraphViewChangedEventArgsEx.cs" />
     <Compile Include="MapViewerEnums.cs" />
+    <Compile Include="Models\EOIMap.cs" />
+    <Compile Include="Models\DurationMapSet.cs" />
+    <Compile Include="Models\EOICalculationResult.cs" />
     <Compile Include="Models\MapData.cs" />
     <Compile Include="Models\MapMetadata.cs" />
     <Compile Include="Models\AxisData.cs" />
@@ -124,6 +127,8 @@
     <Compile Include="CellHelperCollection.cs" />
     <Compile Include="ChecksumResultDetails.cs" />
     <Compile Include="CodeBlock.cs" />
+    <Compile Include="Services\IEOICalculatorService.cs" />
+    <Compile Include="Services\EOICalculatorService.cs" />
     <Compile Include="Services\FileOperationsManager.cs" />
     <Compile Include="Services\ChecksumService.cs" />
     <Compile Include="Services\MapViewerCoordinator.cs" />
@@ -164,6 +169,9 @@
     <Compile Include="Components\MapGridComponent.cs" />
     <Compile Include="Components\Chart3DComponent.cs" />
     <Compile Include="Components\Chart2DComponent.cs" />
+    <Compile Include="Helpers\BilinearInterpolator.cs" />
+    <Compile Include="Helpers\EOIMapFinder.cs" />
+    <Compile Include="Helpers\EOICalculator.cs" />
     <Compile Include="Helpers\SymbolQueryHelper.cs" />
     <Compile Include="CompareResults.cs">
       <SubType>UserControl</SubType>
@@ -284,6 +292,12 @@
     </Compile>
     <Compile Include="frmEEPromEditor.Designer.cs">
       <DependentUpon>frmEEPromEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmEOICalculator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmEOICalculator.Designer.cs">
+      <DependentUpon>frmEOICalculator.cs</DependentUpon>
     </Compile>
     <Compile Include="frmFirmwareInfo.cs">
       <SubType>Form</SubType>
@@ -477,6 +491,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmEEPromEditor.resx">
       <DependentUpon>frmEEPromEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmEOICalculator.resx">
+      <DependentUpon>frmEOICalculator.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmFirmwareInfo.resx">
       <DependentUpon>frmFirmwareInfo.cs</DependentUpon>
