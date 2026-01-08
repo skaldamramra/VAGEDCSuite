@@ -136,7 +136,7 @@ namespace VAGSuite
             this.labelControl6.Name = "labelControl6";
             this.labelControl6.Size = new System.Drawing.Size(420, 40);
             this.labelControl6.TabIndex = 6;
-            this.labelControl6.Text = "rkam, Pixis5, othmar77, dieseljohnny, bazare, bondiblu, Relic, Macadam, dilemma";
+            this.labelControl6.Text = "rkam, Pixis5, othmar77, dieseljohnny, bazare, bondiblu, Relic, Macadam, dilemma, krook1024";
             this.labelControl6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // labelControl5
