@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using ComponentFactory.Krypton.Toolkit;
 using ComponentFactory.Krypton.Navigator;
@@ -89,7 +90,6 @@ namespace VAGSuite
         {
             // As per docking.pdf: "You should always wait until the load event occurs before executing any docking code."
             
-            
             // Link the workspace to the docking manager for dragging support
             // (Derived from page_dragging.pdf p. 72)
             this.dragManager1.DragTargetProviders.Add(this.kryptonDockableWorkspace1);
@@ -103,6 +103,39 @@ namespace VAGSuite
             
             // 3. Manage floating windows
             kryptonDockingManager1.ManageFloating("Floating", this);
+
+            // Configure dockspace cells to use cell's close button instead of page-level close button
+            // This removes the duplicate "X" buttons and ensures proper page removal
+            kryptonDockingManager1.DockspaceCellAdding += (s, e) => {
+                // Remove any existing close button specs (page-level close buttons)
+                for (int i = e.CellControl.Button.ButtonSpecs.Count - 1; i >= 0; i--)
+                {
+                    if (e.CellControl.Button.ButtonSpecs[i].Type == PaletteButtonSpecStyle.Close)
+                        e.CellControl.Button.ButtonSpecs.RemoveAt(i);
+                }
+                
+                // Enable the cell's close button with proper action
+                e.CellControl.Button.CloseButtonAction = CloseButtonAction.RemovePageAndDispose;
+                e.CellControl.Button.CloseButtonDisplay = ButtonDisplay.ShowEnabled;
+                e.CellControl.Palette = VAGEDCThemeManager.Instance.CustomPalette;
+                e.CellControl.PaletteMode = PaletteMode.Custom;
+            };
+
+            // Configure floatspace cells (for floating windows) to use cell's close button
+            kryptonDockingManager1.FloatspaceCellAdding += (s, e) => {
+                // Remove any existing close button specs (page-level close buttons)
+                for (int i = e.CellControl.Button.ButtonSpecs.Count - 1; i >= 0; i--)
+                {
+                    if (e.CellControl.Button.ButtonSpecs[i].Type == PaletteButtonSpecStyle.Close)
+                        e.CellControl.Button.ButtonSpecs.RemoveAt(i);
+                }
+                
+                // Enable the cell's close button with proper action
+                e.CellControl.Button.CloseButtonAction = CloseButtonAction.RemovePageAndDispose;
+                e.CellControl.Button.CloseButtonDisplay = ButtonDisplay.ShowEnabled;
+                e.CellControl.Palette = VAGEDCThemeManager.Instance.CustomPalette;
+                e.CellControl.PaletteMode = PaletteMode.Custom;
+            };
 
             // 4. Add the Symbols page to the left side (replacing dockSymbols)
             kryptonDockingManager1.AddDockspace("Control", DockingEdge.Left, new KryptonPage[] { pageSymbols });
