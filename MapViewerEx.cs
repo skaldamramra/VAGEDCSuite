@@ -2577,14 +2577,17 @@ namespace VAGSuite
             DataGridViewSelectedCellCollection cellcollection = gridControl1.SelectedCells;
             if (cellcollection.Count > 2)
             {
-                // Use the refactored SmoothingService for proportional smoothing
+                // Use the new neighbor-aware proportional smoothing
                 object[] cells = new object[cellcollection.Count];
                 for (int i = 0; i < cellcollection.Count; i++)
                 {
                     cells[i] = cellcollection[i];
                 }
                 
-                _smoothingService.SmoothProportional(cells, gridControl1, x_axisvalues, y_axisvalues);
+                _smoothingService.SmoothProportionalWithNeighbors(cells, gridControl1, x_axisvalues, y_axisvalues, m_isUpsideDown);
+                m_datasourceMutated = true;
+                simpleButton2.Enabled = true;
+                simpleButton3.Enabled = true;
             }
         }
 
@@ -2603,7 +2606,8 @@ namespace VAGSuite
                 {
                     cells[i] = cellcollection[i];
                 }
-                _smoothingService.SmoothInterpolated(cells, gridControl1, x_axisvalues, y_axisvalues);
+                // Use the new bilinear smoothing for better results
+                _smoothingService.SmoothBilinear(cells, gridControl1, x_axisvalues, y_axisvalues, m_isUpsideDown);
                 m_datasourceMutated = true;
                 simpleButton2.Enabled = true;
                 simpleButton3.Enabled = true;

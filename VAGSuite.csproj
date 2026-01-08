@@ -158,6 +158,7 @@
     <Compile Include="Services\IClipboardService.cs" />
     <Compile Include="Services\ClipboardService.cs" />
     <Compile Include="Services\ISmoothingService.cs" />
+    <Compile Include="Services\SelectionAnalyzer.cs" />
     <Compile Include="Services\SmoothingService.cs" />
     <Compile Include="Services\IMapOperationService.cs" />
     <Compile Include="Services\MapOperationService.cs" />

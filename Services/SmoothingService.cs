@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 using VAGSuite.Models;
 
@@ -12,6 +14,9 @@ namespace VAGSuite.Services
     {
         private readonly IDataConversionService _conversionService;
         
+        // Blending factor for neighbor influence (0.0 = no neighbor influence, 1.0 = full neighbor)
+        private const double NeighborBlendFactor = 0.25;
+
         public SmoothingService(IDataConversionService conversionService)
         {
             _conversionService = conversionService;
@@ -332,7 +337,307 @@ namespace VAGSuite.Services
                 Console.WriteLine("SmoothInterpolated: " + E.Message);
             }
         }
-        
+
+        /// <summary>
+        /// Smooths selected cells using linear interpolation with neighbor awareness.
+        /// Provides smoother transitions by blending with surrounding cells.
+        /// </summary>
+        public void SmoothLinearWithNeighbors(object[] cells, object gridView, int[] xAxis, int[] yAxis, bool isUpsideDown = false)
+        {
+            if (cells == null || cells.Length < 2 || !(gridView is DataGridView gv))
+                return;
+
+            var analyzer = new SelectionAnalyzer(cells, gv);
+
+            try
+            {
+                if (analyzer.IsSingleColumn)
+                {
+                    // Single column - smooth along Y axis
+                    int topValue = analyzer.GetCornerValue(Corner.TopLeft);
+                    int bottomValue = analyzer.GetCornerValue(Corner.BottomLeft);
+                    double step = (double)(bottomValue - topValue) / (analyzer.RowCount - 1);
+
+                    for (int row = analyzer.MinRow + 1; row < analyzer.MaxRow; row++)
+                    {
+                        int interpolatedValue = topValue + (int)(step * (row - analyzer.MinRow));
+                        
+                        // Blend with neighbor average
+                        double neighborAvg = analyzer.GetNeighborAverage(row, analyzer.MinColumn);
+                        if (neighborAvg > 0)
+                        {
+                            interpolatedValue = (int)((interpolatedValue * (1 - NeighborBlendFactor)) +
+                                                       (neighborAvg * NeighborBlendFactor));
+                        }
+
+                        SetCellValue(analyzer.FindCell(row, analyzer.MinColumn), interpolatedValue, gv);
+                    }
+                }
+                else if (analyzer.IsSingleRow)
+                {
+                    // Single row - smooth along X axis
+                    int leftValue = analyzer.GetCornerValue(Corner.TopLeft);
+                    int rightValue = analyzer.GetCornerValue(Corner.TopRight);
+                    double step = (double)(rightValue - leftValue) / (analyzer.ColumnCount - 1);
+
+                    for (int col = analyzer.MinColumn + 1; col < analyzer.MaxColumn; col++)
+                    {
+                        int interpolatedValue = leftValue + (int)(step * (col - analyzer.MinColumn));
+                        
+                        // Blend with neighbor average
+                        double neighborAvg = analyzer.GetNeighborAverage(analyzer.MinRow, col);
+                        if (neighborAvg > 0)
+                        {
+                            interpolatedValue = (int)((interpolatedValue * (1 - NeighborBlendFactor)) +
+                                                       (neighborAvg * NeighborBlendFactor));
+                        }
+
+                        SetCellValue(analyzer.FindCell(analyzer.MinRow, col), interpolatedValue, gv);
+                    }
+                }
+                else
+                {
+                    // Block selected - apply linear smoothing per row with neighbor blending
+                    for (int row = analyzer.MinRow; row <= analyzer.MaxRow; row++)
+                    {
+                        int leftValue = analyzer.GetCellValue(row, analyzer.MinColumn);
+                        int rightValue = analyzer.GetCellValue(row, analyzer.MaxColumn);
+                        double step = (double)(rightValue - leftValue) / (analyzer.ColumnCount - 1);
+
+                        for (int col = analyzer.MinColumn + 1; col < analyzer.MaxColumn; col++)
+                        {
+                            int interpolatedValue = leftValue + (int)(step * (col - analyzer.MinColumn));
+                            
+                            // Blend with neighbor average
+                            double neighborAvg = analyzer.GetNeighborAverage(row, col);
+                            if (neighborAvg > 0)
+                            {
+                                interpolatedValue = (int)((interpolatedValue * (1 - NeighborBlendFactor)) +
+                                                           (neighborAvg * NeighborBlendFactor));
+                            }
+
+                            SetCellValue(analyzer.FindCell(row, col), interpolatedValue, gv);
+                        }
+                    }
+                }
+            }
+            catch (Exception E)
+            {
+                Console.WriteLine("SmoothLinearWithNeighbors: " + E.Message);
+            }
+        }
+
+        /// <summary>
+        /// Smooths selected cells proportionally with actual corner detection and neighbor blending.
+        /// Uses axis values for interpolation, respecting non-linear axis scaling.
+        /// </summary>
+        public void SmoothProportionalWithNeighbors(object[] cells, object gridView, int[] xAxis, int[] yAxis, bool isUpsideDown = false)
+        {
+            if (cells == null || cells.Length < 2 || !(gridView is DataGridView gv))
+                return;
+
+            var analyzer = new SelectionAnalyzer(cells, gv);
+
+            try
+            {
+                if (analyzer.IsSingleColumn)
+                {
+                    // Single column - smooth along Y axis using proportional interpolation
+                    int topValue = analyzer.GetCornerValue(Corner.TopLeft);
+                    int bottomValue = analyzer.GetCornerValue(Corner.BottomLeft);
+                    double diffvalue = topValue - bottomValue;
+
+                    for (int row = analyzer.MinRow + 1; row < analyzer.MaxRow; row++)
+                    {
+                        // Calculate position along Y axis
+                        double yPos = SelectionAnalyzer.GetAxisValue(yAxis, row, isUpsideDown);
+                        double yStart = SelectionAnalyzer.GetAxisValue(yAxis, analyzer.MinRow, isUpsideDown);
+                        double yEnd = SelectionAnalyzer.GetAxisValue(yAxis, analyzer.MaxRow, isUpsideDown);
+                        
+                        if (yEnd != yStart)
+                        {
+                            double t = (yPos - yStart) / (yEnd - yStart);
+                            double newvalue = bottomValue + (diffvalue * t);
+                            newvalue = Math.Round(newvalue, 0);
+
+                            // Blend with neighbor average
+                            double neighborAvg = analyzer.GetNeighborAverage(row, analyzer.MinColumn);
+                            if (neighborAvg > 0)
+                            {
+                                newvalue = ((newvalue * (1 - NeighborBlendFactor)) +
+                                            (neighborAvg * NeighborBlendFactor));
+                            }
+
+                            SetCellValue(analyzer.FindCell(row, analyzer.MinColumn), (int)newvalue, gv);
+                        }
+                    }
+                }
+                else if (analyzer.IsSingleRow)
+                {
+                    // Single row - smooth along X axis using proportional interpolation
+                    int leftValue = analyzer.GetCornerValue(Corner.TopLeft);
+                    int rightValue = analyzer.GetCornerValue(Corner.TopRight);
+                    double diffvalue = rightValue - leftValue;
+
+                    for (int col = analyzer.MinColumn + 1; col < analyzer.MaxColumn; col++)
+                    {
+                        // Calculate position along X axis
+                        double xPos = SelectionAnalyzer.GetAxisValue(xAxis, col, isUpsideDown);
+                        double xStart = SelectionAnalyzer.GetAxisValue(xAxis, analyzer.MinColumn, isUpsideDown);
+                        double xEnd = SelectionAnalyzer.GetAxisValue(xAxis, analyzer.MaxColumn, isUpsideDown);
+
+                        if (xEnd != xStart)
+                        {
+                            double t = (xPos - xStart) / (xEnd - xStart);
+                            double newvalue = leftValue + (diffvalue * t);
+                            newvalue = Math.Round(newvalue, 0);
+
+                            // Blend with neighbor average
+                            double neighborAvg = analyzer.GetNeighborAverage(analyzer.MinRow, col);
+                            if (neighborAvg > 0)
+                            {
+                                newvalue = ((newvalue * (1 - NeighborBlendFactor)) +
+                                            (neighborAvg * NeighborBlendFactor));
+                            }
+
+                            SetCellValue(analyzer.FindCell(analyzer.MinRow, col), (int)newvalue, gv);
+                        }
+                    }
+                }
+                else
+                {
+                    // Block selected - use actual corner values for 2D proportional interpolation
+                    int tl = analyzer.GetCornerValue(Corner.TopLeft);
+                    int tr = analyzer.GetCornerValue(Corner.TopRight);
+                    int bl = analyzer.GetCornerValue(Corner.BottomLeft);
+                    int br = analyzer.GetCornerValue(Corner.BottomRight);
+
+                    for (int row = analyzer.MinRow; row <= analyzer.MaxRow; row++)
+                    {
+                        double yPos = SelectionAnalyzer.GetAxisValue(yAxis, row, isUpsideDown);
+                        double yStart = SelectionAnalyzer.GetAxisValue(yAxis, analyzer.MinRow, isUpsideDown);
+                        double yEnd = SelectionAnalyzer.GetAxisValue(yAxis, analyzer.MaxRow, isUpsideDown);
+
+                        for (int col = analyzer.MinColumn; col <= analyzer.MaxColumn; col++)
+                        {
+                            if (col == analyzer.MinColumn || col == analyzer.MaxColumn ||
+                                row == analyzer.MinRow || row == analyzer.MaxRow)
+                                continue; // Skip corners
+
+                            double xPos = SelectionAnalyzer.GetAxisValue(xAxis, col, isUpsideDown);
+                            double xStart = SelectionAnalyzer.GetAxisValue(xAxis, analyzer.MinColumn, isUpsideDown);
+                            double xEnd = SelectionAnalyzer.GetAxisValue(xAxis, analyzer.MaxColumn, isUpsideDown);
+
+                            if (xEnd != xStart && yEnd != yStart)
+                            {
+                                double tx = (xPos - xStart) / (xEnd - xStart);
+                                double ty = (yPos - yStart) / (yEnd - yStart);
+
+                                // Bilinear interpolation
+                                double topRow = tr * tx + tl * (1 - tx);
+                                double bottomRow = br * tx + bl * (1 - tx);
+                                double newvalue = bottomRow * ty + topRow * (1 - ty);
+                                newvalue = Math.Round(newvalue, 0);
+
+                                // Blend with neighbor average
+                                double neighborAvg = analyzer.GetNeighborAverage(row, col);
+                                if (neighborAvg > 0)
+                                {
+                                    newvalue = ((newvalue * (1 - NeighborBlendFactor)) +
+                                                (neighborAvg * NeighborBlendFactor));
+                                }
+
+                                SetCellValue(analyzer.FindCell(row, col), (int)newvalue, gv);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception E)
+            {
+                Console.WriteLine("SmoothProportionalWithNeighbors: " + E.Message);
+            }
+        }
+
+        /// <summary>
+        /// Applies true bilinear interpolation for 2D blocks using axis values.
+        /// Provides smooth transitions that respect both X and Y axis scaling.
+        /// </summary>
+        public void SmoothBilinear(object[] cells, object gridView, int[] xAxis, int[] yAxis, bool isUpsideDown = false)
+        {
+            if (cells == null || cells.Length < 4 || !(gridView is DataGridView gv))
+                return;
+
+            var analyzer = new SelectionAnalyzer(cells, gv);
+
+            try
+            {
+                // Get actual corner values
+                int tl = analyzer.GetCornerValue(Corner.TopLeft);
+                int tr = analyzer.GetCornerValue(Corner.TopRight);
+                int bl = analyzer.GetCornerValue(Corner.BottomLeft);
+                int br = analyzer.GetCornerValue(Corner.BottomRight);
+
+                // Get axis ranges
+                double xStart = SelectionAnalyzer.GetAxisValue(xAxis, analyzer.MinColumn, isUpsideDown);
+                double xEnd = SelectionAnalyzer.GetAxisValue(xAxis, analyzer.MaxColumn, isUpsideDown);
+                double yStart = SelectionAnalyzer.GetAxisValue(yAxis, analyzer.MinRow, isUpsideDown);
+                double yEnd = SelectionAnalyzer.GetAxisValue(yAxis, analyzer.MaxRow, isUpsideDown);
+
+                double xRange = xEnd - xStart;
+                double yRange = yEnd - yStart;
+
+                if (xRange == 0 || yRange == 0)
+                    return;
+
+                // Apply bilinear interpolation to all cells in selection
+                for (int row = analyzer.MinRow; row <= analyzer.MaxRow; row++)
+                {
+                    double yPos = SelectionAnalyzer.GetAxisValue(yAxis, row, isUpsideDown);
+                    double ty = (yPos - yStart) / yRange;
+
+                    for (int col = analyzer.MinColumn; col <= analyzer.MaxColumn; col++)
+                    {
+                        // Skip corners (already have values)
+                        if ((row == analyzer.MinRow && col == analyzer.MinColumn) ||
+                            (row == analyzer.MinRow && col == analyzer.MaxColumn) ||
+                            (row == analyzer.MaxRow && col == analyzer.MinColumn) ||
+                            (row == analyzer.MaxRow && col == analyzer.MaxColumn))
+                            continue;
+
+                        double xPos = SelectionAnalyzer.GetAxisValue(xAxis, col, isUpsideDown);
+                        double tx = (xPos - xStart) / xRange;
+
+                        // Bilinear interpolation formula:
+                        // V(x,y) = V00*(1-tx)*(1-ty) + V10*tx*(1-ty) + V01*(1-tx)*ty + V11*tx*ty
+                        double interpolatedValue =
+                            tl * (1 - tx) * (1 - ty) +
+                            tr * tx * (1 - ty) +
+                            bl * (1 - tx) * ty +
+                            br * tx * ty;
+
+                        // Blend with neighbor average for smoother transitions at boundaries
+                        if (analyzer.RowCount > 2 || analyzer.ColumnCount > 2)
+                        {
+                            double neighborAvg = analyzer.GetNeighborAverage(row, col);
+                            if (neighborAvg > 0)
+                            {
+                                interpolatedValue = (interpolatedValue * (1 - NeighborBlendFactor)) +
+                                                   (neighborAvg * NeighborBlendFactor);
+                            }
+                        }
+
+                        int finalValue = (int)Math.Round(interpolatedValue);
+                        SetCellValue(analyzer.FindCell(row, col), finalValue, gv);
+                    }
+                }
+            }
+            catch (Exception E)
+            {
+                Console.WriteLine("SmoothBilinear: " + E.Message);
+            }
+        }
+
         private int ParseCellValue(object cell, object gridView)
         {
             if (cell == null)

@@ -21,5 +21,20 @@ namespace VAGSuite.Services
         /// Applies interpolated smoothing between 4 corners
         /// </summary>
         void SmoothInterpolated(object[] cells, object gridView, int[] xAxis, int[] yAxis);
+
+        /// <summary>
+        /// Applies linear smoothing with neighbor awareness for smoother transitions
+        /// </summary>
+        void SmoothLinearWithNeighbors(object[] cells, object gridView, int[] xAxis, int[] yAxis, bool isUpsideDown = false);
+
+        /// <summary>
+        /// Applies proportional smoothing with actual corner detection and neighbor blending
+        /// </summary>
+        void SmoothProportionalWithNeighbors(object[] cells, object gridView, int[] xAxis, int[] yAxis, bool isUpsideDown = false);
+
+        /// <summary>
+        /// Applies true bilinear interpolation for 2D blocks using axis values
+        /// </summary>
+        void SmoothBilinear(object[] cells, object gridView, int[] xAxis, int[] yAxis, bool isUpsideDown = false);
     }
 }
