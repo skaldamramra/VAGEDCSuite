@@ -1302,16 +1302,77 @@ namespace VAGSuite
 
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                File.Copy(Tools.Instance.m_currentfile, sfd.FileName, true);
-                if (MessageBox.Show("Do you want to open the newly saved file?", "Question", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                try
                 {
-                    m_appSettings.Lastprojectname = "";
-                    CloseProject();
-                    OpenFile(sfd.FileName, true);
-                    m_appSettings.LastOpenedType = 0;
+                    // Read all bytes and write them back to avoid file locking issues
+                    // This is necessary because the file may still be open by File.OpenRead() calls
+                    byte[] fileData = File.ReadAllBytes(Tools.Instance.m_currentfile);
+                    File.WriteAllBytes(sfd.FileName, fileData);
+                    
+                    if (MessageBox.Show("Do you want to open the newly saved file?", "Question", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    {
+                        m_appSettings.Lastprojectname = "";
+                        CloseProject();
+                        OpenFile(sfd.FileName, true);
+                        m_appSettings.LastOpenedType = 0;
+                    }
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show($"Failed to save file: {ex.Message}", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
+
+        private void btnSaveAll_ItemClick(object sender, EventArgs e)
+        {
+            if (Tools.Instance.m_currentfile == string.Empty || !File.Exists(Tools.Instance.m_currentfile))
+            {
+                return;
+            }
+
+            // Check if docking manager is available
+            if (kryptonDockingManager1 == null || kryptonDockingManager1.Pages == null)
+            {
+                return;
+            }
+
+            int savedCount = 0;
+            int skippedCount = 0;
+
+            foreach (ComponentFactory.Krypton.Navigator.KryptonPage pnl in kryptonDockingManager1.Pages)
+            {
+                foreach (Control c in pnl.Controls)
+                {
+                    if (c is MapViewerEx viewer)
+                    {
+                        // Only save maps that have unsaved changes and belong to the current file
+                        if (viewer.DatasourceMutated && viewer.Filename == Tools.Instance.m_currentfile)
+                        {
+                            viewer.SaveData();
+                            savedCount++;
+                        }
+                        else if (viewer.DatasourceMutated)
+                        {
+                            skippedCount++;
+                        }
+                    }
+                }
+            }
+
+            // Provide feedback to the user
+            if (savedCount > 0 || skippedCount > 0)
+            {
+                string message = $"Saved {savedCount} map(s).";
+                if (skippedCount > 0)
+                {
+                    message += $"\n{skippedCount} map(s) from other files were skipped.";
+                }
+                frmInfoBox info = new frmInfoBox(message);
+            }
+        }
+
 
         private void CloseProject()
         {

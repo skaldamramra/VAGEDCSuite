@@ -70,8 +70,12 @@ namespace VAGSuite
                 c.Font = customFont;
             }
             
-            // Specific theme for ADGV to fix white headers
+            // Apply theme to RichTextBox details area
             var theme = VAGEDCThemeManager.Instance.CurrentTheme;
+            rtfDetails.BackColor = theme.GridBackground;
+            rtfDetails.ForeColor = theme.TextPrimary;
+            
+            // Specific theme for ADGV to fix white headers
             dgvEOI.BackgroundColor = theme.GridBackground;
             dgvEOI.GridColor = theme.GridBorder;
             dgvEOI.DefaultCellStyle.BackColor = theme.GridBackground;
@@ -651,8 +655,8 @@ namespace VAGSuite
         {
             if (_currentResult == null) return;
             
-            // Update details label
-            lblDetails.Text = _currentResult.GetSummary();
+            // Update details RichTextBox with calculation summary
+            rtfDetails.Text = _currentResult.GetSummary();
             
             // Populate data grid
             PopulateDataGrid();
@@ -801,7 +805,7 @@ namespace VAGSuite
                 // Clear current results
                 _currentResult = null;
                 dgvEOI.Rows.Clear();
-                lblDetails.Text = "Calculation details will appear here...";
+                rtfDetails.Text = "Calculation details will appear here...";
             }
         }
         

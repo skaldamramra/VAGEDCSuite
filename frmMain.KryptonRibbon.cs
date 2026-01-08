@@ -153,8 +153,12 @@ namespace VAGSuite
             KryptonRibbonGroupButton btnKryptonCompareFiles = new KryptonRibbonGroupButton { TextLine1 = "Compare", TextLine2 = "Files", ImageLarge = GetResourceImage("CompareFiles.png") };
             btnKryptonCompareFiles.Click += (s, e) => btnCompareFiles_ItemClick(s, null);
 
+            KryptonRibbonGroupButton btnKryptonSaveAll = new KryptonRibbonGroupButton { TextLine1 = "Save", TextLine2 = "All", ImageLarge = GetResourceImage("Save.png") };
+            btnKryptonSaveAll.Click += (s, e) => btnSaveAll_ItemClick(s, null);
+
             rbpgKryptonGeneralFileTriple2.Items.Add(btnKryptonProduceBinary);
             rbpgKryptonGeneralFileTriple2.Items.Add(btnKryptonCompareFiles);
+            rbpgKryptonGeneralFileTriple2.Items.Add(btnKryptonSaveAll);
             this.rbpgKryptonGeneralFile.Items.Add(rbpgKryptonGeneralFileTriple2);
 
             //

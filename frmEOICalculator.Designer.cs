@@ -31,7 +31,7 @@ namespace VAGSuite
             this.kryptonPanel1 = new ComponentFactory.Krypton.Toolkit.KryptonPanel();
             this.btnClose = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.btnExportCSV = new ComponentFactory.Krypton.Toolkit.KryptonButton();
-            this.lblDetails = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
+            this.rtfDetails = new System.Windows.Forms.RichTextBox();
             this.kryptonGroupBox1 = new ComponentFactory.Krypton.Toolkit.KryptonGroupBox();
             this.dgvEOI = new Zuby.ADGV.AdvancedDataGridView();
             this.kryptonGroupBox2 = new ComponentFactory.Krypton.Toolkit.KryptonGroupBox();
@@ -77,22 +77,26 @@ namespace VAGSuite
             this.btnExportCSV.TabIndex = 1;
             this.btnExportCSV.Values.Text = "Export CSV";
             this.btnExportCSV.Click += new System.EventHandler(this.btnExportCSV_Click);
-            // 
-            // lblDetails
-            // 
-            this.lblDetails.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblDetails.Location = new System.Drawing.Point(5, 5);
-            this.lblDetails.Name = "lblDetails";
-            this.lblDetails.Size = new System.Drawing.Size(890, 90);
-            this.lblDetails.TabIndex = 0;
-            this.lblDetails.Values.Text = "Calculation details will appear here...";
-            // 
+            //
+            // rtfDetails
+            //
+            this.rtfDetails.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rtfDetails.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtfDetails.Location = new System.Drawing.Point(5, 5);
+            this.rtfDetails.Name = "rtfDetails";
+            this.rtfDetails.ReadOnly = true;
+            this.rtfDetails.Size = new System.Drawing.Size(890, 90);
+            this.rtfDetails.TabIndex = 0;
+            this.rtfDetails.Text = "Calculation details will appear here...";
+            this.rtfDetails.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.rtfDetails.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            //
             // kryptonGroupBox1
-            // 
+            //
             this.kryptonGroupBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.kryptonGroupBox1.Location = new System.Drawing.Point(0, 460);
             this.kryptonGroupBox1.Name = "kryptonGroupBox1";
-            this.kryptonGroupBox1.Panel.Controls.Add(this.lblDetails);
+            this.kryptonGroupBox1.Panel.Controls.Add(this.rtfDetails);
             this.kryptonGroupBox1.Size = new System.Drawing.Size(900, 100);
             this.kryptonGroupBox1.TabIndex = 1;
             this.kryptonGroupBox1.Values.Heading = "Calculation Details";
@@ -218,7 +222,7 @@ namespace VAGSuite
         private ComponentFactory.Krypton.Toolkit.KryptonPanel kryptonPanel1;
         private ComponentFactory.Krypton.Toolkit.KryptonButton btnClose;
         private ComponentFactory.Krypton.Toolkit.KryptonButton btnExportCSV;
-        private ComponentFactory.Krypton.Toolkit.KryptonLabel lblDetails;
+        private System.Windows.Forms.RichTextBox rtfDetails;
         private ComponentFactory.Krypton.Toolkit.KryptonGroupBox kryptonGroupBox1;
         private Zuby.ADGV.AdvancedDataGridView dgvEOI;
         private ComponentFactory.Krypton.Toolkit.KryptonGroupBox kryptonGroupBox2;
