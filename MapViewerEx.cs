@@ -31,6 +31,10 @@ namespace VAGSuite
         private IMapValidationService _mapValidationService;
         private MapViewerController _controller;
         
+        // Undo/Redo Service
+        private IUndoRedoService _undoRedoService;
+        private byte[] _preEditState; // Stores state before cell edit for efficient undo
+        
         // Phase 5 Components - UI Component instances
         private MapGridComponent _mapGridComponent;
         private Chart3DComponent _chart3DComponent;
@@ -711,6 +715,7 @@ namespace VAGSuite
             nChartControl1.MouseUp += new MouseEventHandler(nChartControl1_MouseUp);
 
             gridControl1.MouseMove += new MouseEventHandler(gridView1_MouseMove);
+            gridControl1.EditingControlShowing += new DataGridViewEditingControlShowingEventHandler(gridView1_EditingControlShowing);
 
             // Initialize Phase 5 Components
             InitializePhase5Components();
@@ -724,6 +729,10 @@ namespace VAGSuite
             _mapOperationService = new MapOperationService(_dataConversionService);
             _mapValidationService = new MapValidationService(_dataConversionService);
             _controller = new MapViewerController(this);
+            
+            // Initialize Undo/Redo Service
+            _undoRedoService = new UndoRedoService();
+            _undoRedoService.StateChanged += OnUndoRedoStateChanged;
             
         }
         
@@ -1701,10 +1710,17 @@ namespace VAGSuite
         {
             m_datasourceMutated = true;
             simpleButton2.Enabled = true;
-            simpleButton3.Enabled = true; // Enable the undo button when data is mutated
+            simpleButton3.Enabled = true; // Enable the reset button when data is mutated
             
             // Update m_map_content with the latest data from the grid
             m_map_content = GetDataFromGridView(m_isUpsideDown);
+            
+            // Push state to undo stack if this was a real edit (not just programmatic update)
+            byte[] preEditState = _undoRedoService.GetAndClearPreEditState();
+            if (preEditState != null)
+            {
+                _undoRedoService.PushState(preEditState, "Edit Cell");
+            }
             
             // Ensure components are updated with the new content
             if (_chart3DComponent != null) _chart3DComponent.LoadData(CreateMapViewerState());
@@ -1729,7 +1745,7 @@ namespace VAGSuite
 
         private void simpleButton3_Click(object sender, EventArgs e)
         {
-            // Restore original map content
+            // Restore original map content (Reset to Original functionality)
             if (m_map_original_content != null)
             {
                 m_map_content = (byte[])m_map_original_content.Clone();
@@ -1737,6 +1753,9 @@ namespace VAGSuite
                 m_datasourceMutated = false;
                 simpleButton2.Enabled = false;
                 simpleButton3.Enabled = false;
+                
+                // Clear undo/redo history when resetting to original
+                _undoRedoService.Clear();
             }
         }
 
@@ -1885,6 +1904,25 @@ namespace VAGSuite
                 btnToggleTooltips_Click(this, EventArgs.Empty);
                 e.Handled = true;
                 return;
+            }
+
+            // Handle Undo/Redo keyboard shortcuts
+            if (e.Control)
+            {
+                if (e.KeyCode == Keys.Z)
+                {
+                    // Ctrl+Z: Undo
+                    PerformUndo();
+                    e.Handled = true;
+                    return;
+                }
+                else if (e.KeyCode == Keys.Y || (e.KeyCode == Keys.Z && e.Shift))
+                {
+                    // Ctrl+Y or Ctrl+Shift+Z: Redo
+                    PerformRedo();
+                    e.Handled = true;
+                    return;
+                }
             }
 
             // Delegate to MapGridComponent for key handling (Add/Subtract/PageUp/PageDown/Home/End)
@@ -2063,6 +2101,14 @@ namespace VAGSuite
             if (sender is KryptonTextBox)
             {
                 KryptonTextBox txtedit = (KryptonTextBox)sender;
+                
+                // Capture state before increment/decrement operations
+                bool isIncrementOrDecrement = (e.KeyCode == Keys.Add || e.KeyCode == Keys.Subtract);
+                if (isIncrementOrDecrement && _preEditState == null)
+                {
+                    _preEditState = GetDataFromGridView(m_isUpsideDown);
+                }
+                
                 if (e.KeyCode == Keys.Add)
                 {
                     e.SuppressKeyPress = true;
@@ -2203,6 +2249,9 @@ namespace VAGSuite
             {
                 try
                 {
+                    // Capture state before paste for undo
+                    byte[] currentState = GetDataFromGridView(m_isUpsideDown);
+                    
                     int rowhandlefrom = cellcollection[0].RowIndex;
                     int colindexfrom = cellcollection[0].ColumnIndex;
                     
@@ -2222,6 +2271,9 @@ namespace VAGSuite
                         int val = _dataConversionService.ParseValue(pasteInfo.Value.ToString(), m_viewtype);
                         gridControl1.Rows[pasteInfo.Row].Cells[pasteInfo.Column].Value = _dataConversionService.FormatValue(val, m_viewtype, m_issixteenbit);
                     }
+                    
+                    // Push state to undo stack after paste
+                    _undoRedoService.PushState(currentState, "Paste");
                 }
                 catch (Exception pasteE)
                 {
@@ -2232,6 +2284,9 @@ namespace VAGSuite
 
         private void inOrgininalPositionToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Capture state before paste for undo
+            byte[] currentState = GetDataFromGridView(m_isUpsideDown);
+            
             // Use the refactored ClipboardService
             object[] targetCells = new object[3];
             targetCells[0] = 0;
@@ -2247,6 +2302,9 @@ namespace VAGSuite
                 int val = _dataConversionService.ParseValue(pasteInfo.Value.ToString(), m_viewtype);
                 gridControl1.Rows[pasteInfo.Row].Cells[pasteInfo.Column].Value = _dataConversionService.FormatValue(val, m_viewtype, m_issixteenbit);
             }
+            
+            // Push state to undo stack after paste
+            _undoRedoService.PushState(currentState, "Paste");
         }
 
 
@@ -2270,6 +2328,9 @@ namespace VAGSuite
                 DataGridViewSelectedCellCollection selectedCells = gridControl1.SelectedCells;
                 if (selectedCells.Count > 0)
                 {
+                    // Capture state before math operation for undo
+                    byte[] currentState = GetDataFromGridView(m_isUpsideDown);
+                    
                     OperationType opType = (OperationType)toolStripComboBox1.SelectedIndex;
                     
                     // Convert DataGridViewSelectedCellCollection to object array for service
@@ -2284,6 +2345,9 @@ namespace VAGSuite
                         (rh, col) => gridControl1.Rows[rh].Cells[Convert.ToInt32(col)].Value,
                         (rh, col, val) => gridControl1.Rows[rh].Cells[Convert.ToInt32(col)].Value = val
                     );
+                    
+                    // Push state to undo stack after math operation
+                    _undoRedoService.PushState(currentState, "Math Operation");
                 }
             }
             catch (Exception E)
@@ -2441,8 +2505,13 @@ namespace VAGSuite
         {
         }
 
-        private void gridView1_ShowingEditor(object sender, CancelEventArgs e)
+        private void gridView1_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
         {
+            // Capture pre-edit state for undo when cell editing begins
+            if (_preEditState == null && !IsCompareViewer && !m_isDifferenceViewer)
+            {
+                _preEditState = GetDataFromGridView(m_isUpsideDown);
+            }
         }
 
         private void gridView1_HiddenEditor(object sender, EventArgs e)
@@ -2577,6 +2646,9 @@ namespace VAGSuite
             DataGridViewSelectedCellCollection cellcollection = gridControl1.SelectedCells;
             if (cellcollection.Count > 2)
             {
+                // Capture state before smoothing for undo
+                byte[] currentState = GetDataFromGridView(m_isUpsideDown);
+                
                 // Use the new neighbor-aware proportional smoothing
                 object[] cells = new object[cellcollection.Count];
                 for (int i = 0; i < cellcollection.Count; i++)
@@ -2588,6 +2660,9 @@ namespace VAGSuite
                 m_datasourceMutated = true;
                 simpleButton2.Enabled = true;
                 simpleButton3.Enabled = true;
+                
+                // Push state to undo stack after smoothing
+                _undoRedoService.PushState(currentState, "Smoothing");
             }
         }
 
@@ -2601,6 +2676,9 @@ namespace VAGSuite
             DataGridViewSelectedCellCollection cellcollection = gridControl1.SelectedCells;
             if (cellcollection.Count > 2)
             {
+                // Capture state before proportional smoothing for undo
+                byte[] currentState = GetDataFromGridView(m_isUpsideDown);
+                
                 object[] cells = new object[cellcollection.Count];
                 for (int i = 0; i < cellcollection.Count; i++)
                 {
@@ -2611,6 +2689,9 @@ namespace VAGSuite
                 m_datasourceMutated = true;
                 simpleButton2.Enabled = true;
                 simpleButton3.Enabled = true;
+                
+                // Push state to undo stack after proportional smoothing
+                _undoRedoService.PushState(currentState, "Proportional Smoothing");
             }
         }
 
@@ -2772,6 +2853,91 @@ namespace VAGSuite
             
             UpdateChartControlSlice(GetDataFromGridView(m_isUpsideDown));
         }
+
+        #region Undo/Redo Implementation
+        
+        /// <summary>
+        /// Handles changes to the undo/redo state by updating UI button states.
+        /// </summary>
+        private void OnUndoRedoStateChanged(object sender, EventArgs e)
+        {
+            UpdateUndoRedoButtonStates();
+        }
+        
+        /// <summary>
+        /// Updates the enabled state of undo/redo buttons based on current stack state.
+        /// </summary>
+        private void UpdateUndoRedoButtonStates()
+        {
+            if (btnUndo != null)
+            {
+                btnUndo.Enabled = _undoRedoService.CanUndo;
+            }
+            if (btnRedo != null)
+            {
+                btnRedo.Enabled = _undoRedoService.CanRedo;
+            }
+        }
+        
+        /// <summary>
+        /// Performs an undo operation and refreshes the display.
+        /// </summary>
+        public void PerformUndo()
+        {
+            byte[] previousState = _undoRedoService.Undo(m_map_content);
+            if (previousState != null)
+            {
+                m_map_content = previousState;
+                m_datasourceMutated = true;
+                simpleButton2.Enabled = true;
+                
+                // Refresh the display
+                ShowTable(m_TableWidth, m_issixteenbit);
+            }
+        }
+        
+        /// <summary>
+        /// Performs a redo operation and refreshes the display.
+        /// </summary>
+        public void PerformRedo()
+        {
+            byte[] nextState = _undoRedoService.Redo(m_map_content);
+            if (nextState != null)
+            {
+                m_map_content = nextState;
+                m_datasourceMutated = true;
+                simpleButton2.Enabled = true;
+                
+                // Refresh the display
+                ShowTable(m_TableWidth, m_issixteenbit);
+            }
+        }
+        
+        /// <summary>
+        /// Clears the undo/redo history.
+        /// </summary>
+        public void ClearUndoRedoHistory()
+        {
+            _undoRedoService.Clear();
+        }
+        
+        /// <summary>
+        /// Event handler for the Undo button click.
+        /// </summary>
+        private void btnUndo_Click(object sender, EventArgs e)
+        {
+            PerformUndo();
+        }
+        
+        /// <summary>
+        /// Event handler for the Redo button click.
+        /// </summary>
+        private void btnRedo_Click(object sender, EventArgs e)
+        {
+            PerformRedo();
+        }
+        
+        #endregion
 
     }
 }

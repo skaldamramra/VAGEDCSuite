@@ -66,7 +66,9 @@ namespace VAGSuite
             // Bottom Buttons
             this.simpleButton1 = new ComponentFactory.Krypton.Toolkit.KryptonButton(); // Close
             this.simpleButton2 = new ComponentFactory.Krypton.Toolkit.KryptonButton(); // Save
-            this.simpleButton3 = new ComponentFactory.Krypton.Toolkit.KryptonButton(); // Undo
+            this.simpleButton3 = new ComponentFactory.Krypton.Toolkit.KryptonButton(); // Reset to Original
+            this.btnUndo = new ComponentFactory.Krypton.Toolkit.KryptonButton(); // Undo
+            this.btnRedo = new ComponentFactory.Krypton.Toolkit.KryptonButton(); // Redo
             this.simpleButton8 = new ComponentFactory.Krypton.Toolkit.KryptonButton(); // Save to ECU
             this.simpleButton9 = new ComponentFactory.Krypton.Toolkit.KryptonButton(); // Read from ECU
             this.simpleButton10 = new ComponentFactory.Krypton.Toolkit.KryptonButton(); // Read
@@ -356,12 +358,14 @@ namespace VAGSuite
             this.labelControl9.Values.Text = "MAP";
             this.labelControl9.Visible = true;
 
-            // 
+            //
             // bottomPanel
             //
             this.bottomPanel.Controls.Add(this.btnGraph2D);
             this.bottomPanel.Controls.Add(this.btnGraph3D);
-            this.bottomPanel.Controls.Add(this.simpleButton3); // Undo
+            this.bottomPanel.Controls.Add(this.simpleButton3); // Reset to Original
+            this.bottomPanel.Controls.Add(this.btnUndo); // Undo
+            this.bottomPanel.Controls.Add(this.btnRedo); // Redo
             this.bottomPanel.Controls.Add(this.simpleButton9); // Read ECU
             this.bottomPanel.Controls.Add(this.simpleButton8); // Save ECU
             this.bottomPanel.Controls.Add(this.simpleButton10); // Read
@@ -379,11 +383,31 @@ namespace VAGSuite
             this.simpleButton3.Name = "simpleButton3";
             this.simpleButton3.Size = new System.Drawing.Size(100, 25);
             this.simpleButton3.TabIndex = 0;
-            this.simpleButton3.Values.Text = "Undo changes";
+            this.simpleButton3.Values.Text = "Reset to Original";
             this.simpleButton3.Click += new System.EventHandler(this.simpleButton3_Click);
 
+            // Undo Button
+            this.btnUndo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnUndo.Location = new System.Drawing.Point(120, 8);
+            this.btnUndo.Name = "btnUndo";
+            this.btnUndo.Size = new System.Drawing.Size(60, 25);
+            this.btnUndo.TabIndex = 8;
+            this.btnUndo.Values.Text = "Undo";
+            this.btnUndo.Enabled = false;
+            this.btnUndo.Click += new System.EventHandler(this.btnUndo_Click);
+
+            // Redo Button
+            this.btnRedo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnRedo.Location = new System.Drawing.Point(185, 8);
+            this.btnRedo.Name = "btnRedo";
+            this.btnRedo.Size = new System.Drawing.Size(60, 25);
+            this.btnRedo.TabIndex = 9;
+            this.btnRedo.Values.Text = "Redo";
+            this.btnRedo.Enabled = false;
+            this.btnRedo.Click += new System.EventHandler(this.btnRedo_Click);
+
             this.btnGraph3D.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnGraph3D.Location = new System.Drawing.Point(120, 8);
+            this.btnGraph3D.Location = new System.Drawing.Point(255, 8);
             this.btnGraph3D.Name = "btnGraph3D";
             this.btnGraph3D.Size = new System.Drawing.Size(40, 25);
             this.btnGraph3D.TabIndex = 6;
@@ -391,7 +415,7 @@ namespace VAGSuite
             this.btnGraph3D.Click += new System.EventHandler(this.btnGraph3D_Click);
 
             this.btnGraph2D.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnGraph2D.Location = new System.Drawing.Point(165, 8);
+            this.btnGraph2D.Location = new System.Drawing.Point(300, 8);
             this.btnGraph2D.Name = "btnGraph2D";
             this.btnGraph2D.Size = new System.Drawing.Size(40, 25);
             this.btnGraph2D.TabIndex = 7;
@@ -662,6 +686,10 @@ namespace VAGSuite
         private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton8;
         private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton9;
         private ComponentFactory.Krypton.Toolkit.KryptonButton simpleButton10;
+        
+        // Undo/Redo buttons
+        private ComponentFactory.Krypton.Toolkit.KryptonButton btnUndo;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton btnRedo;
         
         private ComponentFactory.Krypton.Toolkit.KryptonCheckButton btnGraph3D;
         private ComponentFactory.Krypton.Toolkit.KryptonCheckButton btnGraph2D;

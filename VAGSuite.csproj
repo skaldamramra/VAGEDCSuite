@@ -164,6 +164,8 @@
     <Compile Include="Services\MapOperationService.cs" />
     <Compile Include="Services\IMapValidationService.cs" />
     <Compile Include="Services\MapValidationService.cs" />
+    <Compile Include="Services\IUndoRedoService.cs" />
+    <Compile Include="Services\UndoRedoService.cs" />
     <Compile Include="Services\MapViewerController.cs" />
     <Compile Include="Services\IMapDataService.cs" />
     <Compile Include="Services\MapDataService.cs" />
