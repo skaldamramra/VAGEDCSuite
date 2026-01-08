@@ -1184,6 +1184,67 @@ namespace VAGSuite.Components
         #region Public Methods
 
         /// <summary>
+        /// Loads EOI map data directly into the 3D chart
+        /// </summary>
+        public void LoadEOIData(EOIMap eoiMap, MapMetadata metadata = null)
+        {
+            if (eoiMap == null || eoiMap.Values == null)
+            {
+                Console.WriteLine("Chart3DComponent: LoadEOIData aborted - eoiMap is null or has no values");
+                return;
+            }
+
+            Console.WriteLine($"Chart3DComponent: LoadEOIData called for map: {eoiMap.SourceSymbol?.Varname ?? "EOI Map"}");
+
+            // Convert EOIMap to byte array format expected by UpdateBuffers
+            int rows = eoiMap.YCount;
+            int cols = eoiMap.XCount;
+            
+            _tableWidth = cols;
+            _isSixteenBit = false; // EOI values are doubles, stored as floats
+            _viewType = ViewType.Easy;
+            _mapName = metadata?.Name ?? "EOI Map";
+            _xAxisName = metadata?.XAxisName ?? "RPM";
+            _yAxisName = metadata?.YAxisName ?? "IQ (mg/st)";
+            _zAxisName = metadata?.ZAxisName ?? "EOI (degrees)";
+            
+            // Convert double values to byte array
+            _mapContent = new byte[rows * cols];
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    int idx = r * cols + c;
+                    double val = eoiMap.Values[c, r]; // Note: Values is [x, y]
+                    // Clamp to byte range (0-255) for display
+                    byte byteVal = (byte)Math.Max(0, Math.Min(255, val + 128));
+                    _mapContent[idx] = byteVal;
+                }
+            }
+
+            // Store axis values for labels
+            _xAxisValues = new int[cols];
+            _yAxisValues = new int[rows];
+            for (int i = 0; i < cols && i < eoiMap.XAxis.Length; i++)
+            {
+                _xAxisValues[i] = (int)eoiMap.XAxis[i];
+            }
+            for (int i = 0; i < rows && i < eoiMap.YAxis.Length; i++)
+            {
+                _yAxisValues[i] = (int)eoiMap.YAxis[i];
+            }
+
+            // Set correction factors for proper axis scaling
+            // EOI values are stored as (value + 128) in the byte array to fit 0-255
+            // We need to apply -128 offset to show the real degrees
+            _correctionFactor = 1.0;
+            _correctionOffset = -128.0;
+
+            ConfigureChart();
+            UpdateBuffers();
+        }
+
+        /// <summary>
         /// Loads data into the 3D chart
         /// </summary>
         public void LoadData(MapViewerState state)

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using ComponentFactory.Krypton.Toolkit;
+using VAGSuite.Components;
 using VAGSuite.Helpers;
 using VAGSuite.Models;
 using VAGSuite.Services;
@@ -31,6 +32,9 @@ namespace VAGSuite
         private Point _lastMousePos;
         private bool _showTooltips = true;
         
+        // 3D Chart Component
+        private Chart3DComponent _chart3DComponent;
+        
         public IEOICalculatorService CalculatorService { get; set; }
         
         public frmEOICalculator()
@@ -54,6 +58,114 @@ namespace VAGSuite
                 _lastTooltipCol = -1;
                 TooltipService.Hide("EOI");
             };
+            
+            // Initialize 3D Chart Component
+            Initialize3DChart();
+        }
+        
+        private void Initialize3DChart()
+        {
+            try
+            {
+                Console.WriteLine("frmEOICalculator: Initializing 3D Chart Component...");
+                
+                // Create and configure the Chart3DComponent
+                _chart3DComponent = new Chart3DComponent();
+                _chart3DComponent.SetChartControl(glControl3D);
+                
+                // Wire up navigation button events
+                btnZoomIn.Click += (s, e) => {
+                    if (_chart3DComponent != null)
+                    {
+                        float rotation, elevation, zoom;
+                        _chart3DComponent.GetView(out rotation, out elevation, out zoom);
+                        zoom *= 1.15f;
+                        zoom = Math.Max(0.5f, Math.Min(5.0f, zoom));
+                        _chart3DComponent.SetView(rotation, elevation, zoom);
+                    }
+                };
+                
+                btnZoomOut.Click += (s, e) => {
+                    if (_chart3DComponent != null)
+                    {
+                        float rotation, elevation, zoom;
+                        _chart3DComponent.GetView(out rotation, out elevation, out zoom);
+                        zoom *= 0.85f;
+                        zoom = Math.Max(0.5f, Math.Min(5.0f, zoom));
+                        _chart3DComponent.SetView(rotation, elevation, zoom);
+                    }
+                };
+                
+                btnRotateLeft.Click += (s, e) => {
+                    if (_chart3DComponent != null)
+                    {
+                        float rotation, elevation, zoom;
+                        _chart3DComponent.GetView(out rotation, out elevation, out zoom);
+                        rotation -= 15f;
+                        _chart3DComponent.SetView(rotation, elevation, zoom);
+                    }
+                };
+                
+                btnRotateRight.Click += (s, e) => {
+                    if (_chart3DComponent != null)
+                    {
+                        float rotation, elevation, zoom;
+                        _chart3DComponent.GetView(out rotation, out elevation, out zoom);
+                        rotation += 15f;
+                        _chart3DComponent.SetView(rotation, elevation, zoom);
+                    }
+                };
+                
+                btnToggleWireframe.Click += (s, e) => {
+                    if (_chart3DComponent != null)
+                    {
+                        _chart3DComponent.ToggleRenderMode();
+                        UpdateWireframeButtonState();
+                    }
+                };
+                
+                btnToggleTooltips3D.Click += (s, e) => {
+                    if (_chart3DComponent != null)
+                    {
+                        _chart3DComponent.ToggleTooltips();
+                        UpdateTooltips3DButtonState();
+                    }
+                };
+                
+                // Set initial button states
+                UpdateWireframeButtonState();
+                UpdateTooltips3DButtonState();
+                
+                Console.WriteLine("frmEOICalculator: 3D Chart Component initialized.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"frmEOICalculator: Error initializing 3D chart: {ex.Message}");
+            }
+        }
+        
+        private void UpdateWireframeButtonState()
+        {
+            if (_chart3DComponent != null)
+            {
+                bool isWireframe = _chart3DComponent.IsWireframeMode;
+                Color activeColor = Color.FromArgb(0, 122, 204);
+                Color inactiveColor = Color.FromArgb(60, 60, 60);
+                btnToggleWireframe.StateNormal.Back.Color1 = isWireframe ? activeColor : inactiveColor;
+                btnToggleWireframe.Refresh();
+            }
+        }
+        
+        private void UpdateTooltips3DButtonState()
+        {
+            if (_chart3DComponent != null)
+            {
+                bool isTooltips = _chart3DComponent.IsTooltipsEnabled;
+                Color activeColor = Color.FromArgb(0, 122, 204);
+                Color inactiveColor = Color.FromArgb(60, 60, 60);
+                btnToggleTooltips3D.StateNormal.Back.Color1 = isTooltips ? activeColor : inactiveColor;
+                btnToggleTooltips3D.Refresh();
+            }
         }
         
         private void ApplyTheme()
@@ -70,12 +182,8 @@ namespace VAGSuite
                 c.Font = customFont;
             }
             
-            // Apply theme to RichTextBox details area
-            var theme = VAGEDCThemeManager.Instance.CurrentTheme;
-            rtfDetails.BackColor = theme.GridBackground;
-            rtfDetails.ForeColor = theme.TextPrimary;
-            
             // Specific theme for ADGV to fix white headers
+            var theme = VAGEDCThemeManager.Instance.CurrentTheme;
             dgvEOI.BackgroundColor = theme.GridBackground;
             dgvEOI.GridColor = theme.GridBorder;
             dgvEOI.DefaultCellStyle.BackColor = theme.GridBackground;
@@ -655,11 +763,44 @@ namespace VAGSuite
         {
             if (_currentResult == null) return;
             
-            // Update details RichTextBox with calculation summary
-            rtfDetails.Text = _currentResult.GetSummary();
-            
             // Populate data grid
             PopulateDataGrid();
+            
+            // Update 3D visualization
+            Update3DVisualization();
+        }
+        
+        private void Update3DVisualization()
+        {
+            if (_chart3DComponent == null || _currentResult == null || _currentResult.EOIMap == null)
+            {
+                Console.WriteLine("frmEOICalculator: Cannot update 3D visualization - chart or data is null");
+                return;
+            }
+            
+            try
+            {
+                Console.WriteLine($"frmEOICalculator: Updating 3D visualization with EOI map...");
+                
+                // Create metadata for the EOI map
+                var metadata = new MapMetadata
+                {
+                    Name = $"EOI Map ({_selectedTemperature:F0}°C)",
+                    Description = "End of Injection calculation result",
+                    XAxisName = "RPM",
+                    YAxisName = "IQ (mg/st)",
+                    ZAxisName = "EOI (degrees)"
+                };
+                
+                // Load EOI data into the 3D chart
+                _chart3DComponent.LoadEOIData(_currentResult.EOIMap, metadata);
+                
+                Console.WriteLine("frmEOICalculator: 3D visualization updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"frmEOICalculator: Error updating 3D visualization: {ex.Message}");
+            }
         }
         
         private void PopulateDataGrid()
@@ -805,7 +946,6 @@ namespace VAGSuite
                 // Clear current results
                 _currentResult = null;
                 dgvEOI.Rows.Clear();
-                rtfDetails.Text = "Calculation details will appear here...";
             }
         }
         
