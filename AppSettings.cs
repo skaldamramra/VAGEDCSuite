@@ -140,6 +140,18 @@ namespace VAGSuite
             }
         }
 
+        private bool m_ShowEOITooltips = true;
+
+        public bool ShowEOITooltips
+        {
+            get { return m_ShowEOITooltips; }
+            set
+            {
+                m_ShowEOITooltips = value;
+                SaveRegistrySetting("ShowEOITooltips", m_ShowEOITooltips);
+            }
+        }
+
        
 
         private bool m_SynchronizeMapviewers = true;
@@ -571,6 +583,10 @@ namespace VAGSuite
                             else if (a == "ShowMapDescriptions")
                             {
                                 m_ShowMapDescriptions = Convert.ToBoolean(Settings.GetValue(a).ToString());
+                            }
+                            else if (a == "ShowEOITooltips")
+                            {
+                                m_ShowEOITooltips = Convert.ToBoolean(Settings.GetValue(a).ToString());
                             }
                             else if (a == "RequestProjectNotes")
                             {

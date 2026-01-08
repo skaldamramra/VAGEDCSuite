@@ -3084,7 +3084,7 @@ namespace VAGSuite
             m_appSettings.ShowMapDescriptions = !m_appSettings.ShowMapDescriptions;
             if (!m_appSettings.ShowMapDescriptions)
             {
-                TooltipService.Hide();
+                TooltipService.Hide("MapDescription");
             }
             UpdateMapDescriptionsButtonAppearance();
         }

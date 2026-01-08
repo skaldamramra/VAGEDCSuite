@@ -29,6 +29,7 @@ namespace VAGSuite
         private int _lastTooltipCol = -1;
         private Timer _tooltipTimer;
         private Point _lastMousePos;
+        private bool _showTooltips = true;
         
         public IEOICalculatorService CalculatorService { get; set; }
         
@@ -36,6 +37,9 @@ namespace VAGSuite
         {
             InitializeComponent();
             ApplyTheme();
+            
+            // Initialize tooltip button appearance
+            UpdateTooltipButtonAppearance();
             
             // Initialize tooltip timer
             _tooltipTimer = new Timer();
@@ -48,7 +52,7 @@ namespace VAGSuite
                 _tooltipTimer.Stop();
                 _lastTooltipRow = -1;
                 _lastTooltipCol = -1;
-                TooltipService.Hide();
+                TooltipService.Hide("EOI");
             };
         }
         
@@ -820,7 +824,7 @@ namespace VAGSuite
                 {
                     // Cell changed, restart timer
                     _tooltipTimer.Stop();
-                    TooltipService.Hide();
+                    TooltipService.Hide("EOI");
                     
                     _lastTooltipRow = hit.RowIndex;
                     _lastTooltipCol = hit.ColumnIndex;
@@ -838,14 +842,51 @@ namespace VAGSuite
                     _tooltipTimer.Stop();
                     _lastTooltipRow = -1;
                     _lastTooltipCol = -1;
-                    TooltipService.Hide();
+                    TooltipService.Hide("EOI");
                 }
             }
         }
 
+        private void btnToggleTooltips_Click(object sender, EventArgs e)
+        {
+            _showTooltips = !_showTooltips;
+            UpdateTooltipButtonAppearance();
+            
+            // Hide tooltip immediately if tooltips are disabled
+            if (!_showTooltips)
+            {
+                TooltipService.Hide("EOI");
+            }
+        }
+        
+        private void UpdateTooltipButtonAppearance()
+        {
+            Color activeBackColor = Color.FromArgb(14, 99, 156); // VAGEDC Dark blue
+            Color inactiveBackColor = Color.FromArgb(60, 60, 60); // Krypton group box background
+            Color textColor = Color.FromArgb(220, 220, 220);
+            
+            if (_showTooltips)
+            {
+                btnToggleTooltips.BackColor = activeBackColor;
+                btnToggleTooltips.ForeColor = Color.White;
+                btnToggleTooltips.Values.Text = "Tooltips: ON";
+            }
+            else
+            {
+                btnToggleTooltips.BackColor = inactiveBackColor;
+                btnToggleTooltips.ForeColor = textColor;
+                btnToggleTooltips.Values.Text = "Tooltips: OFF";
+            }
+            
+            btnToggleTooltips.Invalidate();
+        }
+        
         private void TooltipTimer_Tick(object sender, EventArgs e)
         {
             _tooltipTimer.Stop();
+            
+            // Check if tooltips are enabled
+            if (!_showTooltips) return;
             
             if (_currentResult == null || _currentResult.EOIMap == null) return;
             if (_lastTooltipRow < 0 || _lastTooltipCol < 0) return;
@@ -880,7 +921,7 @@ namespace VAGSuite
                 sb.AppendLine($"Formula: EOI = SOI - Duration");
                 sb.AppendLine($"Result: {eoi:F2}°");
 
-                TooltipService.ShowForControl(dgvEOI, _lastMousePos, "Calculation Details", sb.ToString());
+                TooltipService.ShowForControl(dgvEOI, _lastMousePos, "Calculation Details", sb.ToString(), "EOI");
             }
         }
     }

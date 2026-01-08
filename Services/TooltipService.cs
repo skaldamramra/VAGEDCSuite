@@ -26,6 +26,7 @@ namespace VAGSuite.Services
         // Single shared wrapped tooltip form instance (supports text wrapping)
         private static WrappedTooltipForm s_wrappedTooltip;
         private static Control s_lastOwner;
+        private static string s_currentContext = string.Empty;
         private static readonly object s_lock = new object();
 
         private static void EnsureInitialized()
@@ -50,7 +51,16 @@ namespace VAGSuite.Services
         /// <param name="clientPosition">Point in owner.ClientCoordinates where the tooltip should appear (typically mouse location).</param>
         /// <param name="title">Short title/caption (can be null or empty).</param>
         /// <param name="text">Tooltip text body - will wrap if longer than 600px.</param>
-        public static void ShowForControl(Control owner, Point clientPosition, string title, string text)
+        /// <summary>
+        /// Shows a tooltip for the specified owner control with an optional context identifier.
+        /// The context ensures that tooltips from different parts of the application don't interfere with each other.
+        /// </summary>
+        /// <param name="owner">The control to anchor the tooltip to (must be non-null).</param>
+        /// <param name="clientPosition">Point in owner.ClientCoordinates where the tooltip should appear.</param>
+        /// <param name="title">Short title/caption (can be null or empty).</param>
+        /// <param name="text">Tooltip text body - will wrap if longer than 600px.</param>
+        /// <param name="context">Optional context identifier to isolate tooltips (e.g., "EOI", "MapDescription").</param>
+        public static void ShowForControl(Control owner, Point clientPosition, string title, string text, string context = "")
         {
             if (owner == null) return;
             EnsureInitialized();
@@ -74,7 +84,7 @@ namespace VAGSuite.Services
             {
                 try
                 {
-                    owner.BeginInvoke(new Action(() => ShowInternal(owner, clientPosition, fullText)));
+                    owner.BeginInvoke(new Action(() => ShowInternal(owner, clientPosition, fullText, context)));
                 }
                 catch
                 {
@@ -83,19 +93,20 @@ namespace VAGSuite.Services
             }
             else
             {
-                ShowInternal(owner, clientPosition, fullText);
+                ShowInternal(owner, clientPosition, fullText, context);
             }
         }
 
-        private static void ShowInternal(Control owner, Point clientPosition, string text)
+        private static void ShowInternal(Control owner, Point clientPosition, string text, string context)
         {
             if (owner == null || owner.IsDisposed) return;
             EnsureInitialized();
 
             try
             {
-                // Store last owner for Hide call
+                // Store last owner and context for Hide call
                 s_lastOwner = owner;
+                s_currentContext = context ?? string.Empty;
 
                 // Set the content - WrappedTooltipForm handles word wrapping automatically
                 s_wrappedTooltip.Content = text;
@@ -115,9 +126,17 @@ namespace VAGSuite.Services
         /// <summary>
         /// Hides any currently visible tooltip shown by this service.
         /// </summary>
-        public static void Hide()
+        /// <param name="context">Optional context identifier - only hides tooltips matching this context.</param>
+        public static void Hide(string context = "")
         {
             EnsureInitialized();
+
+            // If a context is specified and doesn't match, don't hide
+            string targetContext = context ?? string.Empty;
+            if (!string.IsNullOrEmpty(s_currentContext) && s_currentContext != targetContext)
+            {
+                return; // Different context, don't interfere
+            }
 
             try
             {
@@ -133,6 +152,7 @@ namespace VAGSuite.Services
             finally
             {
                 s_lastOwner = null;
+                s_currentContext = string.Empty;
             }
         }
     }

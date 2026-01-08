@@ -40,6 +40,7 @@ namespace VAGSuite
             this.trackTemperature = new System.Windows.Forms.TrackBar();
             this.lblTemperature = new ComponentFactory.Krypton.Toolkit.KryptonLabel();
             this.btnCalculate = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.btnToggleTooltips = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             ((System.ComponentModel.ISupportInitialize)(this.kryptonPanel1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.kryptonGroupBox1)).BeginInit();
             this.kryptonGroupBox1.Panel.SuspendLayout();
@@ -124,6 +125,7 @@ namespace VAGSuite
             this.kryptonGroupBox2.Panel.Controls.Add(this.trackTemperature);
             this.kryptonGroupBox2.Panel.Controls.Add(this.lblTemperature);
             this.kryptonGroupBox2.Panel.Controls.Add(this.btnCalculate);
+            this.kryptonGroupBox2.Panel.Controls.Add(this.btnToggleTooltips);
             this.kryptonGroupBox2.Size = new System.Drawing.Size(900, 150);
             this.kryptonGroupBox2.TabIndex = 3;
             this.kryptonGroupBox2.Values.Heading = "Configuration";
@@ -163,15 +165,24 @@ namespace VAGSuite
             this.lblTemperature.Size = new System.Drawing.Size(300, 20);
             this.lblTemperature.TabIndex = 3;
             this.lblTemperature.Values.Text = "Temperature: 90 °C";
-            // 
+            //
             // btnCalculate
-            // 
+            //
             this.btnCalculate.Location = new System.Drawing.Point(500, 25);
             this.btnCalculate.Name = "btnCalculate";
             this.btnCalculate.Size = new System.Drawing.Size(120, 30);
             this.btnCalculate.TabIndex = 4;
             this.btnCalculate.Values.Text = "Calculate EOI";
             this.btnCalculate.Click += new System.EventHandler(this.btnCalculate_Click);
+            //
+            // btnToggleTooltips
+            //
+            this.btnToggleTooltips.Location = new System.Drawing.Point(640, 25);
+            this.btnToggleTooltips.Name = "btnToggleTooltips";
+            this.btnToggleTooltips.Size = new System.Drawing.Size(120, 30);
+            this.btnToggleTooltips.TabIndex = 5;
+            this.btnToggleTooltips.Values.Text = "Tooltips: ON";
+            this.btnToggleTooltips.Click += new System.EventHandler(this.btnToggleTooltips_Click);
             // 
             // frmEOICalculator
             // 
@@ -216,5 +227,6 @@ namespace VAGSuite
         private System.Windows.Forms.TrackBar trackTemperature;
         private ComponentFactory.Krypton.Toolkit.KryptonLabel lblTemperature;
         private ComponentFactory.Krypton.Toolkit.KryptonButton btnCalculate;
+        private ComponentFactory.Krypton.Toolkit.KryptonButton btnToggleTooltips;
     }
 }

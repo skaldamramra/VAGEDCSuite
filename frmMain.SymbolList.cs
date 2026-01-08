@@ -242,7 +242,7 @@ namespace VAGSuite
                 {
                     // Use the WinForms-based TooltipService to update the shown tooltip position/text.
                     // ShowForControl expects a client coordinate relative to the owner control; we have e.Location.
-                    TooltipService.ShowForControl(tvSymbols, e.Location, sh.Varname, description);
+                    TooltipService.ShowForControl(tvSymbols, e.Location, sh.Varname, description, "MapDescription");
                 }
             }
         }
@@ -250,7 +250,7 @@ namespace VAGSuite
         private void tvSymbols_MouseLeave(object sender, EventArgs e)
         {
             hoverTimer.Stop();
-            TooltipService.Hide();
+            TooltipService.Hide("MapDescription");
             activeNode = null;
             isTooltipActive = false;
         }
@@ -267,7 +267,7 @@ namespace VAGSuite
                 {
                     isTooltipActive = true;
                     // Use TooltipService (WinForms.ToolTip wrapper) to show the hint.
-                    TooltipService.ShowForControl(tvSymbols, tvSymbols.PointToClient(System.Windows.Forms.Cursor.Position), sh.Varname, description);
+                    TooltipService.ShowForControl(tvSymbols, tvSymbols.PointToClient(System.Windows.Forms.Cursor.Position), sh.Varname, description, "MapDescription");
                 }
             }
         }
@@ -282,7 +282,7 @@ namespace VAGSuite
             {
                 // Ensure we hide any active tooltip when descriptions are disabled.
                 hoverTimer.Stop();
-                TooltipService.Hide();
+                TooltipService.Hide("MapDescription");
                 activeNode = null;
                 isTooltipActive = false;
                 return;
@@ -302,7 +302,7 @@ namespace VAGSuite
                     activeNode = null;
                     isTooltipActive = false;
                     hoverTimer.Stop();
-                    TooltipService.Hide();
+                    TooltipService.Hide("MapDescription");
                 }
                 return;
             }
@@ -327,7 +327,7 @@ namespace VAGSuite
                 // Node changed: reset tooltip state and start hover timer for the new node.
                 activeNode = node;
                 isTooltipActive = false;
-                try { TooltipService.Hide(); } catch { }
+                try { TooltipService.Hide("MapDescription"); } catch { }
                 hoverTimer.Stop();
     
                 if (node != null)
