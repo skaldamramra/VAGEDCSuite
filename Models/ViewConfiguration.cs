@@ -21,6 +21,11 @@ namespace VAGSuite.Models
         public bool TableVisible { get; set; }
         public bool GraphVisible { get; set; } = true;
         
+        /// <summary>
+        /// When true, shows the difference between current values and original values
+        /// </summary>
+        public bool IsDeltaMode { get; set; }
+        
         public int SelectedTabPageIndex { get; set; }
         public int SliderPosition { get; set; }
     }

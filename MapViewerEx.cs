@@ -57,6 +57,25 @@ namespace VAGSuite
             }
         }
 
+        /// <summary>
+        /// When true, shows the difference between current values and original values
+        /// </summary>
+        private bool m_isDeltaMode = false;
+
+        public bool IsDeltaMode
+        {
+            get { return m_isDeltaMode; }
+            set
+            {
+                if (m_isDeltaMode != value)
+                {
+                    m_isDeltaMode = value;
+                    // Invalidate grid to repaint with new delta mode
+                    gridControl1.Invalidate();
+                }
+            }
+        }
+
         public delegate void ViewerClose(object sender, EventArgs e);
         public event ViewerClose onClose;
         public delegate void AxisEditorRequested(object sender, AxisEditorRequestedEventArgs e);
@@ -790,7 +809,8 @@ namespace VAGSuite
                     CorrectionOffset = correction_offset,
                     LockMode = toolStripComboBox2.SelectedIndex,
                     TableVisible = gridControl1.Visible,
-                    GraphVisible = graphPanel.Visible
+                    GraphVisible = graphPanel.Visible,
+                    IsDeltaMode = m_isDeltaMode
                 },
                 IsDirty = m_datasourceMutated,
                 IsCompareMode = _isCompareViewer,
@@ -1596,13 +1616,36 @@ namespace VAGSuite
                 if (e.Value == null || e.Value == DBNull.Value) return;
 
                 int cellValue = _dataConversionService.ParseValue(e.Value.ToString(), m_viewtype);
+                
+                // Get original value for delta mode
+                int originalValue = 0;
+                if (m_isDeltaMode && m_map_original_content != null)
+                {
+                    // Calculate the byte offset in the original content
+                    int rowIndex = m_isUpsideDown ? (gridControl1.RowCount - 1 - e.RowIndex) : e.RowIndex;
+                    int byteOffset = (rowIndex * m_TableWidth + e.ColumnIndex) * (m_issixteenbit ? 2 : 1);
+                    
+                    if (byteOffset >= 0 && byteOffset < m_map_original_content.Length)
+                    {
+                        if (m_issixteenbit && byteOffset + 1 < m_map_original_content.Length)
+                        {
+                            originalValue = m_map_original_content[byteOffset] * 256 + m_map_original_content[byteOffset + 1];
+                        }
+                        else if (!m_issixteenbit)
+                        {
+                            originalValue = m_map_original_content[byteOffset];
+                        }
+                    }
+                }
 
                 // Use IMapRenderingService for color calculation
                 Color cellColor = _mapRenderingService.CalculateCellColor(
                     cellValue,
                     m_MaxValueInTable,
                     m_OnlineMode,
-                    m_isRedWhite);
+                    m_isRedWhite,
+                    originalValue,
+                    m_isDeltaMode);
 
                 // Apply coloring if not disabled
                 if (!m_disablecolors)
@@ -1630,7 +1673,8 @@ namespace VAGSuite
                     cellValue,
                     CreateMapViewerState().Configuration,
                     CreateMapViewerState().Metadata,
-                    m_issixteenbit);
+                    m_issixteenbit,
+                    originalValue);
 
                 e.PaintContent(e.CellBounds);
                 
@@ -1897,37 +1941,6 @@ namespace VAGSuite
             timer.Start();
         }
 
-        private void gridView1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.T && nChartControl1.Visible)
-            {
-                btnToggleTooltips_Click(this, EventArgs.Empty);
-                e.Handled = true;
-                return;
-            }
-
-            // Handle Undo/Redo keyboard shortcuts
-            if (e.Control)
-            {
-                if (e.KeyCode == Keys.Z)
-                {
-                    // Ctrl+Z: Undo
-                    PerformUndo();
-                    e.Handled = true;
-                    return;
-                }
-                else if (e.KeyCode == Keys.Y || (e.KeyCode == Keys.Z && e.Shift))
-                {
-                    // Ctrl+Y or Ctrl+Shift+Z: Redo
-                    PerformRedo();
-                    e.Handled = true;
-                    return;
-                }
-            }
-
-            // Delegate to MapGridComponent for key handling (Add/Subtract/PageUp/PageDown/Home/End)
-            _mapGridComponent.GridControl1_KeyDown(sender, e);
-        }
 
 
 
@@ -2938,6 +2951,20 @@ namespace VAGSuite
         }
         
         #endregion
+
+        /// <summary>
+        /// Event handler for the Delta Mode button click.
+        /// </summary>
+        private void btnDeltaMode_Click(object sender, EventArgs e)
+        {
+            IsDeltaMode = !IsDeltaMode;
+            
+            // Update button checked state
+            if (btnDeltaMode != null)
+            {
+                btnDeltaMode.Checked = m_isDeltaMode;
+            }
+        }
 
     }
 }

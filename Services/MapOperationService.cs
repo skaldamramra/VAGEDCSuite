@@ -70,6 +70,11 @@ namespace VAGSuite.Services
                         case OperationType.Fill:
                             workingValue = operand;
                             break;
+                        case OperationType.Percentage:
+                            // Convert percentage (e.g. 5) to multiplier (e.g. 1.05)
+                            double factor = 1.0 + (operand / 100.0);
+                            workingValue *= factor;
+                            break;
                     }
 
                     int finalRawValue;

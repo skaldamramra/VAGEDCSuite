@@ -8,7 +8,8 @@ namespace VAGSuite.Services
         Addition,
         Multiplication,
         Division,
-        Fill
+        Fill,
+        Percentage
     }
 
     public interface IMapOperationService

@@ -85,6 +85,7 @@ namespace VAGSuite
             this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripComboBox3 = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnDeltaMode = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton7 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
@@ -152,6 +153,7 @@ namespace VAGSuite
             this.toolStripLabel3,
             this.toolStripComboBox3,
             this.toolStripSeparator2,
+            this.btnDeltaMode,
             this.toolStripButton7,
             this.toolStripButton6,
             this.toolStripButton1,
@@ -212,7 +214,6 @@ namespace VAGSuite
             this.gridControl1.RowHeadersVisible = true;
             this.gridControl1.CellPainting += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.advancedDataGridView1_CellPainting);
             this.gridControl1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.advancedDataGridView1_CellValueChanged);
-            this.gridControl1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.gridView1_KeyDown);
 
             //
             // graphPanel
@@ -468,7 +469,7 @@ namespace VAGSuite
             this.toolStripComboBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.toolStripComboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.toolStripComboBox1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.toolStripComboBox1.Items.AddRange(new object[] { "Addition", "Multiply", "Divide", "Fill" });
+            this.toolStripComboBox1.Items.AddRange(new object[] { "Addition", "Multiply", "Divide", "Fill", "Percentage" });
             this.toolStripComboBox1.Name = "toolStripComboBox1";
             this.toolStripComboBox1.Size = new System.Drawing.Size(121, 25);
 
@@ -502,6 +503,15 @@ namespace VAGSuite
 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+
+            //
+            // btnDeltaMode
+            //
+            this.btnDeltaMode.CheckOnClick = true;
+            this.btnDeltaMode.Name = "btnDeltaMode";
+            this.btnDeltaMode.Size = new System.Drawing.Size(23, 22);
+            this.btnDeltaMode.Text = "Delta Mode";
+            this.btnDeltaMode.Click += new System.EventHandler(this.btnDeltaMode_Click);
 
             this.toolStripButton7.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.toolStripButton7.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton7.Image")));
@@ -719,6 +729,8 @@ namespace VAGSuite
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        
+        private System.Windows.Forms.ToolStripButton btnDeltaMode;
         
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem copySelectedCellsToolStripMenuItem;
