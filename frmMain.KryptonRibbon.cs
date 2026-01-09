@@ -510,11 +510,11 @@ namespace VAGSuite
             this.rbpgKryptonHelpDocsTriple.MaximumSize = GroupItemSize.Large;
             this.rbpgKryptonHelpDocsTriple.MinimumSize = GroupItemSize.Large;
             
-            KryptonRibbonGroupButton btnKryptonUserManual = new KryptonRibbonGroupButton { TextLine1 = "User", TextLine2 = "Manual", ImageLarge = GetResourceImage("vagedc.ico") };
+            KryptonRibbonGroupButton btnKryptonUserManual = new KryptonRibbonGroupButton { TextLine1 = "User", TextLine2 = "Manual", ImageLarge = GetResourceImage("UserManual.png") };
             btnKryptonUserManual.Click += (s, e) => btnUserManual_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonReleaseNotes = new KryptonRibbonGroupButton { TextLine1 = "Release", TextLine2 = "Notes", ImageLarge = GetResourceImage("vagedc.ico") };
+            KryptonRibbonGroupButton btnKryptonReleaseNotes = new KryptonRibbonGroupButton { TextLine1 = "Release", TextLine2 = "Notes", ImageLarge = GetResourceImage("ReleaseNotes.png") };
             btnKryptonReleaseNotes.Click += (s, e) => btnReleaseNotes_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonAbout = new KryptonRibbonGroupButton { TextLine1 = "About", TextLine2 = "VAGSuite", ImageLarge = GetResourceImage("vagedc.ico") };
+            KryptonRibbonGroupButton btnKryptonAbout = new KryptonRibbonGroupButton { TextLine1 = "About", TextLine2 = "VAGSuite", ImageLarge = GetResourceImage("AboutVagSuite.png") };
             btnKryptonAbout.Click += (s, e) => btnAbout_ItemClick(s, null);
             
             this.rbpgKryptonHelpDocsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonUserManual, btnKryptonReleaseNotes, btnKryptonAbout });
@@ -524,7 +524,7 @@ namespace VAGSuite
             KryptonRibbonGroupTriple rbpgKryptonUpdateTriple = new KryptonRibbonGroupTriple();
             rbpgKryptonUpdateTriple.MaximumSize = GroupItemSize.Large;
             rbpgKryptonUpdateTriple.MinimumSize = GroupItemSize.Large;
-            KryptonRibbonGroupButton btnKryptonUpdate = new KryptonRibbonGroupButton { TextLine1 = "Check for", TextLine2 = "Updates", ImageLarge = GetResourceImage("vagedc.ico") };
+            KryptonRibbonGroupButton btnKryptonUpdate = new KryptonRibbonGroupButton { TextLine1 = "Check for", TextLine2 = "Updates", ImageLarge = GetResourceImage("CheckForUpdates.png") };
             btnKryptonUpdate.Click += (s, e) => btnCheckForUpdates_ItemClick(s, null);
             rbpgKryptonUpdateTriple.Items.Add(btnKryptonUpdate);
             rbpgKryptonUpdate.Items.Add(rbpgKryptonUpdateTriple);
