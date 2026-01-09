@@ -1210,14 +1210,42 @@ namespace VAGSuite
 
         public override void NameKnownMaps(byte[] allBytes, SymbolCollection newSymbols, List<CodeBlock> newCodeBlocks)
         {
+            // New Rule-Based Engine
+            try
+            {
+                MapRuleRepository repo = new MapRuleRepository();
+                var rules = repo.LoadRules("EDC15P");
+                MapDetectionEngine engine = new MapDetectionEngine();
+
+                foreach (SymbolHelper sh in newSymbols)
+                {
+                    foreach (var rule in rules)
+                    {
+                        if (engine.EvaluateRule(rule, sh, allBytes))
+                        {
+                            engine.ApplyMetadata(rule, sh, allBytes, newCodeBlocks, newSymbols);
+                            break; // First match wins
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error in MapDetectionEngine: " + ex.Message);
+            }
+
             SymbolAxesTranslator st = new SymbolAxesTranslator();
             long boosttagetmaploc = 0;
             bool eb96CylHeadPresent = false;
 
             foreach (SymbolHelper sh in newSymbols)
             {
+                // Skip if already named by the engine
+                if (!string.IsNullOrEmpty(sh.Varname) && !sh.Varname.StartsWith("2D") && !sh.Varname.StartsWith("3D")) continue;
+
                 //sh.X_axis_descr = st.TranslateAxisID(sh.X_axis_ID);
                 //sh.Y_axis_descr = st.TranslateAxisID(sh.Y_axis_ID);
+                /* Migrated to EDC15P_MapRules.xml
                 if (sh.Length == 700) // 25*14
                 {
                     sh.Category = "Detected maps";
@@ -1234,7 +1262,9 @@ namespace VAGSuite
                     sh.YaxisUnits = "km/h";
                     sh.XaxisUnits = "rpm";
                 }
+                */
 
+                /* Migrated to EDC15P_MapRules.xml
                 if (sh.Length == 570)
                 {
                     if (sh.X_axis_ID / 256 == 0xC5 && sh.Y_axis_ID / 256 == 0xEC)
@@ -1297,7 +1327,8 @@ namespace VAGSuite
                         sh.YaxisUnits = "mg/st";
                     }
                 }
-                else if (sh.Length == 480)
+                */
+                if (sh.Length == 480)
                 {
                     if (sh.X_axis_ID / 256 == 0xC5 && sh.Y_axis_ID / 256 == 0xEC)
                     {
@@ -1450,6 +1481,7 @@ namespace VAGSuite
                 else if (sh.Length == 416)
                 {
                     string strAddrTest = sh.Flash_start_address.ToString("X8");
+                    /* Migrated to EDC15P_MapRules.xml
                     if (sh.X_axis_ID / 256 == 0xF9 && sh.Y_axis_ID / 256 == 0xDA)
                     {
                         // this is IQ by MAF limiter!
@@ -1481,7 +1513,8 @@ namespace VAGSuite
                         sh.XaxisUnits = "mg/st";
 
                     }
-                    else if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xDA)
+                    */
+                    if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xDA)
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Limiters";
@@ -1823,6 +1856,7 @@ namespace VAGSuite
                 }
                 else if (sh.Length == 320)
                 {
+                    /* Migrated to EDC15P_MapRules.xml
                     if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xC0)
                     {
                         sh.Category = "Detected maps";
@@ -1849,7 +1883,8 @@ namespace VAGSuite
                         sh.XaxisUnits = "mg/st";
                         boosttagetmaploc = sh.X_axis_address;
                     }
-                    else if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xDA)
+                    */
+                    if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xDA)
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Limiters";

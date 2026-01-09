@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  EDC15P Map Detection Rules
+  
+  This file defines the rules for detecting and naming maps in EDC15P binary files.
+  The detection engine evaluates these rules against potential maps found in the binary.
+  
+  Structure:
+  <MapRules ecuType="EDC15P" version="1.0">
+    <MapRule priority="100" id="unique_id">
+      <Description>Human-readable description</Description>
+      
+      <Conditions>
+        All conditions must match for the rule to apply.
+        
+        <Length>570</Length>                  - Exact length in bytes
+        <Length min="500" max="600" />        - Length range
+        
+        <XAxisID high="0xC5" />               - X-axis ID high byte (e.g., 0xC5 for 0xC5EC)
+        <XAxisID exact="0xC5EC" />            - Exact X-axis ID
+        <YAxisID high="0xEC" />               - Y-axis ID high byte
+        
+        <XAxisLength>19</XAxisLength>         - X-axis length (number of points)
+        <YAxisLength>15</YAxisLength>         - Y-axis length
+        
+        <MapSelector numRepeats="10" />       - For maps with selectors (e.g., SOI)
+        
+        Logical Operators:
+        <Or>
+          <Conditions>...</Conditions>
+          <Conditions>...</Conditions>
+        </Or>
+      </Conditions>
+      
+      <Metadata>
+        Properties to assign to the detected map.
+        
+        <Category>Detected maps</Category>
+        <Subcategory>Fuel</Subcategory>
+        
+        <Name>Map Name</Name>                 - Static name
+        <Name sequential="true" baseName="Injector duration" /> 
+                                              - Sequential naming (e.g., "Injector duration 00", "01")
+                                              
+        <Correction>0.01</Correction>         - Z-axis correction factor
+        <Offset>0</Offset>                    - Z-axis offset
+        
+        <XAxis>
+          <Description>Engine speed</Description>
+          <Units>rpm</Units>
+          <Correction>1.0</Correction>
+          <Offset>0</Offset>
+        </XAxis>
+        
+        <YAxis>...</YAxis>
+        <ZAxis>...</ZAxis>
+      </Metadata>
+    </MapRule>
+  </MapRules>
+-->
+<MapRules ecuType="EDC15P" version="1.0">
+  
+  <!-- Launch Control -->
+  <MapRule priority="100" id="launch_control_700">
+    <Description>
+      Launch control map - 25x14 dimension (700 bytes)
+    </Description>
+    <Conditions>
+      <Length>700</Length>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Misc</Subcategory>
+      <Name>Launch control map</Name>
+      <Correction>0.01</Correction>
+      <XAxis>
+        <Description>Engine speed (rpm)</Description>
+        <Units>rpm</Units>
+      </XAxis>
+      <YAxis>
+        <Description>Approx. vehicle speed (km/h)</Description>
+        <Units>km/h</Units>
+        <Correction>0.156250</Correction>
+      </YAxis>
+      <ZAxis>
+        <Description>IQ limit</Description>
+      </ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- Injector Duration (570 bytes) -->
+  <MapRule priority="110" id="injector_duration_570">
+    <Description>
+      Injector duration map - 19x15 dimension (570 bytes)
+      Handles multiple axis ID combinations: C5/EC, C4/EA, C4/EC
+    </Description>
+    <Conditions>
+      <Length>570</Length>
+      <Or>
+        <Conditions>
+          <XAxisID high="0xC5" />
+          <YAxisID high="0xEC" />
+        </Conditions>
+        <Conditions>
+          <XAxisID high="0xC4" />
+          <YAxisID high="0xEA" />
+        </Conditions>
+        <Conditions>
+          <XAxisID high="0xC4" />
+          <YAxisID high="0xEC" />
+        </Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Fuel</Subcategory>
+      <Name sequential="true" baseName="Injector duration" />
+      <Correction>0.023437</Correction>
+      <XAxis>
+        <Description>Engine speed (rpm)</Description>
+        <Units>rpm</Units>
+      </XAxis>
+      <YAxis>
+        <Description>Requested Quantity mg/stroke</Description>
+        <Units>mg/st</Units>
+        <Correction>0.01</Correction>
+      </YAxis>
+      <ZAxis>
+        <Description>Duration (crankshaft degrees)</Description>
+      </ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- Boost Target (320 bytes) -->
+  <MapRule priority="120" id="boost_target_320">
+    <Description>
+      Boost target map - 10x16 dimension (320 bytes)
+      Handles EC/C0 and EA/C0 axis combinations
+    </Description>
+    <Conditions>
+      <Length>320</Length>
+      <Or>
+        <Conditions>
+          <XAxisID high="0xEC" />
+          <YAxisID high="0xC0" />
+        </Conditions>
+        <Conditions>
+          <XAxisID high="0xEA" />
+          <YAxisID high="0xC0" />
+        </Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Turbo</Subcategory>
+      <Name>Boost target map</Name>
+      <XAxis>
+        <Description>IQ (mg/stroke)</Description>
+        <Units>mg/st</Units>
+        <Correction>0.01</Correction>
+      </XAxis>
+      <YAxis>
+        <Description>Engine speed (rpm)</Description>
+        <Units>rpm</Units>
+      </YAxis>
+      <ZAxis>
+        <Description>Boost target (mbar)</Description>
+      </ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- Smoke Limiter (416 bytes) -->
+  <MapRule priority="130" id="smoke_limiter_416">
+    <Description>
+      Smoke limiter (IQ by MAF) - 13x16 dimension (416 bytes)
+      Axis IDs: F9/DA
+    </Description>
+    <Conditions>
+      <Length>416</Length>
+      <XAxisID high="0xF9" />
+      <YAxisID high="0xDA" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Limiters</Subcategory>
+      <!-- Note: Conditional naming based on temperature is not yet fully supported in XML, using base name -->
+      <Name>Smoke limiter</Name>
+      <Correction>0.01</Correction>
+      <XAxis>
+        <Description>Airflow mg/stroke</Description>
+        <Units>mg/st</Units>
+        <Correction>0.1</Correction>
+      </XAxis>
+      <YAxis>
+        <Description>Engine speed (rpm)</Description>
+        <Units>rpm</Units>
+      </YAxis>
+      <ZAxis>
+        <Description>Maximum IQ (mg)</Description>
+      </ZAxis>
+    </Metadata>
+  </MapRule>
+
+</MapRules>

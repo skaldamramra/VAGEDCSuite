@@ -176,6 +176,9 @@
     <Compile Include="Helpers\EOIMapFinder.cs" />
     <Compile Include="Helpers\EOICalculator.cs" />
     <Compile Include="Helpers\SymbolQueryHelper.cs" />
+    <Compile Include="MapDetectionRules.cs" />
+    <Compile Include="MapRuleRepository.cs" />
+    <Compile Include="MapDetectionEngine.cs" />
     <Compile Include="CompareResults.cs">
       <SubType>UserControl</SubType>
     </Compile>
