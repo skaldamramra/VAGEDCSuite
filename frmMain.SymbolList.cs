@@ -11,6 +11,7 @@ namespace VAGSuite
     public partial class frmMain
     {
         private KryptonTreeView tvSymbols;
+        private ImageList symbolImageList;
 
         private void InitializeSymbolGrid()
         {
@@ -24,6 +25,41 @@ namespace VAGSuite
             this.tvSymbols.StateCommon.Back.Color1 = Color.FromArgb(30, 30, 30);
             this.tvSymbols.StateCommon.Node.Content.ShortText.Color1 = Color.FromArgb(220, 220, 220);
             this.tvSymbols.StateCommon.Node.Content.ShortText.Color2 = Color.FromArgb(220, 220, 220);
+            
+            // Create ImageList for map source indicators
+            this.symbolImageList = new ImageList();
+            this.symbolImageList.ImageSize = new Size(16, 16);
+            this.symbolImageList.ColorDepth = ColorDepth.Depth32Bit;
+            
+            // Create icons for FileParser (blue) and MapRulesXml (green)
+            // FileParser icon - blue document
+            Bitmap bmpFileParser = new Bitmap(16, 16);
+            using (Graphics g = Graphics.FromImage(bmpFileParser))
+            {
+                g.Clear(Color.Transparent);
+                using (Brush brush = new SolidBrush(Color.FromArgb(100, 149, 237))) // Cornflower blue
+                {
+                    g.FillRectangle(brush, 2, 2, 12, 14);
+                    g.DrawRectangle(Pens.White, 4, 4, 8, 10);
+                }
+            }
+            this.symbolImageList.Images.Add("FileParser", bmpFileParser);
+            
+            // MapRulesXml icon - green document
+            Bitmap bmpMapRules = new Bitmap(16, 16);
+            using (Graphics g = Graphics.FromImage(bmpMapRules))
+            {
+                g.Clear(Color.Transparent);
+                using (Brush brush = new SolidBrush(Color.FromArgb(60, 179, 113))) // Sea green
+                {
+                    g.FillRectangle(brush, 2, 2, 12, 14);
+                    g.DrawRectangle(Pens.White, 4, 4, 8, 10);
+                }
+            }
+            this.symbolImageList.Images.Add("MapRulesXml", bmpMapRules);
+            
+            // Assign ImageList to TreeView
+            this.tvSymbols.ImageList = this.symbolImageList;
             
             // Events
             this.tvSymbols.NodeMouseDoubleClick += tvSymbols_NodeMouseDoubleClick;
@@ -166,6 +202,11 @@ namespace VAGSuite
                                 : sh.Flash_start_address.ToString();
                             var symbolNode = new TreeNode(sh.Varname + " [" + addressString + "]");
                             symbolNode.Tag = sh;
+                            
+                            // Set icon based on map source (FileParser = 0, MapRulesXml = 1)
+                            symbolNode.ImageKey = sh.MapSource == MapSource.MapRulesXml ? "MapRulesXml" : "FileParser";
+                            symbolNode.SelectedImageKey = symbolNode.ImageKey;
+                            
                             subNode.Nodes.Add(symbolNode);
                         }
                     }

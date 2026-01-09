@@ -4,11 +4,36 @@ using System.Text;
 
 namespace VAGSuite
 {
+    /// <summary>
+    /// Represents the source of a map detection
+    /// </summary>
+    public enum MapSource
+    {
+        /// <summary>Map detected from file parser patterns</summary>
+        FileParser,
+        
+        /// <summary>Map identified from MapRules XML file</summary>
+        MapRulesXml
+    }
+
     public class SymbolHelper
     {
 		internal bool Is1D = false;
 		internal bool Is2D = false;
 		internal bool Is3D = false;
+
+        private MapSource _mapSource = MapSource.FileParser;
+
+        /// <summary>
+        /// Gets or sets the source of this map detection.
+        /// FileParser = detected from file parser patterns
+        /// MapRulesXml = identified from MapRules XML file
+        /// </summary>
+        public MapSource MapSource
+        {
+            get { return _mapSource; }
+            set { _mapSource = value; }
+        }
 
         private string m_xaxisUnits = string.Empty;
 

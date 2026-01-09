@@ -130,6 +130,9 @@ namespace VAGSuite
 
         public void ApplyMetadata(MapRule rule, SymbolHelper symbol, byte[] binData, List<CodeBlock> codeBlocks, SymbolCollection existingSymbols)
         {
+            // Mark the symbol as coming from MapRules XML
+            symbol.MapSource = MapSource.MapRulesXml;
+
             if (rule.Metadata == null) return;
 
             if (!string.IsNullOrEmpty(rule.Metadata.Category))
