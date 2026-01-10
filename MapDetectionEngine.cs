@@ -457,14 +457,10 @@ namespace VAGSuite
             {
                 string name = rule.Metadata.Name.Value ?? "";
 
-                // Meticulous: Calculate the variant index for multi-maps
-                // to ensure the correct temperature is extracted from MapData.
+                // 1. Calculate Variant Index (for multi-maps with MapSelector)
                 int variantIndex = 0;
                 if (symbol.MapSelector != null && symbol.MapSelector.NumRepeats > 1)
                 {
-                    // existingSymbols contains candidates.
-                    // currentPassSymbols contains XML clones already processed.
-                    // We check both to find our relative position in the set.
                     if (existingSymbols != null)
                     {
                         foreach (SymbolHelper s in existingSymbols)
@@ -477,80 +473,67 @@ namespace VAGSuite
                     }
                 }
 
-                // Handle conditional templates for dynamic naming
+                // 2. Calculate Sequential Match Index (for separate maps matching same rule)
+                // We use BaseName if provided, otherwise the static Value.
+                string baseNameForCounting = rule.Metadata.Name.BaseName ?? rule.Metadata.Name.Value;
+                if (string.IsNullOrEmpty(baseNameForCounting)) baseNameForCounting = "Unknown Map";
+                if (!baseNameForCounting.Contains("(XML)")) baseNameForCounting += " (XML)";
+
+                int matchIndex = 0;
+                if (existingSymbols != null)
+                {
+                    foreach (SymbolHelper s in existingSymbols)
+                    {
+                        if (s.Varname != null && s.Varname.StartsWith(baseNameForCounting))
+                        {
+                            if (!rule.Metadata.Name.CodeBlockScoped || s.CodeBlock == symbol.CodeBlock)
+                            {
+                                matchIndex++;
+                            }
+                        }
+                    }
+                }
+                if (currentPassSymbols != null)
+                {
+                    foreach (SymbolHelper s in currentPassSymbols)
+                    {
+                        if (s.Varname != null && s.Varname.StartsWith(baseNameForCounting))
+                        {
+                            if (!rule.Metadata.Name.CodeBlockScoped || s.CodeBlock == symbol.CodeBlock)
+                            {
+                                matchIndex++;
+                            }
+                        }
+                    }
+                }
+
+                // 3. Evaluate Template (passing both indices)
                 if (rule.Metadata.Name.ConditionalTemplates != null && rule.Metadata.Name.ConditionalTemplates.Count > 0)
                 {
-                    name = EvaluateConditionalTemplate(rule.Metadata.Name.ConditionalTemplates, symbol, binData, variantIndex);
+                    name = EvaluateConditionalTemplate(rule.Metadata.Name.ConditionalTemplates, symbol, binData, variantIndex, matchIndex);
                 }
                 else if (!string.IsNullOrEmpty(rule.Metadata.Name.Value))
                 {
-                    // Safety check: Ensure (XML) suffix is present if not using templates
                     if (!rule.Metadata.Name.Value.Contains("(XML)"))
                     {
                         name = rule.Metadata.Name.Value + " (XML)";
                     }
                 }
 
+                // 4. Handle standard sequential suffix if requested
                 if (rule.Metadata.Name.Sequential)
                 {
-                    // Meticulous: If we have a conditional template, it might have produced a unique name
-                    // (like "SOI 90 deg C"). If Sequential is also true, we use the BaseName for counting,
-                    // or the template result if BaseName is missing.
-                    string baseName = rule.Metadata.Name.BaseName ?? name;
-                    if (string.IsNullOrEmpty(baseName)) baseName = "Unknown Map";
-
-                    // Ensure baseName has (XML) for the count check to work against other XML maps
-                    if (!baseName.Contains("(XML)")) baseName += " (XML)";
-                    
-                    int matchCount = 0;
-
-                    // Count in existing (likely FileParser) symbols
-                    if (existingSymbols != null)
+                    // If template result is same as baseName, or we have no template result
+                    if (string.IsNullOrEmpty(name) || name == baseNameForCounting || name.EndsWith("(XML)"))
                     {
-                        foreach (SymbolHelper s in existingSymbols)
-                        {
-                            if (s.Varname != null && s.Varname.StartsWith(baseName))
-                            {
-                                if (!rule.Metadata.Name.CodeBlockScoped || s.CodeBlock == symbol.CodeBlock)
-                                {
-                                    matchCount++;
-                                }
-                            }
-                        }
-                    }
-
-                    // Count in current pass (XML) symbols
-                    if (currentPassSymbols != null)
-                    {
-                        foreach (SymbolHelper s in currentPassSymbols)
-                        {
-                            if (s.Varname != null && s.Varname.StartsWith(baseName))
-                            {
-                                if (!rule.Metadata.Name.CodeBlockScoped || s.CodeBlock == symbol.CodeBlock)
-                                {
-                                    matchCount++;
-                                }
-                            }
-                        }
-                    }
-
-                    // If the current 'name' (from template) is already more specific than baseName,
-                    // we append the counter to the baseName to avoid stomping the template result
-                    // UNLESS the template result is identical to baseName.
-                    // For EDC15P SOI, we want "SOI 90 deg C (XML)". If we append a counter,
-                    // it should be "SOI 90 deg C (XML) 00" only if needed.
-                    // However, the user reports SOI doesn't have temperature.
-                    // This is because 'name' was overwritten by "baseName + counter".
-                    
-                    // If the current 'name' (from template) is already more specific than baseName,
-                    // we append the counter to the name instead of baseName.
-                    if (!string.IsNullOrEmpty(name) && name != baseName && !name.StartsWith(baseName + " "))
-                    {
-                        name = name + " " + matchCount.ToString("D2");
+                        // Ensure we don't double up (XML)
+                        string baseName = name.Contains("(XML)") ? name : baseNameForCounting;
+                        name = baseName + " " + matchIndex.ToString("D2");
                     }
                     else
                     {
-                        name = baseName + " " + matchCount.ToString("D2");
+                        // Append to the specific name from template
+                        name = name + " " + matchIndex.ToString("D2");
                     }
                 }
 
@@ -563,7 +546,7 @@ namespace VAGSuite
         /// <summary>
         /// Evaluates conditional templates for dynamic naming.
         /// </summary>
-        private string EvaluateConditionalTemplate(List<ConditionalTemplate> templates, SymbolHelper symbol, byte[] binData, int variantIndex)
+        private string EvaluateConditionalTemplate(List<ConditionalTemplate> templates, SymbolHelper symbol, byte[] binData, int variantIndex, int matchIndex)
         {
             foreach (var template in templates)
             {
@@ -574,6 +557,13 @@ namespace VAGSuite
                 {
                     case "mapselectorexists":
                         conditionMet = symbol.MapSelector != null;
+                        break;
+                    case "sequentialindex":
+                        // Check matchIndex (Legacy: pidCount % 4)
+                        if (int.TryParse(template.Condition, out int expectedIndex))
+                        {
+                            conditionMet = matchIndex == expectedIndex;
+                        }
                         break;
                     case "mapselectorproperty":
                         // Parse condition like "NumRepeats=10" or "MapIndexes.Length>1"
@@ -625,22 +615,26 @@ namespace VAGSuite
                             }
                         }
                         break;
+                    case "default":
+                        conditionMet = true;
+                        break;
                 }
 
                 if (conditionMet)
                 {
                     // Replace placeholders in template
                     string result = template.Template;
+                    
+                    // Always replace match_index if present
+                    result = result.Replace("{match_index}", matchIndex.ToString());
+
                     if (symbol.MapSelector != null && symbol.MapSelector.MapData != null && variantIndex < symbol.MapSelector.MapData.Length)
                     {
                         result = result.Replace("{temperature}", GetTemperatureSOIRange(symbol.MapSelector, variantIndex).ToString());
                         result = result.Replace("{index}", variantIndex.ToString());
-                        return result;
                     }
-                    else if (template.ConditionType.ToLower() == "default")
-                    {
-                        return result;
-                    }
+                    
+                    return result;
                 }
             }
 

@@ -590,7 +590,10 @@
       Boost target map - 10x16 dimension (320 bytes)
     </Description>
     <Conditions>
-      <Length>320</Length>
+      <Or>
+        <Conditions><Length>320</Length></Conditions>
+        <Conditions><Length>280</Length></Conditions>
+      </Or>
       <Or>
         <Conditions><XAxisID high="0xEC" /><YAxisID high="0xC0" /></Conditions>
         <Conditions><XAxisID high="0xEA" /><YAxisID high="0xC0" /></Conditions>
@@ -818,6 +821,65 @@
     </Metadata>
   </MapRule>
 
+  <!-- 7.4 PID Control Maps -->
+  <MapRule priority="166" id="pid_maps_generic">
+    <Description>PID maps (I, D, DT1, P amplification) - Legacy:3899</Description>
+    <Conditions>
+      <Length>32</Length>
+      <XAxisID high="0xC0" />
+      <YAxisID exact="0x0000" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Turbo</Subcategory>
+      <Name sequential="false" baseName="PID map (XML)" codeBlockScoped="true">
+        <ConditionalTemplate>
+          <When conditionType="SequentialIndex" condition="0">
+            <Template>PID map - I amplification (ldwIRfakKL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="1">
+            <Template>PID map - D amplification (ldwDRfakKL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="2">
+            <Template>PID map - DT1 memory factor (ldwDR_gfKL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="3">
+            <Template>PID map - P amplification (ldwPRfakKL) (XML)</Template>
+          </When>
+          <When conditionType="default">
+            <Template>PID map {match_index} (XML)</Template>
+          </When>
+        </ConditionalTemplate>
+      </Name>
+      <Correction>0.0001</Correction>
+      <XAxis>
+        <Description>Consumption (l/h)</Description>
+        <Units>l/h</Units>
+        <Correction>0.015022</Correction>
+      </XAxis>
+      <ZAxis>
+        <Description>Output PID value multiplication</Description>
+      </ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="167" id="boost_actuator_upper_limit">
+    <Description>Boost actuator upper limit curve (ldwDRmaxKL) - Legacy:3925</Description>
+    <Conditions>
+      <Length>32</Length>
+      <XAxisID high="0xEC" />
+      <YAxisID exact="0x0000" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Turbo</Subcategory>
+      <Name>Boost actuator upper limit (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
+      <ZAxis><Description>Actuator limit (%)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
   <!-- 8. EGR Map with Zero-Check -->
   <MapRule priority="160" id="egr_map_generic">
     <Description>EGR map with dimension checks to prevent collisions (Legacy parser:1620, 1745, 1808, 1852)</Description>
@@ -1040,6 +1102,276 @@
       <XAxis><Description>IAT (celcius)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
       <YAxis><Description>Requested boost</Description><Units>mbar</Units></YAxis>
       <ZAxis><Description>Boost limit (mbar)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 14. Linearization Maps -->
+  <MapRule priority="300" id="maf_linearization_64">
+    <Description>MAF linearization - 32x1 (Legacy:3416)</Description>
+    <Conditions>
+      <Length>64</Length>
+      <Or>
+        <Conditions><XAxisID high="0xEB" /></Conditions>
+        <Conditions><XAxisID high="0xE0" /></Conditions>
+      </Or>
+      <YAxisID exact="0x0000" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>MAF linearization (XML)</Name>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="305" id="map_linearization_4">
+    <Description>MAP linearization - 2x1 (Legacy:5863)</Description>
+    <Conditions>
+      <Length>4</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xEBA2" /></Conditions>
+        <Conditions><XAxisID exact="0xEBA4" /></Conditions>
+        <Conditions><XAxisID exact="0xE9BC" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>MAP linearization (XML)</Name>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="310" id="oil_temp_sensor_linear">
+    <Description>Oil temperature sensor linearization (anwOTF_KL) - Legacy:5886</Description>
+    <Conditions>
+      <Length>4</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xEBC4" /></Conditions>
+        <Conditions><XAxisID exact="0xEBC6" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Oil temperature sensor linearization (XML)</Name>
+      <Correction>0.1</Correction><Offset>-273.1</Offset>
+      <XAxis><Description>Voltage (mV)</Description><Units>mv</Units><Correction>4.8875855</Correction></XAxis>
+      <ZAxis><Description>Oil Temperature (°C)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 15. Misc 2D Correction Maps -->
+  <MapRule priority="330" id="idle_rpm_4">
+    <Description>Idle RPM - 2x1 (Legacy:5869)</Description>
+    <Conditions>
+      <Length>4</Length>
+      <XAxisID high="0xC1" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name sequential="true" baseName="Idle RPM (XML)" codeBlockScoped="true" />
+      <XAxis><Description>Coolant temperature</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <ZAxis><Description>Target engine speed</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="335" id="oil_temp_overrun_corr">
+    <Description>Oil temperature correction line for overrun (kuwNLOELKL) - Legacy:4681</Description>
+    <Conditions>
+      <Length>16</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xC1B0" /></Conditions>
+        <Conditions><XAxisID exact="0xC17A" /></Conditions>
+        <Conditions><XAxisID exact="0xC1C0" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Oil temp correction for overrun (XML)</Name>
+      <Correction>0.02</Correction>
+      <XAxis><Description>Oil temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <ZAxis><Description>Correction (s)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="340" id="glow_state_time_line">
+    <Description>Glow intermediate glowing state time line (gswGS_T1ZG) - Legacy:5801</Description>
+    <Conditions>
+      <Length>6</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xC19C" /></Conditions>
+        <Conditions><XAxisID exact="0xC168" /></Conditions>
+        <Conditions><XAxisID exact="0xC1AC" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Glow intermediate state time (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>Air temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <ZAxis><Description>Wait time (s)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="345" id="ac_compressor_sw_off_line">
+    <Description>AC Compressor water temperature switch-off limit line (klwWTab_KL) - Legacy:5813</Description>
+    <Conditions>
+      <Length>6</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xC270" /></Conditions>
+        <Conditions><XAxisID exact="0xC234" /></Conditions>
+        <Conditions><XAxisID exact="0xC27E" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>AC Switch-off limit (XML)</Name>
+      <Correction>0.1</Correction><Offset>-273.1</Offset>
+      <XAxis><Description>Vehicle speed (km/h)</Description><Units>km/h</Units><Correction>0.01</Correction></XAxis>
+      <ZAxis><Description>Water temperature treshold (°C)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="350" id="smoke_map_selector_limiter">
+    <Description>Limiter Smoke map selector / Pre-injection ramp-slope - Legacy:5827</Description>
+    <Conditions>
+      <Length>6</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xC19E" /></Conditions>
+        <Conditions><XAxisID exact="0xC16A" /></Conditions>
+        <Conditions><XAxisID exact="0xC1AE" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name sequential="true" baseName="Smoke selector / Pre-inj ramp (XML)" codeBlockScoped="true" />
+      <XAxis><Description>Water temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 16. Protection and Correction Lines -->
+  <MapRule priority="360" id="atm_pressure_corr_linear">
+    <Description>Atmospheric pressure correction linearization (ldwLDBdPKL) - Legacy:5911</Description>
+    <Conditions>
+      <Length>4</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xEC2E" /></Conditions>
+        <Conditions><XAxisID exact="0xEC2C" /></Conditions>
+        <Conditions><XAxisID exact="0xEC38" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Atm. pressure corr. linearization (XML)</Name>
+      <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
+      <ZAxis><Description>Atmospheric pressure (mBar)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="365" id="refrigerant_pressure_linear">
+    <Description>Refrigerant pressure linearization (anwKMD_KL) - Legacy:5920</Description>
+    <Conditions>
+      <Length>4</Length><XAxisID exact="0xEBD8" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Refrigerant pressure linearization (XML)</Name>
+      <Correction>0.002</Correction>
+      <XAxis><Description>Raw duty cycle (%)</Description><Units>%</Units><Correction>0.01</Correction></XAxis>
+      <ZAxis><Description>Refrigerant pressure (Bar)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="370" id="voltage_linearization_ubat_ref">
+    <Description>Voltage linearization (anwUBAT_KL, anwREF_KL) - Legacy:5951</Description>
+    <Conditions>
+      <Length>4</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xEB58" /></Conditions>
+        <Conditions><XAxisID exact="0xEB5A" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name sequential="true" baseName="Voltage linearization (XML)" codeBlockScoped="true" />
+      <XAxis><Description>Fixed values</Description><Units>-</Units></XAxis>
+      <ZAxis><Description>Linearized value</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="375" id="rme_fuel_iq_correction">
+    <Description>RME Fuel IQ correction line (arwRME_KL) - Legacy:6000</Description>
+    <Conditions>
+      <Length>4</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xE920" /></Conditions>
+        <Conditions><XAxisID exact="0xE926" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>RME Fuel IQ correction (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>Injection quantity (mg/stroke)</Description><Units>mgst</Units><Correction>0.01</Correction></XAxis>
+      <ZAxis><Description>Corrected IQ (mg/stroke)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="380" id="egr_motor_temp_corr_vp44">
+    <Description>EGR Motor temperature correction pre-injection (VP44) - Legacy:6011</Description>
+    <Conditions>
+      <Length>4</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xC042" /></Conditions>
+        <Conditions><XAxisID exact="0xC048" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>EGR Temp corr pre-inj (VP44) (XML)</Name>
+      <Correction>0.0001</Correction>
+      <XAxis><Description>Injection quantity (mg/stroke)</Description><Units>mgst</Units><Correction>0.01</Correction></XAxis>
+      <ZAxis><Description>Correction</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="385" id="brake_light_switch_linear">
+    <Description>Brake light switch linearization (anwBRE_KL) - Legacy:5941</Description>
+    <Conditions>
+      <Length>4</Length><XAxisID exact="0xEBC2" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Brake light switch linearization (XML)</Name>
+      <XAxis><Description>Voltage (mV)</Description><Units>mv</Units><Correction>4.8875855</Correction></XAxis>
+      <ZAxis><Description>Linearization (not active)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="390" id="gate_array_response">
+    <Description>Gate array response (edwGAR_KL) - Legacy:5982</Description>
+    <Conditions>
+      <Length>4</Length><XAxisID exact="0xEB10" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Gate array response (XML)</Name>
+      <XAxis><Description>fixed values</Description></XAxis>
+      <ZAxis><Description>response</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="395" id="drag_torque_deactivation">
+    <Description>Deactivation of drag torque limiter (mrwRSch_KL) - Legacy:5990</Description>
+    <Conditions>
+      <Length>4</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xF94A" /></Conditions>
+        <Conditions><XAxisID exact="0xF948" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Drag torque limiter deactivation (XML)</Name>
+      <Correction>0.0001</Correction>
+      <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
+      <ZAxis><Description>Deactivation</Description></ZAxis>
     </Metadata>
   </MapRule>
 
