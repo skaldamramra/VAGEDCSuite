@@ -156,8 +156,6 @@ namespace VAGSuite
             newSymbols.SortingOrder = GenericComparer.SortOrder.Ascending;
             newSymbols.Sort();
             
-            NameKnownMaps(allBytes, newSymbols, newCodeBlocks);
-
             BuildAxisIDList(newSymbols, newAxisHelpers);
             MatchAxis(newSymbols, newAxisHelpers);
 
@@ -165,6 +163,8 @@ namespace VAGSuite
             FindSVBL(allBytes, filename, newSymbols, newCodeBlocks);
             FindVCDSDiagLimits(allBytes, filename, newSymbols, newCodeBlocks);
             FindMiscMaps(allBytes, filename, newSymbols, newCodeBlocks);
+
+            NameKnownMaps(allBytes, newSymbols, newCodeBlocks);
             SymbolTranslator strans = new SymbolTranslator();
             foreach (SymbolHelper sh in newSymbols)
             {

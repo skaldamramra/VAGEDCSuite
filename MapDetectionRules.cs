@@ -64,13 +64,13 @@ namespace VAGSuite
         public MapSelectorCondition MapSelector { get; set; }
 
         [XmlElement("ByteCheck")]
-        public ByteCheckCondition ByteCheck { get; set; }
+        public List<ByteCheckCondition> ByteChecks { get; set; }
 
         [XmlElement("AxisValueCheck")]
-        public AxisValueCheckCondition AxisValueCheck { get; set; }
+        public List<AxisValueCheckCondition> AxisValueChecks { get; set; }
 
         [XmlElement("MapSelectorProperty")]
-        public MapSelectorPropertyCondition MapSelectorProperty { get; set; }
+        public List<MapSelectorPropertyCondition> MapSelectorProperties { get; set; }
 
         [XmlElement("CodeBlock")]
         public CodeBlockCondition CodeBlock { get; set; }

@@ -75,22 +75,31 @@ namespace VAGSuite
                 if (conditions.MapSelector.NumRepeats != 0 && candidate.MapSelector.NumRepeats != conditions.MapSelector.NumRepeats) return false;
             }
 
-            // Byte Check condition
-            if (conditions.ByteCheck != null)
+            // Byte Check conditions
+            if (conditions.ByteChecks != null)
             {
-                if (!EvaluateByteCheck(conditions.ByteCheck, candidate, binData)) return false;
+                foreach (var byteCheck in conditions.ByteChecks)
+                {
+                    if (!EvaluateByteCheck(byteCheck, candidate, binData)) return false;
+                }
             }
 
-            // Axis Value Check condition
-            if (conditions.AxisValueCheck != null)
+            // Axis Value Check conditions
+            if (conditions.AxisValueChecks != null)
             {
-                if (!EvaluateAxisValueCheck(conditions.AxisValueCheck, candidate, binData)) return false;
+                foreach (var axisCheck in conditions.AxisValueChecks)
+                {
+                    if (!EvaluateAxisValueCheck(axisCheck, candidate, binData)) return false;
+                }
             }
 
-            // MapSelector Property condition
-            if (conditions.MapSelectorProperty != null)
+            // MapSelector Property conditions
+            if (conditions.MapSelectorProperties != null)
             {
-                if (!EvaluateMapSelectorProperty(conditions.MapSelectorProperty, candidate)) return false;
+                foreach (var propCheck in conditions.MapSelectorProperties)
+                {
+                    if (!EvaluateMapSelectorProperty(propCheck, candidate)) return false;
+                }
             }
 
             // CodeBlock condition
@@ -251,11 +260,30 @@ namespace VAGSuite
             double minValue = double.MaxValue;
             double maxValue = double.MinValue;
 
+            double axisCorrection = 1.0;
+            double axisOffset = 0.0;
+
+            if (axisCheck.Axis.ToUpper() == "X")
+            {
+                axisCorrection = candidate.X_axis_correction;
+                axisOffset = candidate.X_axis_offset;
+            }
+            else if (axisCheck.Axis.ToUpper() == "Y")
+            {
+                axisCorrection = candidate.Y_axis_correction;
+                axisOffset = candidate.Y_axis_offset;
+            }
+            else
+            {
+                axisCorrection = candidate.Correction;
+                axisOffset = candidate.Offset;
+            }
+
             for (int i = 0; i < axisLength * 2 && (axisAddress + i) < binData.Length - 1; i += 2)
             {
                 if (axisAddress + i + 1 >= binData.Length) break;
                 ushort rawValue = (ushort)((binData[axisAddress + i + 1] << 8) | binData[axisAddress + i]);
-                double value = rawValue * candidate.Correction + candidate.Offset;
+                double value = (rawValue * axisCorrection) + axisOffset;
                 if (value < minValue) minValue = value;
                 if (value > maxValue) maxValue = value;
             }
@@ -514,7 +542,16 @@ namespace VAGSuite
                     // However, the user reports SOI doesn't have temperature.
                     // This is because 'name' was overwritten by "baseName + counter".
                     
-                    name = baseName + " " + matchCount.ToString("D2");
+                    // If the current 'name' (from template) is already more specific than baseName,
+                    // we append the counter to the name instead of baseName.
+                    if (!string.IsNullOrEmpty(name) && name != baseName && !name.StartsWith(baseName + " "))
+                    {
+                        name = name + " " + matchCount.ToString("D2");
+                    }
+                    else
+                    {
+                        name = baseName + " " + matchCount.ToString("D2");
+                    }
                 }
 
                 // Append location info
@@ -594,18 +631,11 @@ namespace VAGSuite
                 {
                     // Replace placeholders in template
                     string result = template.Template;
-                    if (symbol.MapSelector != null && symbol.MapSelector.MapIndexes != null && symbol.MapSelector.MapIndexes.Length > 1)
+                    if (symbol.MapSelector != null && symbol.MapSelector.MapData != null && variantIndex < symbol.MapSelector.MapData.Length)
                     {
-                        // Meticulous: Check if the selector index is empty (legacy EDC15P logic)
-                        bool allEmpty = true;
-                        foreach (int idx in symbol.MapSelector.MapIndexes) if (idx != 0) allEmpty = false;
-                        
-                        if (!allEmpty)
-                        {
-                            result = result.Replace("{temperature}", GetTemperatureSOIRange(symbol.MapSelector, variantIndex).ToString());
-                            result = result.Replace("{index}", variantIndex.ToString());
-                            return result;
-                        }
+                        result = result.Replace("{temperature}", GetTemperatureSOIRange(symbol.MapSelector, variantIndex).ToString());
+                        result = result.Replace("{index}", variantIndex.ToString());
+                        return result;
                     }
                     else if (template.ConditionType.ToLower() == "default")
                     {

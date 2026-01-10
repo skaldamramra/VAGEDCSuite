@@ -132,8 +132,6 @@
       <Length>2</Length>
       <ByteCheck address="flash_start_address" offset="-2" expected="0x00" op="eq" />
       <ByteCheck address="flash_start_address" offset="-1" expected="0x0E" op="eq" />
-      <ByteCheck address="flash_start_address" offset="0" expected="0x24" op="eq" />
-      <ByteCheck address="flash_start_address" offset="1" expected="0x13" op="eq" />
       <ByteCheck address="flash_start_address" offset="2" expected="0x32" op="eq" />
       <ByteCheck address="flash_start_address" offset="3" expected="0x00" op="eq" />
       <ByteCheck address="flash_start_address" offset="4" expected="0x70" op="eq" />
@@ -306,6 +304,23 @@
     </Metadata>
   </MapRule>
 
+  <MapRule priority="107" id="left_foot_brake_switch">
+    <Description>Left Foot Brake Switch (Legacy:780)</Description>
+    <Conditions>
+      <Length>2</Length>
+      <ByteCheck address="flash_start_address" offset="-5" expected="0x27" op="eq" />
+      <ByteCheck address="flash_start_address" offset="-4" expected="0x00" op="eq" />
+      <ByteCheck address="flash_start_address" offset="-3" expected="0x00" op="eq" />
+      <ByteCheck address="flash_start_address" offset="-2" expected="0x64" op="eq" />
+      <ByteCheck address="flash_start_address" offset="-1" expected="0x00" op="eq" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Switches</Subcategory>
+      <Name>Left Foot Brake Switch (1 = ON (default), O = OFF) (XML)</Name>
+    </Metadata>
+  </MapRule>
+
   <!-- 3. Start of Injection (SOI) - Repeat 10 -->
   <MapRule priority="108" id="soi_map_448_temp">
     <Description>
@@ -319,7 +334,7 @@
     <Metadata>
       <Category>Detected maps</Category>
       <Subcategory>Fuel</Subcategory>
-      <Name>
+      <Name sequential="false" codeBlockScoped="true">
         <ConditionalTemplate>
           <When conditionType="MapSelectorExists">
             <Template>Start of injection (SOI) {temperature} deg C (XML)</Template>
@@ -612,7 +627,7 @@
     <Metadata>
       <Category>Detected maps</Category>
       <Subcategory>Limiters</Subcategory>
-      <Name>
+      <Name sequential="false" codeBlockScoped="true">
         <ConditionalTemplate>
           <When conditionType="MapSelectorExists">
             <Template>Smoke limiter {temperature} deg C (XML)</Template>
@@ -653,7 +668,40 @@
     </Metadata>
   </MapRule>
 
-  <!-- 7.2 SOI Limiter (Temperature) -->
+  <!-- 7.2 Torque Limiter - Min map -->
+  <MapRule priority="143" id="torque_limiter_min">
+    <Description>Torque limiter - Min map (mrwADB_KF) (Legacy:5742)</Description>
+    <Conditions>
+      <Length>8</Length><XAxisLength>2</XAxisLength><YAxisLength>2</YAxisLength>
+      <XAxisID high="0xC2" /><YAxisID high="0xEC" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
+      <Name>Torque limiter - Min map (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>Speed/rpm ratio (km/h per rpm)</Description><Units>km/h/rpm</Units></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Torque limit (mg/stroke)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="144" id="torque_limiter_min_pi">
+    <Description>Torque limiter - Min map PI (mrwADB2_KF) (Legacy:5742)</Description>
+    <Conditions>
+      <Length>8</Length><XAxisLength>2</XAxisLength><YAxisLength>2</YAxisLength>
+      <XAxisID high="0xC2" /><YAxisID high="0xEC" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
+      <Name>Torque limiter - Min map PI (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>Speed/rpm ratio (km/h per rpm)</Description><Units>km/h/rpm</Units></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Torque limit (mg/stroke)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 7.3 SOI Limiter (Temperature) -->
   <MapRule priority="146" id="soi_limiter_temp">
     <Description>SOI limiter (temperature) (Legacy:1945)</Description>
     <Conditions>
@@ -759,7 +807,6 @@
         <Conditions><XAxisID high="0xEA" /></Conditions>
       </Or>
       <YAxisID high="0xC1" />
-      <AxisValueCheck axis="X" comparison="lt" value="2000" checkType="max" />
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
@@ -822,7 +869,7 @@
 
   <!-- 10. Expected Fuel Temp / Boost Correction -->
   <MapRule priority="215" id="boost_correction_water_temp">
-    <Description>Boost correction by water temperature (ldwTW_KF) (Legacy:2679)</Description>
+    <Description>Boost correction by water temperature (ldwTW_KF) (Legacy parser:2673)</Description>
     <Conditions>
       <Length>128</Length><XAxisLength>8</XAxisLength><YAxisLength>8</YAxisLength>
       <Or>
@@ -830,28 +877,24 @@
         <Conditions><XAxisID high="0xEB" /></Conditions>
       </Or>
       <YAxisID high="0xC0" />
-      <AxisValueCheck axis="Y" comparison="lt" value="2000" checkType="max" />
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
       <Name>Boost correction by water temperature (XML)</Name>
       <Correction>0.01</Correction>
+      <!-- Axis descriptions swapped to match legacy parser viewer orientation -->
       <XAxis><Description>IQ (mg/stroke)</Description><Units>mg/st</Units><Correction>0.01</Correction></XAxis>
-      <YAxis><Description>Temperature</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
+      <YAxis><Description>Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
       <ZAxis><Description>Limitation of Boost (in %)</Description></ZAxis>
     </Metadata>
   </MapRule>
 
   <MapRule priority="216" id="expected_fuel_temp">
-    <Description>Expected fuel temperature (zmwMKBT_KF) (Legacy:2695)</Description>
+    <Description>Expected fuel temperature (zmwMKBT_KF) (Legacy parser:2709)</Description>
     <Conditions>
       <Length>128</Length><XAxisLength>8</XAxisLength><YAxisLength>8</YAxisLength>
-      <Or>
-        <Conditions><XAxisID high="0xEA" /></Conditions>
-        <Conditions><XAxisID high="0xEB" /></Conditions>
-      </Or>
+      <XAxisID high="0xEC" />
       <YAxisID high="0xC0" />
-      <AxisValueCheck axis="Y" comparison="gt" value="2000" checkType="max" />
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
@@ -874,7 +917,7 @@
       </Or>
     </Conditions>
     <Metadata>
-      <Category>Detected maps</Category><Subcategory>Protection</Subcategory>
+      <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
       <Name>Fuel Temperature overheating protection map (mrwBKT_KF) (XML)</Name>
       <Correction>0.0001</Correction>
       <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
@@ -893,7 +936,7 @@
       </Or>
     </Conditions>
     <Metadata>
-      <Category>Detected maps</Category><Subcategory>Protection</Subcategory>
+      <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
       <Name>Fuel tank inlet temp overheat protection map (mrwBTT_KF) (XML)</Name>
       <Correction>0.0001</Correction>
       <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
@@ -910,7 +953,7 @@
       <XAxisID high="0xEC" /><YAxisID high="0xEC" />
     </Conditions>
     <Metadata>
-      <Category>Detected maps</Category><Subcategory>Protection</Subcategory>
+      <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
       <Name>Overboost debouncing limit (XML)</Name>
       <Correction>10</Correction>
       <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
@@ -930,9 +973,9 @@
       </Or>
     </Conditions>
     <Metadata>
-      <Category>Detected maps</Category><Subcategory>Protection</Subcategory>
+      <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
       <Name>Limit of overboost protection (XML)</Name>
-      <Correction>0.01</Correction>
+      <Correction>1</Correction>
       <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
       <YAxis><Description>VNT Actuator Duty Cycle (%)</Description><Units>%</Units><Correction>0.01</Correction></YAxis>
       <ZAxis><Description>Pressure limit (mbar)</Description></ZAxis>
@@ -941,16 +984,21 @@
 
   <!-- 11.2 IQ by Air Intake Temp -->
   <MapRule priority="229" id="iq_by_iat">
-    <Description>IQ by air intake temp (Legacy:4615)</Description>
+    <Description>IQ by air intake temp (Legacy parser:4611)</Description>
     <Conditions>
       <Length min="18" max="70" />
-      <XAxisID high="0xC1" />
+      <!-- Legacy restricts to 0xC1Ax and 0xEC3x -->
+      <Or>
+        <Conditions><XAxisID exact="0xC1A6" /></Conditions>
+        <Conditions><XAxisID exact="0xC1AC" /></Conditions>
+      </Or>
       <YAxisID high="0xEC" />
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
       <Name>IQ by air intake temp (XML)</Name>
       <Correction>0.01</Correction>
+      <!-- Axis descriptions swapped to match legacy parser viewer orientation -->
       <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
       <YAxis><Description>Temperature</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
       <ZAxis><Description>%</Description></ZAxis>
