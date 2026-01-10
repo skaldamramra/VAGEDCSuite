@@ -398,13 +398,12 @@
 
   <!-- 7. Smoke Limiter / IQ by MAP/MAF Limiters (Length 416/384) -->
   <MapRule priority="140" id="smoke_limiter_generic">
-    <Description>Smoke limiter (IQ by MAF) - Axis IDs: F9/DA (Legacy match)</Description>
+    <Description>Smoke limiter (IQ by MAF) - Axis IDs: F9/DA or EA/DA (Legacy parser:1511, 1777)</Description>
     <Conditions>
       <Or>
-        <Conditions><Length>416</Length></Conditions>
-        <Conditions><Length>384</Length><XAxisLength>16</XAxisLength><YAxisLength>12</YAxisLength></Conditions>
+        <Conditions><Length>416</Length><XAxisID high="0xF9" /><YAxisID high="0xDA" /></Conditions>
+        <Conditions><Length>384</Length><XAxisLength>16</XAxisLength><YAxisLength>12</YAxisLength><XAxisID high="0xEA" /><YAxisID high="0xDA" /></Conditions>
       </Or>
-      <XAxisID high="0xF9" /><YAxisID high="0xDA" />
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category>
@@ -427,7 +426,7 @@
   </MapRule>
 
   <MapRule priority="145" id="iq_by_map_limiter">
-    <Description>IQ by MAP limiter - Axis IDs: EC/DA, Max(Y) under 4000</Description>
+    <Description>IQ by MAP limiter - Axis IDs: EC/DA, Max(Y) under 4000 (Legacy parser:1542)</Description>
     <Conditions>
       <Or>
         <Conditions><Length>416</Length></Conditions>
@@ -446,14 +445,75 @@
     </Metadata>
   </MapRule>
 
-  <!-- 8. EGR Map with Zero-Check -->
-  <MapRule priority="160" id="egr_map_generic">
+  <MapRule priority="148" id="iq_by_maf_limiter">
+    <Description>IQ by MAF limiter - Axis IDs: EC/DA, Max(Y) over 4000 (Legacy parser:1560)</Description>
     <Conditions>
       <Or>
         <Conditions><Length>416</Length></Conditions>
-        <Conditions><Length>390</Length></Conditions>
         <Conditions><Length>384</Length></Conditions>
+      </Or>
+      <XAxisID high="0xEC" /><YAxisID high="0xDA" />
+      <AxisValueCheck axis="Y" comparison="ge" value="4000" checkType="max" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
+      <Name>IQ by MAF limiter (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>Airflow mg/stroke</Description><Units>mg/st</Units><Correction>0.1</Correction></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Maximum IQ (mg)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="150" id="inverse_driver_wish_384">
+    <Description>Inverse driver wish - 12x16 dimension (384 bytes) (Legacy parser:1763)</Description>
+    <Conditions>
+      <Length>384</Length>
+      <XAxisLength>12</XAxisLength>
+      <YAxisLength>16</YAxisLength>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Inverse driver wish (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>IQ (mg/stroke)</Description><Units>mg/st</Units><Correction>0.01</Correction></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Throttle position</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="155" id="n75_duty_cycle_generic">
+    <Description>N75 duty cycle map (Legacy parser:1575, 1604, 1677, 1867)</Description>
+    <Conditions>
+      <Or>
+        <Conditions><Length>416</Length></Conditions>
         <Conditions><Length>352</Length></Conditions>
+      </Or>
+      <XAxisID high="0xEC" />
+      <Or>
+        <Conditions><YAxisID high="0xEA" /></Conditions>
+        <Conditions><YAxisID exact="0xE9D4" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Turbo</Subcategory>
+      <Name>N75 duty cycle (XML)</Name>
+      <Correction>-0.01</Correction><Offset>100</Offset>
+      <XAxis><Description>IQ (mg/stroke)</Description><Units>mg/st</Units><Correction>0.01</Correction></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Duty cycle %</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 8. EGR Map with Zero-Check -->
+  <MapRule priority="160" id="egr_map_generic">
+    <Description>EGR map with dimension checks to prevent collisions (Legacy parser:1620, 1745, 1808, 1852)</Description>
+    <Conditions>
+      <Or>
+        <Conditions><Length>416</Length><XAxisLength>16</XAxisLength><YAxisLength>13</YAxisLength></Conditions>
+        <Conditions><Length>390</Length><XAxisLength>15</XAxisLength><YAxisLength>13</YAxisLength></Conditions>
+        <Conditions><Length>384</Length><XAxisLength>16</XAxisLength><YAxisLength>12</YAxisLength></Conditions>
+        <Conditions><Length>352</Length><XAxisLength>16</XAxisLength><YAxisLength>11</YAxisLength></Conditions>
       </Or>
       <XAxisID high="0xEC" />
       <Or>
@@ -493,28 +553,6 @@
     </Metadata>
   </MapRule>
 
-  <!-- 10. N75 Duty Cycle Map -->
-  <MapRule priority="210" id="n75_duty_cycle_generic">
-    <Conditions>
-      <Or>
-        <Conditions><Length>416</Length></Conditions>
-        <Conditions><Length>352</Length></Conditions>
-      </Or>
-      <XAxisID high="0xEC" />
-      <Or>
-        <Conditions><YAxisID high="0xEA" /></Conditions>
-        <Conditions><YAxisID exact="0xE9D4" /></Conditions>
-      </Or>
-    </Conditions>
-    <Metadata>
-      <Category>Detected maps</Category><Subcategory>Turbo</Subcategory>
-      <Name>N75 duty cycle (XML)</Name>
-      <Correction>-0.01</Correction><Offset>100</Offset>
-      <XAxis><Description>IQ (mg/stroke)</Description><Units>mg/st</Units><Correction>0.01</Correction></XAxis>
-      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
-      <ZAxis><Description>Duty cycle %</Description></ZAxis>
-    </Metadata>
-  </MapRule>
 
   <!-- 11. Fuel Temperature Protection -->
   <MapRule priority="220" id="fuel_temp_protection_200">
