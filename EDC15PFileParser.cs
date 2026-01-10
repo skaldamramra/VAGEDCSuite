@@ -1243,7 +1243,7 @@ namespace VAGSuite
                             // Clone the symbol so we don't overwrite the original candidate
                             // This allows side-by-side comparison (Blue vs Green)
                             SymbolHelper xmlClone = sh.Clone();
-                            engine.ApplyMetadata(rule, xmlClone, allBytes, newCodeBlocks, newSymbols);
+                            engine.ApplyMetadata(rule, xmlClone, allBytes, newCodeBlocks, newSymbols, xmlSymbols);
                             xmlSymbols.Add(xmlClone);
                             break; // First match wins
                         }
@@ -6202,7 +6202,9 @@ namespace VAGSuite
                         Console.WriteLine(sh.Varname + " " + sh.CodeBlock);
                     }
                 }
-                if (sh.Varname.StartsWith(varName) && sh.CodeBlock == codeBlock)
+                // Meticulous Check: Exclude (XML) maps from the legacy counter
+                // to prevent naming collisions when both systems run side-by-side.
+                if (sh.Varname.StartsWith(varName) && sh.CodeBlock == codeBlock && !sh.Varname.Contains("(XML)"))
                 {
 
                     if (debug) Console.WriteLine("Found " + sh.Varname + " " + sh.CodeBlock);

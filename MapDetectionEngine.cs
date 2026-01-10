@@ -371,14 +371,8 @@ namespace VAGSuite
             return true; 
         }
 
-        public void ApplyMetadata(MapRule rule, SymbolHelper symbol, byte[] binData, List<CodeBlock> codeBlocks, SymbolCollection existingSymbols)
+        public void ApplyMetadata(MapRule rule, SymbolHelper symbol, byte[] binData, List<CodeBlock> codeBlocks, SymbolCollection existingSymbols, List<SymbolHelper> currentPassSymbols = null)
         {
-            // Create a clone or a new symbol for XML detection to avoid overwriting the candidate
-            // However, the current architecture passes the candidate 'symbol' which is already in the collection.
-            // To allow side-by-side comparison without overwriting, we should ideally add a NEW symbol.
-            // But for now, we will just ensure we don't overwrite the MapSource if it's already set to something else,
-            // OR we accept that the engine marks it.
-            
             // Mark the symbol as coming from MapRules XML
             symbol.MapSource = MapSource.MapRulesXml;
 
@@ -428,41 +422,48 @@ namespace VAGSuite
                 {
                     name = EvaluateConditionalTemplate(rule.Metadata.Name.ConditionalTemplates, symbol, binData);
                 }
-                else if (!string.IsNullOrEmpty(rule.Metadata.Name.Value) && !rule.Metadata.Name.Value.Contains("(XML)"))
+                else if (!string.IsNullOrEmpty(rule.Metadata.Name.Value))
                 {
                     // Safety check: Ensure (XML) suffix is present if not using templates
-                    name = rule.Metadata.Name.Value + " (XML)";
+                    if (!rule.Metadata.Name.Value.Contains("(XML)"))
+                    {
+                        name = rule.Metadata.Name.Value + " (XML)";
+                    }
                 }
 
                 if (rule.Metadata.Name.Sequential)
                 {
+                    // Use template result as base name if BaseName is not specified
                     string baseName = rule.Metadata.Name.BaseName ?? name;
+                    
                     // Ensure baseName has (XML) for the count check to work against other XML maps
                     if (!baseName.Contains("(XML)")) baseName += " (XML)";
                     
-                    int matchCount;
+                    int matchCount = 0;
 
-                    if (rule.Metadata.Name.CodeBlockScoped)
+                    // Count in existing (likely FileParser) symbols
+                    foreach (SymbolHelper s in existingSymbols)
                     {
-                        // Count only within the same code block
-                        matchCount = 0;
-                        foreach (SymbolHelper s in existingSymbols)
+                        if (s.Varname != null && s.Varname.StartsWith(baseName))
                         {
-                            if (s.CodeBlock == symbol.CodeBlock && s.Varname != null && s.Varname.StartsWith(baseName))
+                            if (!rule.Metadata.Name.CodeBlockScoped || s.CodeBlock == symbol.CodeBlock)
                             {
                                 matchCount++;
                             }
                         }
                     }
-                    else
+
+                    // Count in current pass (XML) symbols
+                    if (currentPassSymbols != null)
                     {
-                        // Count all matches (original behavior)
-                        matchCount = 0;
-                        foreach (SymbolHelper s in existingSymbols)
+                        foreach (SymbolHelper s in currentPassSymbols)
                         {
                             if (s.Varname != null && s.Varname.StartsWith(baseName))
                             {
-                                matchCount++;
+                                if (!rule.Metadata.Name.CodeBlockScoped || s.CodeBlock == symbol.CodeBlock)
+                                {
+                                    matchCount++;
+                                }
                             }
                         }
                     }
@@ -565,10 +566,11 @@ namespace VAGSuite
         /// </summary>
         private double GetTemperatureSOIRange(MapSelector selector, int index)
         {
-            // Simplified calculation - actual implementation would use the MapIndexes
-            if (selector.MapIndexes != null && index < selector.MapIndexes.Length)
+            // Calculation from legacy parser: (val * 0.1) - 273.1
+            if (selector.MapData != null && index < selector.MapData.Length)
             {
-                return selector.MapIndexes[index] * 0.5; // Example conversion
+                double val = Convert.ToDouble(selector.MapData.GetValue(index));
+                return Math.Round((val * 0.1) - 273.1, 0);
             }
             return 0;
         }

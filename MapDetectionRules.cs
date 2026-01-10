@@ -78,10 +78,12 @@ namespace VAGSuite
         [XmlElement("CustomValidator")]
         public List<CustomValidator> CustomValidators { get; set; }
 
-        [XmlElement("Or")]
+        [XmlArray("Or")]
+        [XmlArrayItem("Conditions")]
         public List<Conditions> Or { get; set; }
 
-        [XmlElement("And")]
+        [XmlArray("And")]
+        [XmlArrayItem("Conditions")]
         public List<Conditions> And { get; set; }
     }
 
