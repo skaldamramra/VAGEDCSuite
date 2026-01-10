@@ -4,6 +4,17 @@ using System.Xml.Serialization;
 
 namespace VAGSuite
 {
+    // Enums for comparison operators
+    public enum ComparisonOperator
+    {
+        Eq,      // Equal
+        Ne,      // Not Equal
+        Lt,      // Less Than
+        Le,      // Less Than or Equal
+        Gt,      // Greater Than
+        Ge       // Greater Than or Equal
+    }
+
     [XmlRoot("MapRules")]
     public class MapRules
     {
@@ -51,6 +62,18 @@ namespace VAGSuite
 
         [XmlElement("MapSelector")]
         public MapSelectorCondition MapSelector { get; set; }
+
+        [XmlElement("ByteCheck")]
+        public ByteCheckCondition ByteCheck { get; set; }
+
+        [XmlElement("AxisValueCheck")]
+        public AxisValueCheckCondition AxisValueCheck { get; set; }
+
+        [XmlElement("MapSelectorProperty")]
+        public MapSelectorPropertyCondition MapSelectorProperty { get; set; }
+
+        [XmlElement("CodeBlock")]
+        public CodeBlockCondition CodeBlock { get; set; }
 
         [XmlElement("CustomValidator")]
         public List<CustomValidator> CustomValidators { get; set; }
@@ -105,6 +128,112 @@ namespace VAGSuite
         public int NumRepeats { get; set; }
     }
 
+    /// <summary>
+    /// Byte-level inspection condition.
+    /// Checks raw byte values at specific addresses relative to the symbol.
+    /// </summary>
+    public class ByteCheckCondition
+    {
+        /// <summary>
+        /// Address reference: "y_axis_address", "x_axis_address", "flash_start_address", or custom offset
+        /// </summary>
+        [XmlAttribute("address")]
+        public string Address { get; set; }
+
+        /// <summary>
+        /// Offset from the address (default: 0)
+        /// </summary>
+        [XmlAttribute("offset")]
+        public int Offset { get; set; }
+
+        /// <summary>
+        /// Expected byte value in hex (e.g., "0x00")
+        /// </summary>
+        [XmlAttribute("expected")]
+        public string Expected { get; set; }
+
+        /// <summary>
+        /// Comparison operator (default: Eq)
+        /// </summary>
+        [XmlAttribute("op")]
+        public string Op { get; set; }
+    }
+
+    /// <summary>
+    /// Axis value runtime check condition.
+    /// Checks actual axis data values at runtime.
+    /// </summary>
+    public class AxisValueCheckCondition
+    {
+        /// <summary>
+        /// Which axis to check: "X", "Y", or "Z"
+        /// </summary>
+        [XmlAttribute("axis")]
+        public string Axis { get; set; }
+
+        /// <summary>
+        /// Comparison operator: "lt" (less than), "le", "gt", "ge", "eq", "ne"
+        /// </summary>
+        [XmlAttribute("comparison")]
+        public string Comparison { get; set; }
+
+        /// <summary>
+        /// Value to compare against
+        /// </summary>
+        [XmlAttribute("value")]
+        public double Value { get; set; }
+
+        /// <summary>
+        /// Check type: "max" (maximum value), "min" (minimum value)
+        /// </summary>
+        [XmlAttribute("checkType")]
+        public string CheckType { get; set; }
+    }
+
+    /// <summary>
+    /// MapSelector property condition.
+    /// Checks properties of the MapSelector object.
+    /// </summary>
+    public class MapSelectorPropertyCondition
+    {
+        /// <summary>
+        /// Property name: "NumRepeats", "MapIndexes.Length", "MapIndexes[0]", etc.
+        /// </summary>
+        [XmlAttribute("property")]
+        public string Property { get; set; }
+
+        /// <summary>
+        /// Comparison operator: "eq", "ne", "lt", "le", "gt", "ge"
+        /// </summary>
+        [XmlAttribute("comparison")]
+        public string Comparison { get; set; }
+
+        /// <summary>
+        /// Expected value
+        /// </summary>
+        [XmlAttribute("value")]
+        public string Value { get; set; }
+    }
+
+    /// <summary>
+    /// CodeBlock context condition.
+    /// Checks the code block context for the symbol.
+    /// </summary>
+    public class CodeBlockCondition
+    {
+        /// <summary>
+        /// Expected code block ID(s). Can be comma-separated for multiple values.
+        /// </summary>
+        [XmlAttribute("id")]
+        public string Id { get; set; }
+
+        /// <summary>
+        /// Code block type: "Automatic", "Manual", "4x4", or empty for any
+        /// </summary>
+        [XmlAttribute("type")]
+        public string Type { get; set; }
+    }
+
     public class CustomValidator
     {
         [XmlAttribute("method")]
@@ -140,12 +269,45 @@ namespace VAGSuite
 
         [XmlAttribute("baseName")]
         public string BaseName { get; set; }
-        
+
+        /// <summary>
+        /// If true, sequential naming is scoped to the current code block only.
+        /// </summary>
+        [XmlAttribute("codeBlockScoped")]
+        public bool CodeBlockScoped { get; set; }
+
         [XmlElement("Default")]
         public string Default { get; set; }
-        
+
         [XmlElement("IfMapSelectorNotEmpty")]
         public string IfMapSelectorNotEmpty { get; set; }
+
+        [XmlElement("ConditionalTemplate")]
+        public List<ConditionalTemplate> ConditionalTemplates { get; set; }
+    }
+
+    /// <summary>
+    /// Conditional template for dynamic naming.
+    /// </summary>
+    public class ConditionalTemplate
+    {
+        /// <summary>
+        /// Condition type: "MapSelectorExists", "MapSelectorProperty", "ByteCheck", etc.
+        /// </summary>
+        [XmlAttribute("conditionType")]
+        public string ConditionType { get; set; }
+
+        /// <summary>
+        /// Condition details (property name, expected value, etc.)
+        /// </summary>
+        [XmlAttribute("condition")]
+        public string Condition { get; set; }
+
+        /// <summary>
+        /// Template string with placeholders like {temperature}, {index}, etc.
+        /// </summary>
+        [XmlText]
+        public string Template { get; set; }
     }
 
     public class AxisMetadata
@@ -154,5 +316,43 @@ namespace VAGSuite
         public string Units { get; set; }
         public double? Correction { get; set; }
         public double? Offset { get; set; }
+    }
+
+    /// <summary>
+    /// Dynamic axis address calculation metadata.
+    /// Allows specifying offsets from the flash start address for axis data.
+    /// </summary>
+    public class AxisAddressOffset
+    {
+        /// <summary>
+        /// Offset from flash_start_address to X-axis data (usually negative)
+        /// </summary>
+        [XmlAttribute("x")]
+        public int X { get; set; }
+
+        /// <summary>
+        /// Offset from flash_start_address to Y-axis data (usually negative)
+        /// </summary>
+        [XmlAttribute("y")]
+        public int Y { get; set; }
+    }
+
+    /// <summary>
+    /// Temperature range extraction from MapSelector.
+    /// Used for dynamic naming of temperature-based maps.
+    /// </summary>
+    public class TemperatureFromSelector
+    {
+        /// <summary>
+        /// Index in the MapSelector's MapIndexes array
+        /// </summary>
+        [XmlAttribute("selectorIndex")]
+        public int SelectorIndex { get; set; }
+
+        /// <summary>
+        /// Output format: "C" (Celsius), "F" (Fahrenheit)
+        /// </summary>
+        [XmlAttribute("unit")]
+        public string Unit { get; set; }
     }
 }

@@ -96,6 +96,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DebugMapComparison.cs" />
     <Compile Include="MapViewerEventArgs\AxisEditorRequestedEventArgs.cs" />
     <Compile Include="MapViewerEventArgs\ViewTypeChangedEventArgs.cs" />
     <Compile Include="MapViewerEventArgs\AxisLockEventArgs.cs" />

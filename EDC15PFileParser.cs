@@ -133,6 +133,9 @@ namespace VAGSuite
             string softwareNumber = ExtractSoftwareNumber(allBytes);
             partNumberConverter pnc = new partNumberConverter();
 
+            // Initialize debug comparison tracking
+            DebugMapComparison.Initialize(filename);
+
             VerifyCodeBlocks(allBytes, newSymbols, newCodeBlocks);
 
             for (int t = 0; t < allBytes.Length - 1; t += 2)
@@ -146,16 +149,13 @@ namespace VAGSuite
                     if ((len2skip % 2) > 0) len2skip -= 1;
                     if (len2skip < 0) len2skip = 0;
                     t += len2skip;
-                    /*                    if (from > 0x4dc00 && from < 0x4dd00)
-                                        {
-                                           // Console.WriteLine("map detected: " + from.ToString("X8") + " - " + t.ToString("X8") + " len: " + len2skip.ToString("X8"));
-                                        }*/
                 }
             }
 
             newSymbols.SortColumn = "Flash_start_address";
             newSymbols.SortingOrder = GenericComparer.SortOrder.Ascending;
             newSymbols.Sort();
+            
             NameKnownMaps(allBytes, newSymbols, newCodeBlocks);
 
             BuildAxisIDList(newSymbols, newAxisHelpers);
@@ -169,7 +169,21 @@ namespace VAGSuite
             foreach (SymbolHelper sh in newSymbols)
             {
                 sh.Description = strans.TranslateSymbolToHelpText(sh.Varname);
+                
+                // Track for debug comparison after all detection and naming logic has completed
+                if (sh.MapSource == MapSource.MapRulesXml)
+                {
+                    DebugMapComparison.AddXmlMapRulesMap(sh);
+                }
+                else
+                {
+                    DebugMapComparison.AddFileParserMap(sh);
+                }
             }
+            
+            // Generate debug comparison files
+            DebugMapComparison.GenerateComparisonFiles();
+            
             // check for must have maps... if there are maps missing, report it
             return newSymbols;
         }
@@ -1217,16 +1231,29 @@ namespace VAGSuite
                 var rules = repo.LoadRules("EDC15P");
                 MapDetectionEngine engine = new MapDetectionEngine();
 
+                // Create a temporary list to hold XML-detected clones
+                List<SymbolHelper> xmlSymbols = new List<SymbolHelper>();
+
                 foreach (SymbolHelper sh in newSymbols)
                 {
                     foreach (var rule in rules)
                     {
                         if (engine.EvaluateRule(rule, sh, allBytes))
                         {
-                            engine.ApplyMetadata(rule, sh, allBytes, newCodeBlocks, newSymbols);
+                            // Clone the symbol so we don't overwrite the original candidate
+                            // This allows side-by-side comparison (Blue vs Green)
+                            SymbolHelper xmlClone = sh.Clone();
+                            engine.ApplyMetadata(rule, xmlClone, allBytes, newCodeBlocks, newSymbols);
+                            xmlSymbols.Add(xmlClone);
                             break; // First match wins
                         }
                     }
+                }
+
+                // Add XML clones back to the main collection
+                foreach (var xmlSh in xmlSymbols)
+                {
+                    newSymbols.Add(xmlSh);
                 }
             }
             catch (Exception ex)
@@ -1240,12 +1267,14 @@ namespace VAGSuite
 
             foreach (SymbolHelper sh in newSymbols)
             {
-                // Skip if already named by the engine
-                if (!string.IsNullOrEmpty(sh.Varname) && !sh.Varname.StartsWith("2D") && !sh.Varname.StartsWith("3D")) continue;
+                // DEBUG MODE: To compare XML vs FileParser naming, temporarily set this to true
+                bool skipIfAlreadyNamed = false; // Set to false to see both versions for comparison
+
+                // Skip XML-sourced maps in the original FileParser logic
+                if (sh.MapSource == MapSource.MapRulesXml) continue;
 
                 //sh.X_axis_descr = st.TranslateAxisID(sh.X_axis_ID);
                 //sh.Y_axis_descr = st.TranslateAxisID(sh.Y_axis_ID);
-                /* Migrated to EDC15P_MapRules.xml
                 if (sh.Length == 700) // 25*14
                 {
                     sh.Category = "Detected maps";
@@ -1262,9 +1291,7 @@ namespace VAGSuite
                     sh.YaxisUnits = "km/h";
                     sh.XaxisUnits = "rpm";
                 }
-                */
 
-                /* Migrated to EDC15P_MapRules.xml
                 if (sh.Length == 570)
                 {
                     if (sh.X_axis_ID / 256 == 0xC5 && sh.Y_axis_ID / 256 == 0xEC)
@@ -1327,7 +1354,7 @@ namespace VAGSuite
                         sh.YaxisUnits = "mg/st";
                     }
                 }
-                */
+
                 if (sh.Length == 480)
                 {
                     if (sh.X_axis_ID / 256 == 0xC5 && sh.Y_axis_ID / 256 == 0xEC)
@@ -1481,7 +1508,6 @@ namespace VAGSuite
                 else if (sh.Length == 416)
                 {
                     string strAddrTest = sh.Flash_start_address.ToString("X8");
-                    /* Migrated to EDC15P_MapRules.xml
                     if (sh.X_axis_ID / 256 == 0xF9 && sh.Y_axis_ID / 256 == 0xDA)
                     {
                         // this is IQ by MAF limiter!
@@ -1513,8 +1539,7 @@ namespace VAGSuite
                         sh.XaxisUnits = "mg/st";
 
                     }
-                    */
-                    if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xDA)
+                    else if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xDA)
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Limiters";
@@ -1856,7 +1881,6 @@ namespace VAGSuite
                 }
                 else if (sh.Length == 320)
                 {
-                    /* Migrated to EDC15P_MapRules.xml
                     if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xC0)
                     {
                         sh.Category = "Detected maps";
@@ -1883,8 +1907,7 @@ namespace VAGSuite
                         sh.XaxisUnits = "mg/st";
                         boosttagetmaploc = sh.X_axis_address;
                     }
-                    */
-                    if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xDA)
+                    else if (sh.X_axis_ID / 256 == 0xEC && sh.Y_axis_ID / 256 == 0xDA)
                     {
                         sh.Category = "Detected maps";
                         sh.Subcategory = "Limiters";

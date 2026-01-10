@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace VAGSuite
@@ -74,6 +75,30 @@ namespace VAGSuite
                 if (conditions.MapSelector.NumRepeats != 0 && candidate.MapSelector.NumRepeats != conditions.MapSelector.NumRepeats) return false;
             }
 
+            // Byte Check condition
+            if (conditions.ByteCheck != null)
+            {
+                if (!EvaluateByteCheck(conditions.ByteCheck, candidate, binData)) return false;
+            }
+
+            // Axis Value Check condition
+            if (conditions.AxisValueCheck != null)
+            {
+                if (!EvaluateAxisValueCheck(conditions.AxisValueCheck, candidate, binData)) return false;
+            }
+
+            // MapSelector Property condition
+            if (conditions.MapSelectorProperty != null)
+            {
+                if (!EvaluateMapSelectorProperty(conditions.MapSelectorProperty, candidate)) return false;
+            }
+
+            // CodeBlock condition
+            if (conditions.CodeBlock != null)
+            {
+                if (!EvaluateCodeBlockCondition(conditions.CodeBlock, candidate)) return false;
+            }
+
             // Logical OR
             if (conditions.Or != null && conditions.Or.Count > 0)
             {
@@ -110,6 +135,224 @@ namespace VAGSuite
             return true;
         }
 
+        /// <summary>
+        /// Evaluates a ByteCheck condition.
+        /// Checks raw byte values at specific addresses relative to the symbol.
+        /// </summary>
+        private bool EvaluateByteCheck(ByteCheckCondition byteCheck, SymbolHelper candidate, byte[] binData)
+        {
+            if (byteCheck == null) return true;
+
+            int address = 0;
+            switch (byteCheck.Address.ToLower())
+            {
+                case "y_axis_address":
+                    address = candidate.Y_axis_address;
+                    break;
+                case "x_axis_address":
+                    address = candidate.X_axis_address;
+                    break;
+                case "flash_start_address":
+                    address = (int)candidate.Flash_start_address;
+                    break;
+                default:
+                    // Custom offset from flash_start_address
+                    if (byteCheck.Address.StartsWith("+"))
+                    {
+                        int offset = int.Parse(byteCheck.Address.Substring(1));
+                        address = (int)(candidate.Flash_start_address + offset);
+                    }
+                    else if (byteCheck.Address.StartsWith("-"))
+                    {
+                        int offset = int.Parse(byteCheck.Address.Substring(1));
+                        address = (int)(candidate.Flash_start_address - offset);
+                    }
+                    else
+                    {
+                        // Try to parse as absolute address
+                        if (!int.TryParse(byteCheck.Address, out address)) return true;
+                    }
+                    break;
+            }
+
+            address += byteCheck.Offset;
+
+            // Check bounds
+            if (address < 0 || address >= binData.Length) return false;
+
+            int expectedValue = Convert.ToInt32(byteCheck.Expected, 16);
+            int actualValue = binData[address];
+
+            string op = string.IsNullOrEmpty(byteCheck.Op) ? "eq" : byteCheck.Op.ToLower();
+            switch (op)
+            {
+                case "eq":
+                    return actualValue == expectedValue;
+                case "ne":
+                    return actualValue != expectedValue;
+                case "lt":
+                    return actualValue < expectedValue;
+                case "le":
+                    return actualValue <= expectedValue;
+                case "gt":
+                    return actualValue > expectedValue;
+                case "ge":
+                    return actualValue >= expectedValue;
+                default:
+                    return actualValue == expectedValue;
+            }
+        }
+
+        /// <summary>
+        /// Evaluates an AxisValueCheck condition.
+        /// Checks actual axis data values at runtime.
+        /// </summary>
+        private bool EvaluateAxisValueCheck(AxisValueCheckCondition axisCheck, SymbolHelper candidate, byte[] binData)
+        {
+            if (axisCheck == null) return true;
+
+            // Get the axis data
+            double axisValue = 0;
+            int axisAddress = 0;
+            int axisLength = 0;
+
+            switch (axisCheck.Axis.ToUpper())
+            {
+                case "X":
+                    axisAddress = candidate.X_axis_address;
+                    axisLength = candidate.X_axis_length;
+                    break;
+                case "Y":
+                    axisAddress = candidate.Y_axis_address;
+                    axisLength = candidate.Y_axis_length;
+                    break;
+                case "Z":
+                    // For Z-axis, we check the map data itself
+                    axisAddress = (int)candidate.Flash_start_address;
+                    axisLength = candidate.Length;
+                    break;
+                default:
+                    return true;
+            }
+
+            // Read axis values and find max/min
+            double minValue = double.MaxValue;
+            double maxValue = double.MinValue;
+
+            for (int i = 0; i < axisLength && (axisAddress + i) < binData.Length - 1; i += 2)
+            {
+                if (axisAddress + i + 1 >= binData.Length) break;
+                ushort rawValue = (ushort)((binData[axisAddress + i + 1] << 8) | binData[axisAddress + i]);
+                double value = rawValue * candidate.Correction + candidate.Offset;
+                if (value < minValue) minValue = value;
+                if (value > maxValue) maxValue = value;
+            }
+
+            // Check the appropriate value
+            double checkValue = axisCheck.CheckType.ToLower() == "min" ? minValue : maxValue;
+
+            switch (axisCheck.Comparison.ToLower())
+            {
+                case "lt":
+                    return checkValue < axisCheck.Value;
+                case "le":
+                    return checkValue <= axisCheck.Value;
+                case "gt":
+                    return checkValue > axisCheck.Value;
+                case "ge":
+                    return checkValue >= axisCheck.Value;
+                case "eq":
+                    return Math.Abs(checkValue - axisCheck.Value) < 0.001;
+                case "ne":
+                    return Math.Abs(checkValue - axisCheck.Value) >= 0.001;
+                default:
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// Evaluates a MapSelectorProperty condition.
+        /// Checks properties of the MapSelector object.
+        /// </summary>
+        private bool EvaluateMapSelectorProperty(MapSelectorPropertyCondition propCheck, SymbolHelper candidate)
+        {
+            if (propCheck == null) return true;
+            if (candidate.MapSelector == null) return false;
+
+            double actualValue = 0;
+            bool isNumeric = double.TryParse(propCheck.Value, out double expectedValue);
+
+            switch (propCheck.Property.ToLower())
+            {
+                case "numrepeats":
+                    actualValue = candidate.MapSelector.NumRepeats;
+                    break;
+                case "mapindexes.length":
+                case "mapindexes.count":
+                    actualValue = candidate.MapSelector.MapIndexes != null ? candidate.MapSelector.MapIndexes.Length : 0;
+                    break;
+                default:
+                    // Handle indexed properties like "MapIndexes[0]"
+                    if (propCheck.Property.StartsWith("mapindexes[", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int indexStart = propCheck.Property.IndexOf('[') + 1;
+                        int indexEnd = propCheck.Property.IndexOf(']');
+                        if (indexStart > 0 && indexEnd > indexStart)
+                        {
+                            string indexStr = propCheck.Property.Substring(indexStart, indexEnd - indexStart);
+                            if (int.TryParse(indexStr, out int index) && candidate.MapSelector.MapIndexes != null && index < candidate.MapSelector.MapIndexes.Length)
+                            {
+                                actualValue = candidate.MapSelector.MapIndexes[index];
+                            }
+                        }
+                    }
+                    break;
+            }
+
+            switch (propCheck.Comparison.ToLower())
+            {
+                case "eq":
+                    return Math.Abs(actualValue - expectedValue) < 0.001;
+                case "ne":
+                    return Math.Abs(actualValue - expectedValue) >= 0.001;
+                case "lt":
+                    return actualValue < expectedValue;
+                case "le":
+                    return actualValue <= expectedValue;
+                case "gt":
+                    return actualValue > expectedValue;
+                case "ge":
+                    return actualValue >= expectedValue;
+                default:
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// Evaluates a CodeBlock condition.
+        /// Checks the code block context for the symbol.
+        /// </summary>
+        private bool EvaluateCodeBlockCondition(CodeBlockCondition codeBlockCheck, SymbolHelper candidate)
+        {
+            if (codeBlockCheck == null) return true;
+
+            // If no ID specified, just check that we have a code block
+            if (string.IsNullOrEmpty(codeBlockCheck.Id))
+            {
+                return candidate.CodeBlock != 0 || !string.IsNullOrEmpty(codeBlockCheck.Type);
+            }
+
+            // Parse expected IDs (comma-separated)
+            var expectedIds = codeBlockCheck.Id.Split(',').Select(int.Parse).ToList();
+
+            if (!expectedIds.Contains(candidate.CodeBlock)) return false;
+
+            // Type check would require additional context (codeBlocks list)
+            // For now, we just check the ID
+
+            return true;
+        }
+
         private bool ExecuteCustomValidator(CustomValidator validator, SymbolHelper candidate, byte[] binData)
         {
             // Reflection-based validator execution could go here, or a switch statement for known validators
@@ -130,6 +373,12 @@ namespace VAGSuite
 
         public void ApplyMetadata(MapRule rule, SymbolHelper symbol, byte[] binData, List<CodeBlock> codeBlocks, SymbolCollection existingSymbols)
         {
+            // Create a clone or a new symbol for XML detection to avoid overwriting the candidate
+            // However, the current architecture passes the candidate 'symbol' which is already in the collection.
+            // To allow side-by-side comparison without overwriting, we should ideally add a NEW symbol.
+            // But for now, we will just ensure we don't overwrite the MapSource if it's already set to something else,
+            // OR we accept that the engine marks it.
+            
             // Mark the symbol as coming from MapRules XML
             symbol.MapSource = MapSource.MapRulesXml;
 
@@ -173,62 +422,51 @@ namespace VAGSuite
             if (rule.Metadata.Name != null)
             {
                 string name = rule.Metadata.Name.Value;
-                
+
+                // Handle conditional templates for dynamic naming
+                if (rule.Metadata.Name.ConditionalTemplates != null && rule.Metadata.Name.ConditionalTemplates.Count > 0)
+                {
+                    name = EvaluateConditionalTemplate(rule.Metadata.Name.ConditionalTemplates, symbol, binData);
+                }
+                else if (!string.IsNullOrEmpty(rule.Metadata.Name.Value) && !rule.Metadata.Name.Value.Contains("(XML)"))
+                {
+                    // Safety check: Ensure (XML) suffix is present if not using templates
+                    name = rule.Metadata.Name.Value + " (XML)";
+                }
+
                 if (rule.Metadata.Name.Sequential)
                 {
-                    string baseName = rule.Metadata.Name.BaseName;
-                    int count = GetMapNameCountForCodeBlock(baseName, symbol.CodeBlock, existingSymbols);
-                    // Note: The original code often did count-- or similar adjustments. 
-                    // We might need to parameterize the start index.
-                    // For now, assuming 1-based index in name
+                    string baseName = rule.Metadata.Name.BaseName ?? name;
+                    // Ensure baseName has (XML) for the count check to work against other XML maps
+                    if (!baseName.Contains("(XML)")) baseName += " (XML)";
                     
-                    // Original logic often did: count = GetMapNameCount...; count--; Varname = base + count.ToString("D2")
-                    // If GetMapNameCount returns 1 (none found yet + 1), then count-- = 0.
-                    // So the first one is 00? Or did it mean to be 1-based?
-                    // Looking at EDC15PFileParser.cs:
-                    // int injDurCount = GetMapNameCountForCodeBlock("Injector duration", sh.CodeBlock, newSymbols, false);
-                    // injDurCount--;
-                    // sh.Varname = "Injector duration " + injDurCount.ToString("D2") ...
-                    
-                    // If GetMapNameCount returns 1 (meaning 0 found previously), then injDurCount becomes 0.
-                    // So "Injector duration 00".
-                    
-                    // We need to replicate GetMapNameCountForCodeBlock logic here or pass a delegate.
-                    // Since we passed existingSymbols, we can implement it.
-                    
-                    // However, we need to be careful not to count the *current* symbol if it's already added?
-                    // The original code calls GetMapNameCount... BEFORE adding the name to the current symbol (which is already in the collection? No, usually before).
-                    // Wait, in EDC15PFileParser, 'newSymbols' is passed. 'sh' is IN 'newSymbols' loop.
-                    // "foreach (SymbolHelper sh in newSymbols)"
-                    // So 'sh' is already in the collection.
-                    // GetMapNameCountForCodeBlock iterates newSymbols.
-                    // It counts how many start with varName.
-                    // Since 'sh' is in the list but doesn't have the name yet (we are assigning it), it won't be counted yet?
-                    // Ah, "if (sh.Varname.StartsWith(varName)..."
-                    // Since we haven't assigned Varname yet, it won't match.
-                    // So it counts *previous* matches.
-                    
-                    // But wait, GetMapNameCountForCodeBlock does "count++" at the end unconditionally?
-                    // "count++; return count;"
-                    // So if 0 matches, it returns 1.
-                    // Then "injDurCount--;" makes it 0.
-                    // So the first one is 0.
-                    
-                    int currentCount = GetMapNameCountForCodeBlock(baseName, symbol.CodeBlock, existingSymbols);
-                    // Emulate the "count++; count--;" behavior which effectively means "count of existing matches"
-                    // But wait, if I have 2 existing, GetMapNameCount returns 3. 3-- = 2.
-                    // So it is 0-based index.
-                    
-                    // Let's just count existing matches.
-                    int matchCount = 0;
-                    foreach(SymbolHelper s in existingSymbols)
+                    int matchCount;
+
+                    if (rule.Metadata.Name.CodeBlockScoped)
                     {
-                        if (s.CodeBlock == symbol.CodeBlock && s.Varname != null && s.Varname.StartsWith(baseName))
+                        // Count only within the same code block
+                        matchCount = 0;
+                        foreach (SymbolHelper s in existingSymbols)
                         {
-                            matchCount++;
+                            if (s.CodeBlock == symbol.CodeBlock && s.Varname != null && s.Varname.StartsWith(baseName))
+                            {
+                                matchCount++;
+                            }
                         }
                     }
-                    
+                    else
+                    {
+                        // Count all matches (original behavior)
+                        matchCount = 0;
+                        foreach (SymbolHelper s in existingSymbols)
+                        {
+                            if (s.Varname != null && s.Varname.StartsWith(baseName))
+                            {
+                                matchCount++;
+                            }
+                        }
+                    }
+
                     name = baseName + " " + matchCount.ToString("D2");
                 }
 
@@ -236,6 +474,103 @@ namespace VAGSuite
                 string locationInfo = DetermineNumberByFlashBank(symbol.Flash_start_address, codeBlocks);
                 symbol.Varname = name + " [" + locationInfo + "]";
             }
+        }
+
+        /// <summary>
+        /// Evaluates conditional templates for dynamic naming.
+        /// </summary>
+        private string EvaluateConditionalTemplate(List<ConditionalTemplate> templates, SymbolHelper symbol, byte[] binData)
+        {
+            foreach (var template in templates)
+            {
+                bool conditionMet = false;
+
+                switch (template.ConditionType.ToLower())
+                {
+                    case "mapselectorexists":
+                        conditionMet = symbol.MapSelector != null;
+                        break;
+                    case "mapselectorproperty":
+                        // Parse condition like "NumRepeats=10" or "MapIndexes.Length>1"
+                        var parts = template.Condition.Split(new[] { '=', '>', '<' }, 2);
+                        if (parts.Length >= 2 && symbol.MapSelector != null)
+                        {
+                            string propName = parts[0].Trim();
+                            string expectedStr = parts[1].Trim();
+                            double expectedValue;
+                            if (double.TryParse(expectedStr, out expectedValue))
+                            {
+                                double actualValue = 0;
+                                switch (propName.ToLower())
+                                {
+                                    case "numrepeats":
+                                        actualValue = symbol.MapSelector.NumRepeats;
+                                        break;
+                                    case "mapindexes.length":
+                                    case "mapindexes.count":
+                                        actualValue = symbol.MapSelector.MapIndexes?.Length ?? 0;
+                                        break;
+                                }
+                                conditionMet = Math.Abs(actualValue - expectedValue) < 0.001;
+                            }
+                        }
+                        break;
+                    case "bytecheck":
+                        // Parse condition like "y_axis_address+0=00"
+                        var byteParts = template.Condition.Split('=');
+                        if (byteParts.Length >= 2)
+                        {
+                            string addressSpec = byteParts[0].Trim();
+                            string expectedHex = byteParts[1].Trim();
+
+                            int address = 0;
+                            if (addressSpec.StartsWith("y_axis_address"))
+                            {
+                                address = symbol.Y_axis_address + int.Parse(addressSpec.Substring("y_axis_address".Length));
+                            }
+                            else if (addressSpec.StartsWith("x_axis_address"))
+                            {
+                                address = symbol.X_axis_address + int.Parse(addressSpec.Substring("x_axis_address".Length));
+                            }
+
+                            if (address >= 0 && address < binData.Length)
+                            {
+                                int expected = Convert.ToInt32(expectedHex, 16);
+                                conditionMet = binData[address] == expected;
+                            }
+                        }
+                        break;
+                }
+
+                if (conditionMet)
+                {
+                    // Replace placeholders in template
+                    string result = template.Template;
+                    if (symbol.MapSelector != null)
+                    {
+                        result = result.Replace("{temperature}", GetTemperatureSOIRange(symbol.MapSelector, 0).ToString());
+                        result = result.Replace("{index}", "0");
+                    }
+                    return result;
+                }
+            }
+
+            // Return default if no condition matched
+            return templates.FirstOrDefault(t => t.ConditionType.ToLower() == "default")?.Template ?? "";
+        }
+
+        /// <summary>
+        /// Calculates temperature range from MapSelector.
+        /// This is a simplified version - the actual implementation would need the full context.
+        /// </summary>
+        private double GetTemperatureSOIRange(MapSelector selector, int index)
+        {
+            // Simplified calculation - actual implementation would use the MapIndexes
+            if (selector.MapIndexes != null && index < selector.MapIndexes.Length)
+            {
+                return selector.MapIndexes[index] * 0.5; // Example conversion
+            }
+            return 0;
         }
 
         private int GetMapNameCountForCodeBlock(string varName, int codeBlock, SymbolCollection symbols)

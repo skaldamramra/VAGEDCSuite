@@ -326,5 +326,52 @@ namespace VAGSuite
             get { return _codeBlock; }
             set { _codeBlock = value; }
         }
+
+        public SymbolHelper Clone()
+        {
+            SymbolHelper clone = new SymbolHelper();
+            clone.Is1D = this.Is1D;
+            clone.Is2D = this.Is2D;
+            clone.Is3D = this.Is3D;
+            clone.MapSource = this.MapSource;
+            clone.XaxisUnits = this.XaxisUnits;
+            clone.YaxisUnits = this.YaxisUnits;
+            clone.MapSelector = this.MapSelector; // Note: Shallow copy of selector
+            clone.BitMask = this.BitMask;
+            clone.Color = this.Color;
+            clone.Currentdata = this.Currentdata;
+            clone.Symbol_number = this.Symbol_number;
+            clone.Selected = this.Selected;
+            clone.Symbol_type = this.Symbol_type;
+            clone.Internal_address = this.Internal_address;
+            clone.Flash_start_address = this.Flash_start_address;
+            clone.Symbol_number_ECU = this.Symbol_number_ECU;
+            clone.Start_address = this.Start_address;
+            clone.Length = this.Length;
+            clone.Userdescription = this.Userdescription;
+            clone.Varname = this.Varname;
+            clone.Description = this.Description;
+            clone.Category = this.Category;
+            clone.Subcategory = this.Subcategory;
+            clone.X_axis_length = this.X_axis_length;
+            clone.Y_axis_length = this.Y_axis_length;
+            clone.X_axis_ID = this.X_axis_ID;
+            clone.Y_axis_ID = this.Y_axis_ID;
+            clone.X_axis_address = this.X_axis_address;
+            clone.Y_axis_address = this.Y_axis_address;
+            clone.XaxisAssigned = this.XaxisAssigned;
+            clone.YaxisAssigned = this.YaxisAssigned;
+            clone.X_axis_descr = this.X_axis_descr;
+            clone.Y_axis_descr = this.Y_axis_descr;
+            clone.Z_axis_descr = this.Z_axis_descr;
+            clone.X_axis_correction = this.X_axis_correction;
+            clone.X_axis_offset = this.X_axis_offset;
+            clone.Y_axis_correction = this.Y_axis_correction;
+            clone.Y_axis_offset = this.Y_axis_offset;
+            clone.Correction = this.Correction;
+            clone.Offset = this.Offset;
+            clone.CodeBlock = this.CodeBlock;
+            return clone;
+        }
     }
 }
