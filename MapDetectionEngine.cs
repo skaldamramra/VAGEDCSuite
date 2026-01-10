@@ -415,7 +415,7 @@ namespace VAGSuite
             // Naming Logic
             if (rule.Metadata.Name != null)
             {
-                string name = rule.Metadata.Name.Value;
+                string name = rule.Metadata.Name.Value ?? "";
 
                 // Handle conditional templates for dynamic naming
                 if (rule.Metadata.Name.ConditionalTemplates != null && rule.Metadata.Name.ConditionalTemplates.Count > 0)
@@ -435,7 +435,8 @@ namespace VAGSuite
                 {
                     // Use template result as base name if BaseName is not specified
                     string baseName = rule.Metadata.Name.BaseName ?? name;
-                    
+                    if (string.IsNullOrEmpty(baseName)) baseName = "Unknown Map";
+
                     // Ensure baseName has (XML) for the count check to work against other XML maps
                     if (!baseName.Contains("(XML)")) baseName += " (XML)";
                     
@@ -484,6 +485,7 @@ namespace VAGSuite
         {
             foreach (var template in templates)
             {
+                if (template == null || string.IsNullOrEmpty(template.ConditionType)) continue;
                 bool conditionMet = false;
 
                 switch (template.ConditionType.ToLower())

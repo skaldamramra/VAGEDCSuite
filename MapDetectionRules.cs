@@ -284,7 +284,8 @@ namespace VAGSuite
         [XmlElement("IfMapSelectorNotEmpty")]
         public string IfMapSelectorNotEmpty { get; set; }
 
-        [XmlElement("ConditionalTemplate")]
+        [XmlArray("ConditionalTemplate")]
+        [XmlArrayItem("When")]
         public List<ConditionalTemplate> ConditionalTemplates { get; set; }
     }
 
@@ -308,7 +309,7 @@ namespace VAGSuite
         /// <summary>
         /// Template string with placeholders like {temperature}, {index}, etc.
         /// </summary>
-        [XmlText]
+        [XmlElement("Template")]
         public string Template { get; set; }
     }
 

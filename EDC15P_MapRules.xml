@@ -97,7 +97,7 @@
 -->
 <MapRules ecuType="EDC15P" version="2.0">
   
-  <!-- Launch Control -->
+  <!-- 1. Launch Control -->
   <MapRule priority="100" id="launch_control_700">
     <Description>
       Launch control map - 25x14 dimension (700 bytes)
@@ -125,38 +125,223 @@
     </Metadata>
   </MapRule>
 
-  <!-- Injector Duration (Multiple Lengths) -->
-  <MapRule priority="110" id="injector_duration_generic">
+  <!-- 2. BIP SOI Correction (Priority before Generic ID) -->
+  <MapRule priority="105" id="bip_soi_correction_160">
+    <Description>
+      BIP SOI Correction Map (zmwBPKorKF) - 10x8 dimension (160 bytes)
+      Based on legacy EDC15PFileParser.cs:2555
+    </Description>
+    <Conditions>
+      <Length>160</Length>
+      <XAxisLength>10</XAxisLength>
+      <YAxisLength>8</YAxisLength>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Fuel</Subcategory>
+      <Name>BIP SOI Correction Map (XML)</Name>
+      <Correction>0.00390625</Correction>
+      <XAxis>
+        <Description>Crankshaft degrees</Description>
+        <Units>°BTDC</Units>
+        <Correction>0.023437</Correction>
+        <Offset>-78</Offset>
+      </XAxis>
+      <YAxis>
+        <Description>Engine speed (rpm)</Description>
+        <Units>rpm</Units>
+      </YAxis>
+      <ZAxis>
+        <Description>BIP calculation</Description>
+      </ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 3. Start of Injection (SOI) - Repeat 10 -->
+  <MapRule priority="108" id="soi_map_448_temp">
+    <Description>
+      Start of Injection (SOI) map - 16x14 dimension (448 bytes)
+      Based on legacy EDC15PFileParser.cs:1402
+    </Description>
+    <Conditions>
+      <Length>448</Length>
+      <MapSelector numRepeats="10" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Fuel</Subcategory>
+      <Name sequential="true" baseName="Start of injection (SOI) (XML)" codeBlockScoped="true">Start of injection (SOI) (XML)
+        <ConditionalTemplate>
+          <When conditionType="MapSelectorExists">
+            <Template>Start of injection (SOI) {temperature} deg C (XML)</Template>
+          </When>
+          <When conditionType="default">
+            <Template>Start of injection (SOI) (XML)</Template>
+          </When>
+        </ConditionalTemplate>
+      </Name>
+      <Correction>-0.023437</Correction>
+      <Offset>78</Offset>
+      <XAxis>
+        <Description>IQ (mg/stroke)</Description>
+        <Units>mg/st</Units>
+        <Correction>0.01</Correction>
+      </XAxis>
+      <YAxis>
+        <Description>Engine speed (rpm)</Description>
+        <Units>rpm</Units>
+      </YAxis>
+      <ZAxis>
+        <Description>Start position (degrees BTDC)</Description>
+      </ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 4. Length 448 Corrections (Height, Dynamic, IAT) -->
+  <MapRule priority="109" id="injection_height_corr_448">
+    <Conditions>
+      <Length>448</Length>
+      <MapSelector numRepeats="6" />
+      <XAxisID high="0xF9" /><YAxisID high="0xEB" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Fuel</Subcategory>
+      <Name sequential="true" baseName="Injection correction map (Height) (XML)" codeBlockScoped="true" />
+      <Correction>0.023437</Correction>
+      <XAxis><Description>Requested Quantity mg/stroke</Description><Units>mg/st</Units><Correction>0.01</Correction></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Duration (crankshaft degrees)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="110" id="injection_dynamic_advance_448">
+    <Conditions>
+      <Length>448</Length>
+      <MapSelector numRepeats="5" />
+      <XAxisID high="0xF9" /><YAxisID high="0xEB" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Fuel</Subcategory>
+      <Name sequential="true" baseName="Injection dynamic advance map (XML)" codeBlockScoped="true" />
+      <Correction>0.023437</Correction><Offset>-78</Offset>
+      <XAxis><Description>Requested Quantity mg/stroke</Description><Units>mg/st</Units><Correction>0.01</Correction></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Duration (crankshaft degrees)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="111" id="injection_iat_corr_448">
+    <Conditions>
+      <Length>448</Length>
+      <MapSelector numRepeats="4" />
+      <XAxisID high="0xF9" /><YAxisID high="0xEB" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Fuel</Subcategory>
+      <Name sequential="true" baseName="Injection correction map (Air Temperature) (XML)" codeBlockScoped="true" />
+      <Correction>0.023437</Correction>
+      <XAxis><Description>Requested Quantity mg/stroke</Description><Units>mg/st</Units><Correction>0.01</Correction></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Duration (crankshaft degrees)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 5. Injector Duration (ID) - Generic lengths -->
+  <MapRule priority="120" id="injector_duration_generic">
     <Description>
       Injector duration map - Various dimensions
-      Handles multiple axis ID combinations: C5/EC, C4/EA, C4/EC
+      Based on legacy EDC15PFileParser.cs logic for multiple lengths.
+      Higher priority rules handle SOI/BIP/etc. to avoid collisions.
     </Description>
     <Conditions>
       <Or>
-        <Conditions><Length>570</Length></Conditions>
-        <Conditions><Length>480</Length></Conditions>
-        <Conditions><Length>448</Length></Conditions>
-        <Conditions><Length>390</Length></Conditions>
-        <Conditions><Length>360</Length></Conditions>
-        <Conditions><Length>260</Length></Conditions>
-        <Conditions><Length>220</Length></Conditions>
-        <Conditions><Length>200</Length></Conditions>
-        <Conditions><Length>198</Length></Conditions>
-        <Conditions><Length>180</Length></Conditions>
-        <Conditions><Length>160</Length></Conditions>
-      </Or>
-      <Or>
         <Conditions>
-          <XAxisID high="0xC5" />
-          <YAxisID high="0xEC" />
+          <Length>570</Length>
+          <Or>
+            <Conditions><XAxisID high="0xC5" /><YAxisID high="0xEC" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEA" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEC" /></Conditions>
+          </Or>
         </Conditions>
         <Conditions>
-          <XAxisID high="0xC4" />
-          <YAxisID high="0xEA" />
+          <Length>480</Length>
+          <Or>
+            <Conditions><XAxisID high="0xC5" /><YAxisID high="0xEC" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEA" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEC" /></Conditions>
+          </Or>
         </Conditions>
         <Conditions>
-          <XAxisID high="0xC4" />
-          <YAxisID high="0xEC" />
+          <Length>448</Length>
+          <Or>
+            <Conditions><XAxisID high="0xC5" /><YAxisID high="0xEC" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEA" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEC" /></Conditions>
+          </Or>
+        </Conditions>
+        <Conditions>
+          <Length>390</Length><XAxisLength>13</XAxisLength><YAxisLength>15</YAxisLength>
+          <Or>
+            <Conditions><XAxisID high="0xC5" /><YAxisID high="0xEC" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEA" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEC" /></Conditions>
+          </Or>
+        </Conditions>
+        <Conditions>
+          <Length>360</Length><XAxisLength>12</XAxisLength><YAxisLength>15</YAxisLength>
+          <Or>
+            <Conditions><XAxisID high="0xC5" /><YAxisID high="0xEC" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEA" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEC" /></Conditions>
+          </Or>
+        </Conditions>
+        <Conditions>
+          <Length>260</Length>
+          <Or>
+            <Conditions><XAxisID high="0xC5" /><YAxisID high="0xEC" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEA" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEC" /></Conditions>
+          </Or>
+        </Conditions>
+        <Conditions>
+          <Length>220</Length>
+          <Or>
+            <Conditions><XAxisID high="0xC5" /><YAxisID high="0xEC" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEA" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEC" /></Conditions>
+          </Or>
+        </Conditions>
+        <Conditions>
+          <Length>200</Length><AxisValueCheck axis="X" comparison="gt" value="3500" checkType="max" />
+          <Or>
+            <Conditions><XAxisID high="0xC5" /><YAxisID high="0xEC" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEA" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEC" /></Conditions>
+          </Or>
+        </Conditions>
+        <Conditions>
+          <Length>198</Length>
+          <Or>
+            <Conditions><XAxisID high="0xC5" /><YAxisID high="0xEC" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEA" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEC" /></Conditions>
+          </Or>
+        </Conditions>
+        <Conditions>
+          <Length>180</Length>
+          <Or>
+            <Conditions><XAxisID high="0xC5" /><YAxisID high="0xEC" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEA" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEC" /></Conditions>
+          </Or>
+        </Conditions>
+        <Conditions>
+          <Length>160</Length><XAxisLength>8</XAxisLength><YAxisLength>10</YAxisLength>
+          <Or>
+            <Conditions><XAxisID high="0xC5" /><YAxisID high="0xEC" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEA" /></Conditions>
+            <Conditions><XAxisID high="0xC4" /><YAxisID high="0xEC" /></Conditions>
+          </Or>
         </Conditions>
       </Or>
     </Conditions>
@@ -180,23 +365,16 @@
     </Metadata>
   </MapRule>
 
-  <!-- Boost Target (320 bytes) -->
-  <MapRule priority="120" id="boost_target_320">
+  <!-- 6. Boost Target -->
+  <MapRule priority="130" id="boost_target_320">
     <Description>
       Boost target map - 10x16 dimension (320 bytes)
-      Handles EC/C0 and EA/C0 axis combinations
     </Description>
     <Conditions>
       <Length>320</Length>
       <Or>
-        <Conditions>
-          <XAxisID high="0xEC" />
-          <YAxisID high="0xC0" />
-        </Conditions>
-        <Conditions>
-          <XAxisID high="0xEA" />
-          <YAxisID high="0xC0" />
-        </Conditions>
+        <Conditions><XAxisID high="0xEC" /><YAxisID high="0xC0" /></Conditions>
+        <Conditions><XAxisID high="0xEA" /><YAxisID high="0xC0" /></Conditions>
       </Or>
     </Conditions>
     <Metadata>
@@ -218,176 +396,26 @@
     </Metadata>
   </MapRule>
 
-  <!-- Smoke Limiter (Multiple Lengths) -->
-  <MapRule priority="130" id="smoke_limiter_generic">
-    <Description>
-      Smoke limiter (IQ by MAF) - Various dimensions
-      Axis IDs: F9/DA or EA/DA
-    </Description>
+  <!-- 7. Smoke Limiter / IQ by MAP/MAF Limiters (Length 416/384) -->
+  <MapRule priority="140" id="smoke_limiter_generic">
+    <Description>Smoke limiter (IQ by MAF) - Axis IDs: F9/DA or EA/DA</Description>
     <Conditions>
       <Or>
         <Conditions><Length>416</Length></Conditions>
-        <Conditions><Length>384</Length></Conditions>
+        <Conditions><Length>384</Length><XAxisLength>16</XAxisLength><YAxisLength>12</YAxisLength></Conditions>
       </Or>
       <Or>
-        <Conditions>
-          <XAxisID high="0xF9" />
-          <YAxisID high="0xDA" />
-        </Conditions>
-        <Conditions>
-          <XAxisID high="0xEA" />
-          <YAxisID high="0xDA" />
-        </Conditions>
+        <Conditions><XAxisID high="0xF9" /><YAxisID high="0xDA" /></Conditions>
+        <Conditions><XAxisID high="0xEA" /><YAxisID high="0xDA" /></Conditions>
       </Or>
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category>
       <Subcategory>Limiters</Subcategory>
-      <Name sequential="true" baseName="Smoke limiter (XML)" codeBlockScoped="true" />
-      <Correction>0.01</Correction>
-      <XAxis>
-        <Description>Airflow mg/stroke</Description>
-        <Units>mg/st</Units>
-        <Correction>0.1</Correction>
-      </XAxis>
-      <YAxis>
-        <Description>Engine speed (rpm)</Description>
-        <Units>rpm</Units>
-      </YAxis>
-      <ZAxis>
-        <Description>Maximum IQ (mg)</Description>
-      </ZAxis>
-    </Metadata>
-  </MapRule>
-
-  <!-- ======================================================== -->
-  <!-- NEW RULES USING EXTENDED SCHEMA (v2.0)                   -->
-  <!-- ======================================================== -->
-
-  <!-- SOI Map with Temperature Naming (using ByteCheck and ConditionalTemplate) -->
-  <MapRule priority="140" id="soi_map_448_temp">
-    <Description>
-      Start of Injection (SOI) map - 16x14 dimension (448 bytes)
-      Uses temperature-based naming from MapSelector
-    </Description>
-    <Conditions>
-      <Length>448</Length>
-      <XAxisID high="0xC5" />
-      <YAxisID high="0xEC" />
-      <MapSelector numRepeats="10" />
-    </Conditions>
-    <Metadata>
-      <Category>Detected maps</Category>
-      <Subcategory>Fuel</Subcategory>
-      <Name sequential="true" baseName="Start of injection (SOI) (XML)" codeBlockScoped="true" />
-      <Correction>0.01</Correction>
-      <XAxis>
-        <Description>Engine speed (rpm)</Description>
-        <Units>rpm</Units>
-      </XAxis>
-      <YAxis>
-        <Description>Requested Quantity (mg/st)</Description>
-        <Units>mg/st</Units>
-        <Correction>0.01</Correction>
-      </YAxis>
-      <ZAxis>
-        <Description>SOI angle (degrees)</Description>
-      </ZAxis>
-    </Metadata>
-  </MapRule>
-
-  <!-- MAP vs MAF Limiter Differentiation (using AxisValueCheck) -->
-  <MapRule priority="150" id="limiter_map_generic">
-    <Description>
-      MAP limiter map - Various dimensions
-      Distinguished from MAF limiter by Y-axis max value check
-    </Description>
-    <Conditions>
-      <Or>
-        <Conditions><Length>416</Length></Conditions>
-        <Conditions><Length>320</Length></Conditions>
-      </Or>
-      <XAxisID high="0xEC" />
-      <YAxisID high="0xDA" />
-      <AxisValueCheck axis="Y" comparison="lt" value="4000" checkType="max" />
-    </Conditions>
-    <Metadata>
-      <Category>Detected maps</Category>
-      <Subcategory>Limiters</Subcategory>
-      <Name>IQ by MAP limiter (XML)</Name>
-      <Correction>0.01</Correction>
-      <XAxis>
-        <Description>Engine speed (rpm)</Description>
-        <Units>rpm</Units>
-      </XAxis>
-      <YAxis>
-        <Description>Boost pressure (mbar)</Description>
-        <Units>mbar</Units>
-        <Correction>1.0</Correction>
-      </YAxis>
-      <ZAxis>
-        <Description>Maximum IQ (mg)</Description>
-      </ZAxis>
-    </Metadata>
-  </MapRule>
-
-  <!-- EGR Map with Zero-Check on Y-axis (using ByteCheck) -->
-  <MapRule priority="160" id="egr_map_416_zerocheck">
-    <Description>
-      EGR map - 13x16 dimension (416 bytes)
-      Uses byte check to verify Y-axis data is zero (at least the first byte)
-    </Description>
-    <Conditions>
-      <Length>416</Length>
-      <XAxisID high="0xEC" />
-      <Or>
-        <Conditions>
-          <YAxisID high="0xC0" />
-        </Conditions>
-        <Conditions>
-          <YAxisID high="0xE9" />
-        </Conditions>
-      </Or>
-      <ByteCheck address="y_axis_address" offset="0" expected="0x00" op="eq" />
-    </Conditions>
-    <Metadata>
-      <Category>Detected maps</Category>
-      <Subcategory>Misc</Subcategory>
-      <Name sequential="true" baseName="EGR (XML)" codeBlockScoped="true" />
-      <Correction>0.1</Correction>
-      <XAxis>
-        <Description>IQ (mg/stroke)</Description>
-        <Units>mg/st</Units>
-        <Correction>0.01</Correction>
-      </XAxis>
-      <YAxis>
-        <Description>Engine speed (rpm)</Description>
-        <Units>rpm</Units>
-      </YAxis>
-      <ZAxis>
-        <Description>Mass Air Flow (mg/stroke)</Description>
-      </ZAxis>
-    </Metadata>
-  </MapRule>
-
-  <!-- Smoke Limiter with Temperature Variants (using ConditionalTemplate) -->
-  <MapRule priority="170" id="smoke_limiter_416_temp">
-    <Description>
-      Smoke limiter with temperature-based naming
-      Uses conditional templates for dynamic naming based on MapSelector
-    </Description>
-    <Conditions>
-      <Length>416</Length>
-      <XAxisID high="0xF9" />
-      <YAxisID high="0xDA" />
-    </Conditions>
-    <Metadata>
-      <Category>Detected maps</Category>
-      <Subcategory>Limiters</Subcategory>
-      <Name sequential="true" baseName="Smoke limiter (XML)" codeBlockScoped="true">
+      <Name sequential="true" baseName="Smoke limiter (XML)" codeBlockScoped="true">Smoke limiter (XML)
         <ConditionalTemplate>
           <When conditionType="MapSelectorExists">
-            <Template>Smoke limiter {temperature} °C (XML)</Template>
+            <Template>Smoke limiter {temperature} deg C (XML)</Template>
           </When>
           <When conditionType="default">
             <Template>Smoke limiter (XML)</Template>
@@ -395,103 +423,60 @@
         </ConditionalTemplate>
       </Name>
       <Correction>0.01</Correction>
-      <XAxis>
-        <Description>Airflow (mg/st)</Description>
-        <Units>mg/st</Units>
-        <Correction>0.1</Correction>
-      </XAxis>
-      <YAxis>
-        <Description>Engine speed (rpm)</Description>
-        <Units>rpm</Units>
-      </YAxis>
-      <ZAxis>
-        <Description>Maximum IQ (mg)</Description>
-      </ZAxis>
+      <XAxis><Description>Airflow mg/stroke</Description><Units>mg/st</Units><Correction>0.1</Correction></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Maximum IQ (mg)</Description></ZAxis>
     </Metadata>
   </MapRule>
 
-  <!-- Fuel Temperature Protection Map (using exact AxisID matches) -->
-  <MapRule priority="180" id="fuel_temp_protection_200">
-    <Description>
-      Fuel temperature protection map - 10x10 dimension (200 bytes)
-      Uses specific axis ID combinations: C1AE/EC, C178/EC, C1BE/EC
-    </Description>
-    <Conditions>
-      <Length>200</Length>
-      <Or>
-        <Conditions>
-          <XAxisID exact="0xC1AE" />
-          <YAxisID high="0xEC" />
-        </Conditions>
-        <Conditions>
-          <XAxisID exact="0xC178" />
-          <YAxisID high="0xEC" />
-        </Conditions>
-        <Conditions>
-          <XAxisID exact="0xC1BE" />
-          <YAxisID high="0xEC" />
-        </Conditions>
-      </Or>
-    </Conditions>
-    <Metadata>
-      <Category>Detected maps</Category>
-      <Subcategory>Protection</Subcategory>
-      <Name>Fuel temperature protection (XML)</Name>
-      <Correction>0.1</Correction>
-      <XAxis>
-        <Description>Fuel temperature (°C)</Description>
-        <Units>°C</Units>
-        <Correction>1.0</Correction>
-      </XAxis>
-      <YAxis>
-        <Description>Engine speed (rpm)</Description>
-        <Units>rpm</Units>
-      </YAxis>
-      <ZAxis>
-        <Description>Fuel correction (%)</Description>
-      </ZAxis>
-    </Metadata>
-  </MapRule>
-
-  <!-- Torque Limiter Map (various sizes) -->
-  <MapRule priority="190" id="torque_limiter_generic">
-    <Description>
-      Torque limiter map - Various dimensions
-    </Description>
+  <MapRule priority="145" id="iq_by_map_limiter">
+    <Description>IQ by MAP limiter - Axis IDs: EC/DA, Max(Y) under 4000</Description>
     <Conditions>
       <Or>
-        <Conditions><Length>150</Length><XAxisLength>3</XAxisLength><YAxisLength>25</YAxisLength></Conditions>
-        <Conditions><Length>144</Length><XAxisLength>3</XAxisLength><YAxisLength>24</YAxisLength></Conditions>
-        <Conditions><Length>138</Length><XAxisLength>3</XAxisLength><YAxisLength>23</YAxisLength></Conditions>
-        <Conditions><Length>132</Length><XAxisLength>3</XAxisLength><YAxisLength>22</YAxisLength></Conditions>
-        <Conditions><Length>126</Length><XAxisLength>3</XAxisLength><YAxisLength>21</YAxisLength></Conditions>
-        <Conditions><Length>120</Length><XAxisLength>3</XAxisLength><YAxisLength>20</YAxisLength></Conditions>
+        <Conditions><Length>416</Length></Conditions>
+        <Conditions><Length>320</Length></Conditions>
       </Or>
+      <XAxisID high="0xEC" /><YAxisID high="0xDA" />
+      <AxisValueCheck axis="Y" comparison="lt" value="4000" checkType="max" />
     </Conditions>
     <Metadata>
-      <Category>Detected maps</Category>
-      <Subcategory>Limiters</Subcategory>
-      <Name>Torque limiter (XML)</Name>
+      <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
+      <Name>IQ by MAP limiter (XML)</Name>
       <Correction>0.01</Correction>
-      <XAxis>
-        <Description>Engine speed (rpm)</Description>
-        <Units>rpm</Units>
-      </XAxis>
-      <YAxis>
-        <Description>Atm. pressure (mbar)</Description>
-        <Units>mbar</Units>
-      </YAxis>
-      <ZAxis>
-        <Description>Maximum IQ (mg)</Description>
-      </ZAxis>
+      <XAxis><Description>Boost pressure</Description><Units>mbar</Units></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Maximum IQ (mg)</Description></ZAxis>
     </Metadata>
   </MapRule>
 
-  <!-- Driver Wish Map -->
+  <!-- 8. EGR Map with Zero-Check -->
+  <MapRule priority="160" id="egr_map_generic">
+    <Conditions>
+      <Or>
+        <Conditions><Length>416</Length></Conditions>
+        <Conditions><Length>390</Length></Conditions>
+        <Conditions><Length>384</Length></Conditions>
+        <Conditions><Length>352</Length></Conditions>
+      </Or>
+      <XAxisID high="0xEC" />
+      <Or>
+        <Conditions><YAxisID high="0xC0" /></Conditions>
+        <Conditions><YAxisID high="0xE9" /></Conditions>
+      </Or>
+      <ByteCheck address="y_axis_address" offset="0" expected="0x00" op="eq" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name sequential="true" baseName="EGR (XML)" codeBlockScoped="true" />
+      <Correction>0.1</Correction>
+      <XAxis><Description>IQ (mg/stroke)</Description><Units>mg/st</Units><Correction>0.01</Correction></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Mass Air Flow (mg/stroke)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 9. Driver Wish Map -->
   <MapRule priority="200" id="driver_wish_generic">
-    <Description>
-      Driver wish map - Various dimensions
-    </Description>
     <Conditions>
       <Or>
         <Conditions><Length>286</Length><XAxisLength>13</XAxisLength><YAxisLength>11</YAxisLength></Conditions>
@@ -502,102 +487,65 @@
       </Or>
     </Conditions>
     <Metadata>
-      <Category>Detected maps</Category>
-      <Subcategory>Misc</Subcategory>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
       <Name>Driver wish (XML)</Name>
       <Correction>0.01</Correction>
-      <XAxis>
-        <Description>Throttle position</Description>
-        <Units>TPS %</Units>
-        <Correction>0.01</Correction>
-      </XAxis>
-      <YAxis>
-        <Description>Engine speed (rpm)</Description>
-        <Units>rpm</Units>
-      </YAxis>
-      <ZAxis>
-        <Description>Requested IQ (mg)</Description>
-      </ZAxis>
+      <XAxis><Description>Throttle position</Description><Units>TPS %</Units><Correction>0.01</Correction></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Requested IQ (mg)</Description></ZAxis>
     </Metadata>
   </MapRule>
 
-  <!-- N75 Duty Cycle Map -->
-  <MapRule priority="210" id="n75_duty_cycle_416">
-    <Description>
-      N75 duty cycle map - 13x16 dimension (416 bytes)
-      Axis IDs: EC/EA or EC/E9D4
-    </Description>
+  <!-- 10. N75 Duty Cycle Map -->
+  <MapRule priority="210" id="n75_duty_cycle_generic">
     <Conditions>
-      <Length>416</Length>
       <Or>
-        <Conditions>
-          <XAxisID high="0xEC" />
-          <YAxisID high="0xEA" />
-        </Conditions>
-        <Conditions>
-          <XAxisID high="0xEC" />
-          <YAxisID high="0xE9" />
-        </Conditions>
+        <Conditions><Length>416</Length></Conditions>
+        <Conditions><Length>352</Length></Conditions>
+      </Or>
+      <XAxisID high="0xEC" />
+      <Or>
+        <Conditions><YAxisID high="0xEA" /></Conditions>
+        <Conditions><YAxisID exact="0xE9D4" /></Conditions>
       </Or>
     </Conditions>
     <Metadata>
-      <Category>Detected maps</Category>
-      <Subcategory>Turbo</Subcategory>
+      <Category>Detected maps</Category><Subcategory>Turbo</Subcategory>
       <Name>N75 duty cycle (XML)</Name>
-      <Correction>0.01</Correction>
-      <XAxis>
-        <Description>Engine speed (rpm)</Description>
-        <Units>rpm</Units>
-      </XAxis>
-      <YAxis>
-        <Description>Boost demand (mbar)</Description>
-        <Units>mbar</Units>
-        <Correction>1.0</Correction>
-      </YAxis>
-      <ZAxis>
-        <Description>Duty cycle (%)</Description>
-      </ZAxis>
+      <Correction>-0.01</Correction><Offset>100</Offset>
+      <XAxis><Description>IQ (mg/stroke)</Description><Units>mg/st</Units><Correction>0.01</Correction></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Duty cycle %</Description></ZAxis>
     </Metadata>
   </MapRule>
 
-  <!-- MAF Airmass Correction by Temperature -->
-  <MapRule priority="220" id="maf_correction_temp_320">
-    <Description>
-      MAF airmass correction by temperature - 10x16 dimension (320 bytes)
-    </Description>
-    <Conditions>
-      <Length>320</Length>
-      <XAxisID high="0xC5" />
-      <YAxisID high="0xEC" />
-    </Conditions>
-    <Metadata>
-      <Category>Detected maps</Category>
-      <Subcategory>Air Mass</Subcategory>
-      <Name>MAF correction by temperature (XML)</Name>
-      <Correction>0.01</Correction>
-      <XAxis>
-        <Description>Intake air temperature (°C)</Description>
-        <Units>°C</Units>
-        <Correction>1.0</Correction>
-      </XAxis>
-      <YAxis>
-        <Description>Engine speed (rpm)</Description>
-        <Units>rpm</Units>
-      </YAxis>
-      <ZAxis>
-        <Description>MAF correction factor</Description>
-      </ZAxis>
-    </Metadata>
-  </MapRule>
-
-  <!-- Boost Limit Map (200 bytes) -->
-  <MapRule priority="230" id="boost_limit_200">
-    <Description>
-      Boost limit map - 10x10 dimension (200 bytes)
-      Axis IDs: C0/EC or C0/EA
-    </Description>
+  <!-- 11. Fuel Temperature Protection -->
+  <MapRule priority="220" id="fuel_temp_protection_200">
     <Conditions>
       <Length>200</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xC1AE" /><YAxisID high="0xEC" /></Conditions>
+        <Conditions><XAxisID exact="0xC178" /><YAxisID high="0xEC" /></Conditions>
+        <Conditions><XAxisID exact="0xC1BE" /><YAxisID high="0xEC" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Protection</Subcategory>
+      <Name>Fuel temperature protection (XML)</Name>
+      <Correction>0.0001</Correction>
+      <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
+      <YAxis><Description>Fuel temperature (deg C)</Description><Units>deg C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
+      <ZAxis><Description>Correction</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 12. Boost Limit Map -->
+  <MapRule priority="230" id="boost_limit_200">
+    <Conditions>
+      <Or>
+        <Conditions><Length>200</Length></Conditions>
+        <Conditions><Length>180</Length></Conditions>
+      </Or>
       <XAxisID high="0xC0" />
       <Or>
         <Conditions><YAxisID high="0xEC" /></Conditions>
@@ -605,20 +553,11 @@
       </Or>
     </Conditions>
     <Metadata>
-      <Category>Detected maps</Category>
-      <Subcategory>Limiters</Subcategory>
+      <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
       <Name>Boost limit map (XML)</Name>
-      <XAxis>
-        <Description>Engine speed (rpm)</Description>
-        <Units>rpm</Units>
-      </XAxis>
-      <YAxis>
-        <Description>Atmospheric pressure (mbar)</Description>
-        <Units>mbar</Units>
-      </YAxis>
-      <ZAxis>
-        <Description>Maximum boost pressure (mbar)</Description>
-      </ZAxis>
+      <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
+      <YAxis><Description>Atmospheric pressure (mbar)</Description><Units>mbar</Units></YAxis>
+      <ZAxis><Description>Maximum boost pressure (mbar)</Description></ZAxis>
     </Metadata>
   </MapRule>
 
