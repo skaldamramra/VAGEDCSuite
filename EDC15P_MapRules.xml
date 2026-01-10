@@ -170,7 +170,7 @@
     <Metadata>
       <Category>Detected maps</Category>
       <Subcategory>Fuel</Subcategory>
-      <Name sequential="true" baseName="Start of injection (SOI) (XML)" codeBlockScoped="true">Start of injection (SOI) (XML)
+      <Name>
         <ConditionalTemplate>
           <When conditionType="MapSelectorExists">
             <Template>Start of injection (SOI) {temperature} deg C (XML)</Template>
@@ -412,7 +412,7 @@
     <Metadata>
       <Category>Detected maps</Category>
       <Subcategory>Limiters</Subcategory>
-      <Name sequential="true" baseName="Smoke limiter (XML)" codeBlockScoped="true">Smoke limiter (XML)
+      <Name>
         <ConditionalTemplate>
           <When conditionType="MapSelectorExists">
             <Template>Smoke limiter {temperature} deg C (XML)</Template>

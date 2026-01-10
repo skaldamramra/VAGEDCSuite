@@ -239,7 +239,7 @@ namespace VAGSuite
             double minValue = double.MaxValue;
             double maxValue = double.MinValue;
 
-            for (int i = 0; i < axisLength && (axisAddress + i) < binData.Length - 1; i += 2)
+            for (int i = 0; i < axisLength * 2 && (axisAddress + i) < binData.Length - 1; i += 2)
             {
                 if (axisAddress + i + 1 >= binData.Length) break;
                 ushort rawValue = (ushort)((binData[axisAddress + i + 1] << 8) | binData[axisAddress + i]);
@@ -417,10 +417,30 @@ namespace VAGSuite
             {
                 string name = rule.Metadata.Name.Value ?? "";
 
+                // Meticulous: Calculate the variant index for multi-maps
+                // to ensure the correct temperature is extracted from MapData.
+                int variantIndex = 0;
+                if (symbol.MapSelector != null && symbol.MapSelector.NumRepeats > 1)
+                {
+                    // existingSymbols contains candidates.
+                    // currentPassSymbols contains XML clones already processed.
+                    // We check both to find our relative position in the set.
+                    if (existingSymbols != null)
+                    {
+                        foreach (SymbolHelper s in existingSymbols)
+                        {
+                            if (s.MapSelector == symbol.MapSelector && s.Flash_start_address < symbol.Flash_start_address)
+                            {
+                                variantIndex++;
+                            }
+                        }
+                    }
+                }
+
                 // Handle conditional templates for dynamic naming
                 if (rule.Metadata.Name.ConditionalTemplates != null && rule.Metadata.Name.ConditionalTemplates.Count > 0)
                 {
-                    name = EvaluateConditionalTemplate(rule.Metadata.Name.ConditionalTemplates, symbol, binData);
+                    name = EvaluateConditionalTemplate(rule.Metadata.Name.ConditionalTemplates, symbol, binData, variantIndex);
                 }
                 else if (!string.IsNullOrEmpty(rule.Metadata.Name.Value))
                 {
@@ -433,7 +453,9 @@ namespace VAGSuite
 
                 if (rule.Metadata.Name.Sequential)
                 {
-                    // Use template result as base name if BaseName is not specified
+                    // Meticulous: If we have a conditional template, it might have produced a unique name
+                    // (like "SOI 90 deg C"). If Sequential is also true, we use the BaseName for counting,
+                    // or the template result if BaseName is missing.
                     string baseName = rule.Metadata.Name.BaseName ?? name;
                     if (string.IsNullOrEmpty(baseName)) baseName = "Unknown Map";
 
@@ -443,13 +465,16 @@ namespace VAGSuite
                     int matchCount = 0;
 
                     // Count in existing (likely FileParser) symbols
-                    foreach (SymbolHelper s in existingSymbols)
+                    if (existingSymbols != null)
                     {
-                        if (s.Varname != null && s.Varname.StartsWith(baseName))
+                        foreach (SymbolHelper s in existingSymbols)
                         {
-                            if (!rule.Metadata.Name.CodeBlockScoped || s.CodeBlock == symbol.CodeBlock)
+                            if (s.Varname != null && s.Varname.StartsWith(baseName))
                             {
-                                matchCount++;
+                                if (!rule.Metadata.Name.CodeBlockScoped || s.CodeBlock == symbol.CodeBlock)
+                                {
+                                    matchCount++;
+                                }
                             }
                         }
                     }
@@ -469,6 +494,14 @@ namespace VAGSuite
                         }
                     }
 
+                    // If the current 'name' (from template) is already more specific than baseName,
+                    // we append the counter to the baseName to avoid stomping the template result
+                    // UNLESS the template result is identical to baseName.
+                    // For EDC15P SOI, we want "SOI 90 deg C (XML)". If we append a counter,
+                    // it should be "SOI 90 deg C (XML) 00" only if needed.
+                    // However, the user reports SOI doesn't have temperature.
+                    // This is because 'name' was overwritten by "baseName + counter".
+                    
                     name = baseName + " " + matchCount.ToString("D2");
                 }
 
@@ -481,7 +514,7 @@ namespace VAGSuite
         /// <summary>
         /// Evaluates conditional templates for dynamic naming.
         /// </summary>
-        private string EvaluateConditionalTemplate(List<ConditionalTemplate> templates, SymbolHelper symbol, byte[] binData)
+        private string EvaluateConditionalTemplate(List<ConditionalTemplate> templates, SymbolHelper symbol, byte[] binData, int variantIndex)
         {
             foreach (var template in templates)
             {
@@ -551,8 +584,8 @@ namespace VAGSuite
                     string result = template.Template;
                     if (symbol.MapSelector != null)
                     {
-                        result = result.Replace("{temperature}", GetTemperatureSOIRange(symbol.MapSelector, 0).ToString());
-                        result = result.Replace("{index}", "0");
+                        result = result.Replace("{temperature}", GetTemperatureSOIRange(symbol.MapSelector, variantIndex).ToString());
+                        result = result.Replace("{index}", variantIndex.ToString());
                     }
                     return result;
                 }
