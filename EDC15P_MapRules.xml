@@ -398,16 +398,13 @@
 
   <!-- 7. Smoke Limiter / IQ by MAP/MAF Limiters (Length 416/384) -->
   <MapRule priority="140" id="smoke_limiter_generic">
-    <Description>Smoke limiter (IQ by MAF) - Axis IDs: F9/DA or EA/DA</Description>
+    <Description>Smoke limiter (IQ by MAF) - Axis IDs: F9/DA (Legacy match)</Description>
     <Conditions>
       <Or>
         <Conditions><Length>416</Length></Conditions>
         <Conditions><Length>384</Length><XAxisLength>16</XAxisLength><YAxisLength>12</YAxisLength></Conditions>
       </Or>
-      <Or>
-        <Conditions><XAxisID high="0xF9" /><YAxisID high="0xDA" /></Conditions>
-        <Conditions><XAxisID high="0xEA" /><YAxisID high="0xDA" /></Conditions>
-      </Or>
+      <XAxisID high="0xF9" /><YAxisID high="0xDA" />
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category>
@@ -542,9 +539,10 @@
   <!-- 12. Boost Limit Map -->
   <MapRule priority="230" id="boost_limit_200">
     <Conditions>
+      <Description>Boost limit map - 10x10 dimension (200 bytes)</Description>
       <Or>
-        <Conditions><Length>200</Length></Conditions>
-        <Conditions><Length>180</Length></Conditions>
+        <Conditions><Length>200</Length><XAxisLength>10</XAxisLength><YAxisLength>10</YAxisLength></Conditions>
+        <Conditions><Length>180</Length><XAxisLength>9</XAxisLength><YAxisLength>10</YAxisLength></Conditions>
       </Or>
       <XAxisID high="0xC0" />
       <Or>

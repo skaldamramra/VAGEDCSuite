@@ -78,13 +78,17 @@ namespace VAGSuite
         [XmlElement("CustomValidator")]
         public List<CustomValidator> CustomValidators { get; set; }
 
-        [XmlArray("Or")]
-        [XmlArrayItem("Conditions")]
-        public List<Conditions> Or { get; set; }
+        [XmlElement("Or")]
+        public List<ConditionsGroup> Or { get; set; }
 
-        [XmlArray("And")]
-        [XmlArrayItem("Conditions")]
-        public List<Conditions> And { get; set; }
+        [XmlElement("And")]
+        public List<ConditionsGroup> And { get; set; }
+    }
+
+    public class ConditionsGroup
+    {
+        [XmlElement("Conditions")]
+        public List<Conditions> Conditions { get; set; }
     }
 
     public class IntCondition

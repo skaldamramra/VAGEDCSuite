@@ -99,27 +99,39 @@ namespace VAGSuite
                 if (!EvaluateCodeBlockCondition(conditions.CodeBlock, candidate)) return false;
             }
 
-            // Logical OR
+            // Logical OR (Handle multiple <Or> blocks)
             if (conditions.Or != null && conditions.Or.Count > 0)
             {
-                bool anyMatch = false;
-                foreach (var subCondition in conditions.Or)
+                foreach (var group in conditions.Or)
                 {
-                    if (EvaluateConditions(subCondition, candidate, binData))
+                    bool anyMatchInGroup = false;
+                    if (group.Conditions != null)
                     {
-                        anyMatch = true;
-                        break;
+                        foreach (var subCondition in group.Conditions)
+                        {
+                            if (EvaluateConditions(subCondition, candidate, binData))
+                            {
+                                anyMatchInGroup = true;
+                                break;
+                            }
+                        }
                     }
+                    if (!anyMatchInGroup) return false; // This group failed to match any condition
                 }
-                if (!anyMatch) return false;
             }
 
-            // Logical AND
+            // Logical AND (Handle multiple <And> blocks)
             if (conditions.And != null && conditions.And.Count > 0)
             {
-                foreach (var subCondition in conditions.And)
+                foreach (var group in conditions.And)
                 {
-                    if (!EvaluateConditions(subCondition, candidate, binData)) return false;
+                    if (group.Conditions != null)
+                    {
+                        foreach (var subCondition in group.Conditions)
+                        {
+                            if (!EvaluateConditions(subCondition, candidate, binData)) return false;
+                        }
+                    }
                 }
             }
 
@@ -582,12 +594,23 @@ namespace VAGSuite
                 {
                     // Replace placeholders in template
                     string result = template.Template;
-                    if (symbol.MapSelector != null)
+                    if (symbol.MapSelector != null && symbol.MapSelector.MapIndexes != null && symbol.MapSelector.MapIndexes.Length > 1)
                     {
-                        result = result.Replace("{temperature}", GetTemperatureSOIRange(symbol.MapSelector, variantIndex).ToString());
-                        result = result.Replace("{index}", variantIndex.ToString());
+                        // Meticulous: Check if the selector index is empty (legacy EDC15P logic)
+                        bool allEmpty = true;
+                        foreach (int idx in symbol.MapSelector.MapIndexes) if (idx != 0) allEmpty = false;
+                        
+                        if (!allEmpty)
+                        {
+                            result = result.Replace("{temperature}", GetTemperatureSOIRange(symbol.MapSelector, variantIndex).ToString());
+                            result = result.Replace("{index}", variantIndex.ToString());
+                            return result;
+                        }
                     }
-                    return result;
+                    else if (template.ConditionType.ToLower() == "default")
+                    {
+                        return result;
+                    }
                 }
             }
 
