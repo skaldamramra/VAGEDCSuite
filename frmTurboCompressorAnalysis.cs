@@ -25,6 +25,10 @@ namespace VAGSuite
             _turboService = new TurboCompressorService(parser, symbols);
             _renderer = new CompressorMapRenderer();
             InitializeComponent();
+            
+            // Set the application icon
+            this.Icon = new System.Drawing.Icon("vagedc.ico");
+            
             ApplyTheme();
             InitializeGraph();
             LoadInitialData();

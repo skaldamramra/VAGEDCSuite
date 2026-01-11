@@ -14,6 +14,10 @@ namespace VAGSuite
         public frmSettings()
         {
             InitializeComponent();
+            
+            // Set the application icon
+            this.Icon = new System.Drawing.Icon("vagedc.ico");
+            
             VAGSuite.Theming.VAGEDCThemeManager.Instance.ApplyThemeToForm(this);
         }
 
