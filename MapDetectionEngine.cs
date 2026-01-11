@@ -479,12 +479,18 @@ namespace VAGSuite
                 if (string.IsNullOrEmpty(baseNameForCounting)) baseNameForCounting = "Unknown Map";
                 if (!baseNameForCounting.Contains("(XML)")) baseNameForCounting += " (XML)";
 
-                int matchIndex = 0;
+                // For counting, we want to match maps that start with the base name
+                // and were also detected via XML (indicated by the (XML) tag).
+                // We use the pure base name without the (XML) tag for the StartsWith check
+                // to be flexible about where the tag is located (usually it's at the end).
+                string searchPrefix = baseNameForCounting.Replace(" (XML)", "").Replace("(XML)", "").Trim();
+
+                int matchIndex = 0; // Start at 0 as requested by user
                 if (existingSymbols != null)
                 {
                     foreach (SymbolHelper s in existingSymbols)
                     {
-                        if (s.Varname != null && s.Varname.StartsWith(baseNameForCounting))
+                        if (s.Varname != null && s.Varname.StartsWith(searchPrefix) && s.Varname.Contains("(XML)"))
                         {
                             if (!rule.Metadata.Name.CodeBlockScoped || s.CodeBlock == symbol.CodeBlock)
                             {
@@ -497,7 +503,7 @@ namespace VAGSuite
                 {
                     foreach (SymbolHelper s in currentPassSymbols)
                     {
-                        if (s.Varname != null && s.Varname.StartsWith(baseNameForCounting))
+                        if (s.Varname != null && s.Varname.StartsWith(searchPrefix) && s.Varname.Contains("(XML)"))
                         {
                             if (!rule.Metadata.Name.CodeBlockScoped || s.CodeBlock == symbol.CodeBlock)
                             {
@@ -559,7 +565,8 @@ namespace VAGSuite
                         conditionMet = symbol.MapSelector != null;
                         break;
                     case "sequentialindex":
-                        // Check matchIndex (Legacy: pidCount % 4)
+                        // Check matchIndex
+                        // matchIndex is 0-based.
                         if (int.TryParse(template.Condition, out int expectedIndex))
                         {
                             conditionMet = matchIndex == expectedIndex;
