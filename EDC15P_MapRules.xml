@@ -680,25 +680,9 @@
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
-      <Name>Torque limiter - Min map (XML)</Name>
+      <Name sequential="true" baseName="Torque limiter - Min map (XML)" codeBlockScoped="true" />
       <Correction>0.01</Correction>
-      <XAxis><Description>Speed/rpm ratio (km/h per rpm)</Description><Units>km/h/rpm</Units></XAxis>
-      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
-      <ZAxis><Description>Torque limit (mg/stroke)</Description></ZAxis>
-    </Metadata>
-  </MapRule>
-
-  <MapRule priority="144" id="torque_limiter_min_pi">
-    <Description>Torque limiter - Min map PI (mrwADB2_KF) (Legacy:5742)</Description>
-    <Conditions>
-      <Length>8</Length><XAxisLength>2</XAxisLength><YAxisLength>2</YAxisLength>
-      <XAxisID high="0xC2" /><YAxisID high="0xEC" />
-    </Conditions>
-    <Metadata>
-      <Category>Detected maps</Category><Subcategory>Limiters</Subcategory>
-      <Name>Torque limiter - Min map PI (XML)</Name>
-      <Correction>0.01</Correction>
-      <XAxis><Description>Speed/rpm ratio (km/h per rpm)</Description><Units>km/h/rpm</Units></XAxis>
+      <XAxis><Description>Speed/rpm ratio (km/h per rpm)</Description><Units>km/h/rpm</Units><Correction>0.0000390625</Correction></XAxis>
       <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
       <ZAxis><Description>Torque limit (mg/stroke)</Description></ZAxis>
     </Metadata>
@@ -1146,12 +1130,13 @@
         <Conditions><XAxisID exact="0xEBC4" /></Conditions>
         <Conditions><XAxisID exact="0xEBC6" /></Conditions>
       </Or>
+      <AxisValueCheck axis="X" comparison="gt" value="10" checkType="max" />
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
       <Name>Oil temperature sensor linearization (XML)</Name>
       <Correction>0.1</Correction><Offset>-273.1</Offset>
-      <XAxis><Description>Voltage (mV)</Description><Units>mv</Units><Correction>4.8875855</Correction></XAxis>
+      <YAxis><Description>Voltage (mV)</Description><Units>mv</Units><Correction>4.8875855</Correction></YAxis>
       <ZAxis><Description>Oil Temperature (°C)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1166,8 +1151,111 @@
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
       <Name sequential="true" baseName="Idle RPM (XML)" codeBlockScoped="true" />
-      <XAxis><Description>Coolant temperature</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <!-- Swapped to YAxis for legacy parity -->
+      <YAxis><Description>Coolant temperature</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
       <ZAxis><Description>Target engine speed</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="332" id="grid_table_fnwMEstzv">
+    <Description>Grid table for duration quantity fnoM_E (fnwMEstzv) - Legacy:820</Description>
+    <Conditions>
+      <Length>28</Length><XAxisLength>14</XAxisLength><YAxisLength>1</YAxisLength>
+      <XAxisID exact="0x0000" />
+      <ByteCheck address="flash_start_address" offset="-40" expected="0x4A" op="eq" />
+      <ByteCheck address="flash_start_address" offset="-39" expected="0xF9" op="eq" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Grid table for duration quantity fnoM_E (fnwMEstzv) (XML)</Name>
+      <YAxis><Description>Points</Description></YAxis>
+      <ZAxis><Description>Injected Quantity (mg/stroke)</Description></ZAxis>
+      <Correction>0.01</Correction>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="333" id="grid_table_fnwWTstzv">
+    <Description>Grid table for water temperaure fnmWTF (fnwWTstzv) - Legacy:821</Description>
+    <Conditions>
+      <Length>20</Length><XAxisLength>10</XAxisLength><YAxisLength>1</YAxisLength>
+      <XAxisID exact="0x0000" />
+      <ByteCheck address="flash_start_address" offset="-72" expected="0x4A" op="eq" />
+      <ByteCheck address="flash_start_address" offset="-71" expected="0xF9" op="eq" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Grid table for water temperaure fnmWTF (fnwWTstzv) (XML)</Name>
+      <YAxis><Description>Points</Description></YAxis>
+      <ZAxis><Description>Injected Quantity (mg/stroke)</Description></ZAxis>
+      <Correction>0.1</Correction><Offset>-273.1</Offset>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="334" id="grid_table_mrwLKstzv">
+    <Description>Grid table for corrected airmass mroM_LK (mrwLKstzv) - Legacy:823</Description>
+    <Conditions>
+      <Length>26</Length><XAxisLength>13</XAxisLength><YAxisLength>1</YAxisLength>
+      <XAxisID exact="0x0000" />
+      <ByteCheck address="flash_start_address" offset="-40" expected="0x4A" op="eq" />
+      <ByteCheck address="flash_start_address" offset="-39" expected="0xF9" op="eq" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Grid table for corrected airmass mroM_LK (mrwLKstzv) (XML)</Name>
+      <YAxis><Description>Points</Description></YAxis>
+      <ZAxis><Description>Airmass (mg/stroke)</Description></ZAxis>
+      <Correction>0.1</Correction>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="332" id="grid_table_fnwMEstzv">
+    <Description>Grid table for duration quantity fnoM_E (fnwMEstzv) - Legacy:820</Description>
+    <Conditions>
+      <Length>28</Length><XAxisLength>14</XAxisLength><YAxisLength>1</YAxisLength>
+      <XAxisID exact="0x0000" />
+      <ByteCheck address="flash_start_address" offset="-40" expected="0x4A" op="eq" />
+      <ByteCheck address="flash_start_address" offset="-39" expected="0xF9" op="eq" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Grid table for duration quantity fnoM_E (fnwMEstzv) (XML)</Name>
+      <YAxis><Description>Points</Description></YAxis>
+      <ZAxis><Description>Injected Quantity (mg/stroke)</Description></ZAxis>
+      <Correction>0.01</Correction>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="333" id="grid_table_fnwWTstzv">
+    <Description>Grid table for water temperaure fnmWTF (fnwWTstzv) - Legacy:821</Description>
+    <Conditions>
+      <Length>20</Length><XAxisLength>10</XAxisLength><YAxisLength>1</YAxisLength>
+      <XAxisID exact="0x0000" />
+      <ByteCheck address="flash_start_address" offset="-72" expected="0x4A" op="eq" />
+      <ByteCheck address="flash_start_address" offset="-71" expected="0xF9" op="eq" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Grid table for water temperaure fnmWTF (fnwWTstzv) (XML)</Name>
+      <YAxis><Description>Points</Description></YAxis>
+      <ZAxis><Description>Injected Quantity (mg/stroke)</Description></ZAxis>
+      <Correction>0.1</Correction><Offset>-273.1</Offset>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="334" id="grid_table_mrwLKstzv">
+    <Description>Grid table for corrected airmass mroM_LK (mrwLKstzv) - Legacy:823</Description>
+    <Conditions>
+      <Length>26</Length><XAxisLength>13</XAxisLength><YAxisLength>1</YAxisLength>
+      <XAxisID exact="0x0000" />
+      <ByteCheck address="flash_start_address" offset="-40" expected="0x4A" op="eq" />
+      <ByteCheck address="flash_start_address" offset="-39" expected="0xF9" op="eq" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Grid table for corrected airmass mroM_LK (mrwLKstzv) (XML)</Name>
+      <YAxis><Description>Points</Description></YAxis>
+      <ZAxis><Description>Airmass (mg/stroke)</Description></ZAxis>
+      <Correction>0.1</Correction>
     </Metadata>
   </MapRule>
 
@@ -1185,7 +1273,7 @@
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
       <Name>Oil temp correction for overrun (XML)</Name>
       <Correction>0.02</Correction>
-      <XAxis><Description>Oil temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>Oil temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
       <ZAxis><Description>Correction (s)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1204,7 +1292,7 @@
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
       <Name>Glow intermediate state time (XML)</Name>
       <Correction>0.01</Correction>
-      <XAxis><Description>Air temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>Air temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
       <ZAxis><Description>Wait time (s)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1223,7 +1311,7 @@
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
       <Name>AC Switch-off limit (XML)</Name>
       <Correction>0.1</Correction><Offset>-273.1</Offset>
-      <XAxis><Description>Vehicle speed (km/h)</Description><Units>km/h</Units><Correction>0.01</Correction></XAxis>
+      <YAxis><Description>Vehicle speed (km/h)</Description><Units>km/h</Units><Correction>0.01</Correction></YAxis>
       <ZAxis><Description>Water temperature treshold (°C)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1241,7 +1329,7 @@
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
       <Name sequential="true" baseName="Smoke selector / Pre-inj ramp (XML)" codeBlockScoped="true" />
-      <XAxis><Description>Water temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>Water temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
     </Metadata>
   </MapRule>
 
@@ -1259,7 +1347,7 @@
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
       <Name>Atm. pressure corr. linearization (XML)</Name>
-      <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
       <ZAxis><Description>Atmospheric pressure (mBar)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1273,7 +1361,7 @@
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
       <Name>Refrigerant pressure linearization (XML)</Name>
       <Correction>0.002</Correction>
-      <XAxis><Description>Raw duty cycle (%)</Description><Units>%</Units><Correction>0.01</Correction></XAxis>
+      <YAxis><Description>Raw duty cycle (%)</Description><Units>%</Units><Correction>0.01</Correction></YAxis>
       <ZAxis><Description>Refrigerant pressure (Bar)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1334,12 +1422,17 @@
   <MapRule priority="385" id="brake_light_switch_linear">
     <Description>Brake light switch linearization (anwBRE_KL) - Legacy:5941</Description>
     <Conditions>
-      <Length>4</Length><XAxisID exact="0xEBC2" />
+      <Length>4</Length>
+      <Or>
+        <Conditions><XAxisID exact="0xEBC2" /></Conditions>
+        <Conditions><XAxisID exact="0xEBC4" /></Conditions>
+      </Or>
+      <AxisValueCheck axis="X" comparison="le" value="10" checkType="max" />
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
       <Name>Brake light switch linearization (XML)</Name>
-      <XAxis><Description>Voltage (mV)</Description><Units>mv</Units><Correction>4.8875855</Correction></XAxis>
+      <YAxis><Description>Voltage (mV)</Description><Units>mv</Units><Correction>4.8875855</Correction></YAxis>
       <ZAxis><Description>Linearization (not active)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1390,7 +1483,7 @@
       <Category>Detected maps</Category>
       <Subcategory>Misc</Subcategory>
       <Name>Grid table for speed input dzmNmit (fnwDZstzv) (XML)</Name>
-      <XAxis><Description>Points</Description></XAxis>
+      <YAxis><Description>Points</Description></YAxis>
       <ZAxis><Description>Engine speed (rpm)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1409,7 +1502,7 @@
       <Category>Detected maps</Category>
       <Subcategory>Misc</Subcategory>
       <Name>Grid table for speed input dzmNmit (mrwDZstzv) (XML)</Name>
-      <XAxis><Description>Points</Description></XAxis>
+      <YAxis><Description>Points</Description></YAxis>
       <ZAxis><Description>Engine speed (rpm)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1425,7 +1518,7 @@
       <Subcategory>Misc</Subcategory>
       <Name>Grid table for duration quantity fnoM_E (fnwMEstzv) (XML)</Name>
       <Correction>0.01</Correction>
-      <XAxis><Description>Points</Description></XAxis>
+      <YAxis><Description>Points</Description></YAxis>
       <ZAxis><Description>Injected Quantity (mg/stroke)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1441,7 +1534,7 @@
       <Subcategory>Misc</Subcategory>
       <Name>Grid table for corrected airmass mroM_LK (mrwLKstzv) (XML)</Name>
       <Correction>0.1</Correction>
-      <XAxis><Description>Points</Description></XAxis>
+      <YAxis><Description>Points</Description></YAxis>
       <ZAxis><Description>Airmass (mg/stroke)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1457,7 +1550,7 @@
       <Subcategory>Misc</Subcategory>
       <Name>Grid table for water temperaure fnmWTF (fnwWTstzv) (XML)</Name>
       <Correction>0.1</Correction><Offset>-273.1</Offset>
-      <XAxis><Description>Points</Description></XAxis>
+      <YAxis><Description>Points</Description></YAxis>
       <ZAxis><Description>Injected Quantity (mg/stroke)</Description></ZAxis>
     </Metadata>
   </MapRule>
@@ -1673,18 +1766,40 @@
     </Metadata>
   </MapRule>
 
-  <MapRule priority="370" id="speed_dependent_iq_limit_err">
-    <Description>Speed dependent - IQ limit in case of error (mrwBEM_KL) - Legacy:5115</Description>
+  <MapRule priority="370" id="speed_dependent_misc_lines">
+    <Description>Speed dependent misc lines (mrwBEM_KL, anwGFH51KL, ldwGRminKL, khwKH_ABKL) - Legacy:5115, 5108, 5101, 5087</Description>
     <Conditions>
       <Length>12</Length><XAxisLength>6</XAxisLength><YAxisLength>1</YAxisLength>
-      <XAxisID exact="0xEC38" />
+      <Or>
+        <Conditions><XAxisID exact="0xEC38" /></Conditions>
+        <Conditions><XAxisID exact="0xEC2E" /></Conditions>
+        <Conditions><XAxisID exact="0xEC2C" /></Conditions>
+      </Or>
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
-      <Name>Speed dependent - IQ limit in case of error (mrwBEM_KL) (XML)</Name>
+      <Name sequential="false" baseName="Speed dependent -" codeBlockScoped="true">
+        <ConditionalTemplate>
+          <When conditionType="SequentialIndex" condition="0">
+            <Template>Speed dependent - IQ limit in case of error (mrwBEM_KL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="1">
+            <Template>Speed dependent - Ratiometric factor (anwGFH51KL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="2">
+            <Template>Speed dependent - Boost actuator lower limit (ldwGRminKL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="3">
+            <Template>Speed dependent - Heating generator off threshold (khwKH_ABKL) (XML)</Template>
+          </When>
+          <When conditionType="default">
+            <Template>Speed dependent - Unknown {match_index} (XML)</Template>
+          </When>
+        </ConditionalTemplate>
+      </Name>
       <Correction>0.01</Correction>
       <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
-      <ZAxis><Description>Injected quantity (mg/stroke)</Description></ZAxis>
+      <ZAxis><Description>Value</Description></ZAxis>
     </Metadata>
   </MapRule>
 
@@ -1734,17 +1849,43 @@
     </Metadata>
   </MapRule>
 
-  <MapRule priority="390" id="boost_intake_manifold_vacuum">
-    <Description>Boost intake manifold vacuum detection curve (mrwLDFU_KL) - Legacy:4296</Description>
+  <MapRule priority="390" id="boost_vacuum_detection_misc">
+    <Description>Boost vacuum and small-quantity control lines - Legacy:4296, 4285, 4274, 4253, 4246</Description>
     <Conditions>
       <Length>20</Length><XAxisLength>10</XAxisLength><YAxisLength>1</YAxisLength>
-      <XAxisID exact="0xEC38" />
+      <Or>
+        <Conditions><XAxisID exact="0xEC38" /></Conditions>
+        <Conditions><XAxisID exact="0xEC2E" /></Conditions>
+        <Conditions><XAxisID exact="0xEC2C" /></Conditions>
+      </Or>
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
-      <Name>Boost intake manifold vacuum detection (XML)</Name>
+      <Name sequential="false" baseName="Boost/EGR Control -" codeBlockScoped="true">
+        <ConditionalTemplate>
+          <When conditionType="SequentialIndex" condition="0">
+            <Template>Boost intake manifold vacuum detection (mrwLDFU_KL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="1">
+            <Template>EGR control small-quantity off (arwREG0KL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="2">
+            <Template>EGR control small-quantity on (arwREG1KL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="5">
+            <Template>Boost pressure control OFF threshold (ldwREG0WKL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="6">
+            <Template>Boost pressure control ON threshold (ldwREG1KL) (XML)</Template>
+          </When>
+          <When conditionType="default">
+            <Template>Boost/EGR Control line {match_index} (XML)</Template>
+          </When>
+        </ConditionalTemplate>
+      </Name>
       <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
-      <ZAxis><Description>Pressure difference (mbar)</Description></ZAxis>
+      <ZAxis><Description>Value</Description></ZAxis>
+      <Correction>0.01</Correction>
     </Metadata>
   </MapRule>
 
@@ -1811,8 +1952,8 @@
     </Metadata>
   </MapRule>
 
-  <MapRule priority="305" id="egr_setpoint_height_corr">
-    <Description>Pressure - EGR Setpoint height correction (arwPAKORKL) - Legacy:5520</Description>
+  <MapRule priority="305" id="egr_setpoint_height_corr_sequential">
+    <Description>Pressure - EGR Setpoint height correction or SOI Selector (arwPAKORKL, fnwSWST_KL) - Legacy:5520, 5513</Description>
     <Conditions>
       <Length>8</Length><XAxisLength>4</XAxisLength><YAxisLength>1</YAxisLength>
       <Or>
@@ -1823,10 +1964,29 @@
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
-      <Name>EGR Setpoint height correction (XML)</Name>
+      <Name sequential="false" baseName="Pressure -" codeBlockScoped="true">
+        <ConditionalTemplate>
+          <When conditionType="SequentialIndex" condition="0">
+            <Template>EGR Setpoint height correction (arwPAKORKL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="1">
+            <Template>Pressure - Injection advance at start map selector (fnwSWST_KL) (XML)</Template>
+          </When>
+          <When conditionType="default">
+            <Template>Pressure correction {match_index} (XML)</Template>
+          </When>
+        </ConditionalTemplate>
+      </Name>
       <YAxis><Description>Air pressure</Description><Units>mbar</Units></YAxis>
-      <ZAxis><Description>mg/stroke air</Description></ZAxis>
-      <Correction>0.1</Correction>
+      <ZAxis><Description>Value</Description></ZAxis>
+      <ConditionalTemplate>
+        <When conditionType="SequentialIndex" condition="0">
+          <Correction>0.1</Correction>
+        </When>
+        <When conditionType="SequentialIndex" condition="1">
+          <Correction>0.00390625</Correction>
+        </When>
+      </ConditionalTemplate>
     </Metadata>
   </MapRule>
 
@@ -1864,24 +2024,6 @@
     </Metadata>
   </MapRule>
 
-  <MapRule priority="320" id="altitude_egr_setpoint">
-    <Description>Altitude dependent - EGR setpoint characteristic map (arwPSKORKL) - Legacy:5034</Description>
-    <Conditions>
-      <Length>12</Length><XAxisLength>6</XAxisLength><YAxisLength>1</YAxisLength>
-      <Or>
-        <Conditions><XAxisID exact="0xC030" /></Conditions>
-        <Conditions><XAxisID exact="0xC034" /></Conditions>
-        <Conditions><XAxisID exact="0xC02C" /></Conditions>
-      </Or>
-    </Conditions>
-    <Metadata>
-      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
-      <Name>Altitude dependent - EGR setpoint (XML)</Name>
-      <YAxis><Description>Altitude pressure</Description><Units>mbar</Units></YAxis>
-      <ZAxis><Description>Air quantity (mg/stroke)</Description></ZAxis>
-      <Correction>0.1</Correction>
-    </Metadata>
-  </MapRule>
 
   <MapRule priority="325" id="egr_temp_drop_map">
     <Description>EGR- Engine temperature dependend drop map - Legacy:4812</Description>
@@ -2003,8 +2145,8 @@
     </Metadata>
   </MapRule>
 
-  <MapRule priority="360" id="altitude_smoke_turbo_limit">
-    <Description>Altitude dependent - Smoke turbo boost limit ramps - Legacy:5020, 5027</Description>
+  <MapRule priority="320" id="altitude_pressure_misc_6x1">
+    <Description>Altitude dependent maps (EGR, Smoke ramps, SOI selector) - Legacy:5034, 5020, 5027, 5016</Description>
     <Conditions>
       <Length>12</Length><XAxisLength>6</XAxisLength><YAxisLength>1</YAxisLength>
       <Or>
@@ -2015,10 +2157,33 @@
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
-      <Name sequential="true" baseName="Altitude dependent - Smoke turbo boost limit ramp (XML)" codeBlockScoped="true" />
+      <Name sequential="false" baseName="Altitude dependent -" codeBlockScoped="true">
+        <ConditionalTemplate>
+          <When conditionType="SequentialIndex" condition="0">
+            <Template>Altitude dependent - EGR setpoint (arwPSKORKL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="1">
+            <Template>Altitude dependent - Smoke turbo boost positive ramp (mrwTSADpKL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="2">
+            <Template>Altitude dependent - Smoke turbo boost negative ramp (mrwTSADnKL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="3">
+            <Template>Altitude dependent - SOI Pressure correction map selector (fnwSWAD_KL) (XML)</Template>
+          </When>
+          <When conditionType="default">
+            <Template>Altitude dependent - Unknown {match_index} (XML)</Template>
+          </When>
+        </ConditionalTemplate>
+      </Name>
       <YAxis><Description>Altitude pressure</Description><Units>mbar</Units></YAxis>
-      <ZAxis><Description>Limit</Description><Units>mg/stroke/s</Units></ZAxis>
-      <Correction>0.5</Correction>
+      <ZAxis><Description>Value</Description></ZAxis>
+      <ConditionalTemplate>
+        <When conditionType="SequentialIndex" condition="0"><Correction>0.1</Correction></When>
+        <When conditionType="SequentialIndex" condition="1"><Correction>0.5</Correction></When>
+        <When conditionType="SequentialIndex" condition="2"><Correction>0.5</Correction></When>
+        <When conditionType="SequentialIndex" condition="3"><Correction>0.00390625</Correction></When>
+      </ConditionalTemplate>
     </Metadata>
   </MapRule>
 
@@ -2038,18 +2203,57 @@
     </Metadata>
   </MapRule>
 
-  <MapRule priority="370" id="ard_shaper_gradient">
-    <Description>Map- ARD shaper gradient bandwidth maps - Legacy:4713, 4732, 4739, 4752</Description>
+  <MapRule priority="370" id="ard_shaper_gradient_sequential">
+    <Description>Map- ARD shaper and misc 8x1 lines - Legacy:4752, 4745, 4739, 4732, 4728, 4713, 4709, 4702</Description>
     <Conditions>
       <Length>16</Length><XAxisLength>8</XAxisLength><YAxisLength>1</YAxisLength>
       <XAxisID high="0xF9" />
     </Conditions>
     <Metadata>
       <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
-      <Name sequential="true" baseName="ARD shaper gradient bandwidth (XML)" codeBlockScoped="true" />
-      <YAxis><Description>Engine speed</Description><Units>rpm</Units></YAxis>
-      <ZAxis><Description>Injected Quantity</Description><Units>mg/stroke</Units></ZAxis>
-      <Correction>0.01</Correction>
+      <Name sequential="false" baseName="Misc 8x1 -" codeBlockScoped="true">
+        <ConditionalTemplate>
+          <When conditionType="SequentialIndex" condition="0">
+            <Template>Map- ARD shaper gradient bandwidth neg trend - pos offset (mrwFNoO_KL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="1">
+            <Template>Map- ARD shaper gradient bandwidth neg trend - neg offset (mrwFNoU_KL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="2">
+            <Template>Map- ARD shaper gradient bandwidth pos trend - pos offset (mrwFPoO_KL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="3">
+            <Template>Map- ARD shaper gradient bandwidth pos trend - neg offset (mrwFPoU_KL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="4">
+            <Template>Map- Boost shutdown freezing time characteristic (ldwVZDZ_KL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="5">
+            <Template>Map- EGR cooler bypass switch-on line (arwERGnEin) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="6">
+            <Template>Map- EGR cooler bypass switch-off line (arwERGnAus) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="7">
+            <Template>Map- Cooler water temp speed correction line (kuwKOR1_KL) (XML)</Template>
+          </When>
+          <When conditionType="default">
+            <Template>Misc 8x1 line {match_index} (XML)</Template>
+          </When>
+        </ConditionalTemplate>
+      </Name>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Value</Description></ZAxis>
+      <ConditionalTemplate>
+        <When conditionType="SequentialIndex" condition="0"><Correction>0.01</Correction></When>
+        <When conditionType="SequentialIndex" condition="1"><Correction>0.01</Correction></When>
+        <When conditionType="SequentialIndex" condition="2"><Correction>0.01</Correction></When>
+        <When conditionType="SequentialIndex" condition="3"><Correction>0.01</Correction></When>
+        <When conditionType="SequentialIndex" condition="4"><Correction>0.0001</Correction></When>
+        <When conditionType="SequentialIndex" condition="5"><Correction>0.1</Correction></When>
+        <When conditionType="SequentialIndex" condition="6"><Correction>0.1</Correction></When>
+        <When conditionType="SequentialIndex" condition="7"><Correction>0.0001</Correction></When>
+      </ConditionalTemplate>
     </Metadata>
   </MapRule>
 
@@ -2649,6 +2853,450 @@
       <YAxis><Description>Engine speed</Description><Units>rpm</Units></YAxis>
       <ZAxis><Description>Crankshaft degrees</Description><Units>°</Units></ZAxis>
       <Correction>0.0234375</Correction><Offset>-78</Offset>
+    </Metadata>
+  </MapRule>
+
+  <!-- Batch 2: Missing Maps from Legacy Parser -->
+
+  <!-- 22. ARD drivers wish limiter line (mrwFFBgrKL) -->
+  <MapRule priority="400" id="ard_drivers_wish_limiter_mrwFFBgrKL">
+    <Description>ARD drivers wish limiter line (mrwFFBgrKL) - Legacy:5612</Description>
+    <Conditions>
+      <Length>8</Length>
+      <XAxisLength>4</XAxisLength>
+      <YAxisLength>1</YAxisLength>
+      <Or>
+        <Conditions><XAxisID exact="0xF94A" /></Conditions>
+        <Conditions><XAxisID exact="0xF948" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Misc</Subcategory>
+      <Name>ARD drivers wish limiter line (mrwFFBgrKL) (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
+      <ZAxis><Description>Injected quantity (mg/stroke)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 23. Air conditioning torque requirement map (mrwKLMD_KF) -->
+  <MapRule priority="405" id="air_conditioning_torque_mrwKLMD_KF">
+    <Description>Air conditioning torque requirement map (mrwKLMD_KF) - Legacy:3982</Description>
+    <Conditions>
+      <Length>32</Length>
+      <XAxisLength>4</XAxisLength>
+      <YAxisLength>4</YAxisLength>
+      <XAxisID high="0xF9" />
+      <YAxisID high="0xC1" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Misc</Subcategory>
+      <Name>Air conditioning torque requirement map (mrwKLMD_KF) (XML)</Name>
+      <Correction>0.1</Correction>
+      <XAxis>
+        <Description>Engine speed (rpm)</Description>
+        <Units>rpm</Units>
+      </XAxis>
+      <YAxis>
+        <Description>Temperature (°C)</Description>
+        <Units>°C</Units>
+        <Correction>0.1</Correction>
+        <Offset>-273.1</Offset>
+      </YAxis>
+      <ZAxis>
+        <Description>Torque loss due to air conditioning (NM)</Description>
+      </ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 24. MAF airmass correction by temperature -->
+  <MapRule priority="410" id="maf_airmass_correction_temp">
+    <Description>MAF airmass correction by temperature - Legacy:1926</Description>
+    <Conditions>
+      <Length>320</Length>
+      <XAxisLength>16</XAxisLength>
+      <YAxisLength>10</YAxisLength>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Misc</Subcategory>
+      <Name>MAF airmass correction by temperature (XML)</Name>
+      <Correction>0.1</Correction>
+      <XAxis><Description>Temperature (celsius)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>Airflow (mg/stroke)</Description><Units>mgst</Units><Correction>0.1</Correction></YAxis>
+      <ZAxis><Description>Corrected Airflow (mg/stroke)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 25. IAT dependent- Smoke/Boost correction (mrwTSTLKL) -->
+  <MapRule priority="415" id="iat_dependent_smoke_boost_mrwTSTLKL">
+    <Description>IAT dependent- Smoke/Boost correction (mrwTSTLKL) - Legacy:4922, 4961</Description>
+    <Conditions>
+      <Length>14</Length>
+      <XAxisLength>7</XAxisLength>
+      <YAxisLength>1</YAxisLength>
+      <Or>
+        <Conditions><XAxisID exact="0xC19C" /></Conditions>
+        <Conditions><XAxisID exact="0xC168" /></Conditions>
+        <Conditions><XAxisID exact="0xC1AC" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Misc</Subcategory>
+      <Name>IAT dependent- Smoke/Boost correction (mrwTSTLKL) (XML)</Name>
+      <Correction>0.0001</Correction>
+      <XAxis><Description>Air Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <ZAxis><Description>Value</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 26. Unknown 3x4 map (IDs: C1DC / C27E) -->
+  <MapRule priority="420" id="unknown_3x4_map_c1dc_c27e">
+    <Description>Map :3 x 4 IDs: X 49628 (C1DC) Y 49790 (C27E)</Description>
+    <Conditions>
+      <Length>24</Length>
+      <XAxisLength>3</XAxisLength>
+      <YAxisLength>4</YAxisLength>
+      <XAxisID exact="0xC1DC" />
+      <YAxisID exact="0xC27E" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Misc</Subcategory>
+      <Name>Map 3x4 (C1DC/C27E) (XML)</Name>
+    </Metadata>
+  </MapRule>
+
+  <!-- 27. CAN Desired engine speed map -->
+  <MapRule priority="425" id="can_desired_engine_speed">
+    <Description>CAN Desired engine speed map - Legacy:3206</Description>
+    <Conditions>
+      <Length>120</Length>
+      <XAxisLength>6</XAxisLength>
+      <YAxisLength>10</YAxisLength>
+      <XAxisID high="0xC1" />
+      <YAxisID high="0xC1" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Misc</Subcategory>
+      <Name>CAN Desired engine speed map (XML)</Name>
+      <XAxis><Description>Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></YAxis>
+      <ZAxis><Description>Speed (rpm)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 28. PGS linearization (not active) (anwPGS_KL) -->
+  <MapRule priority="430" id="pgs_linearization_anwPGS_KL">
+    <Description>PGS linearization (not active) (anwPGS_KL) - Legacy:5602</Description>
+    <Conditions>
+      <Length>8</Length>
+      <XAxisLength>4</XAxisLength>
+      <YAxisLength>1</YAxisLength>
+      <Or>
+        <Conditions><XAxisID exact="0xEB9A" /></Conditions>
+        <Conditions><XAxisID exact="0xEB9C" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Misc</Subcategory>
+      <Name>PGS linearization (not active) (anwPGS_KL) (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>Voltage (mV)</Description><Units>mV</Units><Correction>4.8875855</Correction></XAxis>
+      <ZAxis><Description>%</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 29. Advanced thrust characteristic map (mrwSCHUPKL) -->
+  <MapRule priority="435" id="advanced_thrust_mrwSCHUPKL">
+    <Description>Advanced thrust characteristic map (mrwSCHUPKL) - Legacy:3479</Description>
+    <Conditions>
+      <Length>50</Length>
+      <XAxisLength>25</XAxisLength>
+      <YAxisLength>1</YAxisLength>
+      <XAxisID high="0xEC" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category>
+      <Subcategory>Misc</Subcategory>
+      <Name>Advanced thrust characteristic map (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
+      <ZAxis><Description>Temperature corrected taget quantity (mg/stroke)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 30. Cooling System Maps (8x8, 128 bytes) -->
+  <MapRule priority="450" id="cooling_kuwSOLL1KF">
+    <Conditions><Length>128</Length><XAxisID exact="0xF94A" /><YAxisID exact="0xF944" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Water temperature basic setpoint - target will map 1 (kuwSOLL1KF) (XML)</Name>
+      <XAxis><Description>Injected Quantity (mg/stroke)</Description><Units>mg/st</Units><Correction>0.01</Correction></XAxis>
+      <YAxis><Description>Engine speed (RPM)</Description><Units>RPM</Units></YAxis>
+      <ZAxis><Description>Load-dependent output Temperature (°C)</Description></ZAxis>
+      <Correction>0.1</Correction><Offset>-273.1</Offset>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="451" id="cooling_kuwSOLL2KF">
+    <Conditions><Length>128</Length><XAxisID exact="0xC1DC" /><YAxisID exact="0xE9CC" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Load-dependend pre control cooling will map 2 (kuwSOLL2KF) (XML)</Name>
+      <XAxis><Description>Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>water Temperature setpoint (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
+      <ZAxis><Description>Load-dependent output Temperature (°C)</Description></ZAxis>
+      <Correction>0.1</Correction><Offset>-273.1</Offset>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="452" id="cooling_kuwSOLL3KF">
+    <Conditions><Length>128</Length><XAxisID exact="0xC1C6" /><YAxisID exact="0xC1DC" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Setpoint temperature difference will map 3 (kuwSOLL3KF) (XML)</Name>
+      <XAxis><Description>Ambient Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>Cylinder head water Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
+      <ZAxis><Description>Setpoint temperature difference (°C)</Description></ZAxis>
+      <Correction>1</Correction>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="453" id="cooling_kuwSOLL4KF">
+    <Conditions><Length>128</Length><XAxisID exact="0xC13C" /><YAxisID exact="0xEA16" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Relative dynamic cooling requirement will map 4 (kuwSOLL4KF) (XML)</Name>
+      <XAxis><Description>Water Temperature difference (°C)</Description><Units>°C</Units><Correction>0.1</Correction></XAxis>
+      <YAxis><Description>Cylinder head outlet control Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction></YAxis>
+      <ZAxis><Description>Correction (°C)</Description></ZAxis>
+      <Correction>1</Correction>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="454" id="cooling_kmwSTEU_KF">
+    <Conditions><Length>128</Length><XAxisID exact="0xC13C" /><YAxisID exact="0xC13E" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Water control duty cycle map (kmwSTEU_KF) (XML)</Name>
+      <XAxis><Description>Setpoint Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>Control temperetare deviation (°C)</Description><Units>°C</Units><Correction>0.1</Correction></YAxis>
+      <ZAxis><Description>Duty Cycle %</Description></ZAxis>
+      <Correction>1</Correction>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="455" id="cooling_kuwHyGRDKF">
+    <Conditions><Length>128</Length><XAxisID exact="0xE9E4" /><YAxisID exact="0xF94A" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Hydraulic cooling fan basic speed map (kuwHyGRDKF) (XML)</Name>
+      <XAxis><Description>Engine speed (rpm)</Description><Units>RPM</Units></XAxis>
+      <YAxis><Description>Cooling output (W)</Description><Units>W</Units></YAxis>
+      <ZAxis><Description>Fan speed (rpm)</Description></ZAxis>
+      <Correction>1</Correction>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="456" id="cooling_kuwElGRDKF">
+    <Conditions><Length>128</Length><XAxisID exact="0xE9EA" /><YAxisID exact="0xF94A" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Electric cooling fan basic speed map (kuwElGRDKF) (XML)</Name>
+      <XAxis><Description>Engine speed (rpm)</Description><Units>RPM</Units></XAxis>
+      <YAxis><Description>Cooling output (W)</Description><Units>W</Units></YAxis>
+      <ZAxis><Description>Fan speed (rpm)</Description></ZAxis>
+      <Correction>1</Correction>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="457" id="cooling_kuwHyLFTKF">
+    <Conditions><Length>128</Length><XAxisID exact="0xF94A" /><YAxisID exact="0xE9E8" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Hydraulic fan speed normalization map (kuwHyLFTKF) (XML)</Name>
+      <XAxis><Description>Fan speed (rpm)</Description><Units>RPM</Units></XAxis>
+      <YAxis><Description>Engine speed (rpm)</Description><Units>RPM</Units></YAxis>
+      <ZAxis><Description>Offset correction</Description></ZAxis>
+      <Correction>1</Correction>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="458" id="cooling_kmwKOR2_KF">
+    <Conditions><Length>128</Length><XAxisID exact="0xC27E" /><YAxisID exact="0xC1C6" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Cooler setpoint correction map 2 (kmwKOR2_KF) (XML)</Name>
+      <XAxis><Description>Ambient Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>Vehicle speed (Km/h)</Description><Units>KMH</Units><Correction>0.01</Correction></YAxis>
+      <ZAxis><Description>Output Temperature (°C)</Description></ZAxis>
+      <Correction>0.1</Correction><Offset>-273.1</Offset>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="459" id="cooling_kuwNLKORKF">
+    <Conditions><Length>128</Length><XAxisID exact="0xC1C6" /><YAxisID exact="0xC1AE" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Radiator fan-caster correction map (kuwNLKORKF) (XML)</Name>
+      <XAxis><Description>Ambient Intake Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>Top of cylinder head Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
+      <ZAxis><Description>Correction (s)</Description></ZAxis>
+      <Correction>1</Correction>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="460" id="cooling_kuwNLKORK2">
+    <Conditions><Length>128</Length><XAxisID exact="0xC1AE" /><YAxisID exact="0xC1C6" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Radiator fan-caster correction map 2 (kuwNLKORK2) (XML)</Name>
+      <XAxis><Description>Ambient Intake Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>Top of cylinder head Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
+      <ZAxis><Description>Correction (s)</Description></ZAxis>
+      <Correction>1</Correction>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="461" id="cooling_kmwLTKOR_KF">
+    <Conditions><Length>128</Length><XAxisID exact="0xC1AC" /><YAxisID exact="0xEA3A" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Cooler temperature characteristic field (kmwLTKOR_KF) (XML)</Name>
+      <XAxis><Description>Pressure (mBar)</Description><Units>mbar</Units></XAxis>
+      <YAxis><Description>Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
+      <ZAxis><Description>Output Temperature (°C)</Description></ZAxis>
+      <Correction>0.1</Correction><Offset>-273.1</Offset>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="462" id="cooling_kuwNLGRDKF">
+    <Conditions><Length>128</Length><XAxisID exact="0xC1AE" /><YAxisID exact="0xE9FC" /></Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Radiator after-run pump time (kuwNLGRDKF) (XML)</Name>
+      <XAxis><Description>Top of cylinder head Temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></XAxis>
+      <YAxis><Description>Water flow (l/h)</Description><Units>l/h</Units><Correction>0.015021</Correction></YAxis>
+      <ZAxis><Description>Run time (s)</Description></ZAxis>
+      <Correction>0.02</Correction>
+    </Metadata>
+  </MapRule>
+
+  <!-- 31. Glowplug Control Maps -->
+  <MapRule priority="470" id="pre_glow_map">
+    <Description>Pre-glow map - Legacy:4125</Description>
+    <Conditions>
+      <Length>20</Length><XAxisLength>2</XAxisLength><YAxisLength>5</YAxisLength>
+      <XAxisID exact="0xC1BA" /><YAxisID exact="0xE9AC" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Pre-glow map (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>Temperature</Description></XAxis>
+      <YAxis><Description>Air pressure</Description></YAxis>
+      <ZAxis><Description>Time (sec)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="471" id="glow_plugs_control_map">
+    <Description>Glow plugs glow control map - Legacy:3364</Description>
+    <Conditions>
+      <Length>72</Length><XAxisLength>6</XAxisLength><YAxisLength>6</YAxisLength>
+      <XAxisID exact="0xF944" /><YAxisID exact="0xF94A" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Glow plugs glow control map (XML)</Name>
+      <Correction>0.01</Correction>
+      <XAxis><Description>Engine speed (rpm)</Description><Units>rpm</Units></XAxis>
+      <YAxis><Description>Injected quantity (mg/stroke)</Description><Units>mgst</Units></YAxis>
+      <ZAxis><Description>Glow plug cycle (%)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="472" id="glowplug_periods_sequential">
+    <Description>Glowplug control period lines (NGKL, t1KL, GAZ_KL) - Legacy:5567, 5557, 5550</Description>
+    <Conditions>
+      <Length>8</Length><XAxisLength>4</XAxisLength><YAxisLength>1</YAxisLength>
+      <XAxisID exact="0xC1B2" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name sequential="false" baseName="Glowplug control -" codeBlockScoped="true">
+        <ConditionalTemplate>
+          <When conditionType="SequentialIndex" condition="0">
+            <Template>Glowplug control - Afterglow period (gswGS_NGKL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="1">
+            <Template>Glowplug control - glow period time in area 1 (gswGS_t1KL) (XML)</Template>
+          </When>
+          <When conditionType="SequentialIndex" condition="2">
+            <Template>Glowplug control - Indicator glow period (gswGAZ_KL) (XML)</Template>
+          </When>
+          <When conditionType="default">
+            <Template>Glowplug control period line {match_index} (XML)</Template>
+          </When>
+        </ConditionalTemplate>
+      </Name>
+      <Correction>0.01</Correction>
+      <YAxis><Description>Engine temperature (°C)</Description><Units>°C</Units><Correction>0.1</Correction><Offset>-273.1</Offset></YAxis>
+      <ZAxis><Description>Period (s)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <!-- 32. Additional Sensor Linearizations -->
+  <MapRule priority="480" id="intake_manifold_temp_linear">
+    <Description>Intake manifold temperature sensor linearization (anwSTF_KL) - Legacy:3795</Description>
+    <Conditions>
+      <Length>36</Length><XAxisLength>18</XAxisLength><YAxisLength>1</YAxisLength>
+      <Or>
+        <Conditions><XAxisID exact="0xEBB2" /></Conditions>
+        <Conditions><XAxisID exact="0xEBB4" /></Conditions>
+      </Or>
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Intake manifold temperature sensor linearization (XML)</Name>
+      <Correction>0.1</Correction><Offset>-273.1</Offset>
+      <YAxis><Description>mV</Description><Units>mV</Units><Correction>4.88758</Correction></YAxis>
+      <ZAxis><Description>Temperature (°C)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="485" id="cylinder_head_water_temp_linear">
+    <Description>Cylinder head water temperature sensor linearization (anwWTF_KL) - Legacy:3807</Description>
+    <Conditions>
+      <Length>36</Length><XAxisLength>18</XAxisLength><YAxisLength>1</YAxisLength>
+      <XAxisID exact="0xEB96" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Cylinder head water temperature sensor linearization (XML)</Name>
+      <Correction>0.1</Correction><Offset>-273.1</Offset>
+      <YAxis><Description>mV</Description><Units>mV</Units><Correction>4.88758</Correction></YAxis>
+      <ZAxis><Description>Temperature (°C)</Description></ZAxis>
+    </Metadata>
+  </MapRule>
+
+  <MapRule priority="490" id="fuel_temp_sensor_linear_36">
+    <Description>Fuel temperature sensor linearization (anwKTF_KL) - Legacy:3820</Description>
+    <Conditions>
+      <Length>36</Length><XAxisLength>18</XAxisLength><YAxisLength>1</YAxisLength>
+      <XAxisID exact="0xEB90" />
+    </Conditions>
+    <Metadata>
+      <Category>Detected maps</Category><Subcategory>Misc</Subcategory>
+      <Name>Fuel temperature sensor linearization (XML)</Name>
+      <Correction>0.1</Correction><Offset>-273.1</Offset>
+      <YAxis><Description>mV</Description><Units>mV</Units><Correction>4.88758</Correction></YAxis>
+      <ZAxis><Description>Temperature (°C)</Description></ZAxis>
     </Metadata>
   </MapRule>
 
