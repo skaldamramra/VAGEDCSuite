@@ -197,9 +197,12 @@ namespace VAGSuite
             myPane.YAxis.Scale.MinAuto = true;
             myPane.YAxis.Scale.MaxAuto = true;
 
-            // Draw Background Map Image if selected
+            // Draw Compressor Map if selected
             if (Enum.TryParse(cmbCompressorMap.Text, out CompressorMapType mapType) && mapType != CompressorMapType.None)
             {
+                // Toggle tooltips based on UI
+                zedMap.IsShowPointValues = chkTooltips.Checked;
+
                 var vectorMap = _renderer.GetVectorMap(mapType);
                 if (vectorMap != null)
                 {
@@ -294,5 +297,12 @@ namespace VAGSuite
         {
             UpdatePlot();
         }
+
+        private void chkTooltips_CheckedChanged(object sender, EventArgs e)
+        {
+            zedMap.IsShowPointValues = chkTooltips.Checked;
+            zedMap.Invalidate();
+        }
+
     }
 }

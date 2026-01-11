@@ -37,6 +37,7 @@ namespace VAGSuite
             this.zedMap = new ZedGraph.ZedGraphControl();
             this.btnCalculate = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.btnExport = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.chkTooltips = new ComponentFactory.Krypton.Toolkit.KryptonCheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.kryptonPanel1)).BeginInit();
             this.kryptonPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cmbCompressorMap)).BeginInit();
@@ -51,6 +52,7 @@ namespace VAGSuite
             this.SuspendLayout();
             
             // kryptonPanel1
+            this.kryptonPanel1.Controls.Add(this.chkTooltips);
             this.kryptonPanel1.Controls.Add(this.btnExport);
             this.kryptonPanel1.Controls.Add(this.btnCalculate);
             this.kryptonPanel1.Controls.Add(this.zedMap);
@@ -234,6 +236,15 @@ namespace VAGSuite
             this.btnExport.Values.Text = "Export Image";
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
             
+            // chkTooltips
+            this.chkTooltips.Location = new System.Drawing.Point(12, 350);
+            this.chkTooltips.Name = "chkTooltips";
+            this.chkTooltips.Size = new System.Drawing.Size(100, 20);
+            this.chkTooltips.TabIndex = 12;
+            this.chkTooltips.Values.Text = "Show Tooltips";
+            this.chkTooltips.Checked = true;
+            this.chkTooltips.CheckedChanged += new System.EventHandler(this.chkTooltips_CheckedChanged);
+
             // frmTurboCompressorAnalysis
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -280,5 +291,6 @@ namespace VAGSuite
         private ZedGraph.ZedGraphControl zedMap;
         private ComponentFactory.Krypton.Toolkit.KryptonButton btnCalculate;
         private ComponentFactory.Krypton.Toolkit.KryptonButton btnExport;
+        private ComponentFactory.Krypton.Toolkit.KryptonCheckBox chkTooltips;
     }
 }
