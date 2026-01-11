@@ -68,18 +68,53 @@ namespace VAGSuite.Rendering
 
                 case CompressorMapType.GT20:
                     // Digitized from GT20.jpg (GT20 56mm, 55 trim, 0.53 A/R)
+                    // Surge line (left border of map)
                     map.SurgeLine.AddRange(new[] {
-                        new PointD(6.0, 1.4), new PointD(8.0, 1.6), new PointD(10.0, 1.9),
-                        new PointD(12.0, 2.2), new PointD(14.0, 2.45), new PointD(16.0, 2.7),
-                        new PointD(18.5, 2.8)
+                        new PointD(6.0, 1.4), new PointD(5.5, 1.6), new PointD(6.5, 1.8),
+                        new PointD(7.5, 2.0), new PointD(9.0, 2.2), new PointD(10.5, 2.4),
+                        new PointD(12.5, 2.6), new PointD(15.0, 2.7), new PointD(18.0, 2.8)
                     });
+                    // Choke line (right border of map)
                     map.ChokeLine.AddRange(new[] {
-                        new PointD(20.0, 2.8), new PointD(25.0, 2.5), new PointD(28.0, 2.0),
-                        new PointD(29.0, 1.8), new PointD(30.0, 1.4)
+                        new PointD(18.0, 2.8), new PointD(20.0, 2.8), new PointD(22.0, 2.75),
+                        new PointD(24.0, 2.65), new PointD(26.0, 2.5), new PointD(27.0, 2.35),
+                        new PointD(28.0, 2.2), new PointD(28.5, 2.0), new PointD(29.0, 1.8)
                     });
-                    map.EfficiencyIslands.Add(new EfficiencyIsland { Label = "79%", Points = new List<PointD> { new PointD(13.0, 1.6), new PointD(13.5, 1.8), new PointD(14.5, 1.8), new PointD(15.0, 1.6), new PointD(14.0, 1.5), new PointD(13.0, 1.6) } });
-                    map.EfficiencyIslands.Add(new EfficiencyIsland { Label = "78%", Points = new List<PointD> { new PointD(11.5, 1.5), new PointD(13.0, 2.0), new PointD(16.0, 2.4), new PointD(20.0, 2.4), new PointD(22.0, 2.0), new PointD(18.0, 1.5), new PointD(11.5, 1.5) } });
-                    map.EfficiencyIslands.Add(new EfficiencyIsland { Label = "75%", Points = new List<PointD> { new PointD(9.0, 1.4), new PointD(11.0, 2.0), new PointD(15.0, 2.7), new PointD(22.0, 2.7), new PointD(27.0, 2.0), new PointD(24.0, 1.4), new PointD(9.0, 1.4) } });
+                    // 79% efficiency island (innermost)
+                    map.EfficiencyIslands.Add(new EfficiencyIsland {
+                        Label = "79%",
+                        Points = new List<PointD> {
+                            new PointD(14.0, 1.6), new PointD(13.8, 1.8), new PointD(14.0, 2.0),
+                            new PointD(15.0, 2.2), new PointD(17.0, 2.4), new PointD(19.0, 2.5),
+                            new PointD(21.0, 2.5), new PointD(21.5, 2.4), new PointD(21.5, 2.2),
+                            new PointD(21.0, 2.0), new PointD(19.0, 1.8), new PointD(17.0, 1.7),
+                            new PointD(14.0, 1.6)
+                        }
+                    });
+                    // 75% efficiency island (middle)
+                    map.EfficiencyIslands.Add(new EfficiencyIsland {
+                        Label = "75%",
+                        Points = new List<PointD> {
+                            new PointD(13.0, 1.4), new PointD(10.0, 1.6), new PointD(9.5, 1.8),
+                            new PointD(10.5, 2.0), new PointD(12.0, 2.3), new PointD(14.0, 2.5),
+                            new PointD(16.0, 2.65), new PointD(18.0, 2.7), new PointD(20.0, 2.7),
+                            new PointD(22.0, 2.6), new PointD(24.0, 2.4), new PointD(26.0, 2.2),
+                            new PointD(27.0, 2.0), new PointD(26.0, 1.8), new PointD(23.0, 1.6),
+                            new PointD(18.0, 1.45), new PointD(13.0, 1.4)
+                        }
+                    });
+                    // 65% efficiency island (outer)
+                    map.EfficiencyIslands.Add(new EfficiencyIsland {
+                        Label = "65%",
+                        Points = new List<PointD> {
+                            new PointD(12.0, 1.25), new PointD(9.0, 1.3), new PointD(7.0, 1.4),
+                            new PointD(6.0, 1.6), new PointD(8.0, 2.0), new PointD(10.0, 2.3),
+                            new PointD(14.0, 2.7), new PointD(18.0, 2.8), new PointD(22.0, 2.75),
+                            new PointD(26.0, 2.5), new PointD(28.0, 2.2), new PointD(29.0, 1.8),
+                            new PointD(29.0, 1.7), new PointD(27.0, 1.5), new PointD(24.0, 1.4),
+                            new PointD(20.0, 1.3), new PointD(15.0, 1.25), new PointD(12.0, 1.25)
+                        }
+                    });
                     break;
             }
             return map;
