@@ -43,18 +43,19 @@ namespace VAGSuite
             // Initialize VAGEDC Dark Theme for Krypton
             var themeManager = VAGEDCThemeManager.Instance;
             
-            // Activate the dark theme before applying to forms
-            // This sets _isCustomThemeActive = true so ApplyThemeToForm works
-            frmMain mainForm = new frmMain();
-            themeManager.ActivateVAGEDCDark(mainForm);
-            
             try
             {
+                // Activate the dark theme before applying to forms
+                // This sets _isCustomThemeActive = true so ApplyThemeToForm works
+                frmMain mainForm = new frmMain();
+                themeManager.ActivateVAGEDCDark(mainForm);
+
                 Application.Run(mainForm);
             }
             catch (Exception ex)
             {
                 try { System.IO.File.AppendAllText("debug_error.log", ex.ToString()); } catch { }
+                MessageBox.Show("Critical Error during startup: " + ex.Message + "\n\nSee debug_error.log for details.", "VAG Suite Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 throw;
             }
         }

@@ -24,23 +24,51 @@ namespace VAGSuite
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonTransactionLog;
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonRollback;
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonRollforward;
-        
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonTurboAnalysis;
+
+        // Tuning Tab Components
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonInjection;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonTurbo;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonLimiters;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonLinearization;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonPID;
+
+        // Help Tab Components
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonHelp;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonHelpAbout;
+
+        // Skins Tab Components
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonSkins;
+
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonGeneralActions;
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple rbpgKryptonGeneralActionsTriple;
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonSearchMaps;
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonViewHex;
         private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonChecksum;
         
-        // Tuning Tab Components
-        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonInjection;
-        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple rbpgKryptonInjectionTriple1;
-        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple rbpgKryptonInjectionTriple2;
-        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonTurbo;
-        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple rbpgKryptonTurboTriple1;
-        
-        // Help Tab Components
-        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonHelpDocs;
-        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple rbpgKryptonHelpDocsTriple;
+        // File Tools Group
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonFileTools;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple rbpgKryptonFileToolsTriple;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonLookupPart;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonMergeFiles;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonSplitFiles;
+
+        // Export Group
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonExport;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple rbpgKryptonExportTriple;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonExcelExport;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonXDFExport;
+
+        // Transactions Group
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonTransactions;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple rbpgKryptonTransactionsTriple;
+
+        // Extra Tools Group (EEPROM, EOI, Settings)
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup rbpgKryptonExtraTools;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple rbpgKryptonExtraToolsTriple;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonEditEEProm;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonEOICalculator;
+        private ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupButton btnKryptonAppSettings;
 
         private void InitializeKryptonRibbon()
         {
@@ -85,10 +113,7 @@ namespace VAGSuite
             this.kryptonRibbon1.Palette = VAGEDCThemeManager.Instance.CustomPalette;
             this.kryptonRibbon1.PaletteMode = PaletteMode.Custom;
             this.kryptonRibbon1.AllowFormIntegrate = false;
-            
-            // Enable the new Ribbon
             this.kryptonRibbon1.Visible = true;
-
 
             //
             // kryptonRibbonTabFile
@@ -99,18 +124,12 @@ namespace VAGSuite
             });
             this.kryptonRibbonTabFile.Text = "File";
 
-            //
-            // rbpgKryptonGeneralFile
-            //
             this.rbpgKryptonGeneralFile.Items.AddRange(new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupContainer[] {
                 this.rbpgKryptonGeneralFileTriple
             });
             this.rbpgKryptonGeneralFile.TextLine1 = "General";
             this.rbpgKryptonGeneralFile.TextLine2 = "File";
 
-            //
-            // rbpgKryptonGeneralFileTriple
-            //
             this.rbpgKryptonGeneralFileTriple.Items.AddRange(new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupItem[] {
                 this.btnKryptonOpenFile,
                 this.btnKryptonSaveAs,
@@ -119,59 +138,26 @@ namespace VAGSuite
             this.rbpgKryptonGeneralFileTriple.MaximumSize = GroupItemSize.Large;
             this.rbpgKryptonGeneralFileTriple.MinimumSize = GroupItemSize.Large;
 
-            //
-            // btnKryptonOpenFile
-            //
             this.btnKryptonOpenFile.TextLine1 = "Open";
             this.btnKryptonOpenFile.TextLine2 = "File";
             this.btnKryptonOpenFile.ImageLarge = GetResourceImage("Open.png");
             this.btnKryptonOpenFile.Click += new System.EventHandler(this.btnKryptonOpenFile_Click);
 
-            //
-            // btnKryptonSaveAs
-            //
             this.btnKryptonSaveAs.TextLine1 = "Save";
             this.btnKryptonSaveAs.TextLine2 = "As...";
             this.btnKryptonSaveAs.ImageLarge = GetResourceImage("Save.png");
             this.btnKryptonSaveAs.Click += new System.EventHandler(this.btnKryptonSaveAs_Click);
 
-            //
-            // btnKryptonBinaryCompare
-            //
             this.btnKryptonBinaryCompare.TextLine1 = "Binary";
             this.btnKryptonBinaryCompare.TextLine2 = "Compare";
             this.btnKryptonBinaryCompare.ImageLarge = GetResourceImage("BinaryCompare.png");
             this.btnKryptonBinaryCompare.Click += new System.EventHandler(this.btnKryptonBinaryCompare_Click);
 
-            KryptonRibbonGroupTriple rbpgKryptonGeneralFileTriple2 = new KryptonRibbonGroupTriple();
-            rbpgKryptonGeneralFileTriple2.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonGeneralFileTriple2.MinimumSize = GroupItemSize.Large;
-
-            KryptonRibbonGroupButton btnKryptonProduceBinary = new KryptonRibbonGroupButton { TextLine1 = "Produce", TextLine2 = "Binary", ImageLarge = GetResourceImage("ProduceBinary.png") };
-            btnKryptonProduceBinary.Click += (s, e) => btnProduceLatestBinary_ItemClick(s, null);
-            
-            KryptonRibbonGroupButton btnKryptonCompareFiles = new KryptonRibbonGroupButton { TextLine1 = "Compare", TextLine2 = "Files", ImageLarge = GetResourceImage("CompareFiles.png") };
-            btnKryptonCompareFiles.Click += (s, e) => btnCompareFiles_ItemClick(s, null);
-
-            KryptonRibbonGroupButton btnKryptonSaveAll = new KryptonRibbonGroupButton { TextLine1 = "Save", TextLine2 = "All", ImageLarge = GetResourceImage("Save.png") };
-            btnKryptonSaveAll.Click += (s, e) => btnSaveAll_ItemClick(s, null);
-
-            rbpgKryptonGeneralFileTriple2.Items.Add(btnKryptonProduceBinary);
-            rbpgKryptonGeneralFileTriple2.Items.Add(btnKryptonCompareFiles);
-            rbpgKryptonGeneralFileTriple2.Items.Add(btnKryptonSaveAll);
-            this.rbpgKryptonGeneralFile.Items.Add(rbpgKryptonGeneralFileTriple2);
-
-            //
-            // rbpgKryptonProjects
-            //
             this.rbpgKryptonProjects.Items.AddRange(new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupContainer[] {
                 this.rbpgKryptonProjectsTriple
             });
             this.rbpgKryptonProjects.TextLine1 = "Projects";
 
-            //
-            // rbpgKryptonProjectsTriple
-            //
             this.rbpgKryptonProjectsTriple.Items.AddRange(new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupItem[] {
                 this.btnKryptonOpenProject,
                 this.btnKryptonCloseProject,
@@ -180,34 +166,16 @@ namespace VAGSuite
             this.rbpgKryptonProjectsTriple.MaximumSize = GroupItemSize.Large;
             this.rbpgKryptonProjectsTriple.MinimumSize = GroupItemSize.Large;
 
-            KryptonRibbonGroupTriple rbpgKryptonProjectsTriple2 = new KryptonRibbonGroupTriple();
-            rbpgKryptonProjectsTriple2.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonProjectsTriple2.MinimumSize = GroupItemSize.Large;
-
-            KryptonRibbonGroupButton btnKryptonBackup = new KryptonRibbonGroupButton { TextLine1 = "Create", TextLine2 = "Backup", ImageLarge = GetResourceImage("CreateBackup.png") };
-            btnKryptonBackup.Click += (s, e) => btnCreateBackup_ItemClick(s, null);
-            rbpgKryptonProjectsTriple2.Items.Add(btnKryptonBackup);
-            this.rbpgKryptonProjects.Items.Add(rbpgKryptonProjectsTriple2);
-
-            //
-            // btnKryptonOpenProject
-            //
             this.btnKryptonOpenProject.TextLine1 = "Open";
             this.btnKryptonOpenProject.TextLine2 = "Project";
             this.btnKryptonOpenProject.ImageLarge = GetResourceImage("OpenProject.png");
             this.btnKryptonOpenProject.Click += new System.EventHandler(this.btnKryptonOpenProject_Click);
 
-            //
-            // btnKryptonCloseProject
-            //
             this.btnKryptonCloseProject.TextLine1 = "Close";
             this.btnKryptonCloseProject.TextLine2 = "Project";
             this.btnKryptonCloseProject.ImageLarge = GetResourceImage("CloseProject.png");
             this.btnKryptonCloseProject.Click += new System.EventHandler(this.btnKryptonCloseProject_Click);
 
-            //
-            // btnKryptonCreateProject
-            //
             this.btnKryptonCreateProject.TextLine1 = "Create";
             this.btnKryptonCreateProject.TextLine2 = "Project";
             this.btnKryptonCreateProject.ImageLarge = GetResourceImage("CreateProject.png");
@@ -221,18 +189,12 @@ namespace VAGSuite
             });
             this.kryptonRibbonTabActions.Text = "Actions";
 
-            //
-            // rbpgKryptonGeneralActions
-            //
             this.rbpgKryptonGeneralActions.Items.AddRange(new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupContainer[] {
                 this.rbpgKryptonGeneralActionsTriple
             });
             this.rbpgKryptonGeneralActions.TextLine1 = "General";
             this.rbpgKryptonGeneralActions.TextLine2 = "Actions";
 
-            //
-            // rbpgKryptonGeneralActionsTriple
-            //
             this.rbpgKryptonGeneralActionsTriple.Items.AddRange(new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupItem[] {
                 this.btnKryptonSearchMaps,
                 this.btnKryptonViewHex,
@@ -244,18 +206,25 @@ namespace VAGSuite
             this.btnKryptonSearchMaps.TextLine1 = "Search";
             this.btnKryptonSearchMaps.TextLine2 = "Maps";
             this.btnKryptonSearchMaps.ImageLarge = GetResourceImage("SearchMaps.png");
+            this.btnKryptonSearchMaps.Click += new System.EventHandler(this.btnKryptonSearchMaps_Click);
 
             this.btnKryptonViewHex.TextLine1 = "View";
             this.btnKryptonViewHex.TextLine2 = "Hex";
             this.btnKryptonViewHex.ImageLarge = GetResourceImage("ViewHex.png");
+            this.btnKryptonViewHex.Click += new System.EventHandler(this.btnKryptonViewHex_Click);
 
             this.btnKryptonChecksum.TextLine1 = "Verify";
             this.btnKryptonChecksum.TextLine2 = "Checksum";
             this.btnKryptonChecksum.ImageLarge = GetResourceImage("VerifyChecksum.png");
+            this.btnKryptonChecksum.Click += new System.EventHandler(this.btnKryptonChecksum_Click);
 
             KryptonRibbonGroupTriple rbpgKryptonActionsTriple2 = new KryptonRibbonGroupTriple();
             rbpgKryptonActionsTriple2.MaximumSize = GroupItemSize.Large;
             rbpgKryptonActionsTriple2.MinimumSize = GroupItemSize.Large;
+
+            KryptonRibbonGroupTriple rbpgKryptonActionsTriple3 = new KryptonRibbonGroupTriple();
+            rbpgKryptonActionsTriple3.MaximumSize = GroupItemSize.Large;
+            rbpgKryptonActionsTriple3.MinimumSize = GroupItemSize.Large;
 
             KryptonRibbonGroupButton btnKryptonFirmwareInfo = new KryptonRibbonGroupButton { TextLine1 = "Firmware", TextLine2 = "Info", ImageLarge = GetResourceImage("FirmwareInfo.png") };
             btnKryptonFirmwareInfo.Click += (s, e) => btnFirmwareInformation_ItemClick(s, null);
@@ -263,282 +232,275 @@ namespace VAGSuite
             btnKryptonVINDecoder.Click += (s, e) => btnVINDecoder_ItemClick(s, null);
             KryptonRibbonGroupButton btnKryptonAirmass = new KryptonRibbonGroupButton { TextLine1 = "Airmass", TextLine2 = "Result", ImageLarge = GetResourceImage("AirmassResult.png") };
             btnKryptonAirmass.Click += (s, e) => btnAirmassResult_ItemClick(s, null);
+            
+            this.btnKryptonTurboAnalysis = new KryptonRibbonGroupButton();
+            this.btnKryptonTurboAnalysis.TextLine1 = "Turbo";
+            this.btnKryptonTurboAnalysis.TextLine2 = "Analysis";
+            this.btnKryptonTurboAnalysis.ImageLarge = GetResourceImage("SearchMaps.png");
+            this.btnKryptonTurboAnalysis.Click += new System.EventHandler(this.btnKryptonTurboAnalysis_Click);
 
             rbpgKryptonActionsTriple2.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonFirmwareInfo, btnKryptonVINDecoder, btnKryptonAirmass });
+            rbpgKryptonActionsTriple3.Items.AddRange(new KryptonRibbonGroupItem[] { this.btnKryptonTurboAnalysis });
+            
             this.rbpgKryptonGeneralActions.Items.Add(rbpgKryptonActionsTriple2);
+            this.rbpgKryptonGeneralActions.Items.Add(rbpgKryptonActionsTriple3);
 
-            // Project Actions Triple
-            KryptonRibbonGroupTriple rbpgKryptonProjectActionsTriple = new KryptonRibbonGroupTriple();
-            rbpgKryptonProjectActionsTriple.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonProjectActionsTriple.MinimumSize = GroupItemSize.Large;
+            // File Tools Group Initialization
+            this.rbpgKryptonFileTools = new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup();
+            this.rbpgKryptonFileToolsTriple = new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple();
+            this.rbpgKryptonFileToolsTriple.MaximumSize = GroupItemSize.Large;
+            this.rbpgKryptonFileToolsTriple.MinimumSize = GroupItemSize.Large;
+
+            this.btnKryptonLookupPart = new KryptonRibbonGroupButton { TextLine1 = "Part", TextLine2 = "Lookup", ImageLarge = GetResourceImage("LookupPart.png") };
+            this.btnKryptonLookupPart.Click += (s, e) => btnLookupPartnumber_ItemClick(s, null);
+
+            this.btnKryptonMergeFiles = new KryptonRibbonGroupButton { TextLine1 = "Merge", TextLine2 = "Files", ImageLarge = GetResourceImage("MergeFiles.png") };
+            this.btnKryptonMergeFiles.Click += (s, e) => btnMergeFiles_ItemClick(s, null);
+
+            this.btnKryptonSplitFiles = new KryptonRibbonGroupButton { TextLine1 = "Split", TextLine2 = "Files", ImageLarge = GetResourceImage("SplitFiles.png") };
+            this.btnKryptonSplitFiles.Click += (s, e) => btnSplitFiles_ItemClick(s, null);
+
+            this.rbpgKryptonFileTools.TextLine1 = "File Tools";
+            this.rbpgKryptonFileToolsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonLookupPart, btnKryptonMergeFiles, btnKryptonSplitFiles });
+            this.rbpgKryptonFileTools.Items.Add(this.rbpgKryptonFileToolsTriple);
+
+            // Export Group Initialization
+            this.rbpgKryptonExport = new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup();
+            this.rbpgKryptonExportTriple = new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple();
+            this.rbpgKryptonExportTriple.MaximumSize = GroupItemSize.Large;
+            this.rbpgKryptonExportTriple.MinimumSize = GroupItemSize.Large;
+
+            this.btnKryptonExcelExport = new KryptonRibbonGroupButton { TextLine1 = "Export", TextLine2 = "Excel", ImageLarge = GetResourceImage("ExcelExport.png") };
+            this.btnKryptonExcelExport.Click += (s, e) => btnExportToExcel_ItemClick(s, null);
+
+            this.btnKryptonXDFExport = new KryptonRibbonGroupButton { TextLine1 = "Export", TextLine2 = "XDF", ImageLarge = GetResourceImage("ExportXDF.png") };
+            this.btnKryptonXDFExport.Click += (s, e) => btnExportXDF_ItemClick(s, null);
+
+            this.rbpgKryptonExport.TextLine1 = "Export";
+            this.rbpgKryptonExportTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonExcelExport, btnKryptonXDFExport });
+            this.rbpgKryptonExport.Items.Add(this.rbpgKryptonExportTriple);
+
+            // Transactions Group Initialization
+            this.rbpgKryptonTransactions = new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup();
+            this.rbpgKryptonTransactionsTriple = new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple();
+            this.rbpgKryptonTransactionsTriple.MaximumSize = GroupItemSize.Large;
+            this.rbpgKryptonTransactionsTriple.MinimumSize = GroupItemSize.Large;
 
             this.btnKryptonTransactionLog = new KryptonRibbonGroupButton { TextLine1 = "Transaction", TextLine2 = "Log", ImageLarge = GetResourceImage("TransactionLog.png") };
             this.btnKryptonTransactionLog.Click += (s, e) => btnShowTransactionLog_ItemClick(s, null);
-            this.btnKryptonRollback = new KryptonRibbonGroupButton { TextLine1 = "Rollback", ImageLarge = GetResourceImage("Rollback.png") };
+
+            this.btnKryptonRollback = new KryptonRibbonGroupButton { TextLine1 = "Roll", TextLine2 = "Back", ImageLarge = GetResourceImage("Rollback.png") };
             this.btnKryptonRollback.Click += (s, e) => btnRollback_ItemClick(s, null);
+
             this.btnKryptonRollforward = new KryptonRibbonGroupButton { TextLine1 = "Roll", TextLine2 = "Forward", ImageLarge = GetResourceImage("RollForward.png") };
             this.btnKryptonRollforward.Click += (s, e) => btnRollforward_ItemClick(s, null);
 
-            rbpgKryptonProjectActionsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { this.btnKryptonTransactionLog, this.btnKryptonRollback, this.btnKryptonRollforward });
-            this.rbpgKryptonGeneralActions.Items.Add(rbpgKryptonProjectActionsTriple);
+            this.rbpgKryptonTransactions.TextLine1 = "Transactions";
+            this.rbpgKryptonTransactionsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonTransactionLog, btnKryptonRollback, btnKryptonRollforward });
+            this.rbpgKryptonTransactions.Items.Add(this.rbpgKryptonTransactionsTriple);
 
-            // Tools Group
-            KryptonRibbonGroup rbpgKryptonTools = new KryptonRibbonGroup { TextLine1 = "Tools" };
-            KryptonRibbonGroupTriple rbpgKryptonToolsTriple = new KryptonRibbonGroupTriple();
-            rbpgKryptonToolsTriple.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonToolsTriple.MinimumSize = GroupItemSize.Large;
-            
-            KryptonRibbonGroupButton btnKryptonLookupPart = new KryptonRibbonGroupButton { TextLine1 = "Lookup", TextLine2 = "Part", ImageLarge = GetResourceImage("LookupPart.png") };
-            btnKryptonLookupPart.Click += (s, e) => btnLookupPartnumber_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonExportXDF = new KryptonRibbonGroupButton { TextLine1 = "Export", TextLine2 = "XDF", ImageLarge = GetResourceImage("ExportXDF.png") };
-            btnKryptonExportXDF.Click += (s, e) => btnExportXDF_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonEditEEProm = new KryptonRibbonGroupButton { TextLine1 = "Edit", TextLine2 = "EEProm", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonEditEEProm.Click += (s, e) => btnEditEEProm_ItemClick(s, null);
-            
-            rbpgKryptonToolsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonLookupPart, btnKryptonExportXDF, btnKryptonEditEEProm });
-            rbpgKryptonTools.Items.Add(rbpgKryptonToolsTriple);
+            // Extra Tools Group Initialization
+            this.rbpgKryptonExtraTools = new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup();
+            this.rbpgKryptonExtraToolsTriple = new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroupTriple();
+            this.rbpgKryptonExtraToolsTriple.MaximumSize = GroupItemSize.Large;
+            this.rbpgKryptonExtraToolsTriple.MinimumSize = GroupItemSize.Large;
 
-            KryptonRibbonGroupTriple rbpgKryptonToolsTriple2 = new KryptonRibbonGroupTriple();
-            rbpgKryptonToolsTriple2.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonToolsTriple2.MinimumSize = GroupItemSize.Large;
+            this.btnKryptonEditEEProm = new KryptonRibbonGroupButton { TextLine1 = "Edit", TextLine2 = "EEPROM", ImageLarge = GetResourceImage("ViewHex.png") };
+            this.btnKryptonEditEEProm.Click += (s, e) => btnEditEEProm_ItemClick(s, null);
 
-            KryptonRibbonGroupButton btnKryptonMerge = new KryptonRibbonGroupButton { TextLine1 = "Merge", TextLine2 = "Files", ImageLarge = GetResourceImage("MergeFiles.png") };
-            btnKryptonMerge.Click += (s, e) => btnMergeFiles_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonSplit = new KryptonRibbonGroupButton { TextLine1 = "Split", TextLine2 = "Files", ImageLarge = GetResourceImage("SplitFiles.png") };
-            btnKryptonSplit.Click += (s, e) => btnSplitFiles_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonExcelExp = new KryptonRibbonGroupButton { TextLine1 = "Excel", TextLine2 = "Export", ImageLarge = GetResourceImage("ExcelExport.png") };
-            btnKryptonExcelExp.Click += (s, e) => btnExportToExcel_ItemClick(s, null);
+            this.btnKryptonEOICalculator = new KryptonRibbonGroupButton { TextLine1 = "EOI", TextLine2 = "Calculator", ImageLarge = GetResourceImage("SearchMaps.png") };
+            this.btnKryptonEOICalculator.Click += (s, e) => btnEOICalculator_ItemClick(s, null);
 
-            rbpgKryptonToolsTriple2.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonMerge, btnKryptonSplit, btnKryptonExcelExp });
-            rbpgKryptonTools.Items.Add(rbpgKryptonToolsTriple2);
+            this.btnKryptonAppSettings = new KryptonRibbonGroupButton { TextLine1 = "App", TextLine2 = "Settings", ImageLarge = GetResourceImage("AppSettings.png") };
+            this.btnKryptonAppSettings.Click += (s, e) => btnAppSettings_ItemClick(s, null);
 
-            // Tools Triple 3 - EOI Calculator
-            KryptonRibbonGroupTriple rbpgKryptonToolsTriple3 = new KryptonRibbonGroupTriple();
-            rbpgKryptonToolsTriple3.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonToolsTriple3.MinimumSize = GroupItemSize.Large;
+            this.rbpgKryptonExtraTools.TextLine1 = "Tools";
+            this.rbpgKryptonExtraToolsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonEditEEProm, btnKryptonEOICalculator, btnKryptonAppSettings });
+            this.rbpgKryptonExtraTools.Items.Add(this.rbpgKryptonExtraToolsTriple);
 
-            KryptonRibbonGroupButton btnKryptonEOICalculator = new KryptonRibbonGroupButton { TextLine1 = "EOI", TextLine2 = "Calculator", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonEOICalculator.Click += (s, e) => btnEOICalculator_ItemClick(s, null);
+            // Add Groups to Actions Tab
+            this.kryptonRibbonTabActions.Groups.AddRange(new ComponentFactory.Krypton.Ribbon.KryptonRibbonGroup[] {
+                this.rbpgKryptonFileTools,
+                this.rbpgKryptonExport,
+                this.rbpgKryptonTransactions,
+                this.rbpgKryptonExtraTools
+            });
 
-            rbpgKryptonToolsTriple3.Items.Add(btnKryptonEOICalculator);
-            rbpgKryptonTools.Items.Add(rbpgKryptonToolsTriple3);
-
-            // Settings Group
-            KryptonRibbonGroup rbpgKryptonSettings = new KryptonRibbonGroup { TextLine1 = "Settings" };
-            KryptonRibbonGroupTriple rbpgKryptonSettingsTriple = new KryptonRibbonGroupTriple();
-            rbpgKryptonSettingsTriple.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonSettingsTriple.MinimumSize = GroupItemSize.Large;
-            KryptonRibbonGroupButton btnKryptonSettings = new KryptonRibbonGroupButton { TextLine1 = "App", TextLine2 = "Settings", ImageLarge = GetResourceImage("AppSettings.png") };
-            btnKryptonSettings.Click += (s, e) => btnAppSettings_ItemClick(s, null);
-            rbpgKryptonSettingsTriple.Items.Add(btnKryptonSettings);
-            rbpgKryptonSettings.Items.Add(rbpgKryptonSettingsTriple);
-
-            this.kryptonRibbonTabActions.Groups.AddRange(new KryptonRibbonGroup[] { rbpgKryptonTools, rbpgKryptonSettings });
-
-            //
-            // btnKryptonSearchMaps
-            //
-            this.btnKryptonSearchMaps.TextLine1 = "Search Maps";
-            this.btnKryptonSearchMaps.ImageSmall = GetResourceImage("vagedc.ico");
-            this.btnKryptonSearchMaps.Click += new System.EventHandler(this.btnKryptonSearchMaps_Click);
-
-            //
-            // btnKryptonViewHex
-            //
-            this.btnKryptonViewHex.TextLine1 = "View Hex";
-            this.btnKryptonViewHex.ImageSmall = GetResourceImage("vagedc.ico");
-            this.btnKryptonViewHex.Click += new System.EventHandler(this.btnKryptonViewHex_Click);
-
-            //
-            // btnKryptonChecksum
-            //
-            this.btnKryptonChecksum.TextLine1 = "Verify Checksum";
-            this.btnKryptonChecksum.ImageSmall = GetResourceImage("vagedc.ico");
-            this.btnKryptonChecksum.Click += new System.EventHandler(this.btnKryptonChecksum_Click);
-
-            //
-            // kryptonRibbonTabTuning
-            //
             this.kryptonRibbonTabTuning.Text = "Tuning";
-            this.rbpgKryptonInjection = new KryptonRibbonGroup();
-            this.rbpgKryptonInjection.TextLine1 = "Injection";
-            this.rbpgKryptonInjectionTriple1 = new KryptonRibbonGroupTriple();
-            this.rbpgKryptonInjectionTriple1.MaximumSize = GroupItemSize.Large;
-            this.rbpgKryptonInjectionTriple1.MinimumSize = GroupItemSize.Large;
-            
-            KryptonRibbonGroupButton btnKryptonDriverWish = new KryptonRibbonGroupButton { TextLine1 = "Driver", TextLine2 = "Wish", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonDriverWish.Click += (s, e) => btnDriverWish_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonTorqueLimiter = new KryptonRibbonGroupButton { TextLine1 = "Torque", TextLine2 = "Limiter", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonTorqueLimiter.Click += (s, e) => btnTorqueLimiter_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonSmokeLimiter = new KryptonRibbonGroupButton { TextLine1 = "Smoke", TextLine2 = "Limiter", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonSmokeLimiter.Click += (s, e) => btnSmokeLimiter_ItemClick(s, null);
-            
-            this.rbpgKryptonInjectionTriple1.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonDriverWish, btnKryptonTorqueLimiter, btnKryptonSmokeLimiter });
-            this.rbpgKryptonInjection.Items.Add(this.rbpgKryptonInjectionTriple1);
-
-            this.rbpgKryptonInjectionTriple2 = new KryptonRibbonGroupTriple();
-            this.rbpgKryptonInjectionTriple2.MaximumSize = GroupItemSize.Large;
-            this.rbpgKryptonInjectionTriple2.MinimumSize = GroupItemSize.Large;
-
-            KryptonRibbonGroupButton btnKryptonSOI = new KryptonRibbonGroupButton { TextLine1 = "Start of", TextLine2 = "Injection", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonSOI.Click += (s, e) => btnStartOfInjection_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonDuration = new KryptonRibbonGroupButton { TextLine1 = "Injector", TextLine2 = "Duration", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonDuration.Click += (s, e) => btnInjectorDuration_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonEGR = new KryptonRibbonGroupButton { TextLine1 = "EGR", TextLine2 = "Map", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonEGR.Click += (s, e) => btnEGRMap_ItemClick(s, null);
-
-            this.rbpgKryptonInjectionTriple2.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonSOI, btnKryptonDuration, btnKryptonEGR });
-            this.rbpgKryptonInjection.Items.Add(this.rbpgKryptonInjectionTriple2);
-            
-            this.rbpgKryptonTurbo = new KryptonRibbonGroup();
-            this.rbpgKryptonTurbo.TextLine1 = "Turbo";
-            this.rbpgKryptonTurboTriple1 = new KryptonRibbonGroupTriple();
-            this.rbpgKryptonTurboTriple1.MaximumSize = GroupItemSize.Large;
-            this.rbpgKryptonTurboTriple1.MinimumSize = GroupItemSize.Large;
-            
-            KryptonRibbonGroupButton btnKryptonTargetBoost = new KryptonRibbonGroupButton { TextLine1 = "Target", TextLine2 = "Boost", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonTargetBoost.Click += (s, e) => btnTargetBoost_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonBoostLimiter = new KryptonRibbonGroupButton { TextLine1 = "Boost", TextLine2 = "Limiter", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonBoostLimiter.Click += (s, e) => btnBoostPressureLimiter_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonN75 = new KryptonRibbonGroupButton { TextLine1 = "N75", TextLine2 = "Map", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonN75.Click += (s, e) => btnN75Map_ItemClick(s, null);
-            
-            this.rbpgKryptonTurboTriple1.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonTargetBoost, btnKryptonBoostLimiter, btnKryptonN75 });
-            this.rbpgKryptonTurbo.Items.Add(this.rbpgKryptonTurboTriple1);
-
-            // Turbo Triple 2
-            KryptonRibbonGroupTriple rbpgKryptonTurboTriple2 = new KryptonRibbonGroupTriple();
-            rbpgKryptonTurboTriple2.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonTurboTriple2.MinimumSize = GroupItemSize.Large;
-
-            KryptonRibbonGroupButton btnKryptonBoostSVBL = new KryptonRibbonGroupButton { TextLine1 = "Boost", TextLine2 = "SVBL", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonBoostSVBL.Click += (s, e) => btnBoostPressureLimitSVBL_ItemClick(s, null);
-            
-            rbpgKryptonTurboTriple2.Items.Add(btnKryptonBoostSVBL);
-            this.rbpgKryptonTurbo.Items.Add(rbpgKryptonTurboTriple2);
-
-            // Injection Triple 3
-            KryptonRibbonGroupTriple rbpgKryptonInjectionTriple3 = new KryptonRibbonGroupTriple();
-            rbpgKryptonInjectionTriple3.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonInjectionTriple3.MinimumSize = GroupItemSize.Large;
-
-            KryptonRibbonGroupButton btnKryptonSOILimiter = new KryptonRibbonGroupButton { TextLine1 = "SOI", TextLine2 = "Limiter", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonSOILimiter.Click += (s, e) => btnSOILimiter_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonStartIQ = new KryptonRibbonGroupButton { TextLine1 = "Start", TextLine2 = "IQ", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonStartIQ.Click += (s, e) => btnStartIQ_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonBIP = new KryptonRibbonGroupButton { TextLine1 = "BIP", TextLine2 = "Basic", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonBIP.Click += (s, e) => btnBIPBasicCharacteristic_ItemClick(s, null);
-
-            rbpgKryptonInjectionTriple3.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonSOILimiter, btnKryptonStartIQ, btnKryptonBIP });
-            this.rbpgKryptonInjection.Items.Add(rbpgKryptonInjectionTriple3);
-
-            // Injection Triple 4
-            KryptonRibbonGroupTriple rbpgKryptonInjectionTriple4 = new KryptonRibbonGroupTriple();
-            rbpgKryptonInjectionTriple4.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonInjectionTriple4.MinimumSize = GroupItemSize.Large;
-
-            KryptonRibbonGroupButton btnKryptonPIDP = new KryptonRibbonGroupButton { TextLine1 = "PID", TextLine2 = "P", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonPIDP.Click += (s, e) => btnPIDMapP_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonDurationLimiter = new KryptonRibbonGroupButton { TextLine1 = "Duration", TextLine2 = "Limiter", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonDurationLimiter.Click += (s, e) => btnDurationLimiter_ItemClick(s, null);
-
-            rbpgKryptonInjectionTriple4.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonPIDP, btnKryptonDurationLimiter });
-            this.rbpgKryptonInjection.Items.Add(rbpgKryptonInjectionTriple4);
-
-            // Injection Triple 5
-            KryptonRibbonGroupTriple rbpgKryptonInjectionTriple5 = new KryptonRibbonGroupTriple();
-            rbpgKryptonInjectionTriple5.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonInjectionTriple5.MinimumSize = GroupItemSize.Large;
-
-            KryptonRibbonGroupButton btnKryptonMAFLimiter = new KryptonRibbonGroupButton { TextLine1 = "MAF", TextLine2 = "Limiter", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonMAFLimiter.Click += (s, e) => btnMAFLimiter_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonMAPLinearization = new KryptonRibbonGroupButton { TextLine1 = "MAP", TextLine2 = "Linear", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonMAPLinearization.Click += (s, e) => btnMAPLinearization_ItemClick(s, null);
-
-            rbpgKryptonInjectionTriple5.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonMAFLimiter, btnKryptonMAPLinearization });
-            this.rbpgKryptonInjection.Items.Add(rbpgKryptonInjectionTriple5);
-
-            KryptonRibbonGroup rbpgKryptonSpecial = new KryptonRibbonGroup { TextLine1 = "Special" };
-            KryptonRibbonGroupTriple rbpgKryptonSpecialTriple = new KryptonRibbonGroupTriple();
-            rbpgKryptonSpecialTriple.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonSpecialTriple.MinimumSize = GroupItemSize.Large;
-
-            KryptonRibbonGroupButton btnKryptonLaunch = new KryptonRibbonGroupButton { TextLine1 = "Launch", TextLine2 = "Control", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonLaunch.Click += (s, e) => btnActivateLaunchControl_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonSmokeLim = new KryptonRibbonGroupButton { TextLine1 = "Smoke", TextLine2 = "Limiters", ImageLarge = GetResourceImage("vagedc.ico") };
-            btnKryptonSmokeLim.Click += (s, e) => btnActivateSmokeLimiters_ItemClick(s, null);
-
-            rbpgKryptonSpecialTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonLaunch, btnKryptonSmokeLim });
-            rbpgKryptonSpecial.Items.Add(rbpgKryptonSpecialTriple);
-            
-            this.kryptonRibbonTabTuning.Groups.AddRange(new KryptonRibbonGroup[] { this.rbpgKryptonInjection, this.rbpgKryptonTurbo, rbpgKryptonSpecial });
-
-            //
-            // kryptonRibbonTabSkins
-            //
             this.kryptonRibbonTabSkins.Text = "Skins";
-            KryptonRibbonGroup rbpgSkins = new KryptonRibbonGroup();
-            rbpgSkins.TextLine1 = "Application Skins";
-            KryptonRibbonGroupTriple rbpgSkinsTriple = new KryptonRibbonGroupTriple();
-            
-            KryptonRibbonGroupButton btnSkinVAGEDCDark = new KryptonRibbonGroupButton();
-            btnSkinVAGEDCDark.TextLine1 = "VAGEDC Dark";
-            btnSkinVAGEDCDark.Tag = "CUSTOM_VAGEDC_DARK";
-            btnSkinVAGEDCDark.Click += new EventHandler(OnKryptonSkinClick);
-            
-            KryptonRibbonGroupButton btnSkinOffice2010 = new KryptonRibbonGroupButton();
-            btnSkinOffice2010.TextLine1 = "Office 2010";
-            btnSkinOffice2010.Tag = PaletteMode.Office2010Blue;
-            btnSkinOffice2010.Click += new EventHandler(OnKryptonSkinClick);
-
-            KryptonRibbonGroupButton btnSkinSparkle = new KryptonRibbonGroupButton();
-            btnSkinSparkle.TextLine1 = "Sparkle";
-            btnSkinSparkle.Tag = PaletteMode.SparkleBlue;
-            btnSkinSparkle.Click += new EventHandler(OnKryptonSkinClick);
-
-            rbpgSkinsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnSkinVAGEDCDark, btnSkinOffice2010, btnSkinSparkle });
-            rbpgSkins.Items.Add(rbpgSkinsTriple);
-            this.kryptonRibbonTabSkins.Groups.Add(rbpgSkins);
-
-            //
-            // kryptonRibbonTabHelp
-            //
             this.kryptonRibbonTabHelp.Text = "Help";
-            this.rbpgKryptonHelpDocs = new KryptonRibbonGroup();
-            this.rbpgKryptonHelpDocs.TextLine1 = "Documentation";
-            this.rbpgKryptonHelpDocsTriple = new KryptonRibbonGroupTriple();
-            this.rbpgKryptonHelpDocsTriple.MaximumSize = GroupItemSize.Large;
-            this.rbpgKryptonHelpDocsTriple.MinimumSize = GroupItemSize.Large;
-            
-            KryptonRibbonGroupButton btnKryptonUserManual = new KryptonRibbonGroupButton { TextLine1 = "User", TextLine2 = "Manual", ImageLarge = GetResourceImage("UserManual.png") };
-            btnKryptonUserManual.Click += (s, e) => btnUserManual_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonReleaseNotes = new KryptonRibbonGroupButton { TextLine1 = "Release", TextLine2 = "Notes", ImageLarge = GetResourceImage("ReleaseNotes.png") };
-            btnKryptonReleaseNotes.Click += (s, e) => btnReleaseNotes_ItemClick(s, null);
-            KryptonRibbonGroupButton btnKryptonAbout = new KryptonRibbonGroupButton { TextLine1 = "About", TextLine2 = "VAGSuite", ImageLarge = GetResourceImage("AboutVagSuite.png") };
-            btnKryptonAbout.Click += (s, e) => btnAbout_ItemClick(s, null);
-            
-            this.rbpgKryptonHelpDocsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnKryptonUserManual, btnKryptonReleaseNotes, btnKryptonAbout });
-            this.rbpgKryptonHelpDocs.Items.Add(this.rbpgKryptonHelpDocsTriple);
-
-            KryptonRibbonGroup rbpgKryptonUpdate = new KryptonRibbonGroup { TextLine1 = "Update" };
-            KryptonRibbonGroupTriple rbpgKryptonUpdateTriple = new KryptonRibbonGroupTriple();
-            rbpgKryptonUpdateTriple.MaximumSize = GroupItemSize.Large;
-            rbpgKryptonUpdateTriple.MinimumSize = GroupItemSize.Large;
-            KryptonRibbonGroupButton btnKryptonUpdate = new KryptonRibbonGroupButton { TextLine1 = "Check for", TextLine2 = "Updates", ImageLarge = GetResourceImage("CheckForUpdates.png") };
-            btnKryptonUpdate.Click += (s, e) => btnCheckForUpdates_ItemClick(s, null);
-            rbpgKryptonUpdateTriple.Items.Add(btnKryptonUpdate);
-            rbpgKryptonUpdate.Items.Add(rbpgKryptonUpdateTriple);
-
-            this.kryptonRibbonTabHelp.Groups.AddRange(new KryptonRibbonGroup[] { this.rbpgKryptonHelpDocs, rbpgKryptonUpdate });
 
             ((System.ComponentModel.ISupportInitialize)(this.kryptonRibbon1)).EndInit();
 
-            // Add to form controls and set docking
-            // CRITICAL: Do NOT call BringToFront() here - let the initialization order handle Z-order
             this.Controls.Add(this.kryptonRibbon1);
             this.kryptonRibbon1.Dock = DockStyle.Top;
+
+            InitializeTuningTab();
+            InitializeSkinsTab();
+            InitializeHelpTab();
         }
 
+        private void InitializeTuningTab()
+        {
+            // Injection Group
+            this.rbpgKryptonInjection = new KryptonRibbonGroup { TextLine1 = "Injection" };
+            KryptonRibbonGroupTriple injectionTriple1 = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+            KryptonRibbonGroupTriple injectionTriple2 = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+            KryptonRibbonGroupTriple injectionTriple3 = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+
+            KryptonRibbonGroupButton btnDriverWish = new KryptonRibbonGroupButton { TextLine1 = "Driver", TextLine2 = "Wish", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnDriverWish.Click += (s, e) => btnDriverWish_ItemClick(s, e);
+            KryptonRibbonGroupButton btnIQByMap = new KryptonRibbonGroupButton { TextLine1 = "IQ by", TextLine2 = "MAP", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnIQByMap.Click += (s, e) => btnIQByMap_ItemClick(s, e);
+            KryptonRibbonGroupButton btnIQByMAF = new KryptonRibbonGroupButton { TextLine1 = "IQ by", TextLine2 = "MAF", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnIQByMAF.Click += (s, e) => btnIQByMAF_ItemClick(s, e);
+
+            KryptonRibbonGroupButton btnSOI = new KryptonRibbonGroupButton { TextLine1 = "Start of", TextLine2 = "Injection", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnSOI.Click += (s, e) => btnStartOfInjection_ItemClick(s, e);
+            KryptonRibbonGroupButton btnSOILimiter = new KryptonRibbonGroupButton { TextLine1 = "SOI", TextLine2 = "Limiter", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnSOILimiter.Click += (s, e) => btnSOILimiter_ItemClick(s, e);
+            KryptonRibbonGroupButton btnDuration = new KryptonRibbonGroupButton { TextLine1 = "Injector", TextLine2 = "Duration", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnDuration.Click += (s, e) => btnInjectorDuration_ItemClick(s, e);
+
+            KryptonRibbonGroupButton btnStartIQ = new KryptonRibbonGroupButton { TextLine1 = "Start", TextLine2 = "IQ", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnStartIQ.Click += (s, e) => btnStartIQ_ItemClick(s, e);
+            KryptonRibbonGroupButton btnBIP = new KryptonRibbonGroupButton { TextLine1 = "BIP", TextLine2 = "Char.", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnBIP.Click += (s, e) => btnBIPBasicCharacteristic_ItemClick(s, e);
+
+            injectionTriple1.Items.AddRange(new KryptonRibbonGroupItem[] { btnDriverWish, btnIQByMap, btnIQByMAF });
+            injectionTriple2.Items.AddRange(new KryptonRibbonGroupItem[] { btnSOI, btnSOILimiter, btnDuration });
+            injectionTriple3.Items.AddRange(new KryptonRibbonGroupItem[] { btnStartIQ, btnBIP });
+            this.rbpgKryptonInjection.Items.AddRange(new KryptonRibbonGroupContainer[] { injectionTriple1, injectionTriple2, injectionTriple3 });
+
+            // Turbo Group
+            this.rbpgKryptonTurbo = new KryptonRibbonGroup { TextLine1 = "Turbo" };
+            KryptonRibbonGroupTriple turboTriple1 = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+            KryptonRibbonGroupTriple turboTriple2 = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+
+            KryptonRibbonGroupButton btnTargetBoost = new KryptonRibbonGroupButton { TextLine1 = "Target", TextLine2 = "Boost", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnTargetBoost.Click += (s, e) => btnTargetBoost_ItemClick(s, e);
+            KryptonRibbonGroupButton btnBoostLimiter = new KryptonRibbonGroupButton { TextLine1 = "Boost", TextLine2 = "Limiter", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnBoostLimiter.Click += (s, e) => btnBoostPressureLimiter_ItemClick(s, e);
+            KryptonRibbonGroupButton btnSVBL = new KryptonRibbonGroupButton { TextLine1 = "Boost", TextLine2 = "SVBL", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnSVBL.Click += (s, e) => btnBoostPressureLimitSVBL_ItemClick(s, e);
+
+            KryptonRibbonGroupButton btnN75 = new KryptonRibbonGroupButton { TextLine1 = "N75", TextLine2 = "Map", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnN75.Click += (s, e) => btnN75Map_ItemClick(s, e);
+            turboTriple1.Items.AddRange(new KryptonRibbonGroupItem[] { btnTargetBoost, btnBoostLimiter, btnSVBL });
+            turboTriple2.Items.AddRange(new KryptonRibbonGroupItem[] { btnN75 });
+            this.rbpgKryptonTurbo.Items.AddRange(new KryptonRibbonGroupContainer[] { turboTriple1, turboTriple2 });
+
+            // Limiters & Filters Group
+            this.rbpgKryptonLimiters = new KryptonRibbonGroup { TextLine1 = "Limiters & Filters" };
+            KryptonRibbonGroupTriple limitersTriple = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+
+            KryptonRibbonGroupButton btnSmokeLimiter = new KryptonRibbonGroupButton { TextLine1 = "Smoke", TextLine2 = "Limiter", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnSmokeLimiter.Click += (s, e) => btnSmokeLimiter_ItemClick(s, e);
+            KryptonRibbonGroupButton btnMAFLimiter = new KryptonRibbonGroupButton { TextLine1 = "MAF", TextLine2 = "Limiter", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnMAFLimiter.Click += (s, e) => btnMAFLimiter_ItemClick(s, e);
+            KryptonRibbonGroupButton btnMAPLimiter = new KryptonRibbonGroupButton { TextLine1 = "MAP", TextLine2 = "Limiter", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnMAPLimiter.Click += (s, e) => btnMAPLimiter_ItemClick(s, e);
+            KryptonRibbonGroupButton btnEGR = new KryptonRibbonGroupButton { TextLine1 = "EGR", TextLine2 = "Map", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnEGR.Click += (s, e) => btnEGRMap_ItemClick(s, e);
+
+            limitersTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnSmokeLimiter, btnMAFLimiter, btnMAPLimiter });
+            // Add EGR to a new line or same triple if space allows. Triple only allows 3.
+            KryptonRibbonGroupTriple limitersTriple2 = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+            limitersTriple2.Items.Add(btnEGR);
+
+            this.rbpgKryptonLimiters.Items.AddRange(new KryptonRibbonGroupContainer[] { limitersTriple, limitersTriple2 });
+
+            // Linearization Group
+            this.rbpgKryptonLinearization = new KryptonRibbonGroup { TextLine1 = "Linearization" };
+            KryptonRibbonGroupTriple linearTriple = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+
+            KryptonRibbonGroupButton btnMAFLinear = new KryptonRibbonGroupButton { TextLine1 = "MAF", TextLine2 = "Linear.", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnMAFLinear.Click += (s, e) => btnMAFLinearization_ItemClick(s, e);
+            KryptonRibbonGroupButton btnMAPLinear = new KryptonRibbonGroupButton { TextLine1 = "MAP", TextLine2 = "Linear.", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnMAPLinear.Click += (s, e) => btnMAPLinearization_ItemClick(s, e);
+
+            linearTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnMAFLinear, btnMAPLinear });
+            this.rbpgKryptonLinearization.Items.Add(linearTriple);
+
+            // PID Group
+            this.rbpgKryptonPID = new KryptonRibbonGroup { TextLine1 = "PID" };
+            KryptonRibbonGroupTriple pidTriple = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+
+            KryptonRibbonGroupButton btnPIDP = new KryptonRibbonGroupButton { TextLine1 = "PID", TextLine2 = "P Map", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnPIDP.Click += (s, e) => btnPIDMapP_ItemClick(s, e);
+            KryptonRibbonGroupButton btnPIDI = new KryptonRibbonGroupButton { TextLine1 = "PID", TextLine2 = "I Map", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnPIDI.Click += (s, e) => btnPIDMapI_ItemClick(s, e);
+            KryptonRibbonGroupButton btnPIDD = new KryptonRibbonGroupButton { TextLine1 = "PID", TextLine2 = "D Map", ImageLarge = GetResourceImage("SearchMaps.png") };
+            btnPIDD.Click += (s, e) => btnPIDMapD_ItemClick(s, e);
+
+            pidTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnPIDP, btnPIDI, btnPIDD });
+            this.rbpgKryptonPID.Items.Add(pidTriple);
+
+            // Special Actions Group
+            KryptonRibbonGroup rbpgKryptonTuningActions = new KryptonRibbonGroup { TextLine1 = "Actions" };
+            KryptonRibbonGroupTriple tuningActionsTriple = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+
+            KryptonRibbonGroupButton btnLaunchControl = new KryptonRibbonGroupButton { TextLine1 = "Activate", TextLine2 = "Launch Ctrl", ImageLarge = GetResourceImage("VerifyChecksum.png") };
+            btnLaunchControl.Click += (s, e) => btnActivateLaunchControl_ItemClick(s, e);
+            KryptonRibbonGroupButton btnActivateSmoke = new KryptonRibbonGroupButton { TextLine1 = "Activate", TextLine2 = "Smoke Lim.", ImageLarge = GetResourceImage("VerifyChecksum.png") };
+            btnActivateSmoke.Click += (s, e) => btnActivateSmokeLimiters_ItemClick(s, e);
+
+            tuningActionsTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnLaunchControl, btnActivateSmoke });
+            rbpgKryptonTuningActions.Items.Add(tuningActionsTriple);
+
+            this.kryptonRibbonTabTuning.Groups.AddRange(new KryptonRibbonGroup[] {
+                rbpgKryptonInjection,
+                rbpgKryptonTurbo,
+                rbpgKryptonLimiters,
+                rbpgKryptonLinearization,
+                rbpgKryptonPID,
+                rbpgKryptonTuningActions
+            });
+        }
+
+        private void InitializeSkinsTab()
+        {
+            this.rbpgKryptonSkins = new KryptonRibbonGroup { TextLine1 = "Themes" };
+            
+            KryptonRibbonGroupTriple skinsTriple = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+
+            KryptonRibbonGroupButton btnVAGEDCDark = new KryptonRibbonGroupButton { TextLine1 = "VAGEDC", TextLine2 = "Dark", ImageLarge = GetResourceImage("AppSettings.png"), Tag = "CUSTOM_VAGEDC_DARK" };
+            btnVAGEDCDark.Click += OnKryptonSkinClick;
+
+            skinsTriple.Items.Add(btnVAGEDCDark);
+
+            this.rbpgKryptonSkins.Items.Add(skinsTriple);
+            this.kryptonRibbonTabSkins.Groups.Add(rbpgKryptonSkins);
+        }
+
+        private void InitializeHelpTab()
+        {
+            this.rbpgKryptonHelp = new KryptonRibbonGroup { TextLine1 = "Help" };
+            KryptonRibbonGroupTriple helpTriple = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+
+            KryptonRibbonGroupButton btnCheckUpdates = new KryptonRibbonGroupButton { TextLine1 = "Check for", TextLine2 = "Updates", ImageLarge = GetResourceImage("CheckForUpdates.png") };
+            btnCheckUpdates.Click += (s, e) => btnCheckForUpdates_ItemClick(s, e);
+            KryptonRibbonGroupButton btnReleaseNotes = new KryptonRibbonGroupButton { TextLine1 = "Release", TextLine2 = "Notes", ImageLarge = GetResourceImage("ReleaseNotes.png") };
+            btnReleaseNotes.Click += (s, e) => btnReleaseNotes_ItemClick(s, e);
+            KryptonRibbonGroupButton btnManual = new KryptonRibbonGroupButton { TextLine1 = "User", TextLine2 = "Manual", ImageLarge = GetResourceImage("UserManual.png") };
+            btnManual.Click += (s, e) => btnUserManual_ItemClick(s, e);
+
+            helpTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnCheckUpdates, btnReleaseNotes, btnManual });
+            this.rbpgKryptonHelp.Items.Add(helpTriple);
+
+            this.rbpgKryptonHelpAbout = new KryptonRibbonGroup { TextLine1 = "About" };
+            KryptonRibbonGroupTriple aboutTriple = new KryptonRibbonGroupTriple { MaximumSize = GroupItemSize.Large, MinimumSize = GroupItemSize.Medium };
+
+            KryptonRibbonGroupButton btnDocs = new KryptonRibbonGroupButton { TextLine1 = "EDC15P", TextLine2 = "Docs", ImageLarge = GetResourceImage("UserManual.png") };
+            btnDocs.Click += (s, e) => btnEDC15PDocumentation_ItemClick(s, e);
+            KryptonRibbonGroupButton btnAbout = new KryptonRibbonGroupButton { TextLine1 = "About", TextLine2 = "VAGEDCSuite", ImageLarge = GetResourceImage("AboutVagSuite.png") };
+            btnAbout.Click += (s, e) => btnAbout_ItemClick(s, e);
+
+            aboutTriple.Items.AddRange(new KryptonRibbonGroupItem[] { btnDocs, btnAbout });
+            this.rbpgKryptonHelpAbout.Items.Add(aboutTriple);
+
+            this.kryptonRibbonTabHelp.Groups.AddRange(new KryptonRibbonGroup[] { rbpgKryptonHelp, rbpgKryptonHelpAbout });
+        }
 
         #region Krypton Ribbon Event Shims
         
@@ -587,6 +549,11 @@ namespace VAGSuite
             btnChecksum_ItemClick(sender, null);
         }
 
+        private void btnKryptonTurboAnalysis_Click(object sender, EventArgs e)
+        {
+            btnTurboAnalysis_ItemClick(sender, null);
+        }
+
         private void OnKryptonSkinClick(object sender, EventArgs e)
         {
             if (sender is KryptonRibbonGroupButton btn && btn.Tag != null)
@@ -595,14 +562,11 @@ namespace VAGSuite
                 {
                     VAGEDCThemeManager.Instance.ActivateVAGEDCDark(this);
                     m_appSettings.UseVAGEDCDarkTheme = true;
-                    m_appSettings.Skinname = "VAGEDC Dark";
                 }
                 else if (btn.Tag is PaletteMode mode)
                 {
-                    // Convert PaletteMode to PaletteModeManager for the manager component
                     this.kryptonManager1.GlobalPaletteMode = (PaletteModeManager)((int)mode);
                     m_appSettings.UseVAGEDCDarkTheme = false;
-                    m_appSettings.Skinname = mode.ToString();
                     VAGEDCThemeManager.Instance.DeactivateCustomTheme();
                 }
             }
@@ -610,10 +574,10 @@ namespace VAGSuite
 
         private Image GetResourceImage(string resourceName)
         {
+            if (string.IsNullOrEmpty(resourceName)) return null;
             try
             {
                 Assembly assembly = Assembly.GetExecutingAssembly();
-                // Try to find the resource by name (case-insensitive)
                 string fullResourceName = null;
                 foreach (string name in assembly.GetManifestResourceNames())
                 {
@@ -630,10 +594,6 @@ namespace VAGSuite
                     {
                         if (stream != null)
                         {
-                            if (resourceName.EndsWith(".ico", StringComparison.OrdinalIgnoreCase))
-                            {
-                                return new Icon(stream).ToBitmap();
-                            }
                             return Image.FromStream(stream);
                         }
                     }

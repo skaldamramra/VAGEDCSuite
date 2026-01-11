@@ -147,6 +147,7 @@
     <Compile Include="Services\LaunchControlService.cs" />
     <Compile Include="Services\SmokeLimiterService.cs" />
     <Compile Include="Services\ProjectRebuildService.cs" />
+    <Compile Include="Services\TurboCompressorService.cs" />
     <Compile Include="Services\MapDescriptionService.cs" />
     <Compile Include="Services\TooltipService.cs" />
     <Compile Include="Services\WrappedTooltipForm.cs" />
@@ -154,6 +155,7 @@
     <Compile Include="Services\DataConversionService.cs" />
     <Compile Include="Services\IMapRenderingService.cs" />
     <Compile Include="Services\MapRenderingService.cs" />
+    <Compile Include="Rendering\CompressorMapRenderer.cs" />
     <Compile Include="Services\IChartService.cs" />
     <Compile Include="Services\ChartService.cs" />
     <Compile Include="Services\IClipboardService.cs" />
@@ -177,6 +179,7 @@
     <Compile Include="Helpers\EOIMapFinder.cs" />
     <Compile Include="Helpers\EOICalculator.cs" />
     <Compile Include="Helpers\SymbolQueryHelper.cs" />
+    <Compile Include="Models\TurboAnalysisModels.cs" />
     <Compile Include="MapDetectionRules.cs" />
     <Compile Include="MapRuleRepository.cs" />
     <Compile Include="MapDetectionEngine.cs" />
@@ -389,6 +392,12 @@
     <Compile Include="frmRebuildFileParameters.designer.cs">
       <DependentUpon>frmRebuildFileParameters.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmTurboCompressorAnalysis.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmTurboCompressorAnalysis.Designer.cs">
+      <DependentUpon>frmTurboCompressorAnalysis.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmSearchMaps.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -540,6 +549,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmRebuildFileParameters.resx">
       <DependentUpon>frmRebuildFileParameters.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmTurboCompressorAnalysis.resx">
+      <DependentUpon>frmTurboCompressorAnalysis.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmSearchMaps.resx">
       <DependentUpon>frmSearchMaps.cs</DependentUpon>

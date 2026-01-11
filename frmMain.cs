@@ -118,7 +118,6 @@ namespace VAGSuite
 
     public partial class frmMain : KryptonForm
     {
-        private KryptonManager kryptonManager;
         private AppSettings m_appSettings;
         private int lastHoverRowHandle = -1;
         private msiupdater m_msiUpdater;
@@ -155,8 +154,7 @@ namespace VAGSuite
                 
             InitializeComponent();
 
-            this.kryptonManager = new KryptonManager(this.components);
-            this.kryptonManager.GlobalPaletteMode = PaletteModeManager.ProfessionalSystem;
+            this.kryptonManager1.GlobalPaletteMode = PaletteModeManager.ProfessionalSystem;
 
             m_DelegateStartReleaseNotePanel = new DelegateStartReleaseNotePanel(this.StartReleaseNotesViewer);
         }
@@ -1018,12 +1016,12 @@ namespace VAGSuite
             {
                 VAGEDCThemeManager.Instance.ActivateVAGEDCDark(this);
                 // Ensure global manager also uses the custom palette
-                this.kryptonManager.GlobalPalette = VAGEDCThemeManager.Instance.CustomPalette;
-                this.kryptonManager.GlobalPaletteMode = PaletteModeManager.Custom;
+                this.kryptonManager1.GlobalPalette = VAGEDCThemeManager.Instance.CustomPalette;
+                this.kryptonManager1.GlobalPaletteMode = PaletteModeManager.Custom;
             }
             else
             {
-                this.kryptonManager.GlobalPaletteMode = PaletteModeManager.Office2010Blue;
+                this.kryptonManager1.GlobalPaletteMode = PaletteModeManager.Office2010Blue;
             }
         }
 
@@ -2361,6 +2359,19 @@ namespace VAGSuite
             }
             
             return sb.ToString();
+        }
+
+        private void btnTurboAnalysis_ItemClick(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(Tools.Instance.m_currentfile))
+            {
+                frmInfoBox info = new frmInfoBox("Please open a file first.");
+                return;
+            }
+
+            IEDCFileParser parser = Tools.Instance.GetParserForFile(Tools.Instance.m_currentfile, false);
+            frmTurboCompressorAnalysis turbo = new frmTurboCompressorAnalysis(parser, Tools.Instance.m_symbols);
+            turbo.ShowDialog();
         }
 
         void airmassResult_onClose(object sender, EventArgs e)

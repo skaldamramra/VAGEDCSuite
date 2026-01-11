@@ -194,9 +194,16 @@ namespace VAGSuite.Theming
 
         public Font GetCustomFont(float size, FontStyle style)
         {
-            if (_sourceSansProFamily != null)
+            try
             {
-                return new Font(_sourceSansProFamily, size, style);
+                if (_sourceSansProFamily != null)
+                {
+                    return new Font(_sourceSansProFamily, size, style);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("VAGEDCThemeManager: Error creating custom font: " + ex.Message);
             }
             return new Font("Segoe UI", size, style);
         }
@@ -291,7 +298,7 @@ namespace VAGSuite.Theming
         /// </summary>
         public void ApplyThemeToForm(Form form)
         {
-            if (!_isCustomThemeActive)
+            if (!_isCustomThemeActive || form == null)
                 return;
                 
             // Apply to form itself
@@ -328,7 +335,7 @@ namespace VAGSuite.Theming
             ApplyThemeToControl(form);
 
             // Force dark scrollbars via Win32 API
-            ApplyDarkScrollbars(form);
+            try { ApplyDarkScrollbars(form); } catch { }
         }
 
         public void ApplyDarkScrollbars(Control control)
@@ -349,6 +356,7 @@ namespace VAGSuite.Theming
         /// </summary>
         public void ApplyThemeToControl(Control control)
         {
+            if (control == null) return;
             // Krypton Controls
             if (control is ComponentFactory.Krypton.Toolkit.KryptonPanel kPanel)
             {

@@ -45,13 +45,17 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            using (System.IO.Stream stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("VAGSuite.splash_new.png"))
+            try
             {
-                if (stream != null)
+                using (System.IO.Stream stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("VAGSuite.splash_new.png"))
                 {
-                    this.BackgroundImage = System.Drawing.Image.FromStream(stream);
+                    if (stream != null)
+                    {
+                        this.BackgroundImage = System.Drawing.Image.FromStream(stream);
+                    }
                 }
             }
+            catch { }
             this.ClientSize = new System.Drawing.Size(1024, 925);
             this.ControlBox = false;
             this.Controls.Add(this.labelControl1);
