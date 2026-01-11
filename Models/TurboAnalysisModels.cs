@@ -91,7 +91,10 @@ namespace VAGSuite.Models
         GT3071R86 = 10,
         GT30R = 11,
         GT40R = 12,
-        HX40W = 13
+        HX40W = 13,
+        GT12 = 14,
+        GT15 = 15,
+        GT20 = 16
     }
 
     public class CompressorMapCoordinates

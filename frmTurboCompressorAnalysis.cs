@@ -189,6 +189,7 @@ namespace VAGSuite
             
             GraphPane myPane = zedMap.GraphPane;
             myPane.CurveList.Clear();
+            myPane.GraphObjList.Clear(); // Clear labels
             
             // Ensure axes auto-scale to show new data
             myPane.XAxis.Scale.MinAuto = true;
@@ -199,10 +200,60 @@ namespace VAGSuite
             // Draw Background Map Image if selected
             if (Enum.TryParse(cmbCompressorMap.Text, out CompressorMapType mapType) && mapType != CompressorMapType.None)
             {
-                // This is a bit tricky with ZedGraph as it's not designed to have a background image scaled to coordinates.
-                // We'll use the renderer to get the coordinates and then try to overlay?
-                // Or just plot the points. The user said "update plot button does nothing".
-                // Let's implement the plotting first.
+                var vectorMap = _renderer.GetVectorMap(mapType);
+                if (vectorMap != null)
+                {
+                    // Plot Surge Line
+                    if (vectorMap.SurgeLine.Count > 0)
+                    {
+                        PointPairList surgeList = new PointPairList();
+                        foreach (var p in vectorMap.SurgeLine) surgeList.Add(p.X, p.Y);
+                        LineItem surgeCurve = myPane.AddCurve("Surge Line", surgeList, Color.FromArgb(200, 244, 71, 71), SymbolType.None);
+                        surgeCurve.Line.Width = 3.0f;
+                        surgeCurve.Line.IsAntiAlias = true;
+                        surgeCurve.Label.IsVisible = true;
+                    }
+
+                    // Plot Choke Line
+                    if (vectorMap.ChokeLine.Count > 0)
+                    {
+                        PointPairList chokeList = new PointPairList();
+                        foreach (var p in vectorMap.ChokeLine) chokeList.Add(p.X, p.Y);
+                        LineItem chokeCurve = myPane.AddCurve("Choke Line", chokeList, Color.FromArgb(150, 100, 100, 100), SymbolType.None);
+                        chokeCurve.Line.Width = 2.0f;
+                        chokeCurve.Line.IsAntiAlias = true;
+                        chokeCurve.Label.IsVisible = true;
+                    }
+
+                    // Plot Efficiency Islands
+                    bool firstIsland = true;
+                    foreach (var island in vectorMap.EfficiencyIslands)
+                    {
+                        PointPairList islandList = new PointPairList();
+                        foreach (var p in island.Points) islandList.Add(p.X, p.Y);
+                        
+                        LineItem islandCurve = myPane.AddCurve(firstIsland ? "Efficiency" : string.Empty, islandList, Color.FromArgb(150, 150, 150, 150), SymbolType.None);
+                        islandCurve.Line.Width = 1.0f;
+                        islandCurve.Line.Style = System.Drawing.Drawing2D.DashStyle.Dash;
+                        islandCurve.Line.IsAntiAlias = true;
+                        islandCurve.Line.IsSmooth = true;
+                        islandCurve.Line.SmoothTension = 0.5f;
+                        islandCurve.Label.IsVisible = firstIsland;
+                        firstIsland = false;
+
+                        // Add efficiency label text
+                        if (island.Points.Count > 0)
+                        {
+                            var midPt = island.Points[island.Points.Count / 2];
+                            TextObj text = new TextObj(island.Label, (float)midPt.X, (float)midPt.Y, CoordType.AxisXYScale, AlignH.Center, AlignV.Center);
+                            text.FontSpec.FontColor = Color.FromArgb(180, 180, 180, 180);
+                            text.FontSpec.Fill.IsVisible = false;
+                            text.FontSpec.Border.IsVisible = false;
+                            text.FontSpec.Size = 8;
+                            myPane.GraphObjList.Add(text);
+                        }
+                    }
+                }
             }
 
             if (_plotPoints != null && _plotPoints.Count > 0)
